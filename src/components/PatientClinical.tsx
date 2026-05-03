@@ -4,6 +4,7 @@ import {
   ArrowDownRight,
   ArrowLeft,
   ArrowUpRight,
+  BookOpen,
   Calendar,
   Camera,
   Check,
@@ -19,6 +20,7 @@ import {
   Phone,
   Plus,
   Shield,
+  Sparkles,
   Trash2,
   User,
   UserRound,
@@ -29,6 +31,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { NovaEvolucao } from './NovaEvolucao';
 import { Odontogram } from './Odontogram';
 import { formatDate } from '../utils/dateUtils';
+import { boxGuideProcedures, boxGuides, type BoxGuideProcedure } from '../data/boxGuides';
 
 interface PatientClinicalProps {
   patient: any;
@@ -209,6 +212,33 @@ const resolveClinicalEventType = (entry: any): ClinicalEventType => {
   return 'OBSERVATION';
 };
 
+const inferBoxProcedure = (value?: string): BoxGuideProcedure | null => {
+  const text = String(value || '').toLowerCase();
+  if (/canal|endo|obtur|pulp|odontometr|instrument|lima/.test(text)) return 'Endodontia';
+  if (/extra|exo|cirurg|sutur|anestes|forceps|f[oó]rceps/.test(text)) return 'Cirurgia';
+  if (/restaura|resina|dent[ií]st|classe|adesiv|c[aá]rie|poliment/.test(text)) return 'Dentistica';
+  if (/perio|raspag|profilax|sondag|cureta|t[aá]rtaro|calculo/.test(text)) return 'Periodontia';
+  if (/prot|coroa|molde|moldag|ciment|prova|ajuste|placa/.test(text)) return 'Protese';
+  if (/urg|dor|abscesso|f[ií]stula|edema|diagn[oó]st/.test(text)) return 'Urgencia';
+  return null;
+};
+
+const getAnamnesisAlert = (patient: any) => {
+  const anamnesis = patient?.anamnesis || {};
+  const candidates = [
+    anamnesis.allergies && `Alergia registrada: ${anamnesis.allergies}`,
+    anamnesis.medications && `Medicacao em uso: ${anamnesis.medications}`,
+    anamnesis.medical_history && String(anamnesis.medical_history),
+    anamnesis.chief_complaint && `Queixa: ${anamnesis.chief_complaint}`,
+  ].filter(Boolean);
+
+  const important = candidates.find((item: any) =>
+    /hipertens|diabet|alerg|anticoagul|card|asma|gest|grav|medica|press|sangr/i.test(String(item))
+  );
+
+  return String(important || candidates[0] || '').trim();
+};
+
 export const PatientClinical: React.FC<PatientClinicalProps> = ({
   patient,
   appointments,
@@ -234,6 +264,10 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   const [optimisticTreatments, setOptimisticTreatments] = useState<any[]>([]);
   const [optimisticEvolutions, setOptimisticEvolutions] = useState<any[]>([]);
   const [isFocusMode, setIsFocusMode] = useState(false);
+  const [isBoxModeOpen, setIsBoxModeOpen] = useState(false);
+  const [selectedBoxProcedure, setSelectedBoxProcedure] = useState<BoxGuideProcedure>('Endodontia');
+  const [selectedBoxDoubt, setSelectedBoxDoubt] = useState<string | null>(null);
+  const [boxStep, setBoxStep] = useState(0);
   const [isUploadingProfilePhoto, setIsUploadingProfilePhoto] = useState(false);
   const [isUploadingClinicalImage, setIsUploadingClinicalImage] = useState(false);
   const [uploadFeedback, setUploadFeedback] = useState<string | null>(null);
@@ -259,7 +293,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       if (e.key === 'Tab') {
         const focusable = el?.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), textarea, input:not([type="hidden"]), select, [tabindex]:not([tabindex="-1"])');
         if (!focusable || focusable.length === 0) return;
-        const nodes = Array.from(focusable);
+        const nodes = Array.from(focusable) as HTMLElement[];
         const idx = nodes.indexOf(document.activeElement as HTMLElement);
         if (e.shiftKey) {
           if (idx === 0) { nodes[nodes.length - 1].focus(); e.preventDefault(); }
@@ -283,7 +317,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       if (e.key === 'Tab') {
         const focusable = el?.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), textarea, input:not([type="hidden"]), select, [tabindex]:not([tabindex="-1"])');
         if (!focusable || focusable.length === 0) return;
-        const nodes = Array.from(focusable);
+        const nodes = Array.from(focusable) as HTMLElement[];
         const idx = nodes.indexOf(document.activeElement as HTMLElement);
         if (e.shiftKey) {
           if (idx === 0) { nodes[nodes.length - 1].focus(); e.preventDefault(); }
@@ -1201,6 +1235,102 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     'bg-white/92 border border-slate-200/70 shadow-[0_8px_24px_rgba(15,23,42,0.05)]';
   const iosSubtleCard =
     'bg-slate-50/70 border border-slate-200/70';
+  const selectedBoxGuide = boxGuides[selectedBoxProcedure];
+  const boxContextProcedure = primaryTreatment?.procedure || upcomingAppointment?.procedure || upcomingAppointment?.notes || '';
+  const boxContextTooth = primaryTreatment?.tooth_number ? `Dente ${primaryTreatment.tooth_number}` : '';
+  const inferredBoxProcedure = inferBoxProcedure(boxContextProcedure);
+  const lastBoxEvolution = (patient?.evolution || [])[0] || null;
+  const anamnesisAlert = getAnamnesisAlert(patient);
+  const lastEvolutionLabel = lastBoxEvolution?.procedure || lastBoxEvolution?.procedure_performed || lastBoxEvolution?.notes || '';
+  const boxNowItems = [
+    anamnesisAlert
+      ? `Atencao sistemica: ${anamnesisAlert}. Antes de anestesiar, confirme PA, medicacao em uso e peca orientacao do professor se houver alteracao.`
+      : 'Atencao sistemica: confirme anamnese, alergias, medicacoes e PA antes de iniciar.',
+    primaryTreatment
+      ? `Procedimento de hoje: ${primaryTreatment.procedure}${primaryTreatment.tooth_number ? ` do dente ${primaryTreatment.tooth_number}` : ''}. Confira radiografia e dente correto antes de iniciar.`
+      : upcomingAppointment
+        ? `Procedimento de hoje: ${upcomingAppointment.procedure || upcomingAppointment.notes || 'atendimento agendado'}. Confira objetivo, radiografia e dente/regiao antes de iniciar.`
+        : 'Sem procedimento em foco: revise odontograma, queixa e plano clinico antes de escolher a conduta.',
+    lastBoxEvolution
+      ? `Ultimo registro: ${lastEvolutionLabel}. Ao terminar, registre o que foi feito e defina retorno.`
+      : 'Ultimo registro: ainda nao ha evolucao anterior. Ao terminar, registre conduta, orientacoes e retorno.',
+    'Depois do atendimento, registre evolucao e defina retorno',
+  ].filter(Boolean);
+  const boxNowSteps = [
+    'Confirmar PA/anamnese',
+    primaryTreatment?.tooth_number ? `Conferir radiografia e dente ${primaryTreatment.tooth_number}` : 'Conferir radiografia e dente/regiao',
+    'Iniciar atendimento',
+    'Registrar evolucao no final',
+  ];
+  const selectedDoubtItems = selectedBoxDoubt
+    ? selectedBoxGuide.chipContent[selectedBoxDoubt] || []
+    : [];
+  const boxSteps = [
+    {
+      label: 'Seguranca primeiro',
+      title: 'Primeiro, so confirme se esta seguro',
+      text: anamnesisAlert
+        ? `${anamnesisAlert}. Respira: antes da anestesia, confira PA e medicacao em uso. Se algo parecer fora, chame o professor.`
+        : 'Antes de comecar, confira anamnese, PA, alergias e medicacoes. So isso agora.',
+      actions: [
+        { label: 'Tudo certo', onClick: () => setBoxStep(1), primary: true },
+        { label: 'Quero revisar', onClick: () => setSelectedBoxDoubt('Anestesia') },
+      ],
+    },
+    {
+      label: 'Caso certo',
+      title: primaryTreatment?.tooth_number ? `Agora confirme o dente ${primaryTreatment.tooth_number}` : 'Agora confirme o caso',
+      text: primaryTreatment
+        ? `Olhe a radiografia, confira o dente na boca e confirme o plano: ${primaryTreatment.procedure}. Sem pressa nessa parte.`
+        : `Olhe a radiografia, confirme a regiao e alinhe o procedimento antes de iniciar. Sem pressa nessa parte.`,
+      actions: [
+        { label: 'Caso confirmado', onClick: () => setBoxStep(2), primary: true },
+        { label: 'Me mostra a sequencia', onClick: () => setSelectedBoxDoubt('Sequencia') },
+      ],
+    },
+    {
+      label: 'Durante',
+      title: 'Agora e so seguir a proxima parte',
+      text: 'Nao precisa pensar no atendimento inteiro. Faca um passo, confira o paciente, depois o proximo.',
+      steps: selectedBoxGuide.chipContent.Sequencia?.slice(1, 6) || selectedBoxGuide.blocks.find((block) => block.ordered)?.items.slice(0, 5) || [],
+      actions: [
+        { label: 'Terminei essa parte', onClick: () => setBoxStep(3), primary: true },
+        { label: 'Travei um pouco', onClick: () => setSelectedBoxDoubt('Sequencia') },
+      ],
+    },
+    {
+      label: 'Fechar bem',
+      title: 'Antes de sair, deixa o caso fechado',
+      text: 'Anote o que foi feito enquanto esta fresco: conduta, intercorrencias, orientacoes e retorno.',
+      actions: [
+        {
+          label: 'Registrar agora',
+          onClick: () => {
+            setIsBoxModeOpen(false);
+            setIsAddingEvolution(true);
+          },
+          primary: true,
+        },
+        {
+          label: 'Definir retorno',
+          onClick: () => {
+            setIsBoxModeOpen(false);
+            setAppActiveTab('agenda');
+            appNavigate('/agenda');
+          },
+        },
+      ],
+    },
+  ];
+  const activeBoxStep = boxSteps[boxStep] || boxSteps[0];
+
+  useEffect(() => {
+    if (!isBoxModeOpen) return;
+    const inferred = inferBoxProcedure(boxContextProcedure);
+    if (inferred) setSelectedBoxProcedure(inferred);
+    setSelectedBoxDoubt(null);
+    setBoxStep(0);
+  }, [isBoxModeOpen, boxContextProcedure]);
 
   return (
     <div className="min-h-screen bg-[#F7F7F8] pb-24 text-slate-900">
@@ -1362,6 +1492,48 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       </header>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-7 space-y-6">
+        {isAcademyProduct && (
+          <section className="rounded-[30px] p-4 sm:p-5 border border-primary/10 bg-gradient-to-br from-primary/10 via-white to-white shadow-[0_12px_32px_rgba(109,40,217,0.08)]">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-11 h-11 rounded-[18px] bg-primary text-white flex items-center justify-center shadow-[0_8px_22px_rgba(109,40,217,0.24)] shrink-0">
+                <Zap size={18} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-primary/70 mb-1">Ações do atendimento</p>
+                <h2 className="text-[22px] sm:text-[26px] font-bold tracking-[-0.025em] text-slate-950">Atendimento no box</h2>
+                <p className="text-[13px] text-slate-500 font-medium leading-relaxed mt-1">Guia rapido e evolucao do caso atual.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setIsBoxModeOpen(true)}
+                className="rounded-[22px] bg-primary px-5 py-4 text-left text-white shadow-[0_12px_28px_rgba(109,40,217,0.22)] transition-all duration-200 hover:opacity-95 active:scale-[0.98] ios-press"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[16px] font-bold">Modo Box</p>
+                    <p className="text-[12px] text-white/75 font-medium mt-1">Cola clínica rápida</p>
+                  </div>
+                  <BookOpen size={20} className="shrink-0 text-white/90" />
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsAddingEvolution(true)}
+                className="rounded-[22px] border border-primary/15 bg-white px-5 py-4 text-left shadow-[0_8px_22px_rgba(15,23,42,0.05)] transition-all duration-200 hover:border-primary/30 active:scale-[0.98] ios-press"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[16px] font-bold text-slate-950">Registrar evolução</p>
+                    <p className="text-[12px] text-slate-500 font-medium mt-1">Fechar o atendimento</p>
+                  </div>
+                  <FileText size={20} className="shrink-0 text-primary" />
+                </div>
+              </button>
+            </div>
+          </section>
+        )}
 
         <section ref={odontogramRef} className="rounded-[30px] p-4 sm:p-5 border border-slate-200/60 bg-white/95 shadow-[0_10px_28px_rgba(15,23,42,0.04),0_1px_3px_rgba(15,23,42,0.06)] transition-shadow duration-500 hover:shadow-[0_14px_36px_rgba(15,23,42,0.06)]">
           <div className="flex items-center justify-between mb-3">
@@ -2264,6 +2436,507 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
           )}
         </div>
       </main>
+
+      {isBoxModeOpen && (
+        <div className="fixed inset-0 z-[197] bg-[#F7F7F8] overflow-y-auto">
+          <div className="min-h-screen pb-8">
+            <div className="sticky top-0 z-20 bg-[#F7F7F8]/88 backdrop-blur-xl border-b border-white/80">
+              <div className="mx-auto max-w-[560px] px-4 py-3">
+                <div className="rounded-[24px] border border-slate-200/70 bg-white/95 px-3.5 py-3 shadow-[0_6px_24px_rgba(15,23,42,0.05)] flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsBoxModeOpen(false)}
+                    className="h-9 px-3 rounded-full bg-slate-50 border border-slate-200/80 text-[12px] font-bold text-slate-600 active:scale-[0.96]"
+                  >
+                    Voltar
+                  </button>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-primary" />
+                      <h2 className="text-[18px] font-black tracking-[-0.03em] text-slate-950 leading-none">Modo Box</h2>
+                    </div>
+                    <p className="mt-1 truncate text-[12px] font-semibold text-slate-500">{patient?.name}</p>
+                  </div>
+                  <span className="rounded-full bg-primary/10 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.08em] text-primary">
+                    {activeBoxStep.label}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mx-auto max-w-[560px] px-4 py-4 space-y-4">
+              <section className="rounded-[22px] bg-[#F3E8FF]/70 px-4 py-3.5 flex items-start gap-3">
+                <Sparkles size={16} className="mt-0.5 shrink-0 text-[#8B5CF6]" />
+                <p className="text-[13px] font-semibold text-[#3A3A3C] leading-snug">
+                  Voce nao precisa lembrar tudo de uma vez. Fazemos so o proximo passo.
+                </p>
+              </section>
+
+              <section className="overflow-hidden rounded-[34px] bg-gradient-to-br from-[#6D28D9] via-[#7C3AED] to-[#8B5CF6] text-white shadow-[0_24px_80px_rgba(109,40,217,0.20)]">
+                <div className="px-6 pt-7 pb-6 min-h-[480px] flex flex-col">
+                <div className="mb-5 flex items-start justify-between gap-4">
+                  <div>
+                    <span className="inline-flex rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-primary">Agora</span>
+                    <p className="mt-3 text-[10px] font-black uppercase tracking-[0.14em] text-white/55">Etapa {boxStep + 1} de {boxSteps.length}</p>
+                  </div>
+                  <div className="flex gap-1.5 pt-1">
+                    {boxSteps.map((step, index) => (
+                      <button
+                        key={step.label}
+                        type="button"
+                        onClick={() => setBoxStep(index)}
+                        className={`h-2.5 rounded-full transition-all ${index === boxStep ? 'w-7 bg-white' : 'w-2.5 bg-white/35'}`}
+                        aria-label={step.label}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex-1 flex flex-col">
+                  <div>
+                    <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.12em]">{activeBoxStep.label}</span>
+                    <h3 className="mt-2 text-[32px] sm:text-[36px] font-black leading-[1.02] tracking-[-0.045em]">{activeBoxStep.title}</h3>
+                    <p className="mt-4 text-[15px] font-semibold leading-relaxed text-white/82">{activeBoxStep.text}</p>
+                  </div>
+
+                {activeBoxStep.steps && (
+                  <ol className="mt-5 space-y-2 rounded-[24px] bg-white/12 border border-white/15 p-3.5">
+                    {activeBoxStep.steps.map((step: string, index: number) => (
+                      <li key={step} className="grid grid-cols-[24px_1fr] gap-2 text-[13px] font-bold text-white/88">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-[11px] font-black text-primary">{index + 1}</span>
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+
+                <div className="mt-auto pt-6 grid grid-cols-1 gap-2.5">
+                  {activeBoxStep.actions.map((action) => (
+                    <button
+                      key={action.label}
+                      type="button"
+                      onClick={action.onClick}
+                      className={`rounded-[22px] px-4 py-4 text-[15px] font-black active:scale-[0.98] ${
+                        action.primary
+                          ? 'bg-white text-primary shadow-[0_8px_28px_rgba(0,0,0,0.16)]'
+                          : 'bg-white/12 border border-white/18 text-white'
+                      }`}
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+                </div>
+                </div>
+              </section>
+
+              <section className="rounded-[24px] border border-[#E5E5EA]/80 bg-white p-3.5 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.13em] text-slate-400">Se der branco</p>
+                    <h3 className="text-[14px] font-black text-slate-950">{selectedBoxGuide.label}</h3>
+                  </div>
+                  {!inferredBoxProcedure && (
+                    <span className="text-[10px] font-bold text-slate-400">escolher guia</span>
+                  )}
+                </div>
+
+                {!inferredBoxProcedure && (
+                  <div className="mb-2 -mx-1 overflow-x-auto pb-1">
+                    <div className="flex min-w-max gap-1.5 px-1">
+                      {boxGuideProcedures.map(({ key, shortLabel }) => (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => {
+                            setSelectedBoxProcedure(key);
+                            setSelectedBoxDoubt(null);
+                          }}
+                          className={`rounded-full border px-3 py-1.5 text-[12px] font-extrabold ${
+                            selectedBoxProcedure === key ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-slate-50 text-slate-600'
+                          }`}
+                        >
+                          {shortLabel}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="-mx-1 overflow-x-auto pb-1">
+                  <div className="flex min-w-max gap-1.5 px-1">
+                    {selectedBoxGuide.doubtChips.map((chip) => (
+                      <button
+                        key={chip}
+                        type="button"
+                        onClick={() => setSelectedBoxDoubt((current) => current === chip ? null : chip)}
+                        className={`rounded-full border px-3 py-1.5 text-[12px] font-extrabold ${
+                          selectedBoxDoubt === chip ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-slate-50 text-slate-600'
+                        }`}
+                      >
+                          {chip}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {selectedBoxDoubt && (
+                  <div className="mt-3 rounded-[16px] bg-slate-50 p-3">
+                    <p className="mb-2 text-[11px] font-black uppercase tracking-[0.1em] text-slate-500">{selectedBoxDoubt}</p>
+                    <p className="mb-3 text-[12px] font-semibold text-slate-500">So o essencial para destravar.</p>
+                    <div className="space-y-2">
+                      {selectedDoubtItems.map((item) => (
+                        <div key={item} className="grid grid-cols-[8px_1fr] gap-2 text-[12px] font-semibold leading-snug text-slate-700">
+                          <span className="mt-[5px] h-1.5 w-1.5 rounded-full bg-primary/70" />
+                          <span>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </section>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {false && isBoxModeOpen && (
+        <div className="fixed inset-0 z-[196] bg-[#F8F7FC] overflow-y-auto">
+          <div className="min-h-screen pb-6">
+            <div className="sticky top-0 z-20 border-b border-slate-200/70 bg-[#F8F7FC]/95 backdrop-blur-xl">
+              <div className="mx-auto max-w-[720px] px-3 py-3">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsBoxModeOpen(false)}
+                    className="rounded-full border border-slate-200 bg-white px-3 py-2 text-[12px] font-bold text-slate-700 active:scale-[0.96]"
+                  >
+                    Voltar
+                  </button>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-[20px] font-black tracking-[-0.03em] text-slate-950 leading-none">Modo Box</h2>
+                    <p className="mt-1 truncate text-[12px] font-semibold text-slate-500">{patient?.name}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsBoxModeOpen(false);
+                      setIsAddingEvolution(true);
+                    }}
+                    className="rounded-full bg-primary px-3 py-2 text-[12px] font-bold text-white shadow-[0_5px_14px_rgba(109,40,217,0.16)] active:scale-[0.96]"
+                  >
+                    Evolucao
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="mx-auto max-w-[720px] px-3 py-3 space-y-3">
+              <section className="rounded-[22px] border border-primary/15 bg-white p-4 shadow-[0_8px_26px_rgba(15,23,42,0.05)]">
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.13em] text-primary/70">O que importa agora</p>
+                    <h3 className="mt-1 text-[22px] font-black tracking-[-0.035em] text-slate-950">Atendimento atual</h3>
+                  </div>
+                  {(boxContextProcedure || boxContextTooth) && (
+                    <span className="max-w-[42%] rounded-full bg-primary/8 px-2.5 py-1 text-right text-[10px] font-black uppercase tracking-[0.06em] text-primary">
+                      {[boxContextProcedure, boxContextTooth].filter(Boolean).join(' - ')}
+                    </span>
+                  )}
+                </div>
+
+                <ul className="space-y-2">
+                  {boxNowItems.map((item) => (
+                    <li key={String(item)} className="grid grid-cols-[9px_1fr] gap-2 text-[13px] font-semibold leading-snug text-slate-700">
+                      <span className="mt-[5px] h-2 w-2 rounded-full bg-primary/75" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
+              <section className="rounded-[18px] border border-slate-200 bg-white p-3 shadow-[0_4px_18px_rgba(15,23,42,0.035)]">
+                <p className="mb-2 text-[10px] font-black uppercase tracking-[0.13em] text-slate-400">Agora</p>
+                <div className="flex gap-1.5 overflow-x-auto pb-1">
+                  {boxNowSteps.map((step, index) => (
+                    <span
+                      key={step}
+                      className={`min-w-max rounded-full border px-3 py-1.5 text-[11px] font-black ${
+                        index === 0
+                          ? 'border-primary/25 bg-primary/8 text-primary'
+                          : 'border-slate-200 bg-slate-50 text-slate-600'
+                      }`}
+                    >
+                      {step}
+                    </span>
+                  ))}
+                </div>
+              </section>
+
+              <section className="rounded-[20px] border border-slate-200 bg-white p-3 shadow-[0_4px_18px_rgba(15,23,42,0.035)]">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.13em] text-slate-400">Se bater duvida</p>
+                    <h3 className="text-[15px] font-black text-slate-950">
+                      {inferredBoxProcedure ? selectedBoxGuide.label : 'Escolher guia'}
+                    </h3>
+                  </div>
+                  {!inferredBoxProcedure && (
+                    <span className="text-[10px] font-bold text-slate-400">sem procedimento em foco</span>
+                  )}
+                </div>
+
+                {!inferredBoxProcedure && (
+                  <div className="mb-3 -mx-1 overflow-x-auto pb-1">
+                    <div className="flex min-w-max gap-1.5 px-1">
+                      {boxGuideProcedures.map(({ key, shortLabel }) => (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => {
+                            setSelectedBoxProcedure(key);
+                            setSelectedBoxDoubt(null);
+                          }}
+                          className={`rounded-full border px-3 py-1.5 text-[12px] font-extrabold ${
+                            selectedBoxProcedure === key
+                              ? 'border-primary bg-primary text-white'
+                              : 'border-slate-200 bg-slate-50 text-slate-600'
+                          }`}
+                        >
+                          {shortLabel}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="-mx-1 overflow-x-auto pb-1">
+                  <div className="flex min-w-max gap-1.5 px-1">
+                    {selectedBoxGuide.doubtChips.map((chip) => (
+                      <button
+                        key={chip}
+                        type="button"
+                        onClick={() => setSelectedBoxDoubt((current) => current === chip ? null : chip)}
+                        className={`rounded-full border px-3 py-1.5 text-[12px] font-extrabold ${
+                          selectedBoxDoubt === chip
+                            ? 'border-primary bg-primary text-white'
+                            : 'border-slate-200 bg-slate-50 text-slate-600'
+                        }`}
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-3 rounded-[16px] border border-slate-200 bg-slate-50/80 p-3">
+                  <p className="mb-2 text-[11px] font-black uppercase tracking-[0.1em] text-slate-500">
+                    {selectedBoxDoubt || 'Resumo rapido'}
+                  </p>
+                  <div className="space-y-2">
+                    {selectedDoubtItems.length > 0 ? (
+                      selectedDoubtItems.map((item) => (
+                        <div key={item} className="grid grid-cols-[8px_1fr] gap-2 text-[12px] font-semibold leading-snug text-slate-700">
+                          <span className="mt-[5px] h-1.5 w-1.5 rounded-full bg-primary/70" />
+                          <span>{item}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="rounded-[12px] bg-white px-3 py-2 text-[12px] font-semibold text-slate-500">
+                        Escolha um assunto acima apenas se travar durante o atendimento.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-[20px] border border-slate-200 bg-white p-3 shadow-[0_4px_18px_rgba(15,23,42,0.035)]">
+                <p className="mb-2 text-[10px] font-black uppercase tracking-[0.13em] text-slate-400">Fechar atendimento</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsBoxModeOpen(false);
+                      setIsAddingEvolution(true);
+                    }}
+                    className="rounded-[16px] bg-primary px-3 py-3 text-[13px] font-black text-white active:scale-[0.98]"
+                  >
+                    Registrar evolucao
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsBoxModeOpen(false);
+                      setAppActiveTab('agenda');
+                      appNavigate('/agenda');
+                    }}
+                    className="rounded-[16px] border border-slate-200 bg-slate-50 px-3 py-3 text-[13px] font-black text-slate-800 active:scale-[0.98]"
+                  >
+                    Marcar retorno
+                  </button>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {false && isBoxModeOpen && (
+        <div className="fixed inset-0 z-[195] bg-[#F8F7FC] overflow-y-auto">
+          <div className="min-h-screen pb-8">
+            <div className="sticky top-0 z-10 bg-[#F8F7FC]/95 backdrop-blur-xl border-b border-slate-200/70">
+              <div className="max-w-[760px] mx-auto px-3 sm:px-4 py-3">
+                <div className="rounded-[18px] border border-slate-200/80 bg-white px-3 py-3 shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
+                <div className="flex items-start gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsBoxModeOpen(false)}
+                    className="rounded-full border border-slate-200 bg-white px-3 py-2 text-[12px] font-bold text-slate-700 active:scale-[0.96]"
+                    aria-label="Voltar ao prontuário"
+                  >
+                    Voltar
+                  </button>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="h-2 w-2 rounded-full bg-primary" />
+                      <h2 className="text-[20px] font-black tracking-[-0.03em] text-slate-950 leading-none">Modo Box</h2>
+                    </div>
+                    <p className="text-[12px] font-semibold text-slate-600 truncate">{patient?.name}</p>
+                    {(boxContextProcedure || boxContextTooth) && (
+                      <p className="mt-1 text-[11px] font-bold text-primary truncate">
+                        {[boxContextProcedure, boxContextTooth].filter(Boolean).join(' - ')}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsBoxModeOpen(false);
+                      setIsAddingEvolution(true);
+                    }}
+                    className="shrink-0 rounded-full bg-primary px-3 py-2 text-[12px] font-bold text-white shadow-[0_5px_14px_rgba(109,40,217,0.18)] active:scale-[0.96]"
+                  >
+                    Registrar evolucao
+                  </button>
+                </div>
+
+                <div className="hidden">
+                  <div className="w-12 h-12 rounded-[20px] bg-white/15 flex items-center justify-center mb-4">
+                    <BookOpen size={22} />
+                  </div>
+                  <h2 className="text-[32px] font-black tracking-[-0.04em] leading-none">Modo Box</h2>
+                  <p className="text-[14px] text-white/78 font-medium leading-relaxed mt-3">Guia rápido para consultar durante a clínica</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-5">
+                    <button
+                      type="button"
+                      onClick={() => setIsBoxModeOpen(false)}
+                      className="rounded-[18px] bg-white text-primary px-4 py-3 text-sm font-bold shadow-sm active:scale-[0.98]"
+                    >
+                      Voltar ao prontuário
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsBoxModeOpen(false);
+                        setIsAddingEvolution(true);
+                      }}
+                      className="rounded-[18px] bg-white/12 border border-white/18 text-white px-4 py-3 text-sm font-bold active:scale-[0.98]"
+                    >
+                      Registrar evolução
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            </div>
+
+            <div className="max-w-[760px] mx-auto px-3 sm:px-4 py-3 space-y-3">
+              <section>
+                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-primary/70 mb-2 px-1">Procedimento</p>
+                <div className="-mx-1 overflow-x-auto pb-1">
+                  <div className="flex min-w-max gap-1.5 px-1">
+                  {boxGuideProcedures.map(({ key, shortLabel }) => {
+                    const isSelected = selectedBoxProcedure === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setSelectedBoxProcedure(key)}
+                        className={`rounded-full border px-3 py-1.5 text-[12px] font-extrabold transition-all ${
+                          isSelected
+                            ? 'border-primary bg-primary text-white shadow-[0_5px_14px_rgba(109,40,217,0.18)]'
+                            : 'border-slate-200 bg-white text-slate-600'
+                        }`}
+                      >
+                        {shortLabel}
+                      </button>
+                    );
+                  })}
+                  </div>
+                </div>
+              </section>
+
+              <section className="space-y-3">
+                <div className="flex items-end justify-between gap-3 px-1">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-primary/70 mb-1">Ficha de seguranca</p>
+                    <h3 className="text-[17px] font-black tracking-[-0.02em] text-slate-950">{selectedBoxGuide.label}</h3>
+                  </div>
+                  <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-500">consulta rapida</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {selectedBoxGuide.blocks.map((block) => (
+                    <article
+                      key={block.title}
+                      className={`rounded-[16px] border p-3 shadow-[0_3px_12px_rgba(15,23,42,0.035)] ${
+                        block.emphasis === 'warning'
+                          ? 'border-amber-200 bg-amber-50/80'
+                          : block.emphasis === 'record'
+                            ? 'border-primary/20 bg-primary/[0.06]'
+                            : 'border-slate-200 bg-white'
+                      }`}
+                    >
+                      <div className="mb-2 flex items-center gap-2 border-b border-black/5 pb-2">
+                        <span className={`h-6 w-6 rounded-lg flex items-center justify-center ${
+                          block.emphasis === 'warning'
+                            ? 'bg-amber-500 text-white'
+                            : block.emphasis === 'record'
+                              ? 'bg-primary text-white'
+                              : 'bg-slate-900 text-white'
+                        }`}>
+                          {block.emphasis === 'record' ? <FileText size={13} /> : <CheckCircle2 size={13} />}
+                        </span>
+                        <h4 className="text-[12px] font-black uppercase tracking-[0.08em] text-slate-900">{block.title}</h4>
+                      </div>
+                      {block.ordered ? (
+                        <ol className="space-y-1.5">
+                          {block.items.map((item, index) => (
+                            <li key={item} className="grid grid-cols-[22px_1fr] gap-2 text-[12px] font-semibold leading-snug text-slate-700">
+                              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] font-black text-primary ring-1 ring-primary/15">{index + 1}</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ol>
+                      ) : (
+                        <ul className="space-y-1.5">
+                          {block.items.map((item) => (
+                            <li key={item} className="grid grid-cols-[8px_1fr] gap-2 text-[12px] font-semibold leading-snug text-slate-700">
+                              <span className="mt-[5px] h-1.5 w-1.5 rounded-full bg-primary/70" />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </article>
+                  ))}
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isAddingEvolution && (
         <div className="fixed inset-0 bg-white z-[200] overflow-y-auto">

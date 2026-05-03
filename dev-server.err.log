@@ -1,3 +1,4 @@
+
 node:internal/modules/run_main:107
     triggerUncaughtException(
     ^
@@ -9,11 +10,12 @@ Error [TransformError]: spawn EPERM
     at file:///C:/Users/User/Downloads/odontohub-academy/odontohub-academy/node_modules/tsx/dist/index-7AaEi15b.mjs:14:2865
     at applyTransformers (file:///C:/Users/User/Downloads/odontohub-academy/odontohub-academy/node_modules/tsx/dist/index-7AaEi15b.mjs:14:1266)
     at transform (file:///C:/Users/User/Downloads/odontohub-academy/odontohub-academy/node_modules/tsx/dist/index-7AaEi15b.mjs:14:2812)
-    at load (file:///C:/Users/User/Downloads/odontohub-academy/odontohub-academy/node_modules/tsx/dist/esm/index.mjs?1777771046920:2:2348)
+    at load (file:///C:/Users/User/Downloads/odontohub-academy/odontohub-academy/node_modules/tsx/dist/esm/index.mjs?1777832580223:2:2348)
     at async nextLoad (node:internal/modules/esm/hooks:785:22)
     at async AsyncLoaderHooksOnLoaderHookWorker.load (node:internal/modules/esm/hooks:410:20) {
   errno: -4048,
   code: 'EPERM',
   syscall: 'spawn'
 }
+
 Node.js v24.15.0

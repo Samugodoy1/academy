@@ -183,6 +183,12 @@ interface Dentist {
   photo_url?: string;
   clinic_name?: string;
   clinic_address?: string;
+  institution?: string;
+  academic_period?: string;
+  student_registration?: string;
+  current_discipline?: string;
+  current_product?: Product;
+  product_accesses?: ProductAccess[];
   accepted_terms?: boolean;
   accepted_terms_at?: string;
   accepted_privacy_policy?: boolean;
@@ -722,6 +728,7 @@ export default function App() {
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [profilePassword, setProfilePassword] = useState('');
   const [isProfileEditing, setIsProfileEditing] = useState(false);
+  const [showAcademyUpgradeModal, setShowAcademyUpgradeModal] = useState(false);
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error', celebration?: boolean, onUndo?: () => void } | null>(null);
   const [confirmation, setConfirmation] = useState<{ message: string, onConfirm: () => void } | null>(null);
   const [guideDismissedUntil, setGuideDismissedUntil] = useState<string | null>(null);
@@ -2802,6 +2809,7 @@ export default function App() {
 
             {activeTab === 'dashboard' && !searchTerm && (
               <AcademyDashboard
+                user={user}
                 patients={patients}
                 appointments={appointments}
                 openPatientRecord={openPatientRecord}
@@ -4093,7 +4101,10 @@ export default function App() {
               <div className="space-y-4 pt-10">
                 {(() => {
                   // ---------- stats ----------
-                  const allMetas = patients.map(p => ({ patient: p, meta: getPatientCardMeta(p) }));
+                  const uniquePatients = Array.from(
+                    new Map(patients.map((patient: any) => [patient.id, patient])).values()
+                  ) as Patient[];
+                  const allMetas = uniquePatients.map(p => ({ patient: p, meta: getPatientCardMeta(p) }));
                   const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0);
                   const todayEnd   = new Date(now); todayEnd.setHours(23, 59, 59, 999);
                   const totalOverdue = allMetas.filter(x => x.meta.attentionStatus.key === 'overdue').length;
@@ -4147,7 +4158,7 @@ export default function App() {
                   const intelMap = new Map<number, any>();
                   patientIntelligence.forEach((pi: any) => intelMap.set(pi.patient_id, pi));
 
-                  const patientCards = patients
+                  const patientCards = uniquePatients
                     .filter(p =>
                       (p.name || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
                       (p.cpf && p.cpf.includes(searchTerm)) ||
@@ -4912,10 +4923,17 @@ export default function App() {
                       </div>
                       <div className="pb-1 min-w-0">
                         <h2 className="text-xl font-bold text-slate-900 truncate">{profile.name}</h2>
-                        {user.role === 'DENTIST' && profile.specialty && (
+                        {getCurrentProduct() === 'academy' ? (
+                          <>
+                            <p className="text-sm text-primary font-medium">Perfil acadêmico</p>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                              {profile.student_registration ? `Matrícula / RA ${profile.student_registration}` : 'Matrícula / RA não informado'}
+                            </p>
+                          </>
+                        ) : user.role === 'DENTIST' && profile.specialty && (
                           <p className="text-sm text-primary font-medium">{profile.specialty}</p>
                         )}
-                        {user.role === 'DENTIST' && profile.cro && (
+                        {getCurrentProduct() !== 'academy' && user.role === 'DENTIST' && profile.cro && (
                           <p className="text-xs text-slate-400 mt-0.5">CRO {profile.cro}</p>
                         )}
                       </div>
@@ -4938,16 +4956,34 @@ export default function App() {
                   <>
                     {/* Profile Section */}
                     <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-4">
-                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Perfil</h3>
+                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{getCurrentProduct() === 'academy' ? 'Perfil acadêmico' : 'Perfil'}</h3>
                       <div className="space-y-3">
                         <div className="flex items-center gap-3">
                           <UserCircle size={16} className="text-slate-300 shrink-0" />
                           <div>
                             <p className="text-[11px] text-slate-400">Nome</p>
-                            <p className="text-sm text-slate-800 font-medium">{profile.name}</p>
+                            <p className="text-sm text-slate-800 font-medium">{profile.name || 'Não informado'}</p>
                           </div>
                         </div>
-                        {user.role === 'DENTIST' && (
+                        {getCurrentProduct() === 'academy' && (
+                          <>
+                            <div className="flex items-center gap-3">
+                              <Shield size={16} className="text-slate-300 shrink-0" />
+                              <div>
+                                <p className="text-[11px] text-slate-400">Matrícula / RA</p>
+                                <p className="text-sm text-slate-800 font-medium">{profile.student_registration || 'Não informado'}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Activity size={16} className="text-slate-300 shrink-0" />
+                              <div>
+                                <p className="text-[11px] text-slate-400">Período ou semestre</p>
+                                <p className="text-sm text-slate-800 font-medium">{profile.academic_period || 'Não informado'}</p>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                        {getCurrentProduct() !== 'academy' && user.role === 'DENTIST' && (
                           <>
                             <div className="flex items-center gap-3">
                               <Shield size={16} className="text-slate-300 shrink-0" />
@@ -4965,7 +5001,7 @@ export default function App() {
                             </div>
                           </>
                         )}
-                        {user.role === 'DENTIST' && profile.bio && (
+                        {getCurrentProduct() !== 'academy' && user.role === 'DENTIST' && profile.bio && (
                           <div className="flex items-start gap-3 pt-1">
                             <FileText size={16} className="text-slate-300 shrink-0 mt-0.5" />
                             <div>
@@ -4985,21 +5021,90 @@ export default function App() {
                           <Mail size={16} className="text-slate-300 shrink-0" />
                           <div>
                             <p className="text-[11px] text-slate-400">E-mail</p>
-                            <p className="text-sm text-slate-800 font-medium">{profile.email}</p>
+                            <p className="text-sm text-slate-800 font-medium">{profile.email || 'Não informado'}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                           <Phone size={16} className="text-slate-300 shrink-0" />
                           <div>
                             <p className="text-[11px] text-slate-400">Telefone</p>
-                            <p className="text-sm text-slate-800 font-medium">{profile.phone || '—'}</p>
+                            <p className="text-sm text-slate-800 font-medium">{profile.phone || 'Não informado'}</p>
                           </div>
                         </div>
                       </div>
                     </div>
 
+                    {getCurrentProduct() === 'academy' && (
+                      <>
+                        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-4">
+                          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Informações da faculdade</h3>
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                              <Building2 size={16} className="text-slate-300 shrink-0" />
+                              <div>
+                                <p className="text-[11px] text-slate-400">Faculdade / Instituição</p>
+                                <p className="text-sm text-slate-800 font-medium">{profile.institution || 'Não informado'}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <FileText size={16} className="text-slate-300 shrink-0" />
+                              <div>
+                                <p className="text-[11px] text-slate-400">Clínica ou disciplina atual</p>
+                                <p className="text-sm text-slate-800 font-medium">{profile.current_discipline || 'Não informado'}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-4">
+                          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Acesso Academy</h3>
+                          <div className="space-y-3">
+                            {(() => {
+                              const academyAccess = profile.product_accesses?.find(access => access.product === 'academy');
+                              const academyPlan = academyAccess?.plan || 'free';
+                              const isFreeAcademy = academyPlan === 'free';
+                              const planLabel = isFreeAcademy ? 'Free' : 'Academy Student';
+                              return (
+                                <>
+                                  <div className="flex items-center gap-3">
+                                    <Shield size={16} className="text-slate-300 shrink-0" />
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-[11px] text-slate-400">Plano Academy</p>
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        <p className="text-sm text-slate-800 font-medium">{planLabel}</p>
+                                        {isFreeAcademy ? (
+                                          <button
+                                            type="button"
+                                            onClick={() => setShowAcademyUpgradeModal(true)}
+                                            className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-bold hover:bg-primary/15 transition-colors"
+                                          >
+                                            Mudar para Student
+                                          </button>
+                                        ) : (
+                                          <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-bold">
+                                            Plano Student
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <CheckCircle2 size={16} className="text-slate-300 shrink-0" />
+                                    <div>
+                                      <p className="text-[11px] text-slate-400">Status do acesso</p>
+                                      <p className="text-sm text-slate-800 font-medium">{academyAccess?.approval_status || 'Não informado'}</p>
+                                    </div>
+                                  </div>
+                                </>
+                              );
+                            })()}
+                          </div>
+                        </div>
+                      </>
+                    )}
+
                     {/* Clinic Section (dentist only) */}
-                    {user.role === 'DENTIST' && (profile.clinic_name || profile.clinic_address) && (
+                    {getCurrentProduct() !== 'academy' && user.role === 'DENTIST' && (profile.clinic_name || profile.clinic_address) && (
                       <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-4">
                         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Clínica</h3>
                         <div className="space-y-3">
@@ -5032,7 +5137,7 @@ export default function App() {
                   <form onSubmit={handleSaveProfile} className="space-y-6">
                     {/* Profile Fields */}
                     <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-5">
-                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Perfil</h3>
+                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{getCurrentProduct() === 'academy' ? 'Dados do aluno' : 'Perfil'}</h3>
                       <div className="space-y-4">
                         <div>
                           <label className="text-[11px] text-slate-400 mb-1.5 block">Nome Completo</label>
@@ -5040,7 +5145,25 @@ export default function App() {
                             onChange={(e) => setProfile({...profile, name: e.target.value})}
                             className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-base" />
                         </div>
-                        {user.role === 'DENTIST' && (
+                        {getCurrentProduct() === 'academy' && (
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-[11px] text-slate-400 mb-1.5 block">Matrícula / RA</label>
+                              <input type="text" value={profile.student_registration || ''}
+                                onChange={(e) => setProfile({...profile, student_registration: e.target.value})}
+                                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-base"
+                                placeholder="Não informado" />
+                            </div>
+                            <div>
+                              <label className="text-[11px] text-slate-400 mb-1.5 block">Período ou semestre</label>
+                              <input type="text" value={profile.academic_period || ''}
+                                onChange={(e) => setProfile({...profile, academic_period: e.target.value})}
+                                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-base"
+                                placeholder="Não informado" />
+                            </div>
+                          </div>
+                        )}
+                        {getCurrentProduct() !== 'academy' && user.role === 'DENTIST' && (
                           <>
                             <div className="grid grid-cols-2 gap-4">
                               <div>
@@ -5090,8 +5213,30 @@ export default function App() {
                       </div>
                     </div>
 
+                    {getCurrentProduct() === 'academy' && (
+                      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-5">
+                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Informações da faculdade</h3>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-[11px] text-slate-400 mb-1.5 block">Faculdade / Instituição</label>
+                            <input type="text" value={profile.institution || ''}
+                              onChange={(e) => setProfile({...profile, institution: e.target.value})}
+                              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-base"
+                              placeholder="Não informado" />
+                          </div>
+                          <div>
+                            <label className="text-[11px] text-slate-400 mb-1.5 block">Clínica ou disciplina atual</label>
+                            <input type="text" value={profile.current_discipline || ''}
+                              onChange={(e) => setProfile({...profile, current_discipline: e.target.value})}
+                              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-base"
+                              placeholder="Não informado" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Clinic Fields (dentist only) */}
-                    {user.role === 'DENTIST' && (
+                    {getCurrentProduct() !== 'academy' && user.role === 'DENTIST' && (
                       <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-5">
                         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Clínica</h3>
                         <div className="space-y-4">
@@ -6462,6 +6607,38 @@ export default function App() {
               </>
             )}
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showAcademyUpgradeModal && (
+          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              className="bg-white border border-primary/10 rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden"
+            >
+              <div className="p-6">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4">
+                  <Sparkles size={22} />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Academy Student</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Em breve você poderá ativar o Academy Student por aqui. Estamos preparando esse fluxo para liberar recursos avançados sem sair do Academy.
+                </p>
+              </div>
+              <div className="px-6 pb-6 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowAcademyUpgradeModal(false)}
+                  className="px-5 py-2.5 rounded-full bg-primary text-white text-sm font-bold hover:opacity-90 transition-all"
+                >
+                  Entendi
+                </button>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 

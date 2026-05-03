@@ -400,6 +400,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   );
 
   const persistTreatmentValue = async (treatmentId: string, rawValue: string) => {
+    if (isAcademyProduct) return;
     const normalized = String(rawValue || '').trim();
     if (!normalized) return;
 
@@ -429,6 +430,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   };
 
   const togglePrepaymentAll = async () => {
+    if (isAcademyProduct) return;
     const activeItems = mergedTreatmentPlan.filter((item: any) =>
       ['APROVADO', 'PENDENTE', 'PLANEJADO'].includes(String(item.status || '').toUpperCase())
     );
@@ -454,6 +456,10 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   };
 
   const confirmPrepayment = async (treatment: any) => {
+    if (isAcademyProduct) {
+      setSelectedTreatmentAction(null);
+      return;
+    }
     const nowIso = new Date().toISOString();
     const nextPlan = (mergedTreatmentPlan || []).map((item: any) =>
       item.id === treatment.id
@@ -497,6 +503,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   };
 
   const confirmPrepaymentAll = async (paymentMethod: string = 'Indefinido') => {
+    if (isAcademyProduct) return;
     const nowIso = new Date().toISOString();
     const unpaid = mergedTreatmentPlan.filter(
       (item: any) =>
@@ -611,7 +618,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     const evolutionId = `evo-odonto-${ts}-${Math.random().toString(36).slice(2, 8)}`;
     const nowIso = new Date().toISOString();
 
-    const values: Record<string, number> = {
+    const values: Record<string, number> = isAcademyProduct ? {} : {
       Restauração: 150,
       Endodontia: 450,
       Coroa: 1200,
@@ -633,7 +640,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       ['root_canal_done', 'extraction_done'].includes(String(status || '').toLowerCase());
 
     // Block completion via odontogram if prepayment is required but not confirmed
-    if (isCompletionAction && existingTreatment?.requires_prepayment && !existingTreatment?.prepayment_confirmed) {
+    if (!isAcademyProduct && isCompletionAction && existingTreatment?.requires_prepayment && !existingTreatment?.prepayment_confirmed) {
       setSelectedTreatmentAction(existingTreatment);
       return;
     }
@@ -655,7 +662,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               procedure,
               value: values[procedure] || 0,
               status: 'PLANEJADO',
-              requires_prepayment: true,
+              requires_prepayment: !isAcademyProduct,
               created_at: nowIso,
             },
           ]
@@ -676,7 +683,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
             procedure,
             value: values[procedure] || 0,
             status: 'PLANEJADO',
-            requires_prepayment: true,
+            requires_prepayment: !isAcademyProduct,
             created_at: nowIso,
           }
       : null;
@@ -749,7 +756,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       await onUpdatePatient(updatedPatient);
 
       // Criar transação financeira automaticamente ao concluir via odontograma
-      if (isCompletionAction && existingTreatment) {
+      if (!isAcademyProduct && isCompletionAction && existingTreatment) {
         const treatmentValue = Number(existingTreatment.value) || 0;
         const alreadyPaidViaPrePayment = existingTreatment.requires_prepayment && existingTreatment.prepayment_confirmed;
         if (treatmentValue > 0 && !alreadyPaidViaPrePayment) {
@@ -839,7 +846,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       // Criar transação financeira automaticamente (pular se pagamento antecipado já confirmado)
       const treatmentValue = Number(treatment.value) || 0;
       const alreadyPaidViaPrePayment = treatment.requires_prepayment && treatment.prepayment_confirmed;
-      if (treatmentValue > 0 && !alreadyPaidViaPrePayment) {
+      if (!isAcademyProduct && treatmentValue > 0 && !alreadyPaidViaPrePayment) {
         const procedureLabel = treatment.procedure || 'Procedimento';
         const toothLabel = treatment.tooth_number ? ` — dente ${treatment.tooth_number}` : '';
         apiFetch('/api/finance', {
@@ -1179,7 +1186,9 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     : upcomingAppointment
       ? 'A consulta já está marcada. Revise o caso e registre a evolução ao finalizar.'
       : 'Mapeie a condição dentária primeiro para orientar o próximo procedimento.';
-  const primaryActionButtonLabel = primaryTreatment ? 'Abrir tratamento atual' : 'Ir para odontograma';
+  const primaryActionButtonLabel = primaryTreatment
+    ? (isAcademyProduct ? 'Abrir plano clínico' : 'Abrir tratamento atual')
+    : 'Ir para odontograma';
 
   const greetingText = (() => {
     const h = new Date().getHours();
@@ -1251,7 +1260,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     <span className="ml-1.5 text-slate-200">·</span>
                   )}
                   {treatmentInProgress.length > 0 && (
-                    <span className="ml-1.5 tabular-nums">{treatmentInProgress.length} procedimento{treatmentInProgress.length !== 1 ? 's' : ''} ativo{treatmentInProgress.length !== 1 ? 's' : ''}</span>
+                    <span className="ml-1.5 tabular-nums">{treatmentInProgress.length} procedimento{treatmentInProgress.length !== 1 ? 's' : ''} {isAcademyProduct ? `planejado${treatmentInProgress.length !== 1 ? 's' : ''}` : `ativo${treatmentInProgress.length !== 1 ? 's' : ''}`}</span>
                   )}
                 </p>
               </div>
@@ -1361,7 +1370,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               {activeToothNumbers.length > 0 && (
                 <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-breathe" />
-                  {activeToothNumbers.length} dente{activeToothNumbers.length !== 1 ? 's' : ''} em tratamento
+                  {activeToothNumbers.length} dente{activeToothNumbers.length !== 1 ? 's' : ''} {isAcademyProduct ? 'em plano clínico' : 'em tratamento'}
                 </p>
               )}
             </div>
@@ -1389,19 +1398,23 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
             <section className="rounded-[28px] border border-slate-200/60 bg-white/95 p-5 sm:p-6 shadow-[0_10px_28px_rgba(15,23,42,0.04),0_1px_3px_rgba(15,23,42,0.06)] transition-shadow duration-500 hover:shadow-[0_14px_36px_rgba(15,23,42,0.06)]">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg sm:text-xl font-semibold tracking-[-0.02em] text-slate-950">Tratamento atual</h3>
+                  <h3 className="text-lg sm:text-xl font-semibold tracking-[-0.02em] text-slate-950">{isAcademyProduct ? 'Plano clínico' : 'Tratamento atual'}</h3>
                   {treatmentInProgress.length > 0 ? (
                     <p className="text-xs text-slate-500 mt-0.5">
-                      {treatmentInProgress.length} procedimento{treatmentInProgress.length !== 1 ? 's' : ''}
-                      {' · '}
-                      {treatmentInProgress.reduce((s: number, i: any) => s + (Number(i.value) || 0), 0)
-                        .toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      {treatmentInProgress.length} procedimento{treatmentInProgress.length !== 1 ? 's' : ''} planejado{treatmentInProgress.length !== 1 ? 's' : ''}
+                      {!isAcademyProduct && (
+                        <>
+                          {' · '}
+                          {treatmentInProgress.reduce((s: number, i: any) => s + (Number(i.value) || 0), 0)
+                            .toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </>
+                      )}
                     </p>
                   ) : (
                     <p className="text-xs text-slate-500 mt-0.5">Nenhum procedimento ativo</p>
                   )}
                 </div>
-                {treatmentInProgress.length > 0 && (() => {
+                {!isAcademyProduct && treatmentInProgress.length > 0 && (() => {
                   const activeUnpaid = treatmentInProgress.filter((item: any) => !item.prepayment_confirmed);
                   const allActive = activeUnpaid.length > 0 && activeUnpaid.every((item: any) => item.requires_prepayment);
                   const allPaid = treatmentInProgress.every((item: any) => item.requires_prepayment && item.prepayment_confirmed);
@@ -1436,7 +1449,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                   treatmentInProgress.map((item: any, idx: number) => {
                     const isPriority = idx === 0;
                     const rawStatus = String(item.status || '').toUpperCase();
-                    const isPrepaid = item.requires_prepayment && item.prepayment_confirmed;
+                    const isPrepaid = !isAcademyProduct && item.requires_prepayment && item.prepayment_confirmed;
 
                     const statusConfig = rawStatus === 'APROVADO'
                       ? { cls: 'bg-emerald-50 text-emerald-700 border-emerald-200', label: 'Em andamento' }
@@ -1465,7 +1478,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
                               {isPriority && (
-                                <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-indigo-500 mb-1">Próximo passo</p>
+                                <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-indigo-500 mb-1">{isAcademyProduct ? 'Próximo passo clínico' : 'Próximo passo'}</p>
                               )}
                               <p className={`font-bold leading-snug truncate ${isPriority ? 'text-[16px] text-slate-950' : 'text-[14px] text-slate-800'}`}>
                                 {item.procedure}
@@ -1484,6 +1497,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                               {statusConfig.label}
                             </span>
 
+                            {!isAcademyProduct && (
                             <div className="flex items-center gap-1.5">
                               <span className="text-[11px] text-slate-400 font-medium">R$</span>
                               <input
@@ -1514,13 +1528,14 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                                 aria-label="Valor do procedimento"
                               />
                             </div>
+                            )}
 
-                            {isPrepaid && (
+                            {!isAcademyProduct && isPrepaid && (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-emerald-50 text-emerald-700 border border-emerald-200">
                                 <Check size={9} /> Pago
                               </span>
                             )}
-                            {item.requires_prepayment && !item.prepayment_confirmed && (
+                            {!isAcademyProduct && item.requires_prepayment && !item.prepayment_confirmed && (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-amber-50 text-amber-700 border border-amber-200">
                                 <Lock size={9} /> Aguardando
                               </span>
@@ -1547,7 +1562,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                       <div className="w-11 h-11 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 animate-gentle-float shadow-[0_4px_12px_rgba(15,23,42,0.04)]">
                         <Clock3 size={18} />
                       </div>
-                      <p className="text-slate-800 text-sm font-bold">Nenhum tratamento ativo no momento</p>
+                      <p className="text-slate-800 text-sm font-bold">{isAcademyProduct ? 'Nenhum procedimento planejado no momento' : 'Nenhum tratamento ativo no momento'}</p>
                       <p className="text-slate-500 text-xs leading-relaxed max-w-[240px]">Inicie pelo odontograma para planejar o próximo passo clínico.</p>
                       <button
                         onClick={focusOdontogram}
@@ -1560,7 +1575,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                 )}
 
                 {/* Receber pelo orçamento completo */}
-                {(() => {
+                {!isAcademyProduct && (() => {
                   const unpaid = treatmentInProgress.filter(
                     (item: any) => !(item.requires_prepayment && item.prepayment_confirmed)
                   );
@@ -1891,13 +1906,21 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     {/* Ver mais — campos do pré-atendimento */}
                     {(() => {
                       const extra = patient?.anamnesis;
-                      const hasExtra = extra && (extra.chief_complaint || extra.habits || extra.family_history);
+                      const hasExtra = extra && (
+                        extra.chief_complaint ||
+                        extra.systemic_diseases ||
+                        extra.clinical_notes ||
+                        extra.habits ||
+                        extra.family_history ||
+                        extra.vital_signs
+                      );
                       if (!hasExtra) return null;
 
                       const extraFields = [
                         { label: 'Queixa principal', value: extra.chief_complaint, color: 'bg-blue-50 border-blue-200/70', labelColor: 'text-blue-600' },
-                        { label: 'Hábitos', value: extra.habits, color: 'bg-violet-50 border-violet-200/70', labelColor: 'text-violet-600' },
-                        { label: 'Histórico familiar', value: extra.family_history, color: 'bg-teal-50 border-teal-200/70', labelColor: 'text-teal-600' },
+                        { label: 'Doenças sistêmicas', value: extra.systemic_diseases || extra.family_history, color: 'bg-teal-50 border-teal-200/70', labelColor: 'text-teal-600' },
+                        { label: 'Observações clínicas importantes', value: extra.clinical_notes || extra.vital_signs, color: 'bg-indigo-50 border-indigo-200/70', labelColor: 'text-indigo-600' },
+                        { label: 'Hábitos relevantes', value: extra.habits, color: 'bg-violet-50 border-violet-200/70', labelColor: 'text-violet-600' },
                       ].filter(f => f.value && f.value.trim());
 
                       if (extraFields.length === 0) return null;
@@ -2287,7 +2310,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
             </div>
 
             <div className="space-y-2.5">
-              {selectedTreatmentAction.requires_prepayment && !selectedTreatmentAction.prepayment_confirmed ? (
+              {!isAcademyProduct && selectedTreatmentAction.requires_prepayment && !selectedTreatmentAction.prepayment_confirmed ? (
                 <>
                   <div className="rounded-[18px] border border-amber-200 bg-amber-50 p-4">
                     <div className="flex items-center gap-2 mb-1.5">
@@ -2326,7 +2349,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     </div>
                     <div>
                       <p className="text-sm font-bold text-emerald-900">Procedimento concluído</p>
-                      {selectedTreatmentAction.requires_prepayment && selectedTreatmentAction.prepayment_confirmed && (
+                      {!isAcademyProduct && selectedTreatmentAction.requires_prepayment && selectedTreatmentAction.prepayment_confirmed && (
                         <p className="text-[11px] text-emerald-600 mt-0.5 flex items-center gap-1"><Check size={9} /> Pagamento já confirmado</p>
                       )}
                     </div>
@@ -2364,7 +2387,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
         </div>
       )}
 
-      {showPaymentModal && (() => {
+      {!isAcademyProduct && showPaymentModal && (() => {
         const unpaid = treatmentInProgress.filter(
           (item: any) => !(item.requires_prepayment && item.prepayment_confirmed)
         );

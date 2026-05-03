@@ -10,9 +10,25 @@ export const getPatients = async (req: Request, res: Response) => {
     const result = await query(
       `SELECT 
          p.*,
+         jsonb_build_object(
+           'exists', bool_or(a.patient_id IS NOT NULL),
+           'medical_history', COALESCE(MAX(a.medical_history), ''),
+           'allergies', COALESCE(MAX(a.allergies), ''),
+           'medications', COALESCE(MAX(a.medications), ''),
+           'chief_complaint', COALESCE(MAX(a.chief_complaint), ''),
+           'habits', COALESCE(MAX(a.habits), ''),
+           'family_history', COALESCE(MAX(a.family_history), ''),
+           'vital_signs', COALESCE(MAX(a.vital_signs), '')
+         ) AS anamnesis,
+         bool_or(o.patient_id IS NOT NULL) AS has_odontogram_record,
+         COALESCE(MAX(o.data), '{}') AS odontogram_data,
          COUNT(ce.id)::int AS evolution_count,
          MAX(ce.date) AS last_evolution_date
        FROM patients p
+       LEFT JOIN anamnesis a
+         ON a.patient_id = p.id
+       LEFT JOIN odontograms o
+         ON o.patient_id = p.id
        LEFT JOIN clinical_evolution ce
          ON ce.patient_id = p.id AND ce.product = p.product
        WHERE p.dentist_id = $1 AND p.product = $2
@@ -109,6 +125,31 @@ export const createPatient = async (req: Request, res: Response) => {
   const product = getProduct(req);
   const { name, cpf, birth_date, phone, email, address } = req.body;
   try {
+    const duplicateChecks: string[] = [];
+    const duplicateParams: any[] = [user.id, product];
+
+    if (cpf && String(cpf).trim()) {
+      duplicateParams.push(String(cpf).trim());
+      duplicateChecks.push(`cpf = $${duplicateParams.length}`);
+    }
+    if (email && String(email).trim()) {
+      duplicateParams.push(String(email).trim());
+      duplicateChecks.push(`LOWER(email) = LOWER($${duplicateParams.length})`);
+    }
+
+    if (duplicateChecks.length > 0) {
+      const existing = await query(
+        `SELECT id FROM patients
+         WHERE dentist_id = $1 AND product = $2 AND (${duplicateChecks.join(' OR ')})
+         ORDER BY id ASC
+         LIMIT 1`,
+        duplicateParams
+      );
+      if (existing.rows.length > 0) {
+        return res.status(200).json({ id: existing.rows[0].id, duplicate: true });
+      }
+    }
+
     const result = await query(
       'INSERT INTO patients (name, cpf, birth_date, phone, email, address, dentist_id, product) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
       [name, cpf, birth_date, phone, email, address, user.id, product]

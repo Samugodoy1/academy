@@ -13,7 +13,7 @@ export const getProfile = async (req: Request, res: Response) => {
   const user = req.user!;
   try {
     const result = await dbQuery(
-      'SELECT id, name, email, role, phone, cro, specialty, bio, photo_url, clinic_name, clinic_address, onboarding_done, welcome_seen, record_opened, pix_key, pix_key_type, pix_beneficiary_name FROM users WHERE id = $1',
+      'SELECT id, name, email, role, phone, cro, specialty, bio, photo_url, clinic_name, clinic_address, institution, academic_period, student_registration, current_discipline, onboarding_done, welcome_seen, record_opened, pix_key, pix_key_type, pix_beneficiary_name FROM users WHERE id = $1',
       [user.id]
     );
     if (result.rows.length === 0) {
@@ -41,15 +41,45 @@ export const getProfile = async (req: Request, res: Response) => {
 
 export const updateProfile = async (req: Request, res: Response) => {
   const user = req.user!;
-  const { name, email, phone, cro, specialty, bio, clinic_name, clinic_address, password } = req.body;
+  const {
+    name,
+    email,
+    phone,
+    cro,
+    specialty,
+    bio,
+    clinic_name,
+    clinic_address,
+    institution,
+    academic_period,
+    student_registration,
+    current_discipline,
+    password
+  } = req.body;
   let { photo_url } = req.body;
 
   try {
     let sql = `
       UPDATE users 
-      SET name = $1, email = $2, phone = $3, cro = $4, specialty = $5, bio = $6, photo_url = $7, clinic_name = $8, clinic_address = $9
+      SET name = $1, email = $2, phone = $3, cro = $4, specialty = $5, bio = $6, photo_url = $7, clinic_name = $8, clinic_address = $9,
+          institution = $10, academic_period = $11, student_registration = $12, current_discipline = $13
     `;
-    let params: any[] = [name, email, phone, cro, specialty, bio, photo_url, clinic_name, clinic_address, user.id];
+    let params: any[] = [
+      name,
+      email,
+      phone,
+      cro,
+      specialty,
+      bio,
+      photo_url,
+      clinic_name,
+      clinic_address,
+      institution,
+      academic_period,
+      student_registration,
+      current_discipline,
+      user.id
+    ];
 
     if (password && password.trim() !== '') {
       const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
@@ -60,10 +90,10 @@ export const updateProfile = async (req: Request, res: Response) => {
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      sql += `, password = $10 WHERE id = $11`;
+      sql += `, password = $15 WHERE id = $14`;
       params.push(hashedPassword);
     } else {
-      sql += ` WHERE id = $10`;
+      sql += ` WHERE id = $14`;
     }
 
     await dbQuery(sql, params);

@@ -19,6 +19,10 @@ export async function initDb() {
         photo_public_id TEXT,
         clinic_name TEXT,
         clinic_address TEXT,
+        institution TEXT,
+        academic_period TEXT,
+        student_registration TEXT,
+        current_discipline TEXT,
         accepted_terms BOOLEAN DEFAULT FALSE,
         accepted_terms_at TIMESTAMP WITH TIME ZONE,
         accepted_privacy_policy BOOLEAN DEFAULT FALSE,
@@ -76,6 +80,18 @@ export async function initDb() {
         END IF;
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='pix_beneficiary_name') THEN
           ALTER TABLE users ADD COLUMN pix_beneficiary_name TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='institution') THEN
+          ALTER TABLE users ADD COLUMN institution TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='academic_period') THEN
+          ALTER TABLE users ADD COLUMN academic_period TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='student_registration') THEN
+          ALTER TABLE users ADD COLUMN student_registration TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='current_discipline') THEN
+          ALTER TABLE users ADD COLUMN current_discipline TEXT;
         END IF;
       END $$;
 

@@ -319,7 +319,7 @@ const StatusBadge = ({ app, now }: { app: Appointment; now: Date }) => {
     icon = <Clock size={10} />;
   } else if (app.status === 'CONFIRMED') {
     label = 'Confirmado';
-    style = 'bg-[#F3E8FF] text-[#6D28D9] border-[#DDD6FE]';
+    style = 'bg-[#EAF7F8] text-[#155A66] border-[#DDECEF]';
   } else {
     label = 'Agendado';
     style = 'bg-slate-50 text-slate-400 border-slate-100';
@@ -1777,7 +1777,7 @@ export default function App() {
     } else if (/higiene|limpeza|profila/.test(lower)) {
       return { bg: '#ca8a04', hover: '#a16207' }; // yellow-600, yellow-700
     } else if (/ortodo|alinha/.test(lower)) {
-      return { bg: '#7c3aed', hover: '#6d28d9' }; // purple-600, purple-700
+      return { bg: '#2F8FA3', hover: '#155A66' }; // academy-primary, academy-primary-dark
     } else if (/prot/.test(lower)) {
       return { bg: '#db2777', hover: '#be123c' }; // pink-600, pink-700
     } else {
@@ -2580,7 +2580,7 @@ export default function App() {
                     whileHover={{ scale: 1.005 }}
                     whileTap={{ scale: 0.98 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 25, mass: 0.8 }}
-                    className="w-full h-[48px] bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-[15px] font-medium rounded-[12px] shadow-[0_1px_3px_rgba(139,92,246,0.1),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_3px_8px_rgba(139,92,246,0.14),0_1px_2px_rgba(0,0,0,0.04)] transition-[background-color,box-shadow] duration-[160ms] ease-in-out"
+                    className="w-full h-[48px] bg-[#2F8FA3] hover:bg-[#155A66] text-white text-[15px] font-medium rounded-[12px] shadow-[0_1px_3px_rgba(47,143,163,0.1),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_3px_8px_rgba(47,143,163,0.14),0_1px_2px_rgba(0,0,0,0.04)] transition-[background-color,box-shadow] duration-[160ms] ease-in-out"
                     style={{ willChange: 'transform' }}
                   >
                     {isRegistering ? 'Criar conta' : 'Continuar'}
@@ -3032,7 +3032,7 @@ export default function App() {
                                     onChange={(e) => updateStatus(app.id, e.target.value as Appointment['status'])}
                                     aria-label={`Status de ${app.patient_name}`}
                                     className={`px-3 py-2 border rounded-xl text-sm font-semibold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none whitespace-nowrap shrink-0 appearance-none cursor-pointer transition-colors ${
-                                      app.status === 'CONFIRMED' ? 'bg-[#F3E8FF] border-[#DDD6FE] text-[#6D28D9]' :
+                                      app.status === 'CONFIRMED' ? 'bg-[#EAF7F8] border-[#DDECEF] text-[#155A66]' :
                                       app.status === 'IN_PROGRESS' ? 'bg-blue-50 border-blue-200 text-blue-700' :
                                       app.status === 'FINISHED' ? 'bg-slate-100 border-slate-200 text-slate-500' :
                                       app.status === 'CANCELLED' ? 'bg-rose-50 border-rose-200 text-rose-600' :
@@ -4325,7 +4325,7 @@ export default function App() {
                             key={`hoje-${handledToday}`}
                             type="button"
                             onClick={handleSummaryProgressClick}
-                            className={`font-semibold transition-colors ${handledToday > 0 ? 'text-[#6D28D9] hover:text-[#6D28D9]' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`font-semibold transition-colors ${handledToday > 0 ? 'text-[#155A66] hover:text-[#155A66]' : 'text-slate-400 hover:text-slate-600'}`}
                             style={{ animation: 'statusPop 150ms ease-out' }}
                           >
                             {handledToday > 0 ? `🔥 ${handledToday} hoje` : '0 hoje'}
@@ -4533,7 +4533,7 @@ export default function App() {
                                       onClick={() => handleScheduleFromCard(patient)}
                                       className={`w-9 h-9 flex items-center justify-center rounded-xl transition-colors ${
                                         isActed
-                                          ? 'text-[#6D28D9] bg-[#F3E8FF]'
+                                          ? 'text-[#155A66] bg-[#EAF7F8]'
                                           : 'text-slate-400 hover:text-primary hover:bg-primary/8'
                                       }`}
                                     >
@@ -4543,7 +4543,7 @@ export default function App() {
                                       type="button"
                                       title="Contatar via WhatsApp"
                                       onClick={() => contactPatientOnWhatsApp(patient)}
-                                      className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-[#6D28D9] hover:bg-[#F3E8FF] transition-colors"
+                                      className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-[#155A66] hover:bg-[#EAF7F8] transition-colors"
                                     >
                                       <MessageCircle size={16} />
                                     </button>
@@ -6707,10 +6707,10 @@ export default function App() {
                   {portalLinkData.preUrl && (
                   <div className="bg-[#F3E8FF] rounded-2xl p-4 border border-[#DDD6FE]">
                     <div className="flex items-center gap-2 mb-2">
-                      <ClipboardList size={16} className="text-[#6D28D9]" />
-                      <span className="text-sm font-bold text-[#6D28D9]">Pré-Atendimento</span>
+                      <ClipboardList size={16} className="text-[#155A66]" />
+                      <span className="text-sm font-bold text-[#155A66]">Pré-Atendimento</span>
                     </div>
-                    <p className="text-xs text-[#6D28D9] mb-3">Ficha online, termos e envio de documentos</p>
+                    <p className="text-xs text-[#155A66] mb-3">Ficha online, termos e envio de documentos</p>
                     <div className="flex gap-2">
                       <input
                         readOnly
@@ -6719,7 +6719,7 @@ export default function App() {
                       />
                       <button
                         onClick={() => { navigator.clipboard.writeText(portalLinkData.preUrl!); }}
-                        className="px-3 py-2 bg-[#8B5CF6] text-white text-xs font-bold rounded-lg hover:bg-[#7C3AED] transition-colors whitespace-nowrap"
+                        className="px-3 py-2 bg-[#2F8FA3] text-white text-xs font-bold rounded-lg hover:bg-[#155A66] transition-colors whitespace-nowrap"
                       >
                         Copiar
                       </button>
@@ -6861,7 +6861,7 @@ function ForgotPassword() {
               whileHover={{ scale: loading ? 1 : 1.005 }}
               whileTap={{ scale: loading ? 1 : 0.98 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25, mass: 0.8 }}
-              className="w-full h-[48px] bg-[#8B5CF6] hover:bg-[#7C3AED] disabled:hover:bg-[#8B5CF6] text-white text-[15px] font-medium rounded-[12px] shadow-[0_1px_3px_rgba(139,92,246,0.1),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_3px_8px_rgba(139,92,246,0.14),0_1px_2px_rgba(0,0,0,0.04)] disabled:opacity-50 disabled:cursor-not-allowed transition-[background-color,box-shadow,opacity] duration-[160ms] ease-in-out"
+              className="w-full h-[48px] bg-[#2F8FA3] hover:bg-[#155A66] disabled:hover:bg-[#2F8FA3] text-white text-[15px] font-medium rounded-[12px] shadow-[0_1px_3px_rgba(47,143,163,0.1),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_3px_8px_rgba(47,143,163,0.14),0_1px_2px_rgba(0,0,0,0.04)] disabled:opacity-50 disabled:cursor-not-allowed transition-[background-color,box-shadow,opacity] duration-[160ms] ease-in-out"
               style={{ willChange: 'transform' }}
             >
               {loading ? 'Enviando...' : 'Enviar instruções'}

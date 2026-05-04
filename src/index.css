@@ -4,7 +4,16 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   
-  --color-primary: #8B5CF6;
+  --color-primary: #2F8FA3;
+
+  --color-academy-primary: #2F8FA3;
+  --color-academy-primary-dark: #155A66;
+  --color-academy-soft: #EAF7F8;
+  --color-academy-bg: #FAFCFD;
+  --color-academy-card: #FFFFFF;
+  --color-academy-text: #132026;
+  --color-academy-muted: #667A80;
+  --color-academy-border: #DDECEF;
 }
 
 @layer base {

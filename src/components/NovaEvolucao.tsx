@@ -29,7 +29,7 @@ const FLOWS: Record<string, { label: string, keywords: string[], stages: any[] }
       { id: 'endo_medicacao', label: 'Medicação Intracanal', icon: FlaskConical, color: 'text-orange-600 bg-orange-50 border-orange-100' },
       { id: 'endo_selamento', label: 'Selamento Provisório', icon: Lock, color: 'text-indigo-600 bg-indigo-50 border-indigo-100' },
       { id: 'endo_instrumentacao', label: 'Instrumentação', icon: Activity, color: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
-      { id: 'endo_obturacao', label: 'Obturação', icon: Activity, color: 'text-purple-600 bg-purple-50 border-purple-100' },
+      { id: 'endo_obturacao', label: 'Obturação', icon: Activity, color: 'text-[#2F8FA3] bg-[#EAF7F8] border-[#DDECEF]' },
       { id: 'endo_restauracao', label: 'Restauração', icon: Palette, color: 'text-pink-600 bg-pink-50 border-pink-100' },
     ]
   },

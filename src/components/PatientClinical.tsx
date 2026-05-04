@@ -1508,14 +1508,15 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               <button
                 type="button"
                 onClick={() => setIsBoxModeOpen(true)}
-                className="rounded-[22px] bg-primary px-5 py-4 text-left text-white shadow-[0_12px_28px_rgba(109,40,217,0.22)] transition-all duration-200 hover:opacity-95 active:scale-[0.98] ios-press"
+                className="rounded-[22px] bg-white border px-5 py-4 text-left shadow-[0_8px_22px_rgba(15,23,42,0.05)] transition-all duration-200 active:scale-[0.98] ios-press"
+                style={{borderColor: 'var(--academy-border)'}}
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[16px] font-bold">Modo Box</p>
-                    <p className="text-[12px] text-white/75 font-medium mt-1">Cola clínica rápida</p>
+                    <p className="text-[12px] font-medium mt-1" style={{color: 'var(--academy-muted)'}}>Cola clínica rápida</p>
                   </div>
-                  <BookOpen size={20} className="shrink-0 text-white/90" />
+                  <BookOpen size={20} className="shrink-0" style={{color: 'var(--academy-primary)'}} />
                 </div>
               </button>
               <button
@@ -2452,12 +2453,12 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                   </button>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-primary" />
+                      <span className="h-2 w-2 rounded-full" style={{backgroundColor: 'var(--academy-primary)'}} />
                       <h2 className="text-[18px] font-black tracking-[-0.03em] text-slate-950 leading-none">Modo Box</h2>
                     </div>
                     <p className="mt-1 truncate text-[12px] font-semibold text-slate-500">{patient?.name}</p>
                   </div>
-                  <span className="rounded-full bg-primary/10 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.08em] text-primary">
+                  <span className="rounded-full px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.08em]" style={{backgroundColor: 'var(--academy-primary)', color: 'var(--academy-primary)', opacity: 0.1}}>
                     {activeBoxStep.label}
                   </span>
                 </div>
@@ -2465,14 +2466,14 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
             </div>
 
             <div className="mx-auto max-w-[560px] px-4 py-4 space-y-4">
-              <section className="rounded-[22px] bg-[#F3E8FF]/70 px-4 py-3.5 flex items-start gap-3">
-                <Sparkles size={16} className="mt-0.5 shrink-0 text-[#8B5CF6]" />
+              <section className="rounded-[22px] px-4 py-3.5 flex items-start gap-3" style={{backgroundColor: 'var(--academy-soft)'}}>
+                <Sparkles size={16} className="mt-0.5 shrink-0" style={{color: 'var(--academy-primary)'}} />
                 <p className="text-[13px] font-semibold text-[#3A3A3C] leading-snug">
                   Voce nao precisa lembrar tudo de uma vez. Fazemos so o proximo passo.
                 </p>
               </section>
 
-              <section className="overflow-hidden rounded-[34px] bg-gradient-to-br from-[#6D28D9] via-[#7C3AED] to-[#8B5CF6] text-white shadow-[0_24px_80px_rgba(109,40,217,0.20)]">
+              <section className="overflow-hidden rounded-[34px] bg-gradient-to-br from-[#155A66] via-[#2F8FA3] to-[#4DB5CA] text-white shadow-[0_24px_80px_rgba(21,90,102,0.20)]">
                 <div className="px-6 pt-7 pb-6 min-h-[480px] flex flex-col">
                 <div className="mb-5 flex items-start justify-between gap-4">
                   <div>
@@ -2623,7 +2624,8 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                       setIsBoxModeOpen(false);
                       setIsAddingEvolution(true);
                     }}
-                    className="rounded-full bg-primary px-3 py-2 text-[12px] font-bold text-white shadow-[0_5px_14px_rgba(109,40,217,0.16)] active:scale-[0.96]"
+                    className="rounded-full bg-academy-primary px-3 py-2 text-[12px] font-bold text-white shadow-[0_5px_14px_rgba(47,143,163,0.16)] active:scale-[0.96]"
+                    style={{backgroundColor: 'var(--academy-primary)'}}
                   >
                     Evolucao
                   </button>
@@ -2798,12 +2800,12 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                   </button>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="h-2 w-2 rounded-full bg-primary" />
+                      <span className="h-2 w-2 rounded-full" style={{backgroundColor: 'var(--academy-primary)'}} />
                       <h2 className="text-[20px] font-black tracking-[-0.03em] text-slate-950 leading-none">Modo Box</h2>
                     </div>
                     <p className="text-[12px] font-semibold text-slate-600 truncate">{patient?.name}</p>
                     {(boxContextProcedure || boxContextTooth) && (
-                      <p className="mt-1 text-[11px] font-bold text-primary truncate">
+                      <p className="mt-1 text-[11px] font-bold truncate" style={{color: 'var(--academy-primary)'}}>
                         {[boxContextProcedure, boxContextTooth].filter(Boolean).join(' - ')}
                       </p>
                     )}
@@ -2830,7 +2832,8 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsBoxModeOpen(false)}
-                      className="rounded-[18px] bg-white text-primary px-4 py-3 text-sm font-bold shadow-sm active:scale-[0.98]"
+                      className="rounded-[18px] bg-white px-4 py-3 text-sm font-bold shadow-sm active:scale-[0.98]"
+                      style={{color: 'var(--academy-primary)'}}
                     >
                       Voltar ao prontuário
                     </button>

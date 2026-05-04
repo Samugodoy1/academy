@@ -540,7 +540,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           transition={{ duration: 0.35, delay: 0.08 }}
           className="flex items-start gap-3 rounded-2xl px-4 py-3.5 bg-[#F3E8FF]/70"
         >
-          <Sparkles size={16} className="mt-0.5 shrink-0 text-[#8B5CF6]" />
+          <Sparkles size={16} className="mt-0.5 shrink-0 text-[#2F8FA3]" />
           <p className="text-[14px] font-medium text-[#3A3A3C] leading-snug">
             {focus.subtitle}
           </p>
@@ -553,7 +553,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
       >
         <div
-          className="overflow-hidden rounded-[32px] shadow-[0_24px_80px_rgba(0,0,0,0.10)] flex flex-col bg-gradient-to-br from-[#6D28D9] via-[#7C3AED] to-[#8B5CF6]"
+          className="overflow-hidden rounded-[32px] shadow-[0_24px_80px_rgba(0,0,0,0.10)] flex flex-col bg-gradient-to-br from-[#155A66] via-[#2F8FA3] to-[#4DB5CA]"
           style={{ minHeight: 'min(60svh, 520px)' }}
         >
           <div className="flex-1 px-7 pt-9 pb-6 flex flex-col gap-5">
@@ -588,7 +588,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
             <div className="flex items-center gap-2.5 flex-wrap">
               {statusLabel && (
-                <span className="px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white/90 text-[#6D28D9]">
+                <span className="px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white/90 text-[#155A66]">
                   {statusLabel}
                 </span>
               )}
@@ -629,7 +629,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
               whileTap={{ scale: 0.98, opacity: 0.92 }}
               transition={{ duration: 0.18, ease: 'easeOut' }}
               onClick={focus.action}
-              className="w-full py-[20px] rounded-[26px] text-[18px] font-bold bg-white shadow-[0_8px_32px_rgba(0,0,0,0.18)] transition-all text-[#6D28D9]"
+              className="w-full py-[20px] rounded-[26px] text-[18px] font-bold bg-white shadow-[0_8px_32px_rgba(0,0,0,0.18)] transition-all text-[#155A66]"
             >
               {focus.actionLabel}
             </motion.button>
@@ -669,7 +669,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         <motion.button
           whileTap={{ scale: 0.96 }}
           onClick={openAppointmentModal}
-          className="flex items-center gap-1.5 px-3.5 py-[11px] rounded-[12px] bg-[#F3E8FF] text-[#6D28D9] text-[12px] font-bold transition-all"
+          className="flex items-center gap-1.5 px-3.5 py-[11px] rounded-[12px] bg-[#EAF7F8] text-[#155A66] text-[12px] font-bold transition-all"
         >
           <CalendarPlus size={13} strokeWidth={2.5} />
           Atendimento

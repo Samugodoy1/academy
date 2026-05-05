@@ -785,7 +785,7 @@ export default function App() {
     if (user && !hasApprovedProductAccess(DEFAULT_PRODUCT)) {
       setActiveTab('dashboard');
     }
-  }, [activeTab, user, hasApprovedProductAccess]);
+  }, [activeTab, user?.id, user?.product_accesses]);
 
   useEffect(() => {
     if (ACADEMY_DISABLED_TABS.has(activeTab)) {
@@ -813,8 +813,10 @@ export default function App() {
     }
   }, []);
 
+  const userIdRef = useRef<number | null>(null);
   useEffect(() => {
-    if (user) {
+    if (user && user.id !== userIdRef.current) {
+      userIdRef.current = user.id;
       fetchData();
       fetchProfile();
       if (user.role?.toUpperCase() === 'ADMIN') {
@@ -822,7 +824,7 @@ export default function App() {
         apiFetch('/api/admin/update-schema', { product: DEFAULT_PRODUCT }).catch(console.error);
       }
     }
-  }, [user]);
+  }, [user?.id]);
 
   useEffect(() => {
     if (selectedPatientTab === 'financeiro' && selectedPatient) {
@@ -830,13 +832,21 @@ export default function App() {
     }
   }, [selectedPatientTab, selectedPatient?.id]);
 
+  const prevProfileTabRef = useRef<string | null>(null);
   useEffect(() => {
-    if ((activeTab === 'configuracoes' || activeTab === 'documentos') && user) {
+    const isProfileTab = activeTab === 'configuracoes' || activeTab === 'documentos';
+    if (isProfileTab && user && prevProfileTabRef.current !== activeTab) {
+      prevProfileTabRef.current = activeTab;
       fetchProfile();
+    } else if (!isProfileTab) {
+      prevProfileTabRef.current = null;
     }
-  }, [activeTab, user]);
+  }, [activeTab]);
 
+  const fetchProfileInFlight = useRef(false);
   const fetchProfile = async () => {
+    if (fetchProfileInFlight.current) return;
+    fetchProfileInFlight.current = true;
     try {
       const res = await apiFetch('/api/profile');
       if (res.ok) {
@@ -846,11 +856,23 @@ export default function App() {
         setUser(prev => {
           if (!prev) return prev;
           const currentAccess = data.product_accesses?.find((access: ProductAccess) => access.product === getCurrentProduct());
+          const newAccesses = JSON.stringify(data.product_accesses);
+          const prevAccesses = JSON.stringify(prev.product_accesses);
+          const newOnboarding = currentAccess?.onboarding_completed ?? prev.onboarding_done;
+          if (
+            newAccesses === prevAccesses &&
+            prev.current_product === data.current_product &&
+            prev.onboarding_done === newOnboarding &&
+            prev.welcome_seen === data.welcome_seen &&
+            prev.record_opened === data.record_opened
+          ) {
+            return prev;
+          }
           const updated = {
             ...prev,
             product_accesses: data.product_accesses,
             current_product: data.current_product,
-            onboarding_done: currentAccess?.onboarding_completed ?? prev.onboarding_done,
+            onboarding_done: newOnboarding,
             welcome_seen: data.welcome_seen,
             record_opened: data.record_opened
           };
@@ -860,6 +882,8 @@ export default function App() {
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
+    } finally {
+      fetchProfileInFlight.current = false;
     }
   };
 

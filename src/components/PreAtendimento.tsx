@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { API_URL } from '../config';
 import {
   CheckCircle2,
   AlertCircle,
@@ -82,7 +83,7 @@ export function PreAtendimento() {
 
   const authenticateToken = async () => {
     try {
-      const res = await fetch(`/api/portal/auth/${token}`);
+      const res = await fetch(`${API_URL}/api/portal/auth/${token}`);
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || 'Link inválido ou expirado');
@@ -113,7 +114,7 @@ export function PreAtendimento() {
     setSubmitting(true);
     try {
       // 1. Submit intake form
-      const formRes = await portalFetch('/api/portal/intake', {
+      const formRes = await portalFetch(`${API_URL}/api/portal/intake`, {
         method: 'POST',
         body: JSON.stringify(form)
       });
@@ -124,7 +125,7 @@ export function PreAtendimento() {
 
       for (const [type, accepted] of Object.entries(consentsAccepted)) {
         if (accepted) {
-          await portalFetch('/api/portal/consent', {
+          await portalFetch(`${API_URL}/api/portal/consent`, {
             method: 'POST',
             body: JSON.stringify({ consent_type: type, signature_data: signatureData })
           });
@@ -138,7 +139,7 @@ export function PreAtendimento() {
         formData.append('description', `Documento: ${file.name}`);
         formData.append('file_type', file.type.includes('image') ? 'image' : 'document');
 
-        await fetch('/api/portal/upload', {
+        await fetch(`${API_URL}/api/portal/upload`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${sessionToken}` },
           body: formData

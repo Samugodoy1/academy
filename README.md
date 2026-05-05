@@ -1,25 +1,29 @@
-# Projeto OdontoHub
+# OdontoHub Academy
 
-Este é um projeto Full-Stack (React + Node.js/TypeScript) para gestão de clínicas odontológicas.
+Frontend React + Vite para a plataforma educacional OdontoHub Academy.
 
-## Tecnologias Utilizadas
+## Arquitetura
 
-### Backend
-- **Express**: Framework web para Node.js.
-- **PostgreSQL (Neon)**: Banco de dados relacional.
-- **Vercel Serverless Functions**: Para execução do backend em produção.
-- **tsx**: Para execução em desenvolvimento.
+Este repositório contém **apenas o frontend** (SPA). Todas as chamadas de API são direcionadas à API central:
 
-### Frontend
-- **React**: Biblioteca para construção de interfaces.
-- **Vite**: Ferramenta de build e desenvolvimento.
-- **Tailwind CSS**: Framework CSS utilitário.
-- **Lucide React**: Ícones SVG.
-- **Motion**: Biblioteca de animações.
+```
+https://api.odontohub.app.br
+```
+
+O backend centralizado está no repositório [odontohub-api](https://github.com/Samugodoy1/odontohub-api).
+
+## Tecnologias
+
+- **React 19** — Biblioteca para construção de interfaces
+- **Vite** — Ferramenta de build e desenvolvimento
+- **Tailwind CSS v4** — Framework CSS utilitário
+- **Lucide React** — Ícones SVG
+- **Motion / Framer Motion** — Animações
 
 ## Requisitos
-- **Node.js**: >= 18.0.0
-- **npm**: >= 9.0.0
+
+- **Node.js** >= 18.0.0
+- **npm** >= 9.0.0
 
 ## Como executar localmente
 
@@ -28,12 +32,28 @@ Este é um projeto Full-Stack (React + Node.js/TypeScript) para gestão de clín
    npm install
    ```
 
-2. Configure as variáveis de ambiente no arquivo `.env`:
-   ```env
-   DATABASE_URL=seu_url_do_postgres
+2. Configure a variável de ambiente:
+   ```bash
+   cp .env.example .env
+   # Edite .env se necessário (para dev local, pode usar http://localhost:3001)
    ```
 
 3. Inicie o servidor de desenvolvimento:
    ```bash
    npm run dev
    ```
+
+## Variáveis de Ambiente
+
+| Variável | Descrição | Exemplo |
+|----------|-----------|---------|
+| `VITE_API_URL` | URL da API central | `https://api.odontohub.app.br` |
+
+## Scripts
+
+| Comando | Descrição |
+|---------|-----------|
+| `npm run dev` | Servidor de desenvolvimento (Vite) |
+| `npm run build` | Build de produção |
+| `npm run preview` | Preview do build local |
+| `npm run lint` | Verificação de tipos TypeScript |

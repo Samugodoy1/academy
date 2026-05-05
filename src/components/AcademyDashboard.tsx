@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, CalendarPlus, CheckCircle2, ChevronRight, ClipboardList, Clock, Plus, Sparkles, Users } from '../icons';
+import { BookOpen, Calendar, CalendarPlus, CheckCircle2, ChevronRight, ClipboardList, Clock, Plus, Sparkles, Users } from '../icons';
 
 interface AcademyDashboardProps {
   user?: any;
@@ -305,8 +305,8 @@ const getFirstVisitAnamnesisMessage = (patient: any, appointments: any[], now: D
 
   if (!nextFirstAppointment) return null;
   return sameDay(nextFirstAppointment.parsedStart, now)
-    ? 'Comece pela anamnese no atendimento de hoje.'
-    : 'Primeira consulta agendada. Anamnese será feita no primeiro atendimento.';
+    ? 'É a primeira visita. Comece pela anamnese.'
+    : 'Primeira consulta. Anamnese no radar.';
 };
 
 const getClinicalPending = (patients: any[], appointments: any[], now: Date) => {
@@ -387,9 +387,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       const patient = getPatient(patients, pendingApp.patient_id);
       return {
         kind: 'evolution',
-        eyebrow: 'Falta só fechar',
-        title: 'Falta só fechar o atendimento de hoje.',
-        subtitle: patient ? `${firstName(patient.name || pendingApp.patient_name)} já foi atendido. Registre a evolução e tire isso da frente.` : 'Registre a evolução e tire isso da frente.',
+        eyebrow: 'Último passo',
+        title: 'Apenas a evolução.',
+        subtitle: patient ? `${firstName(patient.name || pendingApp.patient_name)} já foi atendido. Registre e siga em frente.` : 'Registre o que foi feito e siga em frente.',
         actionLabel: 'Registrar evolução',
         patient,
         appointment: pendingApp,
@@ -403,9 +403,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       const firstVisitMessage = getFirstVisitAnamnesisMessage(patient, usableAppointments, now);
       return {
         kind: 'today',
-        eyebrow: 'Próximo atendimento',
-        title: `Hoje você atende ${firstName(nextTodayAppointment.patient_name)}${time ? ` às ${time}` : ''}.`,
-        subtitle: firstVisitMessage || 'O foco é revisar o caso antes da clínica.',
+        eyebrow: 'A seguir',
+        title: `${firstName(nextTodayAppointment.patient_name)}${time ? `, às ${time}` : ''}.`,
+        subtitle: firstVisitMessage || 'Revise os detalhes antes de começar.',
         actionLabel: 'Abrir caso',
         patient,
         appointment: nextTodayAppointment,
@@ -419,9 +419,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       const firstVisitMessage = getFirstVisitAnamnesisMessage(patient, usableAppointments, now);
       return {
         kind: 'next',
-        eyebrow: 'Próximo passo',
-        title: dayTime ? `Seu próximo atendimento é ${dayTime}.` : 'Seu próximo atendimento está separado aqui.',
-        subtitle: firstVisitMessage || 'Antes da clínica, revise o objetivo e a última evolução.',
+        eyebrow: 'Próximo',
+        title: dayTime ? `${dayTime}.` : 'Agendado.',
+        subtitle: firstVisitMessage || 'Dê uma olhada no que vem por aí.',
         actionLabel: 'Revisar caso',
         patient,
         appointment: nextAppointment,
@@ -432,9 +432,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
     if (pausedCase) {
       return {
         kind: 'paused',
-        eyebrow: 'Caso parado',
-        title: 'Separei um caso que vale revisar.',
-        subtitle: 'Ele está sem movimento recente.',
+        eyebrow: 'Pede atenção',
+        title: 'Vale a pena revisar.',
+        subtitle: 'Faz tempo que não há novidades por aqui.',
         actionLabel: 'Revisar caso',
         patient: pausedCase,
         appointment: null,
@@ -445,9 +445,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
     if (clinicalPending) {
       return {
         kind: 'pending',
-        eyebrow: 'Pequena pendência',
-        title: 'Tem uma coisa pequena pendente.',
-        subtitle: 'Resolva agora e deixe o caso mais tranquilo para a clínica.',
+        eyebrow: 'Ajuste rápido',
+        title: 'Pequeno detalhe.',
+        subtitle: 'Resolva em segundos e libere a mente.',
         actionLabel: 'Resolver pendência',
         patient: clinicalPending,
         appointment: null,
@@ -458,9 +458,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
     if (patients.length === 0) {
       return {
         kind: 'start',
-        eyebrow: 'Vamos começar',
-        title: 'Vamos organizar sua primeira rotina clínica.',
-        subtitle: 'Cadastre o primeiro caso real. Depois eu separo o que pede atenção.',
+        eyebrow: 'Primeiro passo',
+        title: 'Sua rotina, organizada.',
+        subtitle: 'Adicione seu primeiro paciente e deixe o resto comigo.',
         actionLabel: 'Cadastrar primeiro caso',
         patient: null,
         appointment: null,
@@ -470,9 +470,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
     return {
       kind: 'calm',
-      eyebrow: 'Nada urgente por agora',
-      title: 'Tudo certo por agora.',
-      subtitle: 'Quando algo pedir sua atenção, eu mostro aqui.',
+      eyebrow: 'Tudo em dia',
+      title: 'Mente livre.',
+      subtitle: 'Pode focar. Eu aviso se algo surgir.',
       actionLabel: 'Ver casos',
       patient: null,
       appointment: null,
@@ -482,13 +482,13 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
   const greetingName = getGreetingName(user);
   const smartMessage = (() => {
-    if (focus.kind === 'evolution') return 'Tem um atendimento esperando só a evolução.';
-    if (focus.kind === 'today') return 'Separei o caso certo para você revisar agora.';
-    if (focus.kind === 'next') return 'Sem atendimento hoje. O próximo caso já está separado.';
-    if (focus.kind === 'paused') return 'Achei um caso que saiu do ritmo.';
-    if (focus.kind === 'pending') return 'Nada grande. Só um ajuste pequeno no prontuário.';
-    if (focus.kind === 'start') return 'Começa pequeno. Um caso bem organizado já muda a rotina.';
-    return 'Nada urgente por agora. Pode respirar.';
+    if (focus.kind === 'evolution') return 'Falta só a evolução. Resolva rápido.';
+    if (focus.kind === 'today') return 'Tudo pronto para o seu próximo paciente.';
+    if (focus.kind === 'next') return 'Sem pressa. O próximo caso já está na mão.';
+    if (focus.kind === 'paused') return 'Encontrei um caso que esfriou. Vamos retomar?';
+    if (focus.kind === 'pending') return 'Só um ajuste rápido no prontuário. Sem estresse.';
+    if (focus.kind === 'start') return 'Seu primeiro caso. Simples e sem complicação.';
+    return 'Tudo em paz. O dia está sob controle.';
   })();
 
   const focusPatientName = focus.patient?.name || focus.appointment?.patient_name || null;
@@ -513,23 +513,41 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
     })),
     ...(clinicalPending && !finishedWithoutEvolution.some(app => app.patient_id === clinicalPending.id)
       ? [{
-          id: `clinical-${clinicalPending.id}`,
-          patientId: clinicalPending.id,
-          title: clinicalPending.name,
-          meta: getClinicalAlert(clinicalPending, usableAppointments, now) || 'Pendência clínica.',
-          tone: 'amber'
-        }]
+        id: `clinical-${clinicalPending.id}`,
+        patientId: clinicalPending.id,
+        title: clinicalPending.name,
+        meta: getClinicalAlert(clinicalPending, usableAppointments, now) || 'Pendência clínica.',
+        tone: 'amber'
+      }]
       : [])
   ].slice(0, 3);
 
+  const studySuggestion = useMemo(() => {
+    if (focus.kind === 'evolution' || focus.kind === 'calm' || focus.kind === 'start') return null;
+
+    const procedure = procedureHint;
+    if (!procedure) return null;
+
+    const patientName = focusPatientName ? firstName(focusPatientName) : null;
+    const reason = patientName
+      ? `Ligada ao atendimento de ${patientName}.`
+      : 'Ligada ao seu próximo atendimento.';
+
+    return {
+      topic: procedure,
+      reason,
+      duration: '8 min',
+    };
+  }, [focus.kind, procedureHint, focusPatientName]);
+
   return (
-    <div className="max-w-2xl mx-auto space-y-7 pb-32">
-      <section className="space-y-4">
-        <div>
-          <p className="text-[15px] font-medium text-[#8E8E93]">
+    <div className="max-w-2xl mx-auto px-5 sm:px-6 space-y-12 pt-8 pb-32">
+      <section className="space-y-8">
+        <div className="pt-6">
+          <p className="text-[16px] font-medium text-academy-muted mb-2">
             {getTimeGreeting()}{greetingName ? `, ${greetingName}` : ''}
           </p>
-          <h2 className="text-[30px] sm:text-[34px] font-bold text-[#1C1C1E] leading-[1.08] tracking-tight mt-1">
+          <h2 className="text-[34px] sm:text-[38px] font-bold text-academy-text leading-[1.1] tracking-tight mt-1">
             {smartMessage}
           </h2>
         </div>
@@ -538,150 +556,190 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.08 }}
-          className="flex items-start gap-3 rounded-2xl px-4 py-3.5 bg-[#F3E8FF]/70"
+          className="flex items-start gap-3 rounded-2xl px-5 py-4 bg-academy-primary/10"
         >
-          <Sparkles size={16} className="mt-0.5 shrink-0 text-[#2F8FA3]" />
+          <Sparkles size={16} className="mt-0.5 shrink-0 text-academy-primary" />
           <p className="text-[14px] font-medium text-[#3A3A3C] leading-snug">
             {focus.subtitle}
           </p>
         </motion.div>
       </section>
 
-      <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <div
-          className="overflow-hidden rounded-[32px] shadow-[0_24px_80px_rgba(0,0,0,0.10)] flex flex-col bg-gradient-to-br from-[#155A66] via-[#2F8FA3] to-[#4DB5CA]"
-          style={{ minHeight: 'min(60svh, 520px)' }}
+      <div className="space-y-4">
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="flex-1 px-7 pt-9 pb-6 flex flex-col gap-5">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.14em]">
-                  {focus.eyebrow}
-                </span>
-                <h2 className="text-[34px] sm:text-[40px] font-bold text-white leading-[1.1] tracking-[-0.025em] mt-1.5 break-words">
-                  {focusPatientName || focus.title}
-                </h2>
-              </div>
-              {focusPatientName ? (
-                focusPhoto ? (
-                  <img
-                    src={focusPhoto}
-                    alt={focusPatientName}
-                    referrerPolicy="no-referrer"
-                    className="w-16 h-16 rounded-[22px] object-cover border-2 border-white/20 shrink-0 mt-1 shadow-lg"
-                  />
-                ) : (
-                  <div className="w-16 h-16 rounded-[22px] bg-white/15 border border-white/20 flex items-center justify-center shrink-0 mt-1 font-bold text-[26px] text-white shadow-inner">
-                    {focusInitial}
-                  </div>
-                )
-              ) : (
-                <div className="w-16 h-16 rounded-[22px] bg-white/15 border border-white/20 flex items-center justify-center shrink-0 mt-1 text-white shadow-inner">
-                  {focus.kind === 'calm' ? <CheckCircle2 size={28} /> : focus.kind === 'start' ? <Plus size={28} /> : <ClipboardList size={28} />}
+          <div
+            className="overflow-hidden rounded-[32px] shadow-[0_24px_80px_rgba(0,0,0,0.10)] flex flex-col bg-gradient-to-br from-academy-primary-dark via-academy-primary to-academy-primary"
+            style={{ minHeight: 'min(60svh, 520px)' }}
+          >
+            <div className="flex-1 px-8 pt-12 pb-6 flex flex-col gap-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.14em]">
+                    {focus.eyebrow}
+                  </span>
+                  <h2 className="text-[34px] sm:text-[40px] font-bold text-white leading-[1.1] tracking-[-0.025em] mt-1.5 break-words">
+                    {focusPatientName || focus.title}
+                  </h2>
                 </div>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2.5 flex-wrap">
-              {statusLabel && (
-                <span className="px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white/90 text-[#155A66]">
-                  {statusLabel}
-                </span>
-              )}
-              {startFormatted && !isFinishedFocus && (
-                <span className="px-3 py-1.5 rounded-full text-[12px] font-bold bg-white/15 text-white">
-                  {formatDayTime(focus.appointment?.start_time)}
-                </span>
-              )}
-            </div>
-
-            <div className="mt-auto pt-4 space-y-5">
-              <div>
-                <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.12em]">Agora</span>
-                <p className="text-[22px] sm:text-[26px] font-bold text-white mt-1 leading-snug">
-                  {focus.title}
-                </p>
+                {focusPatientName ? (
+                  focusPhoto ? (
+                    <img
+                      src={focusPhoto}
+                      alt={focusPatientName}
+                      referrerPolicy="no-referrer"
+                      className="w-16 h-16 rounded-[22px] object-cover border-2 border-white/20 shrink-0 mt-1 shadow-lg"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-[22px] bg-white/15 border border-white/20 flex items-center justify-center shrink-0 mt-1 font-bold text-[26px] text-white shadow-inner">
+                      {focusInitial}
+                    </div>
+                  )
+                ) : (
+                  <div className="w-16 h-16 rounded-[22px] bg-white/15 border border-white/20 flex items-center justify-center shrink-0 mt-1 text-white shadow-inner">
+                    {focus.kind === 'calm' ? <CheckCircle2 size={28} /> : focus.kind === 'start' ? <Plus size={28} /> : <ClipboardList size={28} />}
+                  </div>
+                )}
               </div>
-
-              <div className="grid gap-3">
-                {procedureHint && (
-                  <HeroDetail label="Objetivo" value={procedureHint} />
+  
+              <div className="flex items-center gap-2.5 flex-wrap">
+                {statusLabel && (
+                  <span className="px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white/90 text-academy-primary-dark">
+                    {statusLabel}
+                  </span>
                 )}
-                {lastEvolution && (
-                  <HeroDetail label="Última evolução" value={lastEvolution} />
+                {startFormatted && !isFinishedFocus && (
+                  <span className="px-3 py-1.5 rounded-full text-[12px] font-bold bg-white/15 text-white">
+                    {formatDayTime(focus.appointment?.start_time)}
+                  </span>
                 )}
-                {clinicalAlert && (
-                  <HeroDetail label="Não esquecer" value={clinicalAlert} />
-                )}
-                {isFinishedFocus && (
-                  <HeroDetail label="Pendência" value="Falta registrar a evolução." />
-                )}
+              </div>
+  
+              <div className="mt-auto pt-4 space-y-5">
+                <div>
+                  <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.12em]">Agora</span>
+                  <p className="text-[22px] sm:text-[26px] font-bold text-white mt-1 leading-snug">
+                    {focus.title}
+                  </p>
+                </div>
+  
+                <div className="grid gap-3">
+                  {procedureHint && (
+                    <HeroDetail label="Objetivo" value={procedureHint} />
+                  )}
+                  {lastEvolution && (
+                    <HeroDetail label="Última evolução" value={lastEvolution} />
+                  )}
+                  {clinicalAlert && (
+                    <HeroDetail label="Não esquecer" value={clinicalAlert} />
+                  )}
+                  {isFinishedFocus && (
+                    <HeroDetail label="Pendência" value="Falta registrar a evolução." />
+                  )}
+                </div>
+              </div>
+            </div>
+  
+            <div className="px-7 pb-8 pt-5 space-y-3">
+              <motion.button
+                whileTap={{ scale: 0.98, opacity: 0.92 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+                onClick={focus.action}
+                className="w-full py-[20px] rounded-[26px] text-[18px] font-bold bg-white shadow-[0_8px_32px_rgba(0,0,0,0.18)] transition-all text-academy-primary-dark"
+              >
+                {focus.actionLabel}
+              </motion.button>
+              <div className="grid grid-cols-2 gap-3">
+                <motion.button
+                  whileTap={{ scale: 0.98, opacity: 0.9 }}
+                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                  onClick={() => setActiveTab('pacientes')}
+                  className="flex items-center justify-center gap-2 px-5 py-[15px] rounded-[20px] bg-white/15 border border-white/20 text-[14px] font-bold text-white transition-all"
+                >
+                  <Users size={16} />
+                  Casos
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.98, opacity: 0.9 }}
+                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                  onClick={openAppointmentModal}
+                  className="flex items-center justify-center gap-2 py-[15px] rounded-[20px] bg-white/15 border border-white/20 text-[14px] font-bold text-white transition-all"
+                >
+                  <CalendarPlus size={16} />
+                  Agendar
+                </motion.button>
               </div>
             </div>
           </div>
+        </motion.section>
 
-          <div className="px-7 pb-8 pt-5 space-y-3">
-            <motion.button
-              whileTap={{ scale: 0.98, opacity: 0.92 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-              onClick={focus.action}
-              className="w-full py-[20px] rounded-[26px] text-[18px] font-bold bg-white shadow-[0_8px_32px_rgba(0,0,0,0.18)] transition-all text-[#155A66]"
-            >
-              {focus.actionLabel}
-            </motion.button>
-            <div className="grid grid-cols-2 gap-3">
-              <motion.button
-                whileTap={{ scale: 0.98, opacity: 0.9 }}
-                transition={{ duration: 0.18, ease: 'easeOut' }}
-                onClick={() => setActiveTab('pacientes')}
-                className="flex items-center justify-center gap-2 px-5 py-[15px] rounded-[20px] bg-white/15 border border-white/20 text-[14px] font-bold text-white transition-all"
-              >
-                <Users size={16} />
-                Casos
-              </motion.button>
-              <motion.button
-                whileTap={{ scale: 0.98, opacity: 0.9 }}
-                transition={{ duration: 0.18, ease: 'easeOut' }}
-                onClick={openAppointmentModal}
-                className="flex items-center justify-center gap-2 py-[15px] rounded-[20px] bg-white/15 border border-white/20 text-[14px] font-bold text-white transition-all"
-              >
-                <CalendarPlus size={16} />
-                Agendar
-              </motion.button>
-            </div>
-          </div>
+        <div className="flex items-center justify-end gap-2">
+          <motion.button
+            whileTap={{ scale: 0.96 }}
+            onClick={() => setIsPatientModalOpen(true)}
+            className="flex items-center gap-1.5 px-4 py-[12px] rounded-xl bg-primary/10 text-primary text-[13px] font-bold transition-all"
+          >
+            <Plus size={14} strokeWidth={2.5} />
+            Caso
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.96 }}
+            onClick={openAppointmentModal}
+            className="flex items-center gap-1.5 px-4 py-[12px] rounded-xl bg-[#F3E8FF] text-academy-primary-dark text-[13px] font-bold transition-all"
+          >
+            <CalendarPlus size={14} strokeWidth={2.5} />
+            Atendimento
+          </motion.button>
         </div>
-      </motion.section>
-
-      <div className="-mt-4 flex items-center justify-end gap-2 px-0.5">
-        <motion.button
-          whileTap={{ scale: 0.96 }}
-          onClick={() => setIsPatientModalOpen(true)}
-          className="flex items-center gap-1.5 px-3.5 py-[11px] rounded-[12px] bg-primary/10 text-primary text-[12px] font-bold transition-all"
-        >
-          <Plus size={13} strokeWidth={2.5} />
-          Caso
-        </motion.button>
-        <motion.button
-          whileTap={{ scale: 0.96 }}
-          onClick={openAppointmentModal}
-          className="flex items-center gap-1.5 px-3.5 py-[11px] rounded-[12px] bg-[#EAF7F8] text-[#155A66] text-[12px] font-bold transition-all"
-        >
-          <CalendarPlus size={13} strokeWidth={2.5} />
-          Atendimento
-        </motion.button>
       </div>
+
+      {studySuggestion && (
+        <motion.section
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div className="rounded-[24px] bg-white border border-academy-border/60 shadow-[0_2px_12px_rgba(0,0,0,0.04)] overflow-hidden">
+            <div className="px-6 pt-6 pb-2">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-[12px] bg-academy-primary/10 flex items-center justify-center">
+                  <BookOpen size={16} className="text-academy-primary" />
+                </div>
+                <span className="text-[12px] font-bold uppercase tracking-[0.08em] text-academy-muted">Revisão curta</span>
+              </div>
+              <h3 className="text-[20px] font-bold text-academy-text leading-snug">
+                {studySuggestion.topic}
+              </h3>
+              <p className="text-[13px] text-academy-muted mt-1.5 leading-relaxed">
+                {studySuggestion.reason}
+              </p>
+            </div>
+            <div className="px-6 pb-5 pt-4 flex items-center justify-between">
+              <span className="text-[12px] font-semibold text-academy-muted/70 flex items-center gap-1.5">
+                <Clock size={12} />
+                {studySuggestion.duration}
+              </span>
+              <motion.button
+                whileTap={{ scale: 0.96, opacity: 0.9 }}
+                onClick={() => setActiveTab('estudos')}
+                className="px-5 py-2.5 rounded-[14px] bg-academy-primary text-white text-[13px] font-bold transition-all shadow-sm"
+              >
+                Revisar
+              </motion.button>
+            </div>
+          </div>
+        </motion.section>
+      )}
 
       {pendingRows.length > 0 && (
         <section className="space-y-4">
-          <div className="flex items-center justify-between px-1">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-2 h-2 bg-rose-500 rounded-full animate-pulse" />
-              <h3 className="text-[15px] font-bold text-[#1C1C1E] tracking-tight">Pedem sua atenção</h3>
+              <h3 className="text-[15px] font-bold text-academy-text tracking-tight">Pedem atenção</h3>
             </div>
             <span className="text-[12px] font-bold text-rose-400">{pendingRows.length}</span>
           </div>
@@ -701,22 +759,22 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
       {otherAppointments.length > 0 && (
         <section className="space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-[15px] font-bold text-[#1C1C1E] tracking-tight">Próximos da agenda</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-[15px] font-bold text-academy-text tracking-tight">Agenda a seguir</h3>
             <button onClick={() => setActiveTab('agenda')} className="text-[13px] font-semibold text-primary">
               Ver tudo
             </button>
           </div>
-          <div className="rounded-[20px] overflow-hidden bg-white border border-[#E5E5EA]/80 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
+          <div className="rounded-[20px] overflow-hidden bg-white border border-academy-border/80 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
             {otherAppointments.map((app, index) => {
               const dateTime = formatAgendaListDateTime(app.start_time);
               return (
                 <motion.div
                   key={app.id}
-                  whileTap={{ backgroundColor: '#F2F2F7' }}
+                  whileTap={{ backgroundColor: 'var(--academy-bg)' }}
                   transition={{ duration: 0.15 }}
                   onClick={() => openPatientRecord(app.patient_id)}
-                  className={`flex items-center justify-between px-5 py-[16px] transition-colors cursor-pointer ${index !== otherAppointments.length - 1 ? 'border-b border-[#F2F2F7]' : ''}`}
+                  className={`flex items-center justify-between px-5 py-[16px] transition-colors cursor-pointer ${index !== otherAppointments.length - 1 ? 'border-b border-academy-border' : ''}`}
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     <div className="flex flex-col items-start shrink-0 w-14">
@@ -729,8 +787,8 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
                     </div>
                     <div className="w-px h-8 bg-primary/15 shrink-0" />
                     <div className="flex flex-col gap-0.5 min-w-0">
-                      <span className="text-[15px] font-semibold text-[#1C1C1E] truncate">{app.patient_name}</span>
-                      <span className="text-[12px] text-[#8E8E93] truncate">{app.notes || 'Atendimento'}</span>
+                      <span className="text-[15px] font-semibold text-academy-text truncate">{app.patient_name}</span>
+                      <span className="text-[12px] text-academy-muted truncate">{app.notes || 'Atendimento'}</span>
                     </div>
                   </div>
                   <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
@@ -742,18 +800,18 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       )}
 
       {pausedCase && focus.patient?.id !== pausedCase.id && (
-        <section className="px-0">
+        <section>
           <motion.button
             whileTap={{ scale: 0.98, opacity: 0.9 }}
             onClick={() => openPatientRecord(pausedCase.id)}
-            className="w-full flex items-center gap-4 bg-[#F2F2F7] rounded-[20px] px-5 py-4 transition-all"
+            className="w-full flex items-center gap-4 bg-academy-bg rounded-[20px] px-5 py-4 transition-all"
           >
             <div className="w-10 h-10 bg-white rounded-[14px] flex items-center justify-center text-primary shadow-sm shrink-0">
               <Clock size={20} />
             </div>
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-[15px] font-semibold text-[#1C1C1E]">Um caso vale revisão</p>
-              <p className="text-[12px] text-[#8E8E93] truncate">{pausedCase.name}</p>
+              <p className="text-[15px] font-semibold text-academy-text">Vale a pena revisar</p>
+              <p className="text-[12px] text-academy-muted truncate">{pausedCase.name}</p>
             </div>
             <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
           </motion.button>
@@ -761,14 +819,14 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       )}
 
       {patients.length > 0 && pendingRows.length === 0 && otherAppointments.length === 0 && !pausedCase && (
-        <section className="px-0">
-          <div className="w-full flex items-center gap-4 bg-[#F2F2F7] rounded-[20px] px-5 py-4">
+        <section>
+          <div className="w-full flex items-center gap-4 bg-academy-bg rounded-[20px] px-5 py-4">
             <div className="w-10 h-10 bg-white rounded-[14px] flex items-center justify-center text-primary shadow-sm shrink-0">
               <CheckCircle2 size={20} />
             </div>
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-[15px] font-semibold text-[#1C1C1E]">Nada urgente por agora.</p>
-              <p className="text-[12px] text-[#8E8E93]">Quando algo pedir sua atenção, eu mostro aqui.</p>
+              <p className="text-[15px] font-semibold text-academy-text">Mente livre.</p>
+              <p className="text-[12px] text-academy-muted">Eu aviso quando precisar da sua atenção.</p>
             </div>
           </div>
         </section>
@@ -796,7 +854,7 @@ const ListRow = ({
   onClick: () => void;
 }) => (
   <motion.div
-    whileTap={{ backgroundColor: '#F2F2F7' }}
+    whileTap={{ backgroundColor: 'var(--academy-bg)' }}
     transition={{ duration: 0.2 }}
     className="flex items-center gap-4 p-5 cursor-pointer border-b border-[#C6C6C8]/5 last:border-b-0"
     onClick={onClick}
@@ -808,8 +866,8 @@ const ListRow = ({
       <div className={`absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full ${accent === 'rose' ? 'bg-rose-400' : 'bg-amber-400'} border-2 border-white`} />
     </div>
     <div className="min-w-0 flex-1">
-      <p className="text-[15px] font-semibold text-[#1C1C1E] truncate">{title}</p>
-      <p className="text-[12px] text-[#8E8E93] mt-0.5 truncate">{meta}</p>
+      <p className="text-[15px] font-semibold text-academy-text truncate">{title}</p>
+      <p className="text-[12px] text-academy-muted mt-0.5 truncate">{meta}</p>
     </div>
     <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
   </motion.div>

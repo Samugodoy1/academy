@@ -79,6 +79,8 @@ import {
   Warning        as PhWarning,
   WarningCircle  as PhWarningCircle,
   X              as PhX,
+  Tooth          as PhTooth,
+  Syringe        as PhSyringe,
 } from '@phosphor-icons/react';
 
 // ─── Prop types ──────────────────────────────────────────────────────────────
@@ -190,3 +192,6 @@ export const Zap           = fill(PhLightning);
 
 /** Spinner — use with Tailwind `animate-spin` class */
 export const Loader2 = bold(PhCircleNotch);
+
+export const Tooth = fill(PhTooth);
+export const Syringe = fill(PhSyringe);

@@ -32,12 +32,12 @@ export const AcademyAgenda: React.FC<AcademyAgendaProps> = () => {
   const dayName = selectedDate.toLocaleDateString('pt-BR', { weekday: 'long' });
 
   return (
-    <div className="flex-1 bg-[var(--academy-bg)] overflow-y-auto pb-20">
+    <div className="flex-1 bg-academy-bg overflow-y-auto pb-20">
       <div className="max-w-2xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="sticky top-0 z-20 bg-[var(--academy-bg)]/80 backdrop-blur-md px-4 py-4"
+          className="sticky top-0 z-20 bg-academy-bg/80 backdrop-blur-md px-4 py-4"
         >
           <div className="mb-4">
             <h1 className="ios-title text-2xl mb-1">Agenda</h1>
@@ -51,8 +51,8 @@ export const AcademyAgenda: React.FC<AcademyAgendaProps> = () => {
                 onClick={() => setViewMode(mode as 'day' | 'week')}
                 className={`flex-1 py-2 rounded-full font-medium text-sm transition-all ${
                   viewMode === mode
-                    ? 'bg-[var(--academy-primary)] text-white'
-                    : 'bg-white text-[var(--academy-text)] border border-[var(--academy-border)]'
+                    ? 'bg-primary text-white'
+                    : 'bg-white text-academy-text border border-slate-200'
                 }`}
               >
                 {mode === 'day' ? 'Dia' : 'Semana'}
@@ -62,18 +62,18 @@ export const AcademyAgenda: React.FC<AcademyAgendaProps> = () => {
 
           <div className="flex items-center justify-between mb-4">
             <button onClick={() => navigateDate('prev')} className="p-2 hover:bg-white rounded-full transition-all">
-              <ChevronLeft size={20} style={{color: 'var(--academy-text)'}} />
+              <ChevronLeft size={20} className="text-academy-text" />
             </button>
 
             <div className="text-center">
-              <p className="text-sm font-semibold text-[var(--academy-text)] capitalize">
+              <p className="text-sm font-semibold text-academy-text capitalize">
                 {viewMode === 'day' ? dayName : 'Semana'} - {monthYear}
               </p>
-              <p className="text-xs text-[var(--academy-muted)]">{selectedDate.toLocaleDateString('pt-BR')}</p>
+              <p className="text-xs text-slate-600">{selectedDate.toLocaleDateString('pt-BR')}</p>
             </div>
 
             <button onClick={() => navigateDate('next')} className="p-2 hover:bg-white rounded-full transition-all">
-              <ChevronRight size={20} style={{color: 'var(--academy-text)'}} />
+              <ChevronRight size={20} className="text-academy-text" />
             </button>
           </div>
 
@@ -87,8 +87,8 @@ export const AcademyAgenda: React.FC<AcademyAgendaProps> = () => {
                     onClick={() => setSelectedDate(date)}
                     className={`flex flex-col items-center gap-1 px-3 py-2 rounded-[12px] transition-all shrink-0 ${
                       isSelected
-                        ? 'bg-[var(--academy-primary)] text-white'
-                        : 'bg-white text-[var(--academy-text)] border border-[var(--academy-border)]'
+                        ? 'bg-primary text-white'
+                        : 'bg-white text-academy-text border border-slate-200'
                     }`}
                   >
                     <span className="text-[10px] font-medium uppercase">{date.toLocaleDateString('pt-BR', { weekday: 'short' })}</span>
@@ -103,9 +103,9 @@ export const AcademyAgenda: React.FC<AcademyAgendaProps> = () => {
         <div className="px-4 space-y-3 py-4">
           {appointments.length === 0 && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
-              <Calendar size={40} style={{color: 'var(--academy-muted)', marginLeft: 'auto', marginRight: 'auto', marginBottom: '0.75rem'}} />
-              <p style={{color: 'var(--academy-muted)'}} className="font-medium">Nenhum atendimento agendado</p>
-              <p className="text-sm mt-1" style={{color: 'var(--academy-muted)'}}>A tela ainda nao possui uma API real de agenda Academy.</p>
+              <Calendar size={40} className="mx-auto mb-3 text-slate-300" />
+              <p className="text-slate-500 font-medium">Nenhum atendimento agendado</p>
+              <p className="text-sm text-slate-400 mt-1">A tela ainda nao possui uma API real de agenda Academy.</p>
             </motion.div>
           )}
         </div>

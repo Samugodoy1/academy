@@ -402,7 +402,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     return (
       <motion.div
         key={p.patient_id}
-        whileTap={{ backgroundColor: '#F2F2F7' }}
+        whileTap={{ backgroundColor: 'var(--academy-bg)' }}
         transition={{ duration: 0.2 }}
         className="flex items-center gap-4 p-5 cursor-pointer border-b border-[#C6C6C8]/5 last:border-b-0"
         onClick={() => openPatientRecord(p.patient_id)}
@@ -418,8 +418,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className={`absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full ${dotColor} border-2 border-white`} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[15px] font-semibold text-[#1C1C1E] truncate">{p.patient_name}</p>
-          <p className="text-[12px] text-[#8E8E93] mt-0.5 truncate">
+          <p className="text-[15px] font-semibold text-academy-text truncate">{p.patient_name}</p>
+          <p className="text-[12px] text-academy-muted mt-0.5 truncate">
             {formatDaysAgo(p.days_since_last_visit)} · {statusLabels[p.status] || p.status}
           </p>
         </div>
@@ -433,7 +433,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); openWhatsApp(p.phone, p.patient_name); }}
-              className="w-[44px] h-[44px] flex items-center justify-center rounded-xl text-[#8E8E93] hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+              className="w-[44px] h-[44px] flex items-center justify-center rounded-xl text-academy-muted hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
               title="WhatsApp"
             >
               <MessageCircle size={15} />
@@ -476,10 +476,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <Stethoscope size={32} />
           </div>
           <div className="space-y-2">
-            <h1 className="text-[32px] font-bold tracking-tight text-[#1C1C1E]">
+            <h1 className="text-[32px] font-bold tracking-tight text-academy-text">
               Bem-vindo ao OdontoHub
             </h1>
-            <p className="text-[17px] text-[#8E8E93] leading-relaxed max-w-md mx-auto">
+            <p className="text-[17px] text-academy-muted leading-relaxed max-w-md mx-auto">
               Seu consultório organizado em um só lugar: pacientes, agenda, prontuários e financeiro.
             </p>
           </div>
@@ -492,7 +492,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           transition={{ delay: 0.15, duration: 0.4 }}
           className="space-y-4"
         >
-          <h2 className="text-[13px] font-bold text-[#8E8E93] uppercase tracking-widest px-2">
+          <h2 className="text-[13px] font-bold text-academy-muted uppercase tracking-widest px-2">
             Como funciona
           </h2>
           <div className="bg-white rounded-[24px] border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.03)] divide-y divide-slate-50">
@@ -504,8 +504,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 desc: 'Prontuário, odontograma e histórico completo em um só lugar.',
               },
               {
-                icon: <Calendar size={20} className="text-violet-600" />,
-                bg: 'bg-violet-50',
+                icon: <Calendar size={20} className="text-academy-primary" />,
+                bg: 'bg-academy-soft',
                 title: 'Organize sua agenda',
                 desc: 'Agende consultas e o sistema envia lembretes automáticos.',
               },
@@ -527,10 +527,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   {item.icon}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[15px] font-semibold text-[#1C1C1E]">{item.title}</p>
-                  <p className="text-[13px] text-[#8E8E93] mt-0.5">{item.desc}</p>
+                  <p className="text-[15px] font-semibold text-academy-text">{item.title}</p>
+                  <p className="text-[13px] text-academy-muted mt-0.5">{item.desc}</p>
                 </div>
-                <div className="flex items-center justify-center w-6 h-6 bg-slate-50 rounded-full text-[11px] font-bold text-[#8E8E93] shrink-0 mt-1">
+                <div className="flex items-center justify-center w-6 h-6 bg-slate-50 rounded-full text-[11px] font-bold text-academy-muted shrink-0 mt-1">
                   {i + 1}
                 </div>
               </div>
@@ -545,13 +545,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
           transition={{ delay: 0.3, duration: 0.4 }}
           className="space-y-4"
         >
-          <h2 className="text-[13px] font-bold text-[#8E8E93] uppercase tracking-widest px-2">
+          <h2 className="text-[13px] font-bold text-academy-muted uppercase tracking-widest px-2">
             Onde encontrar cada coisa
           </h2>
           <div className="grid grid-cols-2 gap-3">
             {[
               { icon: <Users size={18} />, label: 'Pacientes', desc: 'Cadastro e prontuário', color: 'text-primary', bg: 'bg-primary/5 border-primary/10' },
-              { icon: <Calendar size={18} />, label: 'Agenda', desc: 'Consultas do dia', color: 'text-violet-600', bg: 'bg-violet-50/50 border-violet-100' },
+              { icon: <Calendar size={18} />, label: 'Agenda', desc: 'Consultas do dia', color: 'text-academy-primary', bg: 'bg-academy-soft/50 border-violet-100' },
               { icon: <DollarSign size={18} />, label: 'Financeiro', desc: 'Receitas e despesas', color: 'text-emerald-600', bg: 'bg-emerald-50/50 border-emerald-100' },
               { icon: <FileText size={18} />, label: 'Documentos', desc: 'Atestados e receitas', color: 'text-sky-600', bg: 'bg-sky-50/50 border-sky-100' },
             ].map((item, i) => (
@@ -563,8 +563,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 className={`rounded-[18px] border p-4 space-y-2 ${item.bg}`}
               >
                 <span className={item.color}>{item.icon}</span>
-                <p className="text-[14px] font-bold text-[#1C1C1E]">{item.label}</p>
-                <p className="text-[11px] text-[#8E8E93]">{item.desc}</p>
+                <p className="text-[14px] font-bold text-academy-text">{item.label}</p>
+                <p className="text-[11px] text-academy-muted">{item.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -588,7 +588,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             Começar a usar o OdontoHub
             <ArrowRight size={18} />
           </motion.button>
-          <p className="text-center text-[12px] text-[#8E8E93] mt-3">
+          <p className="text-center text-[12px] text-academy-muted mt-3">
             Leva menos de 2 minutos para configurar
           </p>
         </motion.div>
@@ -608,10 +608,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div className="flex flex-col gap-8 pb-32 pt-10 px-2 max-w-2xl mx-auto">
         {/* Header */}
         <header className="space-y-1.5 px-2">
-          <h1 className="text-[28px] font-bold tracking-tight text-[#1C1C1E]">
+          <h1 className="text-[28px] font-bold tracking-tight text-academy-text">
             {timeGreeting.text}, {getGreetingName()} <span className="text-[14px] align-middle">{timeGreeting.emoji}</span>
           </h1>
-          <p className="text-[17px] font-medium text-[#8E8E93]">
+          <p className="text-[17px] font-medium text-academy-muted">
             {getOnboardingMessage()}
           </p>
         </header>
@@ -631,7 +631,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
             />
           </div>
-          <span className="text-[12px] font-bold text-[#8E8E93] shrink-0">
+          <span className="text-[12px] font-bold text-academy-muted shrink-0">
             {completedSteps} de {totalSteps}
           </span>
         </motion.div>
@@ -680,10 +680,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="text-[18px] sm:text-[20px] font-bold text-[#1C1C1E] tracking-tight">
+                <h3 className="text-[18px] sm:text-[20px] font-bold text-academy-text tracking-tight">
                   {hasPatients ? 'Paciente cadastrado' : 'Cadastre seu primeiro paciente'}
                 </h3>
-                <p className="text-[14px] text-[#8E8E93] mt-1 leading-relaxed">
+                <p className="text-[14px] text-academy-muted mt-1 leading-relaxed">
                   {hasPatients
                     ? `${patients.length} paciente${patients.length > 1 ? 's' : ''} no sistema. Clique em "Pacientes" no menu lateral para gerenciar.`
                     : 'Clique no botão abaixo ou acesse "Pacientes" no menu lateral. Prontuário, odontograma e financeiro ficam organizados automaticamente.'
@@ -699,8 +699,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">M</div>
                     <div>
-                      <p className="text-[13px] font-semibold text-[#1C1C1E]">Maria Silva</p>
-                      <p className="text-[11px] text-[#8E8E93]">Última visita: há 3 dias · Em tratamento</p>
+                      <p className="text-[13px] font-semibold text-academy-text">Maria Silva</p>
+                      <p className="text-[11px] text-academy-muted">Última visita: há 3 dias · Em tratamento</p>
                     </div>
                   </div>
                   <div className="flex gap-2 flex-wrap">
@@ -732,14 +732,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
         >
           <div className="px-2 flex items-center gap-2">
             {hasAppointments ? (
-              <div className="w-5 h-5 bg-violet-500 rounded-full flex items-center justify-center">
+              <div className="w-5 h-5 bg-academy-soft0 rounded-full flex items-center justify-center">
                 <Check size={12} className="text-white" strokeWidth={3} />
               </div>
             ) : (
               <div className={`w-5 h-5 rounded-full border-2 ${hasPatients ? 'border-violet-500' : 'border-slate-200'}`} />
             )}
             <span className={`text-[11px] font-bold uppercase tracking-widest ${
-              hasPatients ? 'text-violet-600' : 'text-slate-300'
+              hasPatients ? 'text-academy-primary' : 'text-slate-300'
             }`}>
               Passo 2
             </span>
@@ -757,11 +757,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
             animate={{ opacity: hasAppointments ? 0.55 : hasPatients ? 1 : 0.45 }}
             transition={{ duration: 0.25 }}
             className={`bg-white rounded-[28px] border shadow-[0_4px_24px_rgba(0,0,0,0.03)] p-7 sm:p-8 space-y-5 ${
-              hasAppointments ? 'border-violet-200' : hasPatients ? 'border-slate-100' : 'border-slate-50'
+              hasAppointments ? 'border-academy-border' : hasPatients ? 'border-slate-100' : 'border-slate-50'
             }`}
           >
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-violet-50 rounded-[18px] flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 bg-academy-soft rounded-[18px] flex items-center justify-center shrink-0">
                 {hasAppointments ? (
                   <Check size={22} className="text-violet-500" />
                 ) : (
@@ -769,10 +769,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="text-[18px] sm:text-[20px] font-bold text-[#1C1C1E] tracking-tight">
+                <h3 className="text-[18px] sm:text-[20px] font-bold text-academy-text tracking-tight">
                   {hasAppointments ? 'Agenda ativa' : 'Agende a primeira consulta'}
                 </h3>
-                <p className="text-[14px] text-[#8E8E93] mt-1 leading-relaxed">
+                <p className="text-[14px] text-academy-muted mt-1 leading-relaxed">
                   {hasAppointments
                     ? 'Sua agenda está funcionando. Acesse "Agenda" no menu lateral para ver e gerenciar consultas.'
                     : hasPatients
@@ -788,7 +788,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <>
                 <div className="bg-[#F9FAFB] rounded-2xl p-4 space-y-2 border border-slate-100/50">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider">Prévia da sua agenda</span>
+                    <span className="text-[11px] font-bold text-academy-muted uppercase tracking-wider">Prévia da sua agenda</span>
                   </div>
                   <div className="space-y-1.5">
                     {[
@@ -797,7 +797,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       { time: '14:00', name: '—', proc: 'Horário livre', color: 'bg-slate-100 text-slate-400' },
                     ].map((row, i) => (
                       <div key={i} className="flex items-center gap-3 py-1.5">
-                        <span className="text-[12px] font-bold text-[#1C1C1E] w-10 shrink-0">{row.time}</span>
+                        <span className="text-[12px] font-bold text-academy-text w-10 shrink-0">{row.time}</span>
                         <div className={`flex-1 px-3 py-2 rounded-xl text-[12px] font-medium ${row.color}`}>
                           {row.name} · {row.proc}
                         </div>
@@ -811,7 +811,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   transition={{ delay: 0.15, duration: 0.25 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => setIsModalOpen(true)}
-                  className="flex items-center gap-2.5 bg-violet-600 text-white px-6 py-3.5 rounded-[18px] text-[14px] font-bold shadow-[0_8px_24px_rgba(109,40,217,0.15)] hover:bg-violet-700 transition-all"
+                  className="flex items-center gap-2.5 bg-academy-primary text-white px-6 py-3.5 rounded-[18px] text-[14px] font-bold shadow-[0_8px_24px_rgba(47,143,163,0.15)] hover:bg-academy-primary-dark transition-all"
                 >
                   Agendar primeira consulta
                   <ArrowRight size={15} />
@@ -846,8 +846,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <Sparkles size={22} className="text-amber-500" />
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="text-[18px] sm:text-[20px] font-bold text-[#1C1C1E] tracking-tight">Pronto! Explore seu painel</h3>
-                <p className="text-[14px] text-[#8E8E93] mt-1 leading-relaxed">
+                <h3 className="text-[18px] sm:text-[20px] font-bold text-academy-text tracking-tight">Pronto! Explore seu painel</h3>
+                <p className="text-[14px] text-academy-muted mt-1 leading-relaxed">
                   {step3Active
                     ? 'Seu consultório está configurado. A tela de Início mostra seus próximos atendimentos, pacientes que precisam de atenção e sugestões inteligentes.'
                     : 'Após configurar pacientes e agenda, esta tela mostrará tudo que você precisa saber no dia: próximos atendimentos, alertas e oportunidades.'
@@ -905,12 +905,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* 1. HEADER + CONTEXTO PRÉ-HERO */}
       <div className="space-y-5">
         {/* Saudação — caption level */}
-        <p className="text-[13px] font-medium text-[#8E8E93] px-1 tracking-wide">
+        <p className="text-[13px] font-medium text-academy-muted px-1 tracking-wide">
           {timeGreeting.text}, {getGreetingName()} {timeGreeting.emoji}
         </p>
 
         {/* Mensagem principal — headline dominante */}
-        <h1 className="text-[28px] font-bold tracking-tight text-[#1C1C1E] leading-[1.2] px-1">
+        <h1 className="text-[28px] font-bold tracking-tight text-academy-text leading-[1.2] px-1">
           {getSmartMessage()}
         </h1>
 
@@ -921,7 +921,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.15 }}
             className={`flex items-start gap-3 rounded-2xl px-4 py-3.5 ${
-              insightCard.accent === 'violet' ? 'bg-violet-50/70' :
+              insightCard.accent === 'violet' ? 'bg-academy-soft/70' :
               insightCard.accent === 'rose' ? 'bg-rose-50/70' :
               insightCard.accent === 'amber' ? 'bg-amber-50/70' :
               'bg-emerald-50/70'
@@ -1082,12 +1082,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
         );
       })() : (
         <section className="space-y-5">
-          <div className="w-16 h-16 bg-[#F2F2F7] rounded-full flex items-center justify-center text-[#8E8E93] mx-auto">
+          <div className="w-16 h-16 bg-academy-bg rounded-full flex items-center justify-center text-academy-muted mx-auto">
             <Calendar size={32} />
           </div>
           <div className="space-y-1.5 text-center">
-            <p className="text-[19px] font-bold text-[#1C1C1E]">Agenda livre</p>
-            <p className="text-[14px] text-[#8E8E93]">
+            <p className="text-[19px] font-bold text-academy-text">Agenda livre</p>
+            <p className="text-[14px] text-academy-muted">
               {schedulingSuggestions.length > 0
                 ? `${schedulingSuggestions.length} paciente${schedulingSuggestions.length === 1 ? '' : 's'} aguardando encaixe`
                 : 'Nenhuma consulta por agora'}
@@ -1123,7 +1123,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <motion.button
             whileTap={{ scale: 0.96 }}
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-[11px] rounded-[12px] bg-violet-100 text-violet-700 text-[12px] font-bold transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-[11px] rounded-[12px] bg-violet-100 text-academy-primary-dark text-[12px] font-bold transition-all"
           >
             <CalendarPlus size={13} strokeWidth={2.5} />
             Consulta
@@ -1150,8 +1150,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-rose-400 border-2 border-white" />
               </div>
               <div className="flex-1 min-w-0 text-left">
-                <p className="text-[15px] font-semibold text-[#1C1C1E] truncate">{intelligence.needsActionToday[0].patient_name}</p>
-                <p className="text-[12px] text-[#8E8E93]">
+                <p className="text-[15px] font-semibold text-academy-text truncate">{intelligence.needsActionToday[0].patient_name}</p>
+                <p className="text-[12px] text-academy-muted">
                   {formatDaysAgo(intelligence.needsActionToday[0].days_since_last_visit)} · {statusLabels[intelligence.needsActionToday[0].status] || intelligence.needsActionToday[0].status}
                 </p>
               </div>
@@ -1166,7 +1166,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2.5">
               <div className="w-2 h-2 bg-rose-500 rounded-full animate-pulse" />
-              <h3 className="text-[15px] font-bold text-[#1C1C1E] tracking-tight">Precisam da sua ação</h3>
+              <h3 className="text-[15px] font-bold text-academy-text tracking-tight">Precisam da sua ação</h3>
             </div>
             <span className="text-[12px] font-bold text-rose-400">{intelligence.needsActionToday.length}</span>
           </div>
@@ -1188,16 +1188,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <motion.button
             whileTap={{ scale: 0.98, opacity: 0.9 }}
             onClick={openReminderModal}
-            className="w-full flex items-center gap-4 bg-[#F2F2F7] rounded-[20px] px-5 py-4 transition-all"
+            className="w-full flex items-center gap-4 bg-academy-bg rounded-[20px] px-5 py-4 transition-all"
           >
             <div className="w-10 h-10 bg-white rounded-[14px] flex items-center justify-center text-primary shadow-sm shrink-0">
               <MessageCircle size={20} />
             </div>
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-[15px] font-semibold text-[#1C1C1E]">
+              <p className="text-[15px] font-semibold text-academy-text">
                 {tomorrowUnconfirmedCount} lembrete{tomorrowUnconfirmedCount === 1 ? '' : 's'} para enviar
               </p>
-              <p className="text-[12px] text-[#8E8E93]">Consultas de amanhã sem confirmação</p>
+              <p className="text-[12px] text-academy-muted">Consultas de amanhã sem confirmação</p>
             </div>
             <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
           </motion.button>
@@ -1220,14 +1220,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 >
                   <div className="px-6 pt-6 pb-4 border-b border-[#C6C6C8]/20 flex items-start justify-between gap-4">
                     <div>
-                      <h4 className="text-[20px] font-bold text-[#1C1C1E] tracking-tight">Confirmações de amanhã</h4>
-                      <p className="text-[14px] text-[#8E8E93] mt-1">
+                      <h4 className="text-[20px] font-bold text-academy-text tracking-tight">Confirmações de amanhã</h4>
+                      <p className="text-[14px] text-academy-muted mt-1">
                         {tomorrowUnconfirmedAppointments.length} paciente{tomorrowUnconfirmedAppointments.length === 1 ? '' : 's'} aguardando mensagem de confirmação
                       </p>
                     </div>
                     <button
                       onClick={() => setIsReminderModalOpen(false)}
-                      className="w-9 h-9 rounded-full bg-[#F2F2F7] text-[#8E8E93] hover:text-[#1C1C1E] transition-colors flex items-center justify-center shrink-0"
+                      className="w-9 h-9 rounded-full bg-academy-bg text-academy-muted hover:text-academy-text transition-colors flex items-center justify-center shrink-0"
                     >
                       <X size={18} />
                     </button>
@@ -1243,12 +1243,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         >
                           <div className="min-w-0">
                             <div className="flex items-center gap-2.5 flex-wrap">
-                              <p className="text-[15px] font-semibold text-[#1C1C1E] truncate">{appointment.patient_name}</p>
+                              <p className="text-[15px] font-semibold text-academy-text truncate">{appointment.patient_name}</p>
                               <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700">
                                 Pendente
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 mt-1.5 text-[13px] text-[#8E8E93] font-medium flex-wrap">
+                            <div className="flex items-center gap-2 mt-1.5 text-[13px] text-academy-muted font-medium flex-wrap">
                               <span>{startTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                               <span>•</span>
                               <span>{appointment.notes || 'Consulta'}</span>
@@ -1270,7 +1270,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <div className="px-6 py-4 border-t border-[#C6C6C8]/20 bg-white">
                     <button
                       onClick={() => setIsReminderModalOpen(false)}
-                      className="w-full h-[46px] rounded-[16px] bg-[#F2F2F7] text-[#4B5250] text-[14px] font-medium hover:bg-[#E9E9EE] transition-colors"
+                      className="w-full h-[46px] rounded-[16px] bg-academy-bg text-[#4B5250] text-[14px] font-medium hover:bg-[#E9E9EE] transition-colors"
                     >
                       Fechar
                     </button>
@@ -1286,19 +1286,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {otherAppointments.length > 0 && (
         <section className="space-y-4">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-[15px] font-bold text-[#1C1C1E] tracking-tight">Próximos da agenda</h3>
+            <h3 className="text-[15px] font-bold text-academy-text tracking-tight">Próximos da agenda</h3>
             <button onClick={() => setActiveTab('agenda')} className="text-[13px] font-semibold text-primary">
               Ver tudo
             </button>
           </div>
-          <div className="rounded-[20px] overflow-hidden bg-white border border-[#E5E5EA]/80 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
+          <div className="rounded-[20px] overflow-hidden bg-white border border-academy-border/80 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
             {otherAppointments.map((app, index) => (
               <motion.div
                 key={app.id}
-                whileTap={{ backgroundColor: '#F2F2F7' }}
+                whileTap={{ backgroundColor: 'var(--academy-bg)' }}
                 transition={{ duration: 0.15 }}
                 onClick={() => openPatientRecord(app.patient_id)}
-                className={`flex items-center justify-between px-5 py-[16px] transition-colors cursor-pointer ${index !== otherAppointments.length - 1 ? 'border-b border-[#F2F2F7]' : ''}`}
+                className={`flex items-center justify-between px-5 py-[16px] transition-colors cursor-pointer ${index !== otherAppointments.length - 1 ? 'border-b border-academy-border' : ''}`}
               >
                 <div className="flex items-center gap-4">
                   <div className="flex flex-col items-center shrink-0 w-11">
@@ -1308,8 +1308,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </div>
                   <div className="w-px h-8 bg-primary/15 shrink-0" />
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-[15px] font-semibold text-[#1C1C1E]">{app.patient_name}</span>
-                    <span className="text-[12px] text-[#8E8E93]">{app.notes || 'Consulta'}</span>
+                    <span className="text-[15px] font-semibold text-academy-text">{app.patient_name}</span>
+                    <span className="text-[12px] text-academy-muted">{app.notes || 'Consulta'}</span>
                   </div>
                 </div>
                 <ChevronRight size={16} className="text-[#C6C6C8]" />
@@ -1330,11 +1330,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2.5">
                 <div className="w-1 h-5 rounded-full bg-amber-400" />
-                <h3 className="text-[15px] font-bold text-[#1C1C1E] tracking-tight">Precisam de atenção</h3>
+                <h3 className="text-[15px] font-bold text-academy-text tracking-tight">Precisam de atenção</h3>
               </div>
-              <span className="text-[12px] font-bold text-[#8E8E93]">{combined.length}</span>
+              <span className="text-[12px] font-bold text-academy-muted">{combined.length}</span>
             </div>
-            <div className="rounded-[20px] overflow-hidden bg-white border border-[#E5E5EA]/80 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
+            <div className="rounded-[20px] overflow-hidden bg-white border border-academy-border/80 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
               {combined.slice(0, 5).map(p => renderIntelligencePatient(p, false))}
             </div>
             {combined.length > 5 && (
@@ -1352,11 +1352,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2.5">
               <div className="w-1 h-5 rounded-full bg-violet-400" />
-              <h3 className="text-[15px] font-bold text-[#1C1C1E] tracking-tight">Sugestões de encaixe</h3>
+              <h3 className="text-[15px] font-bold text-academy-text tracking-tight">Sugestões de encaixe</h3>
             </div>
-            <span className="text-[12px] font-bold text-[#8E8E93]">{schedulingSuggestions.length}</span>
+            <span className="text-[12px] font-bold text-academy-muted">{schedulingSuggestions.length}</span>
           </div>
-          <div className="rounded-[20px] overflow-hidden bg-white border border-[#E5E5EA]/80 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
+          <div className="rounded-[20px] overflow-hidden bg-white border border-academy-border/80 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
             {schedulingSuggestions.slice(0, 4).map((sug, i) => {
               const dayLabel = (() => {
                 const d = new Date(sug.suggested_slot.date + 'T12:00:00');
@@ -1369,12 +1369,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
               return (
                 <motion.div
                   key={`sug-${i}`}
-                  whileTap={{ backgroundColor: '#F2F2F7' }}
+                  whileTap={{ backgroundColor: 'var(--academy-bg)' }}
                   transition={{ duration: 0.15 }}
-                  className={`flex items-center gap-4 px-5 py-[14px] cursor-pointer ${i !== Math.min(schedulingSuggestions.length, 4) - 1 ? 'border-b border-[#F2F2F7]' : ''}`}
+                  className={`flex items-center gap-4 px-5 py-[14px] cursor-pointer ${i !== Math.min(schedulingSuggestions.length, 4) - 1 ? 'border-b border-academy-border' : ''}`}
                   onClick={() => openPatientRecord(sug.patient.patient_id)}
                 >
-                  <div className="w-10 h-10 rounded-full bg-violet-50 text-violet-600 flex items-center justify-center font-bold text-[13px] overflow-hidden border border-violet-100 shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-academy-soft text-academy-primary flex items-center justify-center font-bold text-[13px] overflow-hidden border border-violet-100 shrink-0">
                     {sug.patient.photo_url ? (
                       <img src={sug.patient.photo_url} alt={sug.patient.patient_name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                     ) : (
@@ -1382,15 +1382,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[15px] font-semibold text-[#1C1C1E] truncate">{sug.patient.patient_name}</p>
-                    <p className="text-[12px] text-[#8E8E93] truncate">
+                    <p className="text-[15px] font-semibold text-academy-text truncate">{sug.patient.patient_name}</p>
+                    <p className="text-[12px] text-academy-muted truncate">
                       {dayLabel} · {sug.suggested_slot.start} · {sug.procedure || 'Consulta'}
                     </p>
                   </div>
                   <motion.button
                     whileTap={{ scale: 0.95 }}
                     onClick={(e) => { e.stopPropagation(); onSchedulePatient?.(sug.patient.patient_id, sug.suggested_slot.date, sug.suggested_slot.start, sug.suggested_slot.end, sug.procedure); }}
-                    className="shrink-0 px-4 py-[10px] rounded-full bg-violet-600 text-white text-[12px] font-bold"
+                    className="shrink-0 px-4 py-[10px] rounded-full bg-academy-primary text-white text-[12px] font-bold"
                   >
                     Agendar
                   </motion.button>
@@ -1399,7 +1399,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             })}
           </div>
           {schedulingSuggestions.length > 4 && (
-            <button type="button" onClick={() => setActiveTab('agenda')} className="text-[13px] font-semibold text-violet-600 px-1">
+            <button type="button" onClick={() => setActiveTab('agenda')} className="text-[13px] font-semibold text-academy-primary px-1">
               Ver todas as {schedulingSuggestions.length} sugestões →
             </button>
           )}

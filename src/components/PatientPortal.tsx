@@ -378,22 +378,22 @@ export function PatientPortal() {
   };
 
   if (loading) return (
-    <div className="min-h-screen bg-[#F2F2F7] flex items-center justify-center">
+    <div className="min-h-screen bg-academy-bg flex items-center justify-center">
       <div className="flex flex-col items-center gap-5">
         <div className="w-10 h-10 border-[3px] border-[#C6C6C8] border-t-[#0C9B72] rounded-full animate-spin" />
-        <p role="status" aria-live="polite" className="text-[#8E8E93] text-[15px] font-medium tracking-tight">Carregando...</p>
+        <p role="status" aria-live="polite" className="text-academy-muted text-[15px] font-medium tracking-tight">Carregando...</p>
       </div>
     </div>
   );
 
   if (error && !data) return (
-    <div className="min-h-screen bg-[#F2F2F7] flex items-center justify-center px-6">
+    <div className="min-h-screen bg-academy-bg flex items-center justify-center px-6">
       <div className="text-center max-w-sm">
         <div className="w-16 h-16 bg-[#FF3B30]/10 rounded-full flex items-center justify-center mx-auto mb-5">
           <AlertCircle size={28} className="text-[#FF3B30]" />
         </div>
-        <h2 className="text-[20px] font-semibold text-[#1C1C1E] mb-2 tracking-tight">Acesso Indisponível</h2>
-        <p className="text-[#8E8E93] text-[15px] leading-relaxed">{error}</p>
+        <h2 className="text-[20px] font-semibold text-academy-text mb-2 tracking-tight">Acesso Indisponível</h2>
+        <p className="text-academy-muted text-[15px] leading-relaxed">{error}</p>
       </div>
     </div>
   );
@@ -452,11 +452,11 @@ export function PatientPortal() {
       'SCHEDULED': { label: 'Agendado', color: 'bg-[#007AFF]/10 text-[#007AFF]' },
       'CONFIRMED': { label: 'Confirmado', color: 'bg-[#34C759]/10 text-[#34C759]' },
       'IN_PROGRESS': { label: 'Em Atendimento', color: 'bg-[#FF9500]/10 text-[#FF9500]' },
-      'FINISHED': { label: 'Finalizado', color: 'bg-[#E5E5EA] text-[#8E8E93]' },
+      'FINISHED': { label: 'Finalizado', color: 'bg-academy-border text-academy-muted' },
       'CANCELLED': { label: 'Cancelado', color: 'bg-[#FF3B30]/10 text-[#FF3B30]' },
       'NO_SHOW': { label: 'Faltou', color: 'bg-[#FF3B30]/10 text-[#FF3B30]' }
     };
-    return map[s] || { label: s, color: 'bg-[#E5E5EA] text-[#8E8E93]' };
+    return map[s] || { label: s, color: 'bg-academy-border text-academy-muted' };
   };
 
   const getGreeting = () => {
@@ -684,30 +684,30 @@ export function PatientPortal() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F2F2F7] pb-24">
+    <div className="min-h-screen bg-academy-bg pb-24">
       {/* Accessible announcer for screen readers */}
       <div id="a11y-announcer" aria-live="polite" className="sr-only">
         {error || (scheduleSuccess ? (scheduleMode === 'reschedule' ? 'Pedido de reagendamento enviado' : 'Solicitação de agendamento enviada') : '') || (paymentInformed ? 'Pagamento informado' : '') || (pixCopied ? 'Chave PIX copiada' : '')}
       </div>
       {/* ─── Header: frosted, minimal ─── */}
-      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[#E5E5EA]">
+      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-academy-border">
         <div className="max-w-lg mx-auto px-5 py-4 flex items-center gap-3.5">
           {clinic?.photo_url ? (
             <img src={clinic.photo_url} alt={clinic?.clinic_name || clinic?.name || 'Minha Clínica'} className="w-9 h-9 rounded-full object-cover ring-1 ring-[#C6C6C8]/40" />
           ) : (
-            <div className="w-9 h-9 bg-[#E5E5EA] rounded-full flex items-center justify-center">
-              <Stethoscope size={18} className="text-[#8E8E93]" />
+            <div className="w-9 h-9 bg-academy-border rounded-full flex items-center justify-center">
+              <Stethoscope size={18} className="text-academy-muted" />
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-[#1C1C1E] text-[15px] font-semibold tracking-tight truncate">
+            <p className="text-academy-text text-[15px] font-semibold tracking-tight truncate">
               {clinic?.clinic_name || clinic?.name || 'Minha Clínica'}
             </p>
           </div>
           {patient.photo_url ? (
             <img src={patient.photo_url} alt={patient.name} className="w-8 h-8 rounded-full object-cover ring-1 ring-[#C6C6C8]/40" />
           ) : (
-            <div className="w-8 h-8 bg-[#E5E5EA] rounded-full flex items-center justify-center text-[13px] font-semibold text-[#8E8E93]">
+            <div className="w-8 h-8 bg-academy-border rounded-full flex items-center justify-center text-[13px] font-semibold text-academy-muted">
               {patient.name.charAt(0)}
             </div>
           )}
@@ -768,8 +768,8 @@ export function PatientPortal() {
                   return (
                     <>
                       <div>
-                        <p className="text-[#8E8E93] text-[13px] font-medium tracking-wide uppercase">{getGreeting()}</p>
-                        <h1 className="text-[#1C1C1E] text-[28px] font-bold tracking-tight mt-1">
+                        <p className="text-academy-muted text-[13px] font-medium tracking-wide uppercase">{getGreeting()}</p>
+                        <h1 className="text-academy-text text-[28px] font-bold tracking-tight mt-1">
                           {firstName}
                         </h1>
                       </div>
@@ -787,7 +787,7 @@ export function PatientPortal() {
                               </div>
                             )}
                             <div className="flex-1 min-w-0">
-                              <p className="text-[#1C1C1E] text-[14px] font-semibold tracking-tight">Dr(a). {dentistFirstName}</p>
+                              <p className="text-academy-text text-[14px] font-semibold tracking-tight">Dr(a). {dentistFirstName}</p>
                               <p className="text-[#3A3A3C] text-[14px] leading-relaxed mt-1.5 italic">
                                 "{personalMessage}"
                               </p>
@@ -801,11 +801,11 @@ export function PatientPortal() {
                         <div className="rounded-2xl bg-white shadow-[0_1px_4px_rgba(0,0,0,0.04)] p-4">
                           <div className="flex items-center justify-between">
                             <div className="min-w-0 flex-1">
-                              <p className="text-[#8E8E93] text-[11px] font-medium uppercase tracking-wider">Seu tratamento</p>
+                              <p className="text-academy-muted text-[11px] font-medium uppercase tracking-wider">Seu tratamento</p>
                               {caseName && (
-                                <p className="text-[#1C1C1E] text-[15px] font-semibold tracking-tight mt-0.5 truncate">{caseName}</p>
+                                <p className="text-academy-text text-[15px] font-semibold tracking-tight mt-0.5 truncate">{caseName}</p>
                               )}
-                              <p className="text-[#8E8E93] text-[12px] mt-1">{completed} de {total} etapas</p>
+                              <p className="text-academy-muted text-[12px] mt-1">{completed} de {total} etapas</p>
                             </div>
                             {/* Minimal thin bar */}
                             <div className="w-12 h-12 shrink-0 ml-4 relative">
@@ -820,13 +820,13 @@ export function PatientPortal() {
                                   strokeDashoffset={`${2 * Math.PI * 20 * (1 - pct / 100)}`}
                                 />
                               </svg>
-                              <span className="absolute inset-0 flex items-center justify-center text-[#1C1C1E] text-[11px] font-bold">{pct}%</span>
+                              <span className="absolute inset-0 flex items-center justify-center text-academy-text text-[11px] font-bold">{pct}%</span>
                             </div>
                           </div>
 
                           {/* Next step — one line */}
                           {nextStep && (
-                            <div className="mt-3 pt-3 border-t border-[#F2F2F7] flex items-center gap-2">
+                            <div className="mt-3 pt-3 border-t border-academy-border flex items-center gap-2">
                               <div className="w-1.5 h-1.5 rounded-full bg-[#0C9B72] shrink-0" />
                               <p className="text-[#3A3A3C] text-[13px] truncate">
                                 Próxima: <span className="font-medium">{nextStep.procedure || nextStep.id}</span>
@@ -896,11 +896,11 @@ export function PatientPortal() {
                       {/* Countdown badge */}
                       <div className="px-5 pt-5 pb-0 flex items-start justify-between">
                         <div>
-                          <p className="text-[#8E8E93] text-[11px] font-semibold uppercase tracking-widest mb-2">Próxima consulta</p>
-                          <p className="text-[#1C1C1E] text-[22px] font-bold tracking-tight">
+                          <p className="text-academy-muted text-[11px] font-semibold uppercase tracking-widest mb-2">Próxima consulta</p>
+                          <p className="text-academy-text text-[22px] font-bold tracking-tight">
                             {nextDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '')}
                           </p>
-                          <p className="text-[#8E8E93] text-[14px] mt-0.5">
+                          <p className="text-academy-muted text-[14px] mt-0.5">
                             {formatTimeBR(next.start_time)} · Dr(a). {next.dentist_name}
                           </p>
                         </div>
@@ -936,15 +936,15 @@ export function PatientPortal() {
                       )}
 
                       {next.status === 'SCHEDULED' && (
-                        <div className="mx-5 mb-4 border-t border-[#F2F2F7] pt-4">
-                          <p className="text-[#1C1C1E] text-[15px] font-semibold tracking-tight mb-3">
+                        <div className="mx-5 mb-4 border-t border-academy-border pt-4">
+                          <p className="text-academy-text text-[15px] font-semibold tracking-tight mb-3">
                             {getConfirmationQuestion(next.start_time)}
                           </p>
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleConfirmAppointment(next.id)}
                               disabled={appointmentSubmittingId === next.id}
-                              className="h-9 px-5 rounded-full bg-[#1C1C1E] text-white text-[13px] font-semibold tracking-tight active:scale-[0.97] transition-transform disabled:opacity-40 flex items-center justify-center"
+                              className="h-9 px-5 rounded-full bg-academy-text text-white text-[13px] font-semibold tracking-tight active:scale-[0.97] transition-transform disabled:opacity-40 flex items-center justify-center"
                             >
                               {appointmentSubmittingId === next.id ? (
                                 <div className="w-4 h-4 border-2 border-white/25 border-t-white rounded-full animate-spin" />
@@ -996,7 +996,7 @@ export function PatientPortal() {
                           <p className={`${guide.color} text-[11px] font-bold uppercase tracking-widest`}>{guide.title}</p>
                         </div>
                         <p className="text-[#3A3A3C] text-[14px] font-semibold mt-1">{proc.procedure}</p>
-                        <p className="text-[#8E8E93] text-[12px] mt-0.5">{daysLabel} · {formatDateBR(proc.date)}</p>
+                        <p className="text-academy-muted text-[12px] mt-0.5">{daysLabel} · {formatDateBR(proc.date)}</p>
                       </div>
                       <div className="px-5 pb-5 space-y-2.5">
                         {guide.items.map((item, i) => (
@@ -1035,7 +1035,7 @@ export function PatientPortal() {
                 {futureAppointments.length > 1 && (
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                      <h2 className="text-[#1C1C1E] text-[17px] font-semibold tracking-tight">Próximas Consultas</h2>
+                      <h2 className="text-academy-text text-[17px] font-semibold tracking-tight">Próximas Consultas</h2>
                       <button onClick={() => setActiveTab('consultas')} className="text-[#0C9B72] text-[13px] font-medium">
                         Ver tudo
                       </button>
@@ -1043,10 +1043,10 @@ export function PatientPortal() {
                     <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 pb-1">
                       {futureAppointments.slice(1, 6).map(a => (
                         <div key={a.id} className="min-w-[200px] bg-white rounded-2xl p-4 shrink-0 shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
-                          <p className="text-[#1C1C1E] text-[15px] font-semibold tracking-tight">
+                          <p className="text-academy-text text-[15px] font-semibold tracking-tight">
                             {new Date(a.start_time).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '')}
                           </p>
-                          <p className="text-[#8E8E93] text-[13px] mt-0.5">{formatTimeBR(a.start_time)}</p>
+                          <p className="text-academy-muted text-[13px] mt-0.5">{formatTimeBR(a.start_time)}</p>
                           <p className="text-[#AEAEB2] text-[12px] mt-2 truncate">Dr(a). {a.dentist_name}</p>
                         </div>
                       ))}
@@ -1057,7 +1057,7 @@ export function PatientPortal() {
                 {/* Health summary */}
                 {data.anamnesis && (data.anamnesis.allergies || data.anamnesis.medications) && (
                   <div>
-                    <h2 className="text-[#1C1C1E] text-[17px] font-semibold tracking-tight mb-3">Saúde</h2>
+                    <h2 className="text-academy-text text-[17px] font-semibold tracking-tight mb-3">Saúde</h2>
                     <div className="bg-white rounded-2xl divide-y divide-[#E5E5EA] shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
                       {data.anamnesis.allergies && (
                         <div className="px-4 py-3.5 flex items-start gap-3">
@@ -1065,7 +1065,7 @@ export function PatientPortal() {
                             <AlertCircle size={15} className="text-[#FF3B30]" />
                           </div>
                           <div>
-                            <p className="text-[#8E8E93] text-[11px] font-medium uppercase tracking-wider">Alergias</p>
+                            <p className="text-academy-muted text-[11px] font-medium uppercase tracking-wider">Alergias</p>
                             <p className="text-[#3A3A3C] text-[14px] mt-0.5 leading-relaxed">{data.anamnesis.allergies}</p>
                           </div>
                         </div>
@@ -1076,7 +1076,7 @@ export function PatientPortal() {
                             <Heart size={15} className="text-[#AF52DE]" />
                           </div>
                           <div>
-                            <p className="text-[#8E8E93] text-[11px] font-medium uppercase tracking-wider">Medicamentos</p>
+                            <p className="text-academy-muted text-[11px] font-medium uppercase tracking-wider">Medicamentos</p>
                             <p className="text-[#3A3A3C] text-[14px] mt-0.5 leading-relaxed">{data.anamnesis.medications}</p>
                           </div>
                         </div>
@@ -1092,14 +1092,14 @@ export function PatientPortal() {
                       {clinic.photo_url ? (
                         <img src={clinic.photo_url} alt="" className="w-11 h-11 rounded-xl object-cover" />
                       ) : (
-                        <div className="w-11 h-11 bg-[#E5E5EA] rounded-xl flex items-center justify-center">
-                          <Stethoscope size={20} className="text-[#8E8E93]" />
+                        <div className="w-11 h-11 bg-academy-border rounded-xl flex items-center justify-center">
+                          <Stethoscope size={20} className="text-academy-muted" />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-[#1C1C1E] text-[15px] font-semibold truncate">{clinic.clinic_name || clinic.name}</p>
+                        <p className="text-academy-text text-[15px] font-semibold truncate">{clinic.clinic_name || clinic.name}</p>
                         {clinic.clinic_address && (
-                          <p className="text-[#8E8E93] text-[13px] truncate mt-0.5">{clinic.clinic_address}</p>
+                          <p className="text-academy-muted text-[13px] truncate mt-0.5">{clinic.clinic_address}</p>
                         )}
                       </div>
                       {clinic.phone && (
@@ -1120,7 +1120,7 @@ export function PatientPortal() {
             {activeTab === 'consultas' && (
               <div className="space-y-5">
                 <div className="flex items-center justify-between">
-                  <h1 className="text-[#1C1C1E] text-[28px] font-bold tracking-tight">Consultas</h1>
+                  <h1 className="text-academy-text text-[28px] font-bold tracking-tight">Consultas</h1>
                   <button
                     onClick={openNewScheduleModal}
                     className="h-9 px-4 bg-[#0C9B72] text-white rounded-full text-[13px] font-semibold flex items-center gap-1.5 active:scale-95 transition-transform"
@@ -1131,7 +1131,7 @@ export function PatientPortal() {
 
                 {futureAppointments.length > 0 && (
                   <div>
-                    <p className="text-[#8E8E93] text-[11px] font-semibold uppercase tracking-widest mb-3">Próximas</p>
+                    <p className="text-academy-muted text-[11px] font-semibold uppercase tracking-widest mb-3">Próximas</p>
                     <div className="bg-white rounded-2xl divide-y divide-[#E5E5EA] shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
                       {futureAppointments.map(a => (
                         <PortalAppointmentRow
@@ -1145,7 +1145,7 @@ export function PatientPortal() {
                               <button
                                 onClick={() => handleConfirmAppointment(a.id)}
                                 disabled={appointmentSubmittingId === a.id}
-                                className="h-8 px-4 rounded-full bg-[#1C1C1E] text-white text-[12px] font-semibold active:scale-[0.97] transition-transform disabled:opacity-40 flex items-center justify-center"
+                                className="h-8 px-4 rounded-full bg-academy-text text-white text-[12px] font-semibold active:scale-[0.97] transition-transform disabled:opacity-40 flex items-center justify-center"
                               >
                                 {appointmentSubmittingId === a.id ? (
                                   <div className="w-3.5 h-3.5 border-[1.5px] border-white/25 border-t-white rounded-full animate-spin" />
@@ -1172,7 +1172,7 @@ export function PatientPortal() {
 
                 {pastAppointments.length > 0 && (
                   <div>
-                    <p className="text-[#8E8E93] text-[11px] font-semibold uppercase tracking-widest mb-3">Histórico</p>
+                    <p className="text-academy-muted text-[11px] font-semibold uppercase tracking-widest mb-3">Histórico</p>
                     <div className="bg-white rounded-2xl divide-y divide-[#E5E5EA] shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
                       {pastAppointments.slice(0, 20).map(a => (
                         <PortalAppointmentRow key={a.id} appointment={a} formatDate={formatDateBR} formatTime={formatTimeBR} statusLabel={statusLabel} past />
@@ -1190,20 +1190,20 @@ export function PatientPortal() {
             {/* ═══ EVOLUTION TAB ═══ */}
             {activeTab === 'evolucao' && (
               <div className="space-y-5">
-                <h1 className="text-[#1C1C1E] text-[28px] font-bold tracking-tight">Evolução</h1>
+                <h1 className="text-academy-text text-[28px] font-bold tracking-tight">Evolução</h1>
                 {evolution.length > 0 ? (
                   <div className="bg-white rounded-2xl divide-y divide-[#E5E5EA] shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
                     {evolution.map(e => (
                       <div key={e.id} className="px-4 py-4">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-[#8E8E93] text-[12px] font-medium">{formatDateBR(e.date)}</span>
+                          <span className="text-academy-muted text-[12px] font-medium">{formatDateBR(e.date)}</span>
                           <span className="text-[#AEAEB2] text-[12px]">Dr(a). {e.dentist_name}</span>
                         </div>
                         {e.procedure_performed && (
-                          <p className="text-[#1C1C1E] text-[15px] font-semibold tracking-tight">{e.procedure_performed}</p>
+                          <p className="text-academy-text text-[15px] font-semibold tracking-tight">{e.procedure_performed}</p>
                         )}
                         {e.notes && (
-                          <p className="text-[#8E8E93] text-[14px] mt-1 leading-relaxed">{e.notes}</p>
+                          <p className="text-academy-muted text-[14px] mt-1 leading-relaxed">{e.notes}</p>
                         )}
                       </div>
                     ))}
@@ -1217,7 +1217,7 @@ export function PatientPortal() {
             {/* ═══ DOCUMENTS TAB ═══ */}
             {activeTab === 'documentos' && (
               <div className="space-y-5">
-                <h1 className="text-[#1C1C1E] text-[28px] font-bold tracking-tight">Documentos</h1>
+                <h1 className="text-academy-text text-[28px] font-bold tracking-tight">Documentos</h1>
                 {files.length > 0 ? (
                   <div className="bg-white rounded-2xl divide-y divide-[#E5E5EA] shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
                     {files.map(f => (
@@ -1226,9 +1226,9 @@ export function PatientPortal() {
                         href={f.file_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3.5 px-4 py-3.5 active:bg-[#F2F2F7] transition-colors"
+                        className="flex items-center gap-3.5 px-4 py-3.5 active:bg-academy-bg transition-colors"
                       >
-                        <div className="w-10 h-10 rounded-xl overflow-hidden bg-[#F2F2F7] flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-xl overflow-hidden bg-academy-bg flex items-center justify-center shrink-0">
                           {f.file_type?.includes('image') ? (
                             <img src={f.file_url} alt="" className="w-10 h-10 object-cover" />
                           ) : (
@@ -1236,10 +1236,10 @@ export function PatientPortal() {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[#1C1C1E] text-[15px] font-medium truncate">{f.description || 'Documento'}</p>
+                          <p className="text-academy-text text-[15px] font-medium truncate">{f.description || 'Documento'}</p>
                           <p className="text-[#AEAEB2] text-[13px] mt-0.5">{formatDateBR(f.created_at)}</p>
                         </div>
-                        <Download size={16} className="text-[#C7C7CC] shrink-0" />
+                        <Download size={16} className="text-academy-muted shrink-0" />
                       </a>
                     ))}
                   </div>
@@ -1252,7 +1252,7 @@ export function PatientPortal() {
             {/* ═══ FINANCIAL TAB ═══ */}
             {activeTab === 'financeiro' && (
               <div className="space-y-5">
-                <h1 className="text-[#1C1C1E] text-[28px] font-bold tracking-tight">Financeiro</h1>
+                <h1 className="text-academy-text text-[28px] font-bold tracking-tight">Financeiro</h1>
 
                 {/* Summary — identical to prontuário */}
                 {(() => {
@@ -1273,8 +1273,8 @@ export function PatientPortal() {
                     <div className="bg-white rounded-2xl p-4 shadow-[0_1px_6px_rgba(0,0,0,0.05)] space-y-3">
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <p className="text-[#8E8E93] text-[11px] font-semibold uppercase tracking-widest mb-1">Orçamento total</p>
-                          <p className="text-[#1C1C1E] text-[18px] font-bold tracking-tight">
+                          <p className="text-academy-muted text-[11px] font-semibold uppercase tracking-widest mb-1">Orçamento total</p>
+                          <p className="text-academy-text text-[18px] font-bold tracking-tight">
                             {financialTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                           </p>
                         </div>
@@ -1285,10 +1285,10 @@ export function PatientPortal() {
                           </p>
                         </div>
                       </div>
-                      <div className="pt-2 border-t border-[#F2F2F7]">
+                      <div className="pt-2 border-t border-academy-border">
                         <div className="flex items-center justify-between mb-1.5">
-                          <p className="text-[#8E8E93] text-[11px] font-semibold uppercase tracking-widest">Recebido</p>
-                          <span className="text-[#8E8E93] text-[12px] font-semibold">{pct}%</span>
+                          <p className="text-academy-muted text-[11px] font-semibold uppercase tracking-widest">Recebido</p>
+                          <span className="text-academy-muted text-[12px] font-semibold">{pct}%</span>
                         </div>
                         <div className="flex items-baseline gap-2 mb-2">
                           <p className="text-[#34C759] text-[16px] font-bold tracking-tight">
@@ -1300,7 +1300,7 @@ export function PatientPortal() {
                             </p>
                           )}
                         </div>
-                        <div className="h-[6px] bg-[#E5E5EA] rounded-full overflow-hidden">
+                        <div className="h-[6px] bg-academy-border rounded-full overflow-hidden">
                           <div className="h-full bg-[#34C759] rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
                         </div>
                       </div>
@@ -1314,7 +1314,7 @@ export function PatientPortal() {
                   if (pending.length === 0) return null;
                   return (
                     <div>
-                      <p className="text-[#8E8E93] text-[11px] font-semibold uppercase tracking-widest mb-3">Parcelas Pendentes</p>
+                      <p className="text-academy-muted text-[11px] font-semibold uppercase tracking-widest mb-3">Parcelas Pendentes</p>
                       <div className="space-y-2">
                         {pending.map((inst) => {
                           const isOverdue = inst.status === 'OVERDUE' || new Date(inst.due_date) < new Date();
@@ -1328,14 +1328,14 @@ export function PatientPortal() {
                                 <DollarSign size={15} className={isOverdue ? 'text-[#FF3B30]' : 'text-[#FF9500]'} />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-[#1C1C1E] text-[14px] font-semibold truncate">
+                                <p className="text-academy-text text-[14px] font-semibold truncate">
                                   {inst.procedure || `Parcela ${inst.number}`}
                                 </p>
                                 <p className={`text-[12px] font-medium ${isOverdue ? 'text-[#FF3B30]' : 'text-[#FF9500]'}`}>
                                   {isOverdue ? 'Vencida em' : 'Vence em'} {formatDateBR(inst.due_date)}
                                 </p>
                               </div>
-                              <span className={`text-[14px] font-bold shrink-0 ${isOverdue ? 'text-[#FF3B30]' : 'text-[#1C1C1E]'}`}>
+                              <span className={`text-[14px] font-bold shrink-0 ${isOverdue ? 'text-[#FF3B30]' : 'text-academy-text'}`}>
                                 R$ {Number(inst.amount).toFixed(2)}
                               </span>
                               <button
@@ -1355,7 +1355,7 @@ export function PatientPortal() {
                 {/* Payment plans */}
                 {payment_plans.length > 0 && (
                   <div>
-                    <p className="text-[#8E8E93] text-[11px] font-semibold uppercase tracking-widest mb-3">Planos de Pagamento</p>
+                    <p className="text-academy-muted text-[11px] font-semibold uppercase tracking-widest mb-3">Planos de Pagamento</p>
                     {payment_plans.map(plan => {
                       const planInstallments = installments.filter(i => i.payment_plan_id === plan.id);
                       const paidCount = planInstallments.filter(i => i.status === 'PAID').length;
@@ -1367,19 +1367,19 @@ export function PatientPortal() {
                           <div className="p-4">
                             <div className="flex items-start justify-between mb-3">
                               <div>
-                                <p className="text-[#1C1C1E] text-[16px] font-semibold tracking-tight">{plan.procedure}</p>
-                                <p className="text-[#8E8E93] text-[13px] mt-0.5">
+                                <p className="text-academy-text text-[16px] font-semibold tracking-tight">{plan.procedure}</p>
+                                <p className="text-academy-muted text-[13px] mt-0.5">
                                   {plan.installments_count}x de R$ {(plan.total_amount / plan.installments_count).toFixed(2)}
                                 </p>
                               </div>
                               <div className="text-right">
-                                <p className="text-[#1C1C1E] text-[18px] font-bold tracking-tight">
+                                <p className="text-academy-text text-[18px] font-bold tracking-tight">
                                   R$ {Number(plan.total_amount).toFixed(2)}
                                 </p>
                                 <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
                                   plan.status === 'COMPLETED' ? 'bg-[#34C759]/10 text-[#34C759]' :
                                   plan.status === 'ACTIVE' ? 'bg-[#007AFF]/10 text-[#007AFF]' :
-                                  'bg-[#8E8E93]/10 text-[#8E8E93]'
+                                  'bg-academy-muted/10 text-academy-muted'
                                 }`}>
                                   {plan.status === 'ACTIVE' ? 'Ativo' : plan.status === 'COMPLETED' ? 'Concluído' : 'Cancelado'}
                                 </span>
@@ -1388,25 +1388,25 @@ export function PatientPortal() {
 
                             {/* Progress bar */}
                             <div className="flex items-center gap-3">
-                              <div className="flex-1 h-1.5 bg-[#E5E5EA] rounded-full overflow-hidden">
+                              <div className="flex-1 h-1.5 bg-academy-border rounded-full overflow-hidden">
                                 <div
                                   className="h-full bg-[#34C759] rounded-full transition-all duration-500"
                                   style={{ width: `${progress}%` }}
                                 />
                               </div>
-                              <span className="text-[#8E8E93] text-[12px] font-medium shrink-0">{paidCount}/{total}</span>
+                              <span className="text-academy-muted text-[12px] font-medium shrink-0">{paidCount}/{total}</span>
                             </div>
                           </div>
 
                           {/* Installments detail */}
                           {planInstallments.length > 0 && (
-                            <div className="border-t border-[#E5E5EA]">
+                            <div className="border-t border-academy-border">
                               {planInstallments.map((inst) => (
                                 <div
                                   key={inst.id}
-                                  className="flex items-center px-4 py-3 border-b border-[#F2F2F7] last:border-0"
+                                  className="flex items-center px-4 py-3 border-b border-academy-border last:border-0"
                                 >
-                                  <span className="text-[#8E8E93] text-[13px] w-20 shrink-0">Parcela {inst.number}</span>
+                                  <span className="text-academy-muted text-[13px] w-20 shrink-0">Parcela {inst.number}</span>
                                   <span className="text-[#AEAEB2] text-[13px] flex-1">{formatDateBR(inst.due_date)}</span>
                                   <span className="text-[#3A3A3C] text-[13px] font-medium mr-3">R$ {Number(inst.amount).toFixed(2)}</span>
                                   <span className={`text-[11px] font-semibold px-2 py-1 rounded-full ${
@@ -1429,8 +1429,8 @@ export function PatientPortal() {
                 {/* Transactions — same as prontuário */}
                 {transactions.length > 0 && (
                   <div>
-                    <p className="text-[#8E8E93] text-[11px] font-semibold uppercase tracking-widest mb-3">Movimentações</p>
-                    <div className="bg-white rounded-2xl divide-y divide-[#F2F2F7] shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
+                    <p className="text-academy-muted text-[11px] font-semibold uppercase tracking-widest mb-3">Movimentações</p>
+                    <div className="bg-white rounded-2xl divide-y divide-academy-border shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
                       {transactions.map(t => {
                         const isIncome = t.type === 'INCOME';
                         return (
@@ -1441,7 +1441,7 @@ export function PatientPortal() {
                               <DollarSign size={16} className={isIncome ? 'text-[#34C759]' : 'text-[#FF3B30]'} />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-[#1C1C1E] text-[15px] font-medium truncate">
+                              <p className="text-academy-text text-[15px] font-medium truncate">
                                 {t.procedure || t.description}
                               </p>
                               <p className="text-[#AEAEB2] text-[12px] mt-0.5">
@@ -1470,7 +1470,7 @@ export function PatientPortal() {
       </div>
 
       {/* ─── Bottom Tab Bar (iOS style) ─── */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-t border-[#E5E5EA]">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-t border-academy-border">
         <div className="max-w-lg mx-auto flex pb-[env(safe-area-inset-bottom)]">
           {tabs.map(tab => {
             const isActive = activeTab === tab.id;
@@ -1482,10 +1482,10 @@ export function PatientPortal() {
               >
                 <tab.icon
                   size={22}
-                  className={isActive ? 'text-[#0C9B72]' : 'text-[#C7C7CC]'}
+                  className={isActive ? 'text-[#0C9B72]' : 'text-academy-muted'}
                   strokeWidth={isActive ? 2.2 : 1.5}
                 />
-                <span className={`text-[10px] font-medium ${isActive ? 'text-[#0C9B72]' : 'text-[#C7C7CC]'}`}>
+                <span className={`text-[10px] font-medium ${isActive ? 'text-[#0C9B72]' : 'text-academy-muted'}`}>
                   {tab.label}
                 </span>
               </button>
@@ -1526,10 +1526,10 @@ export function PatientPortal() {
                   <div className="w-14 h-14 bg-[#34C759]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                     <CheckCircle2 size={28} className="text-[#34C759]" />
                   </div>
-                  <h3 id="schedule-modal-title" className="text-[18px] font-semibold text-[#1C1C1E] mb-1.5 tracking-tight">
+                  <h3 id="schedule-modal-title" className="text-[18px] font-semibold text-academy-text mb-1.5 tracking-tight">
                     {scheduleMode === 'reschedule' ? 'Pedido Enviado' : 'Solicitação Enviada'}
                   </h3>
-                  <p className="text-[#8E8E93] text-[14px]">
+                  <p className="text-academy-muted text-[14px]">
                     {scheduleMode === 'reschedule'
                       ? 'A clínica vai revisar o novo horário e retornar para você.'
                       : 'A clínica entrará em contato para confirmar.'}
@@ -1539,11 +1539,11 @@ export function PatientPortal() {
                 <div className="px-5 pb-6 pt-3">
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h3 id="schedule-modal-title" className="text-[18px] font-semibold text-[#1C1C1E] tracking-tight">
+                      <h3 id="schedule-modal-title" className="text-[18px] font-semibold text-academy-text tracking-tight">
                         {scheduleMode === 'reschedule' ? 'Reagendar Consulta' : 'Solicitar Consulta'}
                       </h3>
                       {scheduleTargetAppointment && (
-                        <p className="text-[#8E8E93] text-[12px] mt-1">
+                        <p className="text-academy-muted text-[12px] mt-1">
                           Atual: {formatDateBR(scheduleTargetAppointment.start_time)} às {formatTimeBR(scheduleTargetAppointment.start_time)}
                         </p>
                       )}
@@ -1552,15 +1552,15 @@ export function PatientPortal() {
                       type="button"
                       onClick={closeScheduleModal}
                       aria-label="Fechar"
-                      className="w-8 h-8 bg-[#E5E5EA] rounded-full flex items-center justify-center active:scale-90 transition-transform"
+                      className="w-8 h-8 bg-academy-border rounded-full flex items-center justify-center active:scale-90 transition-transform"
                     >
-                      <X size={16} className="text-[#8E8E93]" />
+                      <X size={16} className="text-academy-muted" />
                     </button>
                   </div>
 
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-[#8E8E93] text-[13px] font-medium mb-2">
+                      <label className="block text-academy-muted text-[13px] font-medium mb-2">
                         {scheduleMode === 'reschedule' ? 'Nova Data Preferencial' : 'Data Preferencial'}
                       </label>
                       <input
@@ -1568,15 +1568,15 @@ export function PatientPortal() {
                         value={scheduleForm.preferred_date}
                         min={new Date().toLocaleDateString('en-CA')}
                         onChange={(e) => setScheduleForm({ ...scheduleForm, preferred_date: e.target.value })}
-                        className="w-full h-12 px-4 bg-[#F2F2F7] border border-[#E5E5EA] rounded-xl text-[#1C1C1E] text-[15px] outline-none focus:border-[#0C9B72]/40 transition-colors"
+                        className="w-full h-12 px-4 bg-academy-bg border border-academy-border rounded-xl text-academy-text text-[15px] outline-none focus:border-[#0C9B72]/40 transition-colors"
                       />
                     </div>
                     <div>
-                      <label className="block text-[#8E8E93] text-[13px] font-medium mb-2">Horário Preferencial</label>
+                      <label className="block text-academy-muted text-[13px] font-medium mb-2">Horário Preferencial</label>
                       <select
                         value={scheduleForm.preferred_time}
                         onChange={(e) => setScheduleForm({ ...scheduleForm, preferred_time: e.target.value })}
-                        className="w-full h-12 px-4 bg-[#F2F2F7] border border-[#E5E5EA] rounded-xl text-[#1C1C1E] text-[15px] outline-none focus:border-[#0C9B72]/40 transition-colors appearance-none"
+                        className="w-full h-12 px-4 bg-academy-bg border border-academy-border rounded-xl text-academy-text text-[15px] outline-none focus:border-[#0C9B72]/40 transition-colors appearance-none"
                       >
                         <option value="">Qualquer horário</option>
                         <option value="manha">Manhã (08h–12h)</option>
@@ -1585,7 +1585,7 @@ export function PatientPortal() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-[#8E8E93] text-[13px] font-medium mb-2">
+                      <label className="block text-academy-muted text-[13px] font-medium mb-2">
                         {scheduleMode === 'reschedule' ? 'Preferências' : 'Observações'}
                       </label>
                       <textarea
@@ -1593,7 +1593,7 @@ export function PatientPortal() {
                         value={scheduleForm.notes}
                         onChange={(e) => setScheduleForm({ ...scheduleForm, notes: e.target.value })}
                         rows={3}
-                        className="w-full px-4 py-3 bg-[#F2F2F7] border border-[#E5E5EA] rounded-xl text-[#1C1C1E] text-[15px] outline-none focus:border-[#0C9B72]/40 transition-colors resize-none placeholder:text-[#C7C7CC]"
+                        className="w-full px-4 py-3 bg-academy-bg border border-academy-border rounded-xl text-academy-text text-[15px] outline-none focus:border-[#0C9B72]/40 transition-colors resize-none placeholder:text-academy-muted"
                       />
                     </div>
                     <button
@@ -1636,34 +1636,34 @@ export function PatientPortal() {
                   <div className="w-14 h-14 bg-[#34C759]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                     <CheckCircle2 size={28} className="text-[#34C759]" />
                   </div>
-                  <h3 id="pix-modal-title" className="text-[18px] font-semibold text-[#1C1C1E] mb-1">Pagamento Informado</h3>
-                  <p className="text-[#8E8E93] text-[14px]">A clínica confirmará o recebimento.</p>
+                  <h3 id="pix-modal-title" className="text-[18px] font-semibold text-academy-text mb-1">Pagamento Informado</h3>
+                  <p className="text-academy-muted text-[14px]">A clínica confirmará o recebimento.</p>
                 </div>
               ) : (
                 <div className="px-5 pb-6 pt-3">
                   <div className="flex items-center justify-between mb-5">
-                    <h3 id="pix-modal-title" className="text-[18px] font-semibold text-[#1C1C1E] tracking-tight">Pagar</h3>
-                    <button type="button" onClick={() => setShowPixModal(null)} aria-label="Fechar" className="w-8 h-8 bg-[#E5E5EA] rounded-full flex items-center justify-center"><X size={16} className="text-[#8E8E93]" /></button>
+                    <h3 id="pix-modal-title" className="text-[18px] font-semibold text-academy-text tracking-tight">Pagar</h3>
+                    <button type="button" onClick={() => setShowPixModal(null)} aria-label="Fechar" className="w-8 h-8 bg-academy-border rounded-full flex items-center justify-center"><X size={16} className="text-academy-muted" /></button>
                   </div>
 
-                  <div className="bg-[#F2F2F7] rounded-xl p-4 mb-4 text-center">
-                    <p className="text-[#8E8E93] text-[12px] mb-1">{showPixModal.label}</p>
-                    <p className="text-[#1C1C1E] text-[28px] font-bold tracking-tight">
+                  <div className="bg-academy-bg rounded-xl p-4 mb-4 text-center">
+                    <p className="text-academy-muted text-[12px] mb-1">{showPixModal.label}</p>
+                    <p className="text-academy-text text-[28px] font-bold tracking-tight">
                       R$ {showPixModal.amount.toFixed(2)}
                     </p>
                   </div>
 
                   {pixInfo?.has_pix ? (
                     <div className="space-y-3 mb-5">
-                      <p className="text-[#8E8E93] text-[11px] font-semibold uppercase tracking-widest">Chave PIX</p>
+                      <p className="text-academy-muted text-[11px] font-semibold uppercase tracking-widest">Chave PIX</p>
                       <button onClick={() => copyToClipboard(pixInfo.pix_key!)}
-                        className="w-full flex items-center gap-3 p-3.5 bg-[#F2F2F7] rounded-xl active:bg-[#E5E5EA] transition-colors">
+                        className="w-full flex items-center gap-3 p-3.5 bg-academy-bg rounded-xl active:bg-academy-border transition-colors">
                         <div className="w-10 h-10 bg-[#0C9B72]/10 rounded-xl flex items-center justify-center shrink-0">
                           <DollarSign size={18} className="text-[#0C9B72]" />
                         </div>
                         <div className="flex-1 text-left min-w-0">
-                          <p className="text-[#1C1C1E] text-[15px] font-medium truncate">{pixInfo.pix_key}</p>
-                          <p className="text-[#8E8E93] text-[12px]">{pixInfo.pix_key_type} · {pixInfo.beneficiary_name}</p>
+                          <p className="text-academy-text text-[15px] font-medium truncate">{pixInfo.pix_key}</p>
+                          <p className="text-academy-muted text-[12px]">{pixInfo.pix_key_type} · {pixInfo.beneficiary_name}</p>
                         </div>
                         <span className="text-[#0C9B72] text-[12px] font-semibold shrink-0">
                           {pixCopied ? 'Copiado!' : 'Copiar'}
@@ -1704,10 +1704,10 @@ function PortalQuickAction({ icon: Icon, label, onClick }: {
       onClick={onClick}
       className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-white shadow-[0_1px_6px_rgba(0,0,0,0.05)] active:scale-95 transition-transform"
     >
-      <div className="w-10 h-10 bg-[#F2F2F7] rounded-full flex items-center justify-center">
+      <div className="w-10 h-10 bg-academy-bg rounded-full flex items-center justify-center">
         <Icon size={18} className="text-[#0C9B72]" />
       </div>
-      <span className="text-[#8E8E93] text-[11px] font-medium">{label}</span>
+      <span className="text-academy-muted text-[11px] font-medium">{label}</span>
     </button>
   );
 }
@@ -1715,7 +1715,7 @@ function PortalQuickAction({ icon: Icon, label, onClick }: {
 function PortalStatCard({ value, label }: { value: number; label: string }) {
   return (
     <div className="bg-white rounded-2xl p-4 text-center shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
-      <p className="text-[#1C1C1E] text-[24px] font-bold tracking-tight">{value}</p>
+      <p className="text-academy-text text-[24px] font-bold tracking-tight">{value}</p>
       <p className="text-[#AEAEB2] text-[11px] font-medium uppercase tracking-wider mt-0.5">{label}</p>
     </div>
   );
@@ -1727,28 +1727,28 @@ function PortalAppointmentRow({ appointment, formatDate, formatTime, statusLabel
     'SCHEDULED': 'bg-[#007AFF]/10 text-[#007AFF]',
     'CONFIRMED': 'bg-[#34C759]/10 text-[#34C759]',
     'IN_PROGRESS': 'bg-[#FF9500]/10 text-[#FF9500]',
-    'FINISHED': 'bg-[#E5E5EA] text-[#8E8E93]',
+    'FINISHED': 'bg-academy-border text-academy-muted',
     'CANCELLED': 'bg-[#FF3B30]/10 text-[#FF3B30]',
     'NO_SHOW': 'bg-[#FF3B30]/10 text-[#FF3B30]',
   };
   return (
     <div className={`px-4 py-3.5 ${past ? 'opacity-40' : ''}`}>
       <div className="flex items-center gap-3.5">
-        <div className="w-10 h-10 bg-[#F2F2F7] rounded-xl flex items-center justify-center shrink-0">
-          <Calendar size={16} className="text-[#8E8E93]" />
+        <div className="w-10 h-10 bg-academy-bg rounded-xl flex items-center justify-center shrink-0">
+          <Calendar size={16} className="text-academy-muted" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[#1C1C1E] text-[15px] font-medium">{formatDate(appointment.start_time)}</p>
-          <p className="text-[#8E8E93] text-[13px] mt-0.5">
+          <p className="text-academy-text text-[15px] font-medium">{formatDate(appointment.start_time)}</p>
+          <p className="text-academy-muted text-[13px] mt-0.5">
             {formatTime(appointment.start_time)} · Dr(a). {appointment.dentist_name}
           </p>
         </div>
-        <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold shrink-0 ${statusColors[appointment.status] || 'bg-[#E5E5EA] text-[#8E8E93]'}`}>
+        <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold shrink-0 ${statusColors[appointment.status] || 'bg-academy-border text-academy-muted'}`}>
           {s.label}
         </span>
       </div>
       {appointment.notes && (
-        <p className="text-[#C7C7CC] text-[13px] mt-2 ml-[54px]">{appointment.notes}</p>
+        <p className="text-academy-muted text-[13px] mt-2 ml-[54px]">{appointment.notes}</p>
       )}
       {actionContent && !past && (
         <div className="mt-3 ml-[54px]">
@@ -1766,7 +1766,7 @@ function PortalEmptyState({ icon: Icon, text }: { icon: React.ElementType; text:
   return (
     <div className="py-16 text-center">
       <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
-        <Icon size={24} className="text-[#C7C7CC]" />
+        <Icon size={24} className="text-academy-muted" />
       </div>
       <p className="text-[#AEAEB2] text-[15px]">{text}</p>
     </div>

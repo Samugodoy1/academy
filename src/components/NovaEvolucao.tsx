@@ -29,7 +29,7 @@ const FLOWS: Record<string, { label: string, keywords: string[], stages: any[] }
       { id: 'endo_medicacao', label: 'Medicação Intracanal', icon: FlaskConical, color: 'text-orange-600 bg-orange-50 border-orange-100' },
       { id: 'endo_selamento', label: 'Selamento Provisório', icon: Lock, color: 'text-indigo-600 bg-indigo-50 border-indigo-100' },
       { id: 'endo_instrumentacao', label: 'Instrumentação', icon: Activity, color: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
-      { id: 'endo_obturacao', label: 'Obturação', icon: Activity, color: 'text-[#2F8FA3] bg-[#EAF7F8] border-[#DDECEF]' },
+      { id: 'endo_obturacao', label: 'Obturação', icon: Activity, color: 'text-purple-600 bg-purple-50 border-purple-100' },
       { id: 'endo_restauracao', label: 'Restauração', icon: Palette, color: 'text-pink-600 bg-pink-50 border-pink-100' },
     ]
   },
@@ -459,7 +459,7 @@ export const NovaEvolucao: React.FC<NovaEvolucaoProps> = ({ patientId, onSave, o
               {[
                 { n: '1', text: 'Escreva o que foi feito de forma natural', color: 'bg-primary/8 text-primary' },
                 { n: '2', text: 'Procedimentos, dentes e materiais são identificados', color: 'bg-blue-50 text-blue-600' },
-                { n: '3', text: 'Os blocos organizam o histórico clínico', color: 'bg-violet-50 text-violet-600' },
+                { n: '3', text: 'Os blocos organizam o histórico clínico', color: 'bg-academy-soft text-academy-primary' },
               ].map((step, idx) => (
                 <div key={step.n} className="flex items-start gap-3 animate-fade-in-up" style={{ animationDelay: `${idx * 80}ms` }}>
                   <div className={`w-6 h-6 rounded-lg ${step.color} flex items-center justify-center shrink-0 text-[10px] font-bold shadow-[0_1px_2px_rgba(0,0,0,0.04)]`}>

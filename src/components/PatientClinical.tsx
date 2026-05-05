@@ -10,6 +10,7 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
+  ChevronLeft,
   Circle,
   Clock3,
   CreditCard,
@@ -1333,7 +1334,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   }, [isBoxModeOpen, boxContextProcedure]);
 
   return (
-    <div className="min-h-screen bg-[#F7F7F8] pb-24 text-slate-900">
+    <div className="min-h-screen bg-white pb-24 text-slate-900">
       <div aria-live="polite" className="sr-only">{uploadFeedback || (isSavingAnamnese ? 'Salvando anamnese' : '')}</div>
       <header className="sticky top-0 z-40 border-b border-slate-100/60 ios-glass-heavy">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 pb-3">
@@ -1493,9 +1494,9 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-7 space-y-6">
         {isAcademyProduct && (
-          <section className="rounded-[30px] p-4 sm:p-5 border border-primary/10 bg-gradient-to-br from-primary/10 via-white to-white shadow-[0_12px_32px_rgba(109,40,217,0.08)]">
+          <section className="rounded-[30px] p-4 sm:p-5 border border-primary/10 bg-white shadow-[0_12px_32px_rgba(47,143,163,0.08)]">
             <div className="flex items-start gap-3 mb-4">
-              <div className="w-11 h-11 rounded-[18px] bg-primary text-white flex items-center justify-center shadow-[0_8px_22px_rgba(109,40,217,0.24)] shrink-0">
+              <div className="w-11 h-11 rounded-[18px] bg-primary text-white flex items-center justify-center shrink-0">
                 <Zap size={18} />
               </div>
               <div className="min-w-0">
@@ -1508,21 +1509,20 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               <button
                 type="button"
                 onClick={() => setIsBoxModeOpen(true)}
-                className="rounded-[22px] bg-white border px-5 py-4 text-left shadow-[0_8px_22px_rgba(15,23,42,0.05)] transition-all duration-200 active:scale-[0.98] ios-press"
-                style={{borderColor: 'var(--academy-border)'}}
+                className="rounded-[22px] bg-primary px-5 py-4 text-left text-white transition-all duration-200 hover:opacity-95 active:scale-[0.98] ios-press"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[16px] font-bold">Modo Box</p>
-                    <p className="text-[12px] font-medium mt-1" style={{color: 'var(--academy-muted)'}}>Cola clínica rápida</p>
+                    <p className="text-[12px] text-white/75 font-medium mt-1">Cola clínica rápida</p>
                   </div>
-                  <BookOpen size={20} className="shrink-0" style={{color: 'var(--academy-primary)'}} />
+                  <BookOpen size={20} className="shrink-0 text-white/90" />
                 </div>
               </button>
               <button
                 type="button"
                 onClick={() => setIsAddingEvolution(true)}
-                className="rounded-[22px] border border-primary/15 bg-white px-5 py-4 text-left shadow-[0_8px_22px_rgba(15,23,42,0.05)] transition-all duration-200 hover:border-primary/30 active:scale-[0.98] ios-press"
+                className="rounded-[22px] border border-primary/15 bg-white px-5 py-4 text-left transition-all duration-200 hover:border-primary/30 active:scale-[0.98] ios-press"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
@@ -2093,7 +2093,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                         { label: 'Queixa principal', value: extra.chief_complaint, color: 'bg-blue-50 border-blue-200/70', labelColor: 'text-blue-600' },
                         { label: 'Doenças sistêmicas', value: extra.systemic_diseases || extra.family_history, color: 'bg-teal-50 border-teal-200/70', labelColor: 'text-teal-600' },
                         { label: 'Observações clínicas importantes', value: extra.clinical_notes || extra.vital_signs, color: 'bg-indigo-50 border-indigo-200/70', labelColor: 'text-indigo-600' },
-                        { label: 'Hábitos relevantes', value: extra.habits, color: 'bg-violet-50 border-violet-200/70', labelColor: 'text-violet-600' },
+                        { label: 'Hábitos relevantes', value: extra.habits, color: 'bg-academy-soft border-academy-border/70', labelColor: 'text-academy-primary' },
                       ].filter(f => f.value && f.value.trim());
 
                       if (extraFields.length === 0) return null;
@@ -2439,112 +2439,127 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       </main>
 
       {isBoxModeOpen && (
-        <div className="fixed inset-0 z-[197] bg-[#F7F7F8] overflow-y-auto">
-          <div className="min-h-screen pb-8">
-            <div className="sticky top-0 z-20 bg-[#F7F7F8]/88 backdrop-blur-xl border-b border-white/80">
-              <div className="mx-auto max-w-[560px] px-4 py-3">
-                <div className="rounded-[24px] border border-slate-200/70 bg-white/95 px-3.5 py-3 shadow-[0_6px_24px_rgba(15,23,42,0.05)] flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setIsBoxModeOpen(false)}
-                    className="h-9 px-3 rounded-full bg-slate-50 border border-slate-200/80 text-[12px] font-bold text-slate-600 active:scale-[0.96]"
-                  >
-                    Voltar
-                  </button>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full" style={{backgroundColor: 'var(--academy-primary)'}} />
-                      <h2 className="text-[18px] font-black tracking-[-0.03em] text-slate-950 leading-none">Modo Box</h2>
-                    </div>
-                    <p className="mt-1 truncate text-[12px] font-semibold text-slate-500">{patient?.name}</p>
-                  </div>
-                  <span className="rounded-full px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.08em]" style={{backgroundColor: 'var(--academy-primary)', color: 'var(--academy-primary)', opacity: 0.1}}>
+        <div className="fixed inset-0 z-[197] bg-[#F2F2F7] overflow-y-auto font-sans">
+          <div className="min-h-screen pb-10">
+            {/* Header iOS Style */}
+            <div className="sticky top-0 z-20 bg-[#F2F2F7]/80 backdrop-blur-2xl border-b border-black/[0.05]">
+              <div className="mx-auto max-w-[560px] px-4 h-14 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setIsBoxModeOpen(false)}
+                  className="flex items-center gap-1 text-[16px] font-medium text-academy-primary active:opacity-70 transition-opacity"
+                >
+                  <ChevronLeft size={20} className="-ml-1" />
+                  Prontuário
+                </button>
+                <div className="flex flex-col items-center">
+                  <h2 className="text-[15px] font-bold text-slate-900 tracking-tight">Modo Box</h2>
+                  <p className="text-[11px] font-medium text-slate-500 truncate max-w-[150px]">{patient?.name}</p>
+                </div>
+                <div className="w-[85px] flex justify-end">
+                  <span className="rounded-full bg-academy-primary/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-academy-primary">
                     {activeBoxStep.label}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="mx-auto max-w-[560px] px-4 py-4 space-y-4">
-              <section className="rounded-[22px] px-4 py-3.5 flex items-start gap-3" style={{backgroundColor: 'var(--academy-soft)'}}>
-                <Sparkles size={16} className="mt-0.5 shrink-0" style={{color: 'var(--academy-primary)'}} />
-                <p className="text-[13px] font-semibold text-[#3A3A3C] leading-snug">
-                  Voce nao precisa lembrar tudo de uma vez. Fazemos so o proximo passo.
+            <div className="mx-auto max-w-[560px] px-4 py-5 space-y-5">
+              {/* Alívio mental */}
+              <section className="flex flex-col items-center text-center px-4 pt-2 pb-1">
+                <div className="w-10 h-10 rounded-full bg-academy-soft flex items-center justify-center mb-3 shadow-[0_2px_10px_rgba(47,143,163,0.15)]">
+                  <Sparkles size={18} className="text-academy-primary" />
+                </div>
+                <h3 className="text-[17px] font-bold text-slate-900 tracking-tight mb-1">Um passo de cada vez.</h3>
+                <p className="text-[14px] font-medium text-slate-500 leading-relaxed max-w-[280px]">
+                  Foque apenas no que precisa ser feito agora. Nós te guiamos no restante.
                 </p>
               </section>
 
-              <section className="overflow-hidden rounded-[34px] bg-gradient-to-br from-[#155A66] via-[#2F8FA3] to-[#4DB5CA] text-white shadow-[0_24px_80px_rgba(21,90,102,0.20)]">
-                <div className="px-6 pt-7 pb-6 min-h-[480px] flex flex-col">
-                <div className="mb-5 flex items-start justify-between gap-4">
-                  <div>
-                    <span className="inline-flex rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-primary">Agora</span>
-                    <p className="mt-3 text-[10px] font-black uppercase tracking-[0.14em] text-white/55">Etapa {boxStep + 1} de {boxSteps.length}</p>
-                  </div>
-                  <div className="flex gap-1.5 pt-1">
-                    {boxSteps.map((step, index) => (
-                      <button
-                        key={step.label}
-                        type="button"
-                        onClick={() => setBoxStep(index)}
-                        className={`h-2.5 rounded-full transition-all ${index === boxStep ? 'w-7 bg-white' : 'w-2.5 bg-white/35'}`}
-                        aria-label={step.label}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex-1 flex flex-col">
-                  <div>
-                    <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.12em]">{activeBoxStep.label}</span>
-                    <h3 className="mt-2 text-[32px] sm:text-[36px] font-black leading-[1.02] tracking-[-0.045em]">{activeBoxStep.title}</h3>
-                    <p className="mt-4 text-[15px] font-semibold leading-relaxed text-white/82">{activeBoxStep.text}</p>
+              {/* O Card Principal de Passo */}
+              <section className="overflow-hidden rounded-[32px] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-black/[0.02]">
+                <div className="px-6 pt-7 pb-6 min-h-[460px] flex flex-col">
+                  {/* Progress Indicators */}
+                  <div className="mb-6 flex items-center justify-between">
+                    <div>
+                      <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
+                        Etapa {boxStep + 1} de {boxSteps.length}
+                      </span>
+                    </div>
+                    <div className="flex gap-1.5">
+                      {boxSteps.map((step, index) => (
+                        <button
+                          key={step.label}
+                          type="button"
+                          onClick={() => setBoxStep(index)}
+                          className={`h-2 rounded-full transition-all duration-300 ${index === boxStep ? 'w-6 bg-academy-primary' : 'w-2 bg-slate-200'}`}
+                          aria-label={step.label}
+                        />
+                      ))}
+                    </div>
                   </div>
 
-                {activeBoxStep.steps && (
-                  <ol className="mt-5 space-y-2 rounded-[24px] bg-white/12 border border-white/15 p-3.5">
-                    {activeBoxStep.steps.map((step: string, index: number) => (
-                      <li key={step} className="grid grid-cols-[24px_1fr] gap-2 text-[13px] font-bold text-white/88">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-[11px] font-black text-primary">{index + 1}</span>
-                        <span>{step}</span>
-                      </li>
-                    ))}
-                  </ol>
-                )}
+                  <div className="flex-1 flex flex-col">
+                    <div>
+                      <span className="inline-block px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider mb-3">
+                        {activeBoxStep.label}
+                      </span>
+                      <h3 className="text-[28px] sm:text-[32px] font-bold leading-tight tracking-tight text-slate-900 mb-3">
+                        {activeBoxStep.title}
+                      </h3>
+                      <p className="text-[16px] font-medium leading-relaxed text-slate-600">
+                        {activeBoxStep.text}
+                      </p>
+                    </div>
 
-                <div className="mt-auto pt-6 grid grid-cols-1 gap-2.5">
-                  {activeBoxStep.actions.map((action) => (
-                    <button
-                      key={action.label}
-                      type="button"
-                      onClick={action.onClick}
-                      className={`rounded-[22px] px-4 py-4 text-[15px] font-black active:scale-[0.98] ${
-                        action.primary
-                          ? 'bg-white text-primary shadow-[0_8px_28px_rgba(0,0,0,0.16)]'
-                          : 'bg-white/12 border border-white/18 text-white'
-                      }`}
-                    >
-                      {action.label}
-                    </button>
-                  ))}
-                </div>
-                </div>
+                    {activeBoxStep.steps && (
+                      <ol className="mt-6 space-y-3">
+                        {activeBoxStep.steps.map((step: string, index: number) => (
+                          <li key={step} className="flex items-start gap-3">
+                            <span className="flex shrink-0 h-[22px] w-[22px] items-center justify-center rounded-full bg-academy-soft text-[11px] font-bold text-academy-primary mt-0.5">
+                              {index + 1}
+                            </span>
+                            <span className="text-[15px] font-medium text-slate-700 leading-snug">{step}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    )}
+
+                    <div className="mt-auto pt-8 grid grid-cols-1 gap-3">
+                      {activeBoxStep.actions.map((action) => (
+                        <button
+                          key={action.label}
+                          type="button"
+                          onClick={action.onClick}
+                          className={`rounded-[16px] px-4 py-4 text-[16px] font-bold active:scale-[0.98] transition-all ${
+                            action.primary
+                              ? 'bg-academy-primary text-white shadow-[0_4px_12px_rgba(0,165,160,0.2)] hover:bg-academy-primary-dark'
+                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          }`}
+                        >
+                          {action.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </section>
 
-              <section className="rounded-[24px] border border-[#E5E5EA]/80 bg-white p-3.5 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
-                <div className="mb-2 flex items-center justify-between gap-2">
+              {/* Guia Rápido (Se der branco) */}
+              <section className="rounded-[28px] bg-white p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-black/[0.02]">
+                <div className="mb-4 flex items-center justify-between gap-2">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.13em] text-slate-400">Se der branco</p>
-                    <h3 className="text-[14px] font-black text-slate-950">{selectedBoxGuide.label}</h3>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Shield size={14} className="text-slate-400" />
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Guia de Sobrevivência</p>
+                    </div>
+                    <h3 className="text-[17px] font-bold tracking-tight text-slate-900">{selectedBoxGuide.label}</h3>
                   </div>
-                  {!inferredBoxProcedure && (
-                    <span className="text-[10px] font-bold text-slate-400">escolher guia</span>
-                  )}
                 </div>
 
                 {!inferredBoxProcedure && (
-                  <div className="mb-2 -mx-1 overflow-x-auto pb-1">
-                    <div className="flex min-w-max gap-1.5 px-1">
+                  <div className="mb-3 -mx-1 overflow-x-auto pb-1 hide-scrollbar">
+                    <div className="flex min-w-max gap-2 px-1">
                       {boxGuideProcedures.map(({ key, shortLabel }) => (
                         <button
                           key={key}
@@ -2553,8 +2568,10 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                             setSelectedBoxProcedure(key);
                             setSelectedBoxDoubt(null);
                           }}
-                          className={`rounded-full border px-3 py-1.5 text-[12px] font-extrabold ${
-                            selectedBoxProcedure === key ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-slate-50 text-slate-600'
+                          className={`rounded-full border px-4 py-2 text-[13px] font-bold transition-colors ${
+                            selectedBoxProcedure === key 
+                              ? 'border-academy-primary bg-academy-primary text-white' 
+                              : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
                           }`}
                         >
                           {shortLabel}
@@ -2564,15 +2581,17 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                   </div>
                 )}
 
-                <div className="-mx-1 overflow-x-auto pb-1">
-                  <div className="flex min-w-max gap-1.5 px-1">
+                <div className="-mx-1 overflow-x-auto pb-1 hide-scrollbar">
+                  <div className="flex min-w-max gap-2 px-1">
                     {selectedBoxGuide.doubtChips.map((chip) => (
                       <button
                         key={chip}
                         type="button"
                         onClick={() => setSelectedBoxDoubt((current) => current === chip ? null : chip)}
-                        className={`rounded-full border px-3 py-1.5 text-[12px] font-extrabold ${
-                          selectedBoxDoubt === chip ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-slate-50 text-slate-600'
+                        className={`rounded-full px-4 py-2 text-[13px] font-bold transition-colors ${
+                          selectedBoxDoubt === chip 
+                            ? 'bg-slate-800 text-white' 
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                         }`}
                       >
                           {chip}
@@ -2582,14 +2601,14 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                 </div>
 
                 {selectedBoxDoubt && (
-                  <div className="mt-3 rounded-[16px] bg-slate-50 p-3">
-                    <p className="mb-2 text-[11px] font-black uppercase tracking-[0.1em] text-slate-500">{selectedBoxDoubt}</p>
-                    <p className="mb-3 text-[12px] font-semibold text-slate-500">So o essencial para destravar.</p>
-                    <div className="space-y-2">
+                  <div className="mt-4 rounded-[20px] bg-slate-50 p-4 border border-slate-100">
+                    <p className="mb-1 text-[12px] font-bold uppercase tracking-wider text-slate-500">{selectedBoxDoubt}</p>
+                    <p className="mb-4 text-[14px] font-medium text-slate-600">Apenas o essencial para você destravar agora.</p>
+                    <div className="space-y-3">
                       {selectedDoubtItems.map((item) => (
-                        <div key={item} className="grid grid-cols-[8px_1fr] gap-2 text-[12px] font-semibold leading-snug text-slate-700">
-                          <span className="mt-[5px] h-1.5 w-1.5 rounded-full bg-primary/70" />
-                          <span>{item}</span>
+                        <div key={item} className="flex gap-3">
+                          <div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-academy-primary" />
+                          <span className="text-[14px] font-medium leading-relaxed text-slate-800">{item}</span>
                         </div>
                       ))}
                     </div>
@@ -2624,8 +2643,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                       setIsBoxModeOpen(false);
                       setIsAddingEvolution(true);
                     }}
-                    className="rounded-full bg-academy-primary px-3 py-2 text-[12px] font-bold text-white shadow-[0_5px_14px_rgba(47,143,163,0.16)] active:scale-[0.96]"
-                    style={{backgroundColor: 'var(--academy-primary)'}}
+                    className="rounded-full bg-primary px-3 py-2 text-[12px] font-bold text-white shadow-[0_5px_14px_rgba(47,143,163,0.16)] active:scale-[0.96]"
                   >
                     Evolucao
                   </button>
@@ -2800,12 +2818,12 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                   </button>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="h-2 w-2 rounded-full" style={{backgroundColor: 'var(--academy-primary)'}} />
+                      <span className="h-2 w-2 rounded-full bg-primary" />
                       <h2 className="text-[20px] font-black tracking-[-0.03em] text-slate-950 leading-none">Modo Box</h2>
                     </div>
                     <p className="text-[12px] font-semibold text-slate-600 truncate">{patient?.name}</p>
                     {(boxContextProcedure || boxContextTooth) && (
-                      <p className="mt-1 text-[11px] font-bold truncate" style={{color: 'var(--academy-primary)'}}>
+                      <p className="mt-1 text-[11px] font-bold text-primary truncate">
                         {[boxContextProcedure, boxContextTooth].filter(Boolean).join(' - ')}
                       </p>
                     )}
@@ -2816,7 +2834,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                       setIsBoxModeOpen(false);
                       setIsAddingEvolution(true);
                     }}
-                    className="shrink-0 rounded-full bg-primary px-3 py-2 text-[12px] font-bold text-white shadow-[0_5px_14px_rgba(109,40,217,0.18)] active:scale-[0.96]"
+                    className="shrink-0 rounded-full bg-primary px-3 py-2 text-[12px] font-bold text-white shadow-[0_5px_14px_rgba(47,143,163,0.18)] active:scale-[0.96]"
                   >
                     Registrar evolucao
                   </button>
@@ -2832,8 +2850,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsBoxModeOpen(false)}
-                      className="rounded-[18px] bg-white px-4 py-3 text-sm font-bold shadow-sm active:scale-[0.98]"
-                      style={{color: 'var(--academy-primary)'}}
+                      className="rounded-[18px] bg-white text-primary px-4 py-3 text-sm font-bold shadow-sm active:scale-[0.98]"
                     >
                       Voltar ao prontuário
                     </button>
@@ -2868,7 +2885,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                         onClick={() => setSelectedBoxProcedure(key)}
                         className={`rounded-full border px-3 py-1.5 text-[12px] font-extrabold transition-all ${
                           isSelected
-                            ? 'border-primary bg-primary text-white shadow-[0_5px_14px_rgba(109,40,217,0.18)]'
+                            ? 'border-primary bg-primary text-white shadow-[0_5px_14px_rgba(47,143,163,0.18)]'
                             : 'border-slate-200 bg-white text-slate-600'
                         }`}
                       >

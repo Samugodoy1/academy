@@ -62,7 +62,22 @@ import { PatientPortal } from './components/PatientPortal';
 import { PortalInbox } from './components/PortalInbox';
 import { MLInsights } from './components/MLInsights';
 import { Academy, AcademyPatients, AcademyAgenda, AcademyStudy, AcademyChecklist } from './components/Academy';
-import { formatDate, isOverdue, getFreeSlots, getSuggestion, FreeSlot } from './utils/dateUtils';
+import {
+  addMinutesToLocalDateTime,
+  createLocalDateTime,
+  formatAppointmentDate,
+  formatAppointmentTime,
+  formatDate,
+  formatDateInputValue,
+  formatTimeInputValue,
+  getAppointmentTime,
+  getFreeSlots,
+  getSuggestion,
+  isOverdue,
+  isSameAppointmentDay,
+  parseAppointmentDateTime,
+  FreeSlot,
+} from './utils/dateUtils';
 import { CURRENT_PRODUCT, PRODUCT_LABEL, type ProductCode } from './config/product';
 
 // Types
@@ -287,7 +302,7 @@ const BottomNavItem = ({ id, icon: Icon, label, activeTab, setActiveTab, navigat
 );
 
 const StatusBadge = ({ app, now }: { app: Appointment; now: Date }) => {
-  const startTime = new Date(app.start_time);
+  const startTime = parseAppointmentDateTime(app.start_time) || new Date(app.start_time);
   const diffInMinutes = Math.floor((startTime.getTime() - now.getTime()) / 60000);
 
   let label = '';
@@ -555,7 +570,7 @@ export default function App() {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [patientListFilter, setPatientListFilter] = useState<'all' | 'action-needed' | 'at-risk' | 'no-appointment' | 'in-treatment' | 'overdue' | 'leads'>('all');
+  const [patientListFilter, setPatientListFilter] = useState<'all' | 'pending' | 'scheduled'>('all');
   const [patientActionsToday, setPatientActionsToday] = useState<Set<number>>(new Set());
   const [patientsInlineFeedback, setPatientsInlineFeedback] = useState('');
   const [patientsSubView, setPatientsSubView] = useState<'list' | 'portal'>('list');
@@ -566,7 +581,7 @@ export default function App() {
   const [dentistStatusFilter, setDentistStatusFilter] = useState<'all' | ProductApprovalStatus>('all');
   const [adminProductFilter, setAdminProductFilter] = useState<'all' | Product>('all');
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [agendaViewMode, setAgendaViewMode] = useState<'day' | 'week' | 'month'>('day');
+  const [agendaViewMode, setAgendaViewMode] = useState<'day' | 'week' | 'month'>('week');
   const [selectedWeekDay, setSelectedWeekDay] = useState<number>(new Date().getDay());
   const [now, setNow] = useState(new Date());
   const [monthSheetSelectedDay, setMonthSheetSelectedDay] = useState<Date | null>(null);
@@ -598,7 +613,8 @@ export default function App() {
 
     if (agendaViewMode === 'day') {
       filtered = filtered.filter(a => {
-        const appDate = new Date(a.start_time);
+        const appDate = parseAppointmentDateTime(a.start_time);
+        if (!appDate) return false;
         return appDate.toDateString() === selectedDate.toDateString();
       });
     } else if (agendaViewMode === 'week') {
@@ -607,19 +623,120 @@ export default function App() {
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6);
       filtered = filtered.filter(a => {
-        const appDate = new Date(a.start_time);
+        const appDate = parseAppointmentDateTime(a.start_time);
+        if (!appDate) return false;
         return appDate >= startOfWeek && appDate <= endOfWeek;
       });
     } else if (agendaViewMode === 'month') {
       filtered = filtered.filter(a => {
-        const appDate = new Date(a.start_time);
+        const appDate = parseAppointmentDateTime(a.start_time);
+        if (!appDate) return false;
         return appDate.getMonth() === selectedDate.getMonth() && appDate.getFullYear() === selectedDate.getFullYear();
       });
     }
 
-    return filtered.sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+    return filtered.sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
   }, [appointments, statusFilter, agendaSearchTerm, agendaViewMode, selectedDate]);
-  const [agendaFocusMode, setAgendaFocusMode] = useState(true);
+
+  const getPatientWeekRole = useCallback((appointment: Appointment, weekAppointments: Appointment[]) => {
+    const patientWeekAppointments = weekAppointments
+      .filter(app => app.patient_id === appointment.patient_id)
+      .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
+    const appointmentIndex = patientWeekAppointments.findIndex(app => app.id === appointment.id);
+
+    const hasPreviousCare = appointments.some(other =>
+      other.patient_id === appointment.patient_id &&
+      other.id !== appointment.id &&
+      getAppointmentTime(other.start_time) < getAppointmentTime(appointment.start_time) &&
+      !['CANCELLED', 'NO_SHOW'].includes(String(other.status || '').toUpperCase())
+    );
+
+    if (appointmentIndex > 0) return hasPreviousCare ? 'Retorno' : 'Continuação';
+    return hasPreviousCare ? 'Retorno' : 'Primeira consulta';
+  }, [appointments]);
+
+  const agendaSmartCopy = useMemo(() => {
+    const activeStatuses = new Set(['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS']);
+    const startOfWeek = new Date(selectedDate);
+    startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    const weekAppointments = appointments
+      .filter(app => activeStatuses.has(String(app.status || '').toUpperCase()))
+      .filter(app => {
+        const appDate = parseAppointmentDateTime(app.start_time);
+        if (!appDate) return false;
+        return appDate >= startOfWeek && appDate <= endOfWeek;
+      })
+      .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
+
+    if (weekAppointments.length === 0) return 'Semana tranquila por enquanto.';
+
+    const repeatedPatient = (Array.from(
+      weekAppointments.reduce((map, app) => {
+        const key = app.patient_id || app.patient_name;
+        const current = map.get(key) || [];
+        current.push(app);
+        map.set(key, current);
+        return map;
+      }, new Map<any, Appointment[]>()).values()
+    ) as Appointment[][])
+      .filter(items => items.length > 1)
+      .sort((a, b) => b.length - a.length)[0];
+
+    if (repeatedPatient) {
+      const ordered = [...repeatedPatient].sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
+      const firstAppointment = ordered[0];
+      const firstName = (firstAppointment.patient_name || 'Paciente').split(' ')[0];
+      const days = ordered
+        .map(app => formatAppointmentDate(app.start_time, { weekday: 'long' }).replace('-feira', ''))
+        .filter((day, index, list) => list.indexOf(day) === index)
+        .join(' e ');
+      const time = formatAppointmentTime(firstAppointment.start_time);
+      const firstRole = getPatientWeekRole(firstAppointment, weekAppointments);
+      const firstAction = firstRole === 'Primeira consulta'
+        ? 'Anamnese primeiro.'
+        : 'Revise a evolução.';
+      return `${firstName}: ${ordered.length} atendimentos. ${days}, ${time}. ${firstAction}`;
+    }
+
+    const hasPreviousCare = (app: Appointment) => {
+      const patient = patientMap.get(app.patient_id);
+      const evolutions = patient?.evolution || patient?.clinicalEvolution || [];
+      const hasEvolution = Array.isArray(evolutions) && evolutions.length > 0;
+      const hasLastEvolution = Boolean(patient?.last_evolution_date);
+      const hasPastAppointment = appointments.some(other =>
+        other.patient_id === app.patient_id &&
+        other.id !== app.id &&
+        getAppointmentTime(other.start_time) < getAppointmentTime(app.start_time) &&
+        !['CANCELLED', 'NO_SHOW'].includes(String(other.status || '').toUpperCase())
+      );
+      return hasEvolution || hasLastEvolution || hasPastAppointment;
+    };
+
+    const firstConsultation = weekAppointments.find(app => !hasPreviousCare(app));
+    if (firstConsultation) {
+      const firstName = (firstConsultation.patient_name || 'Paciente').split(' ')[0];
+      return `${firstName} faz primeira consulta. Anamnese antes do box.`;
+    }
+
+    const returnAppointment = weekAppointments.find(app => hasPreviousCare(app));
+    if (returnAppointment) return 'Retorno marcado. Revise a última evolução.';
+
+    const todayAppointment = weekAppointments.find(app => isSameAppointmentDay(app.start_time, now));
+    if (todayAppointment) return 'Hoje tem clínica.';
+
+    const nextAppointment = weekAppointments.find(app => getAppointmentTime(app.start_time) >= now.getTime()) || weekAppointments[0];
+    const day = formatAppointmentDate(nextAppointment.start_time, { weekday: 'long' })
+      .replace('-feira', '');
+    return `Seu próximo atendimento é ${day} com ${nextAppointment.patient_name}.`;
+  }, [appointments, getPatientWeekRole, now, patientMap, selectedDate]);
+
+  const [agendaFocusMode, setAgendaFocusMode] = useState(false);
   const [academyView, setAcademyView] = useState<'home' | 'pacientes' | 'agenda' | 'estudos' | 'checklist'>('home');
 
   const getCurrentProduct = useCallback((): Product => DEFAULT_PRODUCT, []);
@@ -678,6 +795,12 @@ export default function App() {
     duration: '',
     notes: ''
   });
+  const appointmentPresets = [
+    { label: 'Limpeza', procedure: 'Limpeza', duration: '40' },
+    { label: 'Consulta', procedure: 'Consulta', duration: '30' },
+    { label: 'Endo', procedure: 'Endodontia', duration: '90' },
+    { label: 'Restauração', procedure: 'Restauração', duration: '60' },
+  ];
   const [appointmentModalMode, setAppointmentModalMode] = useState<'schedule' | 'reschedule'>('schedule');
   const [editingAppointmentId, setEditingAppointmentId] = useState<number | null>(null);
   const [suggestedSlot, setSuggestedSlot] = useState<{ date: Date; duration: number; procedure: string } | null>(null);
@@ -1124,7 +1247,7 @@ export default function App() {
 
     // Special case for agenda date if not provided as ID
     if (tipo === 'agenda' && !id) {
-      const dateStr = selectedDate.toISOString().split('T')[0];
+      const dateStr = formatDateInputValue(selectedDate);
       url += `?date=${dateStr}`;
     }
 
@@ -1327,11 +1450,12 @@ export default function App() {
   endOfWeek.setHours(23, 59, 59, 999);
 
   const weeklyAppointmentsCount = appointments.filter(a => {
-    const d = new Date(a.start_time);
+    const d = parseAppointmentDateTime(a.start_time);
+    if (!d) return false;
     return d >= startOfWeek && d <= endOfWeek;
   }).length;
 
-  const todayStr = new Date().toLocaleDateString('en-CA');
+  const todayStr = formatDateInputValue(new Date());
   const dailyRevenue = financialSummary?.todayRevenue !== undefined
     ? financialSummary.todayRevenue
     : transactions
@@ -1350,23 +1474,23 @@ export default function App() {
     .reduce((acc, t) => acc + Number(t.amount), 0);
 
   const absencesToday = appointments.filter(a =>
-    new Date(a.start_time).toDateString() === dashboardNow.toDateString() &&
+    isSameAppointmentDay(a.start_time, dashboardNow) &&
     a.status === 'CANCELLED'
   ).length;
 
   const proceduresToday = appointments.filter(a =>
-    new Date(a.start_time).toDateString() === dashboardNow.toDateString() &&
+    isSameAppointmentDay(a.start_time, dashboardNow) &&
     (a.status === 'FINISHED' || a.status === 'IN_PROGRESS')
   ).length;
 
   const nextAppointments = appointments
-    .filter(a => new Date(a.start_time).toDateString() === dashboardNow.toDateString() && new Date(a.start_time) >= dashboardNow && a.status !== 'FINISHED' && a.status !== 'CANCELLED')
-    .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+    .filter(a => isSameAppointmentDay(a.start_time, dashboardNow) && getAppointmentTime(a.start_time) >= dashboardNow.getTime() && a.status !== 'FINISHED' && a.status !== 'CANCELLED')
+    .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time))
     .slice(0, 5);
 
-  const todayAppointmentsTotalCount = appointments.filter(a => new Date(a.start_time).toDateString() === dashboardNow.toDateString()).length;
+  const todayAppointmentsTotalCount = appointments.filter(a => isSameAppointmentDay(a.start_time, dashboardNow)).length;
   const todayAppointmentsRemainingCount = appointments.filter(a =>
-    new Date(a.start_time).toDateString() === dashboardNow.toDateString() &&
+    isSameAppointmentDay(a.start_time, dashboardNow) &&
     a.status !== 'FINISHED' &&
     a.status !== 'CANCELLED'
   ).length;
@@ -1378,9 +1502,10 @@ export default function App() {
   tomorrowEnd.setHours(23, 59, 59, 999);
 
   const tomorrowUnconfirmedAppointments = appointments.filter(a => {
-    const apptDate = new Date(a.start_time);
+    const apptDate = parseAppointmentDateTime(a.start_time);
+    if (!apptDate) return false;
     return apptDate >= tomorrowStart && apptDate <= tomorrowEnd && a.status !== 'CONFIRMED' && a.status !== 'CANCELLED';
-  }).sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+  }).sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
 
   const tomorrowUnconfirmedCount = tomorrowUnconfirmedAppointments.length;
 
@@ -1388,7 +1513,7 @@ export default function App() {
   const weeklyRevenueData = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
-    const dStr = d.toLocaleDateString('en-CA');
+    const dStr = formatDateInputValue(d);
     const amount = transactions
       .filter(t => t.type === 'INCOME' && t.date?.split('T')[0] === dStr)
       .reduce((acc, t) => acc + Number(t.amount), 0);
@@ -1453,7 +1578,7 @@ export default function App() {
       patient_id: '',
       patient_name: '',
       dentist_id: dentist_id || '',
-      date: selectedDate.toLocaleDateString('en-CA'),
+      date: formatDateInputValue(selectedDate),
       time: '',
       duration: '30',
       notes: ''
@@ -1480,7 +1605,7 @@ export default function App() {
       patient_id: patient.id.toString(),
       patient_name: patient.name,
       dentist_id: dentistId || '',
-      date: preferredDate || new Date().toLocaleDateString('en-CA'),
+      date: preferredDate || formatDateInputValue(new Date()),
       time: getTimeFromPreferredSlot(preferredTime),
       duration: '30',
       notes: ''
@@ -1512,8 +1637,12 @@ export default function App() {
   };
 
   const openRescheduleAppointment = (appointment: Appointment) => {
-    const startDate = new Date(appointment.start_time);
-    const endDate = new Date(appointment.end_time);
+    const startDate = parseAppointmentDateTime(appointment.start_time);
+    const endDate = parseAppointmentDateTime(appointment.end_time);
+    if (!startDate || !endDate) {
+      showNotification('Nao foi possivel ler o horario deste atendimento.', 'error');
+      return;
+    }
     const durationMinutes = Math.max(1, Math.round((endDate.getTime() - startDate.getTime()) / 60000));
 
     setAppointmentModalMode('reschedule');
@@ -1526,8 +1655,8 @@ export default function App() {
       patient_id: appointment.patient_id.toString(),
       patient_name: appointment.patient_name || '',
       dentist_id: appointment.dentist_id?.toString() || (user?.id ? user.id.toString() : ''),
-      date: startDate.toLocaleDateString('en-CA'),
-      time: startDate.toLocaleTimeString('pt-BR', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+      date: formatDateInputValue(startDate),
+      time: formatTimeInputValue(startDate),
       duration: durationMinutes.toString(),
       notes: appointment.notes || ''
     });
@@ -1582,10 +1711,10 @@ export default function App() {
   const getPatientLastVisitDate = (patient: Patient) => {
     const finishedAppointments = appointments
       .filter(app => app.patient_id === patient.id && app.status === 'FINISHED')
-      .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime());
+      .sort((a, b) => getAppointmentTime(b.start_time) - getAppointmentTime(a.start_time));
 
     if (finishedAppointments.length > 0) {
-      return new Date(finishedAppointments[0].start_time);
+      return parseAppointmentDateTime(finishedAppointments[0].start_time);
     }
 
     if (patient.evolution && patient.evolution.length > 0) {
@@ -1642,11 +1771,11 @@ export default function App() {
     if (date >= startTomorrow && date < startAfterTomorrow) {
       return `Amanhã, ${timeLabel}`;
     }
-    return `${formatDate(date.toISOString())}, ${timeLabel}`;
+    return `${formatDate(formatDateInputValue(date))}, ${timeLabel}`;
   };
 
   const getRelativeDayLabel = (dateStr: string) => {
-    const date = new Date(dateStr);
+    const date = parseAppointmentDateTime(dateStr) || new Date(dateStr);
     if (Number.isNaN(date.getTime())) return formatDate(dateStr) || 'Data inválida';
 
     const startToday = new Date(now);
@@ -1659,7 +1788,7 @@ export default function App() {
     if (date >= startToday && date < startTomorrow) return 'Hoje';
     if (date >= startYesterday && date < startToday) return 'Ontem';
 
-    return formatDate(date.toISOString()) || formatDate(dateStr) || 'Sem data';
+    return formatDate(formatDateInputValue(date)) || formatDate(dateStr) || 'Sem data';
   };
 
   const getPatientCardMeta = (patient: Patient) => {
@@ -1672,7 +1801,7 @@ export default function App() {
       (patient.treatmentPlan?.some(plan => plan.status === 'PLANEJADO' || plan.status === 'APROVADO') ?? false) ||
       appointments.some(app =>
         app.patient_id === patient.id &&
-        new Date(app.start_time) > now &&
+        getAppointmentTime(app.start_time) > now.getTime() &&
         app.status !== 'CANCELLED' && app.status !== 'FINISHED'
       );
 
@@ -1682,10 +1811,10 @@ export default function App() {
         app.patient_id === patient.id &&
         (app.status === 'SCHEDULED' || app.status === 'CONFIRMED')
       )
-      .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+      .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
 
-    const nextVisitAppointment = scheduledAppointments.find(app => new Date(app.start_time) >= now) ?? null;
-    const nextVisitDate: Date | null = nextVisitAppointment ? new Date(nextVisitAppointment.start_time) : null;
+    const nextVisitAppointment = scheduledAppointments.find(app => getAppointmentTime(app.start_time) >= now.getTime()) ?? null;
+    const nextVisitDate: Date | null = nextVisitAppointment ? parseAppointmentDateTime(nextVisitAppointment.start_time) : null;
 
     // isInRecallProgram: patient has at least one recorded visit (ever seen before)
     const isInRecallProgram = lastVisitDate !== null;
@@ -1747,7 +1876,7 @@ export default function App() {
       'overdue': { key: 'overdue', label: 'Sem visita há tempo', dot: 'bg-rose-500', tone: 'text-rose-700 bg-rose-50 border-rose-100' },
       'review': { key: 'review', label: 'Revisão próxima', dot: 'bg-amber-400', tone: 'text-amber-700 bg-amber-50 border-amber-100' },
       'up-to-date': { key: 'up-to-date', label: 'Em dia', dot: 'bg-emerald-500', tone: 'text-emerald-700 bg-emerald-50 border-emerald-100' },
-      'lead': { key: 'lead', label: 'Caso novo', dot: 'bg-academy-soft0', tone: 'text-academy-primary-dark bg-academy-soft border-violet-100' },
+      'lead': { key: 'lead', label: 'Caso novo', dot: 'bg-academy-primary', tone: 'text-academy-primary-dark bg-academy-soft border-violet-100' },
     };
 
     return {
@@ -1790,9 +1919,9 @@ export default function App() {
       return exoMatch[1] ? `Extração dente ${exoMatch[1]}` : 'Extração';
     }
 
-    // Profilaxia / limpeza
+    // Limpeza / profilaxia
     if (/\b(?:higiene|limpeza|profilaxia)\b/.test(lower)) {
-      return 'Profilaxia';
+      return 'Limpeza';
     }
 
     // Fallback: capitalize words
@@ -1839,10 +1968,11 @@ export default function App() {
   const findAvailableSlots = (date: Date, workingHours = { start: 8, end: 18 }) => {
     const dayAppointments = appointments
       .filter(a => {
-        const appDate = new Date(a.start_time);
+        const appDate = parseAppointmentDateTime(a.start_time);
+        if (!appDate) return false;
         return appDate.toDateString() === date.toDateString();
       })
-      .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+      .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
 
     const slots: Array<{ startTime: Date; endTime: Date; duration: number; procedure: string }> = [];
 
@@ -1861,7 +1991,8 @@ export default function App() {
       });
     } else {
       // First slot: before first appointment
-      const firstAppStart = new Date(dayAppointments[0].start_time);
+      const firstAppStart = parseAppointmentDateTime(dayAppointments[0].start_time);
+      if (!firstAppStart) return slots;
       if (firstAppStart.getHours() > workingHours.start) {
         const startTime = new Date(date);
         startTime.setHours(workingHours.start, 0, 0, 0);
@@ -1878,8 +2009,9 @@ export default function App() {
 
       // Slots between appointments
       for (let i = 0; i < dayAppointments.length - 1; i++) {
-        const currentAppEnd = new Date(dayAppointments[i].end_time);
-        const nextAppStart = new Date(dayAppointments[i + 1].start_time);
+        const currentAppEnd = parseAppointmentDateTime(dayAppointments[i].end_time);
+        const nextAppStart = parseAppointmentDateTime(dayAppointments[i + 1].start_time);
+        if (!currentAppEnd || !nextAppStart) continue;
         const duration = (nextAppStart.getTime() - currentAppEnd.getTime()) / (1000 * 60);
 
         if (duration >= 15) {
@@ -1893,7 +2025,8 @@ export default function App() {
       }
 
       // Last slot: after last appointment
-      const lastAppEnd = new Date(dayAppointments[dayAppointments.length - 1].end_time);
+      const lastAppEnd = parseAppointmentDateTime(dayAppointments[dayAppointments.length - 1].end_time);
+      if (!lastAppEnd) return slots;
       if (lastAppEnd.getHours() < workingHours.end) {
         const endTime = new Date(date);
         endTime.setHours(workingHours.end, 0, 0, 0);
@@ -1949,16 +2082,21 @@ export default function App() {
       return;
     }
 
-    // Calculate start and end times
-    const startTime = new Date(`${newAppointment.date}T${newAppointment.time}`);
-    const endTime = new Date(startTime.getTime() + durationMinutes * 60 * 1000);
+    const startTimeValue = createLocalDateTime(newAppointment.date, newAppointment.time);
+    const endTimeValue = addMinutesToLocalDateTime(startTimeValue, durationMinutes);
+    const startTime = parseAppointmentDateTime(startTimeValue);
+    const endTime = parseAppointmentDateTime(endTimeValue);
+    if (!startTime || !endTime) {
+      setAppointmentFormError('Data ou horÃ¡rio invÃ¡lido.');
+      return;
+    }
 
     // Conflict detection — check for overlapping appointments
     const conflicting = appointments.find(a => {
       if (a.status === 'CANCELLED' || a.status === 'NO_SHOW') return false;
       if (appointmentModalMode === 'reschedule' && a.id === editingAppointmentId) return false;
-      const aStart = new Date(a.start_time).getTime();
-      const aEnd = new Date(a.end_time).getTime();
+      const aStart = getAppointmentTime(a.start_time);
+      const aEnd = getAppointmentTime(a.end_time);
       return startTime.getTime() < aEnd && endTime.getTime() > aStart;
     });
 
@@ -1976,8 +2114,8 @@ export default function App() {
         ...newAppointment,
         notes: formattedProcedure,
         dentist_id: fallbackDentistId,
-        start_time: startTime.toISOString(),
-        end_time: endTime.toISOString()
+        start_time: startTimeValue,
+        end_time: endTimeValue
       };
 
       const isReschedule = appointmentModalMode === 'reschedule' && editingAppointmentId !== null;
@@ -2110,8 +2248,8 @@ export default function App() {
 
   const isNextAppointment = (app: Appointment, allApps: Appointment[]) => {
     const futureApps = allApps
-      .filter(a => new Date(a.start_time) > now && a.status !== 'CANCELLED' && a.status !== 'FINISHED')
-      .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+      .filter(a => getAppointmentTime(a.start_time) > now.getTime() && a.status !== 'CANCELLED' && a.status !== 'FINISHED')
+      .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
     return futureApps.length > 0 && futureApps[0].id === app.id;
   };
 
@@ -2266,7 +2404,11 @@ export default function App() {
     }
 
     // Calcula o dia natural da consulta
-    const appointmentDate = new Date(app.start_time);
+    const appointmentDate = parseAppointmentDateTime(app.start_time);
+    if (!appointmentDate) {
+      showNotification('Nao foi possivel ler o horario deste atendimento.', 'error');
+      return;
+    }
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     appointmentDate.setHours(0, 0, 0, 0);
@@ -2287,7 +2429,7 @@ export default function App() {
     }
 
     // Formata a mensagem de WhatsApp conforme solicitado
-    const time = new Date(app.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const time = formatAppointmentTime(app.start_time);
     const message = `Olá ${app.patient_name}, você confirma sua consulta ${dayDescription} às ${time}?`;
 
     // Limpa o número de telefone (apenas números)
@@ -2873,11 +3015,9 @@ export default function App() {
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex flex-col gap-0.5">
                             <div className="flex items-center gap-3">
-                              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Atendimentos</h2>
+                              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{agendaViewMode === 'week' && !agendaFocusMode ? 'Semana clínica' : 'Atendimentos'}</h2>
                             </div>
-                            {appointments.length <= 3 && (
-                              <p className="text-[13px] text-slate-500">Organize sua rotina clinica academica</p>
-                            )}
+                            <p className="text-[13px] text-slate-500">{agendaSmartCopy}</p>
                           </div>
                           <button
                             onClick={openAppointmentModal}
@@ -2935,15 +3075,7 @@ export default function App() {
 
                         {/* View Mode Controls */}
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                          <div className="flex bg-slate-100 p-1 rounded-full">
-                            <button
-                              onClick={() => { setAgendaFocusMode(true); setAgendaViewMode('day'); }}
-                              className={`px-5 py-2 text-[13px] font-bold rounded-full transition-all flex items-center gap-2 min-h-[40px] ${agendaFocusMode ? 'bg-white shadow-sm text-primary' : 'text-slate-500 hover:text-slate-700'}`}
-                              aria-label="Modo foco"
-                            >
-                              <Activity size={16} />
-                              Próximos
-                            </button>
+                          <div className="grid grid-cols-3 bg-slate-100 p-1 rounded-full">
                             <button
                               onClick={() => { setAgendaFocusMode(false); setAgendaViewMode('day'); }}
                               className={`px-5 py-2 text-[13px] font-bold rounded-full transition-all min-h-[40px] ${!agendaFocusMode && agendaViewMode === 'day' ? 'bg-white shadow-sm text-primary' : 'text-slate-500 hover:text-slate-700'}`}
@@ -3048,7 +3180,7 @@ export default function App() {
                                     {/* Time column - hidden on week/month view mobile */}
                                     <div className={`${agendaViewMode === 'day' ? '' : 'hidden sm:flex'} w-12 sm:w-16 pt-1 flex flex-col items-center shrink-0`}>
                                       <p className={`text-[13px] sm:text-[15px] font-bold ${isNext && !isFocusMode ? 'text-primary' : 'text-slate-900'}`}>
-                                        {new Date(app.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                        {formatAppointmentTime(app.start_time)}
                                       </p>
                                       <div className={`w-[1px] ${agendaViewMode === 'day' ? 'flex-1' : 'h-8'} bg-slate-100 my-2`} />
                                     </div>
@@ -3133,7 +3265,7 @@ export default function App() {
                                       setNewAppointment({
                                         patient_id: '',
                                         dentist_id: user?.id ? user.id.toString() : '',
-                                        date: selectedDate.toISOString().split('T')[0],
+                                        date: formatDateInputValue(selectedDate),
                                         time: slot.start,
                                         duration: slot.duration.toString(),
                                         notes: suggestion
@@ -3152,9 +3284,9 @@ export default function App() {
                               if (agendaFocusMode && agendaViewMode === 'day') {
                                 const todayStr = new Date().toDateString();
                                 const isToday = selectedDate.toDateString() === todayStr;
-                                const todayApps = filtered.filter(a => new Date(a.start_time).toDateString() === todayStr);
+                                const todayApps = filtered.filter(a => isSameAppointmentDay(a.start_time, now));
                                 const nextApps = todayApps
-                                  .filter(a => new Date(a.start_time) > now && a.status !== 'CANCELLED' && a.status !== 'FINISHED' && a.status !== 'NO_SHOW')
+                                  .filter(a => getAppointmentTime(a.start_time) > now.getTime() && a.status !== 'CANCELLED' && a.status !== 'FINISHED' && a.status !== 'NO_SHOW')
                                   .slice(0, 3);
 
                                 return (
@@ -3201,13 +3333,17 @@ export default function App() {
                                 let latestHour = 18;
 
                                 if (filtered.length > 0) {
-                                  const hours = filtered.map(a => new Date(a.start_time).getHours());
-                                  earliestHour = Math.min(...hours);
-                                  latestHour = Math.max(...hours);
+                                  const hours = filtered
+                                    .map(a => parseAppointmentDateTime(a.start_time)?.getHours())
+                                    .filter((hour): hour is number => typeof hour === 'number');
+                                  if (hours.length > 0) {
+                                    earliestHour = Math.min(...hours);
+                                    latestHour = Math.max(...hours);
 
-                                  // Add one hour buffer before and after while always including 08:00-18:00
-                                  earliestHour = Math.max(0, Math.min(8, earliestHour - 1));
-                                  latestHour = Math.min(23, Math.max(18, latestHour + 1));
+                                    // Add one hour buffer before and after while always including 08:00-18:00
+                                    earliestHour = Math.max(0, Math.min(8, earliestHour - 1));
+                                    latestHour = Math.min(23, Math.max(18, latestHour + 1));
+                                  }
                                 }
 
                                 const dayLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -3228,7 +3364,8 @@ export default function App() {
                                   }
 
                                   const dayAppointments = filtered.filter(a => {
-                                    const appDate = new Date(a.start_time);
+                                    const appDate = parseAppointmentDateTime(a.start_time);
+                                    if (!appDate) return false;
                                     return appDate.toDateString() === day.toDateString() && a.status !== 'CANCELLED';
                                   });
 
@@ -3259,7 +3396,8 @@ export default function App() {
                                   }
 
                                   return total + filtered.filter(a => {
-                                    const appDate = new Date(a.start_time);
+                                    const appDate = parseAppointmentDateTime(a.start_time);
+                                    if (!appDate) return false;
                                     return appDate.toDateString() === day.toDateString() && a.status !== 'CANCELLED';
                                   }).length;
                                 }, 0);
@@ -3281,6 +3419,13 @@ export default function App() {
                                 const weekBestSlots = weekDays.map((_, idx) => {
                                   return limitedCandidates.find(candidate => candidate.dayIndex === idx) || null;
                                 });
+                                const weekAppointmentsForRoles = filtered
+                                  .filter(a => {
+                                    const appDate = parseAppointmentDateTime(a.start_time);
+                                    if (!appDate) return false;
+                                    return weekDays.some(day => appDate.toDateString() === day.toDateString());
+                                  })
+                                  .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
 
                                 return (
                                   <div className="space-y-4">
@@ -3292,7 +3437,7 @@ export default function App() {
                                           const isToday = day.toDateString() === new Date().toDateString();
                                           const isSelected = selectedWeekDay === idx;
                                           const hasDayApps = filtered.some(a =>
-                                            new Date(a.start_time).toDateString() === day.toDateString()
+                                            isSameAppointmentDay(a.start_time, day)
                                           );
                                           return (
                                             <button
@@ -3322,8 +3467,8 @@ export default function App() {
                                       {(() => {
                                         const selectedDay = weekDays[selectedWeekDay];
                                         const dayApps = filtered
-                                          .filter(a => selectedDay && new Date(a.start_time).toDateString() === selectedDay.toDateString())
-                                          .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+                                          .filter(a => selectedDay && isSameAppointmentDay(a.start_time, selectedDay))
+                                          .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
 
                                         const bestSlot = weekBestSlots[selectedWeekDay];
 
@@ -3378,7 +3523,8 @@ export default function App() {
                                                 const colors = app.status === 'FINISHED'
                                                   ? { bg: '#cbd5e1', hover: '#a1a5ab' }
                                                   : getProcedureColor(app.notes || '');
-                                                const time = new Date(app.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                                                const time = formatAppointmentTime(app.start_time);
+                                                const weekRole = getPatientWeekRole(app, weekAppointmentsForRoles);
                                                 return (
                                                   <button
                                                     key={app.id}
@@ -3395,7 +3541,7 @@ export default function App() {
                                                     </div>
                                                     <div className="min-w-0 flex-1">
                                                       <p className="text-sm font-semibold text-slate-900 truncate">{app.patient_name}</p>
-                                                      <p className="text-xs text-slate-400 truncate">{app.notes || 'Consulta'}</p>
+                                                      <p className="text-xs text-slate-400 truncate">{weekRole} · {app.notes || 'Avaliação'}</p>
                                                     </div>
                                                     <ChevronRight size={16} className="text-slate-300 shrink-0" />
                                                   </button>
@@ -3477,11 +3623,12 @@ export default function App() {
                                               {/* Day columns */}
                                               {weekDays.map((day, dayIdx) => {
                                                 const dayAppointments = filtered.filter(a => {
-                                                  const appDate = new Date(a.start_time);
+                                                  const appDate = parseAppointmentDateTime(a.start_time);
+                                                  if (!appDate) return false;
                                                   const appHour = appDate.getHours();
                                                   // Show appointment if it starts in this hour
                                                   return appDate.toDateString() === day.toDateString() && appHour === hour;
-                                                }).sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+                                                }).sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
 
                                                 const isToday = day.toDateString() === new Date().toDateString();
                                                 return (
@@ -3493,6 +3640,7 @@ export default function App() {
                                                     <div className="space-y-1">
                                                       {dayAppointments.slice(0, 3).map(app => {
                                                         const firstName = (app.patient_name || '').split(' ')[0] || app.patient_name;
+                                                        const weekRole = getPatientWeekRole(app, weekAppointmentsForRoles);
                                                         const colors = app.status === 'FINISHED'
                                                           ? { bg: '#e2e8f0', hover: '#cbd5e1' }
                                                           : getProcedureColor(app.notes || '');
@@ -3506,12 +3654,12 @@ export default function App() {
                                                             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.hover}
                                                             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.bg}
                                                             className={`${textColor} rounded-lg text-[11px] px-1.5 py-1 font-semibold cursor-pointer transition-colors min-h-7 flex flex-col justify-center overflow-hidden`}
-                                                            title={`${app.patient_name} - ${new Date(app.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`}
+                                                            title={`${app.patient_name} - ${formatAppointmentTime(app.start_time)}`}
                                                             onClick={() => setWeekSheetSelectedAppointment(app)}
                                                           >
                                                             <div className="truncate leading-tight">{firstName}</div>
                                                             <div className="text-[10px] opacity-80 leading-tight">
-                                                              {new Date(app.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                                              {weekRole}
                                                             </div>
                                                           </div>
                                                         );
@@ -3554,7 +3702,7 @@ export default function App() {
                                           <div className="flex items-center justify-between">
                                             <div>
                                               <h3 className="text-2xl font-bold text-slate-900">
-                                                {new Date(weekSheetSelectedAppointment.start_time).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', weekday: 'long' })}
+                                                {formatAppointmentDate(weekSheetSelectedAppointment.start_time, { day: 'numeric', month: 'long', weekday: 'long' })}
                                               </h3>
                                               <p className="text-sm text-slate-500 mt-1">Detalhes do Agendamento</p>
                                             </div>
@@ -3574,12 +3722,13 @@ export default function App() {
                                               <div className="flex items-center gap-4">
                                                 <div>
                                                   <p className="text-2xl font-bold text-primary">
-                                                    {new Date(weekSheetSelectedAppointment.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                                    {formatAppointmentTime(weekSheetSelectedAppointment.start_time)}
                                                   </p>
                                                   <p className="text-[10px] text-slate-400 mt-1">
                                                     {(() => {
-                                                      const start = new Date(weekSheetSelectedAppointment.start_time);
-                                                      const end = new Date(weekSheetSelectedAppointment.end_time);
+                                                      const start = parseAppointmentDateTime(weekSheetSelectedAppointment.start_time);
+                                                      const end = parseAppointmentDateTime(weekSheetSelectedAppointment.end_time);
+                                                      if (!start || !end) return '0min';
                                                       const mins = Math.round((end.getTime() - start.getTime()) / 60000);
                                                       return `${mins}min`;
                                                     })()}
@@ -3589,7 +3738,7 @@ export default function App() {
                                                 <div>
                                                   <p className="text-sm text-slate-500">Término</p>
                                                   <p className="text-lg font-bold text-slate-700 mt-0.5">
-                                                    {new Date(weekSheetSelectedAppointment.end_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                                    {formatAppointmentTime(weekSheetSelectedAppointment.end_time)}
                                                   </p>
                                                 </div>
                                               </div>
@@ -3611,7 +3760,9 @@ export default function App() {
                                                 </div>
                                                 <div className="min-w-0 flex-1">
                                                   <p className="font-bold text-slate-900">{weekSheetSelectedAppointment.patient_name}</p>
-                                                  <p className="text-sm text-slate-500 truncate">{weekSheetSelectedAppointment.notes || 'Consulta'}</p>
+                                                  <p className="text-sm text-slate-500 truncate">
+                                                    {getPatientWeekRole(weekSheetSelectedAppointment, filtered)} · {weekSheetSelectedAppointment.notes || 'Avaliação'}
+                                                  </p>
                                                 </div>
                                               </div>
                                             </div>
@@ -3711,7 +3862,7 @@ export default function App() {
                                               setNewAppointment({
                                                 patient_id: '',
                                                 dentist_id: user?.id ? user.id.toString() : '',
-                                                date: weekSuggestionSheet.date.toISOString().split('T')[0],
+                                                date: formatDateInputValue(weekSuggestionSheet.date),
                                                 time: weekSuggestionSheet.start,
                                                 duration: String(weekSuggestionSheet.duration),
                                                 notes: weekSuggestionSheet.procedure
@@ -3758,9 +3909,10 @@ export default function App() {
 
                                 const selectedDayAppointments = monthSheetSelectedDay
                                   ? filtered.filter(a => {
-                                    const appDate = new Date(a.start_time);
+                                    const appDate = parseAppointmentDateTime(a.start_time);
+                                    if (!appDate) return false;
                                     return appDate.toDateString() === monthSheetSelectedDay.toDateString();
-                                  }).sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+                                  }).sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time))
                                   : [];
 
                                 return (
@@ -3786,7 +3938,8 @@ export default function App() {
                                             }
 
                                             const dayAppointments = filtered.filter(a => {
-                                              const appDate = new Date(a.start_time);
+                                              const appDate = parseAppointmentDateTime(a.start_time);
+                                              if (!appDate) return false;
                                               return appDate.toDateString() === day.toDateString();
                                             });
 
@@ -3891,12 +4044,13 @@ export default function App() {
                                                     {/* Time */}
                                                     <div className="flex-shrink-0 text-center">
                                                       <p className="text-lg font-bold text-primary">
-                                                        {new Date(app.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                                        {formatAppointmentTime(app.start_time)}
                                                       </p>
                                                       <p className="text-[10px] text-slate-400 mt-1">
                                                         {(() => {
-                                                          const start = new Date(app.start_time);
-                                                          const end = new Date(app.end_time);
+                                                          const start = parseAppointmentDateTime(app.start_time);
+                                                          const end = parseAppointmentDateTime(app.end_time);
+                                                          if (!start || !end) return '0min';
                                                           const mins = Math.round((end.getTime() - start.getTime()) / 60000);
                                                           return `${mins}min`;
                                                         })()}
@@ -3974,8 +4128,8 @@ export default function App() {
                                                       patient_id: '',
                                                       patient_name: '',
                                                       dentist_id: dentist_id || '',
-                                                      date: bestSlot.startTime.toISOString().split('T')[0],
-                                                      time: bestSlot.startTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+                                                      date: formatDateInputValue(bestSlot.startTime),
+                                                      time: formatTimeInputValue(bestSlot.startTime),
                                                       duration: Math.floor(bestSlot.duration).toString(),
                                                       notes: bestSlot.procedure
                                                     });
@@ -3985,7 +4139,7 @@ export default function App() {
                                                       patient_id: '',
                                                       patient_name: '',
                                                       dentist_id: dentist_id || '',
-                                                      date: monthSheetSelectedDay!.toISOString().split('T')[0],
+                                                      date: formatDateInputValue(monthSheetSelectedDay!),
                                                       time: '',
                                                       duration: '30',
                                                       notes: ''
@@ -4014,13 +4168,15 @@ export default function App() {
 
                               // Finished appointments from the selected day that already happened — shown in "Consultas Anteriores Realizadas"
                               const pastFinishedAppointments = filtered.filter(a => {
-                                const appDate = new Date(a.start_time);
+                                const appDate = parseAppointmentDateTime(a.start_time);
+                                if (!appDate) return false;
                                 return a.status === 'FINISHED' && appDate <= _now && appDate.toDateString() === selectedDate.toDateString();
-                              }).sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+                              }).sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
 
                               // Remaining appointments (exclude ones already shown above to avoid duplication)
                               const todayAppointments = filtered.filter(a => {
-                                const appDate = new Date(a.start_time);
+                                const appDate = parseAppointmentDateTime(a.start_time);
+                                if (!appDate) return false;
                                 if (appDate.toDateString() !== selectedDate.toDateString()) return false;
                                 if (a.status === 'FINISHED' && appDate <= _now) return false;
                                 return true;
@@ -4030,15 +4186,15 @@ export default function App() {
                               const freeSlots = getFreeSlots(todayAppointments);
 
                               const morning = todayAppointments.filter(a => {
-                                const hour = new Date(a.start_time).getHours();
+                                const hour = parseAppointmentDateTime(a.start_time)?.getHours() ?? 0;
                                 return hour >= 6 && hour < 12;
                               });
                               const afternoon = todayAppointments.filter(a => {
-                                const hour = new Date(a.start_time).getHours();
+                                const hour = parseAppointmentDateTime(a.start_time)?.getHours() ?? 0;
                                 return hour >= 12 && hour < 18;
                               });
                               const evening = todayAppointments.filter(a => {
-                                const hour = new Date(a.start_time).getHours();
+                                const hour = parseAppointmentDateTime(a.start_time)?.getHours() ?? 0;
                                 return hour >= 18 && hour < 22;
                               });
 
@@ -4071,7 +4227,8 @@ export default function App() {
 
                                 // Add appointments
                                 apps.forEach(app => {
-                                  const appTime = new Date(app.start_time).getHours() * 60 + new Date(app.start_time).getMinutes();
+                                  const appDate = parseAppointmentDateTime(app.start_time);
+                                  const appTime = appDate ? appDate.getHours() * 60 + appDate.getMinutes() : 0;
                                   timelineItems.push({ type: 'appointment', item: app, time: appTime });
                                 });
 
@@ -4149,9 +4306,73 @@ export default function App() {
                         const todayEnd = new Date(now); todayEnd.setHours(23, 59, 59, 999);
                         const totalOverdue = allMetas.filter(x => x.meta.attentionStatus.key === 'overdue').length;
                         const todayAppointments = appointments.filter(app => {
-                          const appDate = new Date(app.start_time);
+                          const appDate = parseAppointmentDateTime(app.start_time);
+                          if (!appDate) return false;
                           return appDate >= todayStart && appDate <= todayEnd && app.status !== 'CANCELLED';
                         });
+                        const getNextPatientAppointment = (patient: Patient) => appointments
+                          .filter(app =>
+                            app.patient_id === patient.id &&
+                            getAppointmentTime(app.start_time) >= now.getTime() &&
+                            !['CANCELLED', 'NO_SHOW'].includes(String(app.status || '').toUpperCase())
+                          )
+                          .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time))[0] || null;
+                        const hasFilledAnamnesis = (patient: Patient) => {
+                          const anamnesis = patient.anamnesis || {};
+                          return Object.values(anamnesis).some(value => typeof value === 'string' ? value.trim().length > 0 : Boolean(value));
+                        };
+                        const hasEvolution = (patient: Patient) => {
+                          const evolutions = patient.evolution || patient.clinicalEvolution || [];
+                          return Array.isArray(evolutions) && evolutions.length > 0;
+                        };
+                        const getCaseMoment = (patient: Patient, nextAppointment: Appointment | null) => {
+                          if (nextAppointment && !hasEvolution(patient)) return 'Primeira consulta';
+                          if (nextAppointment) return 'Retorno';
+                          if (hasEvolution(patient)) return 'Em acompanhamento';
+                          return 'Caso novo';
+                        };
+                        const getPatientConduct = (patient: Patient, nextAppointment: Appointment | null) => {
+                          const planned = patient.treatmentPlan?.find(plan => plan.status === 'PLANEJADO' || plan.status === 'APROVADO');
+                          return nextAppointment?.notes || (nextAppointment as any)?.procedure || planned?.procedure || 'Avaliação';
+                        };
+                        const getPatientNextAction = (patient: Patient, meta: ReturnType<typeof getPatientCardMeta>, nextAppointment: Appointment | null) => {
+                          if (nextAppointment && !hasFilledAnamnesis(patient)) return 'Revisar anamnese';
+                          if (nextAppointment && hasEvolution(patient)) return 'Revisar última evolução';
+                          if (nextAppointment) return 'Preparar conduta';
+                          if (meta.attentionStatus.key === 'overdue' || meta.attentionStatus.key === 'review') return 'Definir retorno';
+                          if (meta.isLead) return 'Agendar primeira consulta';
+                          return 'Acompanhar caso';
+                        };
+                        const getCasePendingLabel = (patient: Patient, meta: ReturnType<typeof getPatientCardMeta>, nextAppointment: Appointment | null) => {
+                          if (nextAppointment && !hasFilledAnamnesis(patient)) return 'Anamnese pendente';
+                          if (nextAppointment && hasEvolution(patient)) return 'Revisar última evolução';
+                          if (nextAppointment) return 'Preparar conduta';
+                          if (meta.attentionStatus.key === 'overdue' || meta.attentionStatus.key === 'review') return 'Retorno pendente';
+                          if (meta.isLead) return 'Agendar primeira consulta';
+                          return 'Sem pendências no momento';
+                        };
+                        const getCaseConductLabel = (patient: Patient, nextAppointment: Appointment | null) => {
+                          const conduct = getPatientConduct(patient, nextAppointment);
+                          if (!conduct || conduct === 'Avaliação') return 'Avaliação inicial';
+                          return conduct;
+                        };
+                        const isFinishedCase = (patient: Patient, meta: ReturnType<typeof getPatientCardMeta>, intel: any) => {
+                          if (intel?.status === 'FINALIZADO') return true;
+                          const plans = patient.treatmentPlan || [];
+                          return plans.length > 0 && plans.every(plan => ['CONCLUIDO', 'CONCLUÍDO', 'FINALIZADO'].includes(String(plan.status || '').toUpperCase()));
+                        };
+                        const isCasePending = (patient: Patient, meta: ReturnType<typeof getPatientCardMeta>, intel: any, nextAppointment: Appointment | null) => {
+                          if (nextAppointment && !hasFilledAnamnesis(patient)) return true;
+                          if (meta.attentionStatus.key === 'overdue' || meta.attentionStatus.key === 'review' || meta.isLead) return true;
+                          return intel?.priority === 'HIGH' || intel?.status === 'ABANDONO' || intel?.status === 'ATENCAO';
+                        };
+                        const formatCaseAppointment = (appointment: Appointment | null) => {
+                          if (!appointment) return 'Sem consulta marcada';
+                          const day = formatAppointmentDate(appointment.start_time, { weekday: 'short', day: '2-digit' });
+                          const time = formatAppointmentTime(appointment.start_time);
+                          return `${day} às ${time}`;
+                        };
+                        const hasText = (value?: string | null) => Boolean(value?.trim());
                         const nowHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
                         const freeSlotsToday = getFreeSlots(todayAppointments, '08:00', '18:00', nowHHMM).filter(slot => slot.duration >= 30).length;
                         const showPatientsFeedback = (message: string) => {
@@ -4162,23 +4383,23 @@ export default function App() {
                           if (meta.attentionStatus.key === 'up-to-date') return false;
                           return !appointments.some(app =>
                             app.patient_id === patient.id &&
-                            new Date(app.start_time) >= todayStart &&
-                            new Date(app.start_time) <= todayEnd &&
+                            getAppointmentTime(app.start_time) >= todayStart.getTime() &&
+                            getAppointmentTime(app.start_time) <= todayEnd.getTime() &&
                             app.status !== 'CANCELLED'
                           );
                         }).length;
                         const handledToday = appointments.filter(app =>
                           app.status === 'FINISHED' &&
-                          new Date(app.start_time) >= todayStart &&
-                          new Date(app.start_time) <= todayEnd
+                          getAppointmentTime(app.start_time) >= todayStart.getTime() &&
+                          getAppointmentTime(app.start_time) <= todayEnd.getTime()
                         ).length;
                         const opportunityCandidates = allMetas
                           .filter(({ patient, meta }) => {
                             if (meta.attentionStatus.key === 'up-to-date') return false;
                             return !appointments.some(app =>
                               app.patient_id === patient.id &&
-                              new Date(app.start_time) >= todayStart &&
-                              new Date(app.start_time) <= todayEnd &&
+                              getAppointmentTime(app.start_time) >= todayStart.getTime() &&
+                              getAppointmentTime(app.start_time) <= todayEnd.getTime() &&
                               app.status !== 'CANCELLED'
                             );
                           })
@@ -4199,20 +4420,29 @@ export default function App() {
                         patientIntelligence.forEach((pi: any) => intelMap.set(pi.patient_id, pi));
 
                         const patientCards = uniquePatients
-                          .filter(p =>
-                            (p.name || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
-                            (p.cpf && p.cpf.includes(searchTerm)) ||
-                            p.phone.includes(searchTerm)
+                          .map(patient => {
+                            const meta = getPatientCardMeta(patient);
+                            const intel = intelMap.get(patient.id) || null;
+                            const nextAppointment = getNextPatientAppointment(patient);
+                            const moment = getCaseMoment(patient, nextAppointment);
+                            const conduct = getPatientConduct(patient, nextAppointment);
+                            const conductLabel = getCaseConductLabel(patient, nextAppointment);
+                            const nextAction = getPatientNextAction(patient, meta, nextAppointment);
+                            const pendingLabel = getCasePendingLabel(patient, meta, nextAppointment);
+                            return { patient, meta, intel, nextAppointment, moment, conduct, conductLabel, nextAction, pendingLabel };
+                          })
+                          .filter(({ patient, meta, conduct, nextAction }) =>
+                            (patient.name || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
+                            (conduct || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
+                            (nextAction || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
+                            meta.attentionStatus.label.toLowerCase().includes((searchTerm || '').toLowerCase()) ||
+                            (patient.cpf && patient.cpf.includes(searchTerm)) ||
+                            patient.phone.includes(searchTerm)
                           )
-                          .map(patient => ({ patient, meta: getPatientCardMeta(patient), intel: intelMap.get(patient.id) || null }))
-                          .filter(({ meta, intel }) => {
+                          .filter(({ patient, meta, intel, nextAppointment }) => {
                             if (patientListFilter === 'all') return true;
-                            if (patientListFilter === 'leads') return meta.isLead;
-                            if (patientListFilter === 'action-needed') return intel?.priority === 'HIGH';
-                            if (patientListFilter === 'at-risk') return intel?.status === 'ABANDONO' || intel?.status === 'ATENCAO';
-                            if (patientListFilter === 'no-appointment') return intel ? !intel.has_future_appointment : !meta.nextVisitDate;
-                            if (patientListFilter === 'in-treatment') return intel?.status === 'EM_TRATAMENTO' || meta.clinicalStatus === 'Em tratamento';
-                            if (patientListFilter === 'overdue') return meta.attentionStatus.key === 'overdue';
+                            if (patientListFilter === 'pending') return isCasePending(patient, meta, intel, nextAppointment);
+                            if (patientListFilter === 'scheduled') return Boolean(nextAppointment);
                             return true;
                           })
                           .sort((a, b) => {
@@ -4231,23 +4461,18 @@ export default function App() {
                             return dateA - dateB;
                           });
 
-                        const totalActionNeeded = patientIntelligence.filter((pi: any) => pi.priority === 'HIGH').length;
-                        const totalAtRisk = patientIntelligence.filter((pi: any) => pi.status === 'ABANDONO' || pi.status === 'ATENCAO').length;
-                        const totalNoAppointment = patientIntelligence.filter((pi: any) => !pi.has_future_appointment && pi.status !== 'FINALIZADO').length;
-                        const totalLeads = allMetas.filter(x => x.meta.isLead).length;
-                        const totalInTreatment = allMetas.filter(x => {
-                          const intel = intelMap.get(x.patient.id);
-                          return intel?.status === 'EM_TRATAMENTO' || x.meta.clinicalStatus === 'Em tratamento';
-                        }).length;
+                        const caseSummaries = allMetas.map(({ patient, meta }) => {
+                          const intel = intelMap.get(patient.id) || null;
+                          const nextAppointment = getNextPatientAppointment(patient);
+                          return { patient, meta, intel, nextAppointment };
+                        });
+                        const totalPendingCases = caseSummaries.filter(({ patient, meta, intel, nextAppointment }) => isCasePending(patient, meta, intel, nextAppointment)).length;
+                        const totalScheduledCases = caseSummaries.filter(({ nextAppointment }) => Boolean(nextAppointment)).length;
 
                         const filterChips = [
                           { key: 'all', label: 'Todos', count: null },
-                          { key: 'leads', label: 'Novos', count: totalLeads },
-                          { key: 'action-needed', label: 'Agir agora', count: totalActionNeeded },
-                          { key: 'at-risk', label: 'Em risco', count: totalAtRisk },
-                          { key: 'no-appointment', label: 'Sem agenda', count: totalNoAppointment },
-                          { key: 'in-treatment', label: 'Em tratamento', count: totalInTreatment },
-                          { key: 'overdue', label: 'Sumiram', count: totalOverdue },
+                          { key: 'pending', label: 'Pendentes', count: totalPendingCases },
+                          { key: 'scheduled', label: 'Com consulta', count: totalScheduledCases },
                         ].filter(chip => chip.count === null || chip.count > 0) as { key: string; label: string; count: number | null }[];
 
                         const handleScheduleFromCard = (patient: Patient) => {
@@ -4261,7 +4486,7 @@ export default function App() {
                         }
 
                         const handleSummaryOverdueClick = () => {
-                          setPatientListFilter('overdue');
+                          setPatientListFilter('pending');
                           showPatientsFeedback(`${totalOverdue} ${totalOverdue === 1 ? 'caso precisa' : 'casos precisam'} de revisao.`);
                         };
 
@@ -4284,15 +4509,34 @@ export default function App() {
                           );
                         };
 
+                        const featuredCase = caseSummaries
+                          .filter(({ patient, meta, intel, nextAppointment }) => nextAppointment || isCasePending(patient, meta, intel, nextAppointment))
+                          .sort((a, b) => {
+                            if (a.nextAppointment && b.nextAppointment) return new Date(a.nextAppointment.start_time).getTime() - new Date(b.nextAppointment.start_time).getTime();
+                            if (a.nextAppointment) return -1;
+                            if (b.nextAppointment) return 1;
+                            return 0;
+                          })[0];
+                        const casesSmartCopy = (() => {
+                          if (totalPendingCases > 0) return `${totalPendingCases} ${totalPendingCases === 1 ? 'caso pede' : 'casos pedem'} sua atenção.`;
+                          if (totalScheduledCases > 0) return `${totalScheduledCases} ${totalScheduledCases === 1 ? 'caso tem' : 'casos têm'} consulta marcada.`;
+                          if (!featuredCase) return 'Tudo em ordem por enquanto.';
+                          const firstName = (featuredCase.patient.name || 'Paciente').split(' ')[0];
+                          const action = getPatientNextAction(featuredCase.patient, featuredCase.meta, featuredCase.nextAppointment);
+                          const actionCopy = action === 'Revisar anamnese' ? 'Comece pela anamnese.' : `${action}.`;
+                          if (featuredCase.nextAppointment) return `${firstName} tem consulta marcada. ${actionCopy}`;
+                          return `${firstName} precisa de atenção. ${actionCopy}`;
+                        })();
+
                         return (
                           <>
                             {/* ── Header ── */}
-                            <div className="flex flex-col gap-4 mb-2">
+                            <div className="flex flex-col gap-7 mb-6">
                               <div className="flex items-center justify-between">
                                 <div className="flex flex-col gap-0.5">
-                                  <h3 className="text-2xl font-bold tracking-tight text-slate-900">Casos clinicos</h3>
-                                  {patients.length <= 3 && patientsSubView === 'list' && (
-                                    <p className="text-[13px] text-slate-400">Cadastro, evolucao e acompanhamento da rotina clinica</p>
+                                  <h3 className="text-3xl font-bold tracking-tight text-slate-900">Casos</h3>
+                                  {patientsSubView === 'list' && (
+                                    <p className="text-[14px] text-slate-500 mt-1">{casesSmartCopy}</p>
                                   )}
                                 </div>
                                 {/* Botão Solicitações — só aparece quando há pendências */}
@@ -4318,15 +4562,15 @@ export default function App() {
                               </div>
 
                               {patientsSubView === 'list' && (
-                                <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-full">
+                                <div className="flex items-center gap-3 bg-slate-100 p-1.5 rounded-[22px]">
                                   <div className="relative flex-1">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                     <input
                                       type="text"
-                                      placeholder="Buscar caso clinico..."
+                                      placeholder="Buscar paciente, conduta ou pendência"
                                       value={searchTerm}
                                       onChange={(e) => setSearchTerm(e.target.value)}
-                                      className="w-full h-10 pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-full focus:outline-none focus:ring-1 focus:ring-slate-300 focus:border-slate-300 transition-all text-base"
+                                      className="w-full h-12 pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-[18px] focus:outline-none focus:ring-1 focus:ring-slate-300 focus:border-slate-300 transition-all text-base"
                                     />
                                   </div>
                                   <button
@@ -4344,9 +4588,9 @@ export default function App() {
                             {patientsSubView === 'portal' ? (
                               <PortalInbox
                                 apiFetch={apiFetch}
-                                onSchedulePatient={(patientId, _patientName, preferredDate, preferredTime) => {
+                                onSchedulePatient={(patientId, _patientName, preferredDate) => {
                                   const p = patientMap.get(patientId);
-                                  if (p) openPatientAppointmentModal(p, preferredDate, preferredTime);
+                                  if (p) openPatientAppointmentModal(p, preferredDate);
                                 }}
                                 onOpenPatient={(id) => {
                                   openPatientRecord(id);
@@ -4355,68 +4599,12 @@ export default function App() {
                               />
                             ) : (
                               <>
-                                {/* ── Action-driven status bar ── */}
-                                {(() => {
-                                  const items: React.ReactNode[] = [];
-
-                                  // +X hoje — always visible, green + fire when >0
-                                  items.push(
-                                    <button
-                                      key={`hoje-${handledToday}`}
-                                      type="button"
-                                      onClick={handleSummaryProgressClick}
-                                      className={`font-semibold transition-colors ${handledToday > 0 ? 'text-academy-primary-dark hover:text-academy-primary-dark' : 'text-slate-400 hover:text-slate-600'}`}
-                                      style={{ animation: 'statusPop 150ms ease-out' }}
-                                    >
-                                      {handledToday > 0 ? `🔥 ${handledToday} hoje` : '0 hoje'}
-                                    </button>
-                                  );
-
-                                  // X oportunidades — only when >0
-                                  if (freeSlotsToday > 0) {
-                                    items.push(<span key="sep1" className="text-slate-300">•</span>);
-                                    items.push(
-                                      <button
-                                        key={`oport-${freeSlotsToday}`}
-                                        type="button"
-                                        onClick={handleSummaryOpportunityClick}
-                                        className="text-slate-500 hover:text-slate-700 transition-colors"
-                                        style={{ animation: 'statusPop 150ms ease-out' }}
-                                      >
-                                        {freeSlotsToday} {freeSlotsToday === 1 ? 'horario livre' : 'horarios livres'}
-                                      </button>
-                                    );
-                                  }
-
-                                  // X precisam de atenção — only when >0
-                                  if (totalOverdue > 0) {
-                                    items.push(<span key="sep2" className="text-slate-300">•</span>);
-                                    items.push(
-                                      <button
-                                        key={`atencao-${totalOverdue}`}
-                                        type="button"
-                                        onClick={handleSummaryOverdueClick}
-                                        className="text-rose-500 hover:text-rose-700 transition-colors"
-                                        style={{ animation: 'statusPop 150ms ease-out' }}
-                                      >
-                                        {totalOverdue} {totalOverdue === 1 ? 'precisa de atenção' : 'precisam de atenção'}
-                                      </button>
-                                    );
-                                  }
-
-                                  return (
-                                    <div className="h-8 flex items-center gap-2 text-xs overflow-x-auto whitespace-nowrap px-0.5">
-                                      {items}
-                                    </div>
-                                  );
-                                })()}
-
                                 {patientsInlineFeedback && (
                                   <p className="text-[11px] text-slate-400 px-0.5 -mt-1">{patientsInlineFeedback}</p>
                                 )}
 
                                 {/* ── Filter chips ── */}
-                                <div className="flex flex-wrap gap-2 bg-slate-100 p-1 rounded-2xl">
+                                <div className="flex flex-wrap gap-2 bg-slate-100 p-1.5 rounded-[22px] mt-2">
                                   {filterChips.map(chip => (
                                     <button
                                       key={chip.key}
@@ -4431,11 +4619,13 @@ export default function App() {
                                       {chip.count !== null && chip.count > 0 && (
                                         <span className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold ${chip.key === 'action-needed' || chip.key === 'overdue'
                                             ? 'bg-rose-100 text-rose-600'
-                                            : chip.key === 'at-risk'
-                                              ? 'bg-amber-100 text-amber-700'
-                                              : chip.key === 'leads'
+                                            : chip.key === 'pending'
+                                              ? 'bg-rose-100 text-rose-600'
+                                              : chip.key === 'scheduled'
                                                 ? 'bg-violet-100 text-academy-primary'
-                                                : 'bg-slate-200 text-slate-600'
+                                                : chip.key === 'finished'
+                                                  ? 'bg-emerald-100 text-emerald-700'
+                                                  : 'bg-slate-200 text-slate-600'
                                           }`}>
                                           {chip.count}
                                         </span>
@@ -4445,8 +4635,8 @@ export default function App() {
                                 </div>
 
                                 {/* ── Card grid ── */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                  {patientCards.map(({ patient, meta, intel }) => {
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
+                                  {patientCards.map(({ patient, meta, intel, nextAppointment, moment, conduct, conductLabel, nextAction, pendingLabel }) => {
                                     const isOverdue = meta.attentionStatus.key === 'overdue';
                                     const isReview = meta.attentionStatus.key === 'review';
                                     const isScheduled = meta.status === 'em_tratamento' && !!meta.nextVisitDate;
@@ -4455,9 +4645,7 @@ export default function App() {
                                     // Intelligence-driven labels
                                     const intelPriority = intel?.priority || null;
                                     const intelStatus = intel?.status || null;
-                                    const daysAgo = intel?.days_since_last_visit;
-
-                                    // Status label and config
+                                    const appointmentLabel = formatCaseAppointment(nextAppointment);
                                     const statusConfig: Record<string, { label: string; bg: string; text: string; dot: string }> = {
                                       ABANDONO: { label: 'Abandono', bg: 'bg-rose-50', text: 'text-rose-700', dot: 'bg-rose-500' },
                                       ATENCAO: { label: 'Atenção', bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-400' },
@@ -4471,20 +4659,6 @@ export default function App() {
                                     const stCfg = intelStatus ? statusConfig[intelStatus] : null;
                                     const priCfg = intelPriority ? priorityConfig[intelPriority] : null;
 
-                                    const urgencyLabel = meta.isLead
-                                      ? 'Novo caso · Agende o 1º atendimento'
-                                      : intelStatus === 'ABANDONO'
-                                        ? `${daysAgo != null ? `${daysAgo}d sem visita` : meta.lastVisitLabel}`
-                                        : intelStatus === 'ATENCAO'
-                                          ? `Sem agendamento · ${meta.lastVisitLabel}`
-                                          : isScheduled
-                                            ? `Próx: ${meta.nextVisitLabel || 'Agendada'}`
-                                            : isOverdue
-                                              ? `Sem visita · ${meta.lastVisitLabel}`
-                                              : isReview
-                                                ? `Revisão · ${meta.lastVisitLabel}`
-                                                : meta.lastVisitLabel;
-
                                     const borderColor = meta.isLead ? 'border-l-violet-500 border-violet-100' : intelPriority === 'HIGH' ? 'border-l-rose-500 border-rose-100' : intelStatus === 'ATENCAO' ? 'border-l-amber-400 border-amber-50' : intelStatus === 'ABANDONO' ? 'border-l-rose-400 border-rose-50' : intelStatus === 'EM_TRATAMENTO' ? 'border-l-sky-400 border-slate-100' : 'border-l-transparent border-slate-100 hover:border-slate-200';
 
                                     return (
@@ -4493,7 +4667,6 @@ export default function App() {
                                         className={`flex items-stretch bg-white rounded-2xl border border-l-[3px] hover:shadow-md transition-all ${borderColor}`}
                                       >
                                         <div className="flex items-center gap-3.5 flex-1 min-w-0 px-4 py-3.5">
-                                          {/* Avatar */}
                                           <button
                                             type="button"
                                             onClick={() => openPatientRecord(patient.id)}
@@ -4505,8 +4678,6 @@ export default function App() {
                                               (patient.name || '?').charAt(0)
                                             )}
                                           </button>
-
-                                          {/* Info */}
                                           <button
                                             type="button"
                                             onClick={() => openPatientRecord(patient.id)}
@@ -4514,51 +4685,49 @@ export default function App() {
                                           >
                                             <div className="flex items-center gap-2 mb-1">
                                               <p className="text-[15px] font-semibold text-slate-900 truncate leading-tight">{patient.name}</p>
-                                              {meta.isLead && (
-                                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide bg-academy-soft0 text-white ring-1 ring-violet-200 shrink-0">
+                                              {meta.isLead && hasText('Novo') && (
+                                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide bg-academy-primary text-white ring-1 ring-violet-200 shrink-0">
                                                   Novo
                                                 </span>
                                               )}
-                                              {!meta.isLead && priCfg && (
+                                              {!meta.isLead && priCfg && hasText(priCfg.label) && (
                                                 <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide ${priCfg.bg} ${priCfg.text} ring-1 ${priCfg.ring} shrink-0`}>
                                                   {priCfg.label}
                                                 </span>
                                               )}
                                             </div>
                                             <div className="flex items-center gap-2 flex-wrap">
-                                              {meta.isLead && !stCfg && (
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-academy-soft text-academy-primary-dark">
-                                                  <span className="w-1.5 h-1.5 rounded-full bg-academy-soft0" />
-                                                  Novo
-                                                </span>
-                                              )}
-                                              {stCfg && (
+                                              {stCfg && hasText(stCfg.label) && (
                                                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${stCfg.bg} ${stCfg.text}`}>
                                                   <span className={`w-1.5 h-1.5 rounded-full ${stCfg.dot}`} />
                                                   {stCfg.label}
                                                 </span>
                                               )}
-                                              <span className="text-[11px] text-slate-400 truncate">
-                                                {urgencyLabel}
-                                              </span>
+                                              {hasText(`${moment} · ${appointmentLabel}`) && (
+                                                <span className="text-[11px] text-slate-400 truncate">
+                                                  {moment} · {appointmentLabel}
+                                                </span>
+                                              )}
                                             </div>
-                                            {intel?.next_appointment_date && (
-                                              <p className="text-[10px] text-sky-600 font-medium mt-1 flex items-center gap-1">
-                                                <Calendar size={10} />
-                                                Próx: {new Date(intel.next_appointment_date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                                            {hasText(conductLabel) && (
+                                              <p className="text-[13px] text-slate-700 mt-1 truncate">
+                                                {conductLabel}
+                                              </p>
+                                            )}
+                                            {hasText(pendingLabel) && (
+                                              <p className="text-[12px] text-primary font-semibold mt-0.5 truncate">
+                                                {pendingLabel}
                                               </p>
                                             )}
                                           </button>
                                         </div>
-
-                                        {/* Icon actions */}
                                         <div className="flex items-center gap-1 shrink-0 px-3 border-l border-slate-50">
                                           {meta.isLead ? (
                                             <button
                                               type="button"
                                               title="Agendar 1º atendimento"
                                               onClick={() => handleScheduleFromCard(patient)}
-                                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-academy-soft0 text-white text-[11px] font-bold hover:bg-academy-primary transition-colors active:scale-95"
+                                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-academy-primary text-white text-[11px] font-bold hover:opacity-90 transition-colors active:scale-95"
                                             >
                                               <CalendarPlus size={14} />
                                               <span className="hidden sm:inline">1º atendimento</span>
@@ -5551,6 +5720,38 @@ export default function App() {
                           </button>
                         </div>
                       )}
+
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between px-0.5">
+                          <span className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">Atalhos</span>
+                          <span className="text-[11px] text-slate-400 font-medium">opcional</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {appointmentPresets.map((preset) => {
+                            const isActive = (newAppointment.notes || '').trim().toLowerCase() === preset.procedure.toLowerCase();
+                            return (
+                              <button
+                                key={preset.label}
+                                type="button"
+                                onClick={() => {
+                                  setAppointmentFormError(null);
+                                  setNewAppointment({
+                                    ...newAppointment,
+                                    notes: preset.procedure,
+                                    duration: preset.duration,
+                                  });
+                                }}
+                                className={`min-h-[40px] rounded-xl border px-3 py-2 text-[13px] font-semibold transition-all ios-press ${isActive
+                                  ? 'border-academy-primary/30 bg-academy-soft text-academy-primary-dark shadow-[0_3px_10px_rgba(82,5,123,0.08)]'
+                                  : 'border-slate-200/60 bg-white/70 text-slate-600 hover:border-academy-primary/20 hover:bg-academy-soft/40 hover:text-academy-primary-dark'
+                                  }`}
+                              >
+                                {preset.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
 
                       {/* SEÇÃO 1: Procedimento */}
                       <div>
@@ -7095,8 +7296,8 @@ function PrintLayout({ children, title, onPrint }: { children: React.ReactNode, 
 
 function PrintAgenda({ date, appointments, profile }: { date: Date, appointments: Appointment[], profile: Dentist | null }) {
   const dayAppointments = appointments
-    .filter(a => new Date(a.start_time).toDateString() === date.toDateString())
-    .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+    .filter(a => isSameAppointmentDay(a.start_time, date))
+    .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
 
   return (
     <PrintLayout title="Agenda do Dia" onPrint={() => window.print()}>
@@ -7126,7 +7327,7 @@ function PrintAgenda({ date, appointments, profile }: { date: Date, appointments
             <div className="flex-1">
               <div className="flex justify-between items-start mb-2">
                 <p className="text-2xl font-black text-slate-900">
-                  {new Date(app.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                  {formatAppointmentTime(app.start_time)}
                   <span className="mx-3 text-slate-300">—</span>
                   {app.patient_name}
                 </p>
@@ -7360,7 +7561,7 @@ function PrintDocument({ profile, patients, apiFetch, appointments, transactions
 
   // Handle specific non-generic types
   if (type === 'agenda') {
-    const dateStr = new URLSearchParams(window.location.search).get('date') || new Date().toISOString().split('T')[0];
+    const dateStr = new URLSearchParams(window.location.search).get('date') || formatDateInputValue(new Date());
     const date = new Date(dateStr + 'T12:00:00');
     return <PrintAgenda date={date} appointments={appointments} profile={profile} />;
   }

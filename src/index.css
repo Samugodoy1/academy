@@ -2,14 +2,14 @@
 @import "tailwindcss";
 
 :root {
-  --academy-primary: #2F8FA3;
-  --academy-primary-dark: #155A66;
-  --academy-soft: #EAF7F8;
+  --academy-primary: #52057B;
+  --academy-primary-dark: #3B0459;
+  --academy-soft: #F4E8FA;
   --academy-bg: #FAFCFD;
   --academy-card: #FFFFFF;
   --academy-text: #132026;
   --academy-muted: #667A80;
-  --academy-border: #DDECEF;
+  --academy-border: #E8D4F1;
 }
 
 @theme {

@@ -22,6 +22,7 @@ import {
   Tooth,
   UserCircle
 } from '../icons';
+import { getAppointmentTime, parseAppointmentDateTime } from '../utils/dateUtils';
 
 interface AcademyEstudosProps {
   patients?: any[];
@@ -665,8 +666,7 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
 
 const parseDate = (value?: string) => {
   if (!value) return null;
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
+  return parseAppointmentDateTime(value);
 };
 
 const getPatient = (patients: any[], id: number) => patients.find(p => p.id === id);
@@ -727,7 +727,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         const d = parseDate(app.start_time);
         return d && d > now && d <= limit;
       })
-      .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+      .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
 
     return usable.map(app => {
       const patient = getPatient(patients, app.patient_id);

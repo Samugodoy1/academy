@@ -31,7 +31,7 @@ import {
 import { AnimatePresence, motion } from 'motion/react';
 import { NovaEvolucao } from './NovaEvolucao';
 import { Odontogram } from './Odontogram';
-import { formatDate } from '../utils/dateUtils';
+import { formatAppointmentTime, formatDate, getAppointmentTime } from '../utils/dateUtils';
 import { boxGuideProcedures, boxGuides, type BoxGuideProcedure } from '../data/boxGuides';
 
 interface PatientClinicalProps {
@@ -82,14 +82,8 @@ const getAge = (birthDate?: string) => {
 };
 
 const formatTime = (dateValue?: string) => {
-  if (!dateValue) return '';
-  const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) return '';
-
-  return date.toLocaleTimeString('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  const time = formatAppointmentTime(dateValue);
+  return time === '--:--' ? '' : time;
 };
 
 const formatCurrencyInputBRL = (value: string) => {
@@ -122,7 +116,7 @@ const resolveClinicalStatus = (patient: any, appointments: any[]): ClinicalStatu
 
   if (!hasAnyHistory) return 'NOVO';
 
-  const hasFutureVisit = patientAppointments.some((a: any) => new Date(a.start_time) >= now);
+  const hasFutureVisit = patientAppointments.some((a: any) => getAppointmentTime(a.start_time) >= now.getTime());
   const hasOngoingTreatment = (patient?.treatmentPlan || []).some((item: any) =>
     ['APROVADO', 'PENDENTE', 'PLANEJADO'].includes(String(item.status || '').toUpperCase())
   );
@@ -132,7 +126,7 @@ const resolveClinicalStatus = (patient: any, appointments: any[]): ClinicalStatu
   const latestEvolution = (patient?.evolution || [])[0]?.date;
   const latestFinishedAppointment = patientAppointments
     .filter((a: any) => String(a.status || '').toUpperCase() === 'FINISHED')
-    .sort((a: any, b: any) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())[0]?.start_time;
+    .sort((a: any, b: any) => getAppointmentTime(b.start_time) - getAppointmentTime(a.start_time))[0]?.start_time;
 
   const latestActivityRaw = latestEvolution || latestFinishedAppointment;
   if (!latestActivityRaw) return 'REVISAO';
@@ -1203,8 +1197,8 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   const upcomingAppointment = useMemo(
     () =>
       [...patientAppointments]
-        .filter((appointment: any) => new Date(appointment.start_time).getTime() >= Date.now())
-        .sort((a: any, b: any) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())[0] || null,
+        .filter((appointment: any) => getAppointmentTime(appointment.start_time) >= Date.now())
+        .sort((a: any, b: any) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time))[0] || null,
     [patientAppointments]
   );
 

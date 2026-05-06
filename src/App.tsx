@@ -62,6 +62,7 @@ import { PatientPortal } from './components/PatientPortal';
 import { PortalInbox } from './components/PortalInbox';
 import { MLInsights } from './components/MLInsights';
 import { SubscriptionManagement } from './components/SubscriptionManagement';
+import { SubscriptionCallback } from './components/SubscriptionCallback';
 import { Academy, AcademyPatients, AcademyAgenda, AcademyStudy, AcademyChecklist } from './components/Academy';
 import {
   addMinutesToLocalDateTime,
@@ -2567,7 +2568,14 @@ export default function App() {
                   <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20 shrink-0">
                     <Plus size={24} strokeWidth={3} />
                   </div>
-                  <h1 className="text-xl font-bold tracking-tight text-slate-800 whitespace-nowrap tablet-l:hidden desktop:block">{PRODUCT_LABEL}</h1>
+                  <div className="tablet-l:hidden desktop:block">
+                    <h1 className="text-xl font-bold tracking-tight text-slate-800 whitespace-nowrap">{PRODUCT_LABEL}</h1>
+                    {getProductAccess(getCurrentProduct())?.plan && getProductAccess(getCurrentProduct())?.plan !== 'free' && (
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                        {getProductAccess(getCurrentProduct())?.plan}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <button onClick={() => setIsSidebarOpen(false)} className="tablet-l:hidden text-slate-400">
                   <Plus size={24} className="rotate-45" />
@@ -2601,6 +2609,13 @@ export default function App() {
       <Route path="/nova-evolucao" element={<NovaEvolucao />} />
       <Route path="/termos" element={<TermsPage />} />
       <Route path="/privacidade" element={<PrivacyPage />} />
+      <Route path="/subscription/callback" element={
+        <SubscriptionCallback
+          apiFetch={apiFetch}
+          product={getCurrentProduct()}
+          onNavigate={() => { setActiveTab('dashboard'); navigate('/'); }}
+        />
+      } />
       <Route path="/print/:tipo/:id?" element={
         <PrintDocument
           profile={profile}

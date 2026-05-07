@@ -2173,6 +2173,10 @@ export default function App() {
         );
       } else {
         const data = await res.json();
+        if (data.upgrade_required) {
+          setShowAcademyUpgradeModal(true);
+          return;
+        }
         showNotification(data.error || 'Erro ao cadastrar paciente', 'error');
       }
     } catch (error) {
@@ -6876,18 +6880,38 @@ export default function App() {
                       <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4">
                         <Sparkles size={22} />
                       </div>
-                      <h3 className="text-xl font-bold text-slate-900 mb-2">Academy Student</h3>
-                      <p className="text-sm text-slate-600 leading-relaxed">
-                        Em breve você poderá ativar o Academy Student por aqui. Estamos preparando esse fluxo para liberar recursos avançados sem sair do Academy.
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-primary mb-2">Academy Free</p>
+                      <h3 className="text-xl font-bold text-slate-900 mb-2">Seu Academy já tem seus primeiros casos.</h3>
+                      <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                        Você já organizou 3 casos. Para continuar acompanhando seus pacientes, evoluções e atendimentos da faculdade, mude para o Academy Student.
                       </p>
+                      <div className="space-y-2">
+                        {['Casos ilimitados', 'Agenda acadêmica sem limite', 'Evoluções e modo box completos'].map((item) => (
+                          <div key={item} className="flex items-center gap-3 rounded-2xl bg-primary/5 px-3 py-2.5 text-[13px] font-semibold text-slate-700">
+                            <CheckCircle2 size={16} className="text-primary shrink-0" />
+                            <span>{item}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div className="px-6 pb-6 flex justify-end">
+                    <div className="px-6 pb-6 flex flex-col sm:flex-row gap-2 sm:justify-end">
                       <button
                         type="button"
                         onClick={() => setShowAcademyUpgradeModal(false)}
+                        className="px-5 py-2.5 rounded-full bg-slate-100 text-slate-500 text-sm font-bold hover:bg-slate-200 transition-all"
+                      >
+                        Continuar no Free
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAcademyUpgradeModal(false);
+                          setActiveTab('configuracoes');
+                          navigate('/');
+                        }}
                         className="px-5 py-2.5 rounded-full bg-primary text-white text-sm font-bold hover:opacity-90 transition-all"
                       >
-                        Entendi
+                        Mudar para Student
                       </button>
                     </div>
                   </motion.div>

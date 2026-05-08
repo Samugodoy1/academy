@@ -2302,13 +2302,10 @@ export default function App() {
       } else {
         const data = await res.json();
         if (data.upgrade_required) {
-          setUpgradeLimitModal({
-            open: true,
-            limit: data.limit,
-            currentUsage: data.current_usage,
-            product: data.product || 'academy',
-            upgradePlan: data.upgrade_plan || 'student',
-          });
+          if (data.upgrade_required) {
+            showNotification(data.error || 'Seu plano Free chegou ao limite.', 'error');
+            return;
+          }
           return;
         }
         showNotification(data.error || 'Erro ao cadastrar paciente', 'error');
@@ -7176,31 +7173,7 @@ export default function App() {
       } />
         </Routes>
 
-    <UpgradeLimitModal
-      data={upgradeLimitModal}
-      onClose={() =>
-        setUpgradeLimitModal({
-          open: false,
-          limit: 0,
-          currentUsage: 0,
-          product: 'academy',
-          upgradePlan: 'student',
-        })
-      }
-      onUpgrade={() => {
-        setUpgradeLimitModal({
-          open: false,
-          limit: 0,
-          currentUsage: 0,
-          product: 'academy',
-          upgradePlan: 'student',
-        });
-        navigate('/subscription');
-      }}
-    />
-  </>
-);
-}
+   
 function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');

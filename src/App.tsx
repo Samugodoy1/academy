@@ -7047,32 +7047,33 @@ export default function App() {
           </div>
         )
       } />
-    </Routes>
-    <UpgradeLimitModal
-  data={upgradeLimitModal}
-  onClose={() =>
-    setUpgradeLimitModal({
-      open: false,
-      limit: 0,
-      currentUsage: 0,
-      product: 'academy',
-      upgradePlan: 'student',
-    })
-  }
-  onUpgrade={() => {
-    setUpgradeLimitModal({
-      open: false,
-      limit: 0,
-      currentUsage: 0,
-      product: 'academy',
-      upgradePlan: 'student',
-    });
-    navigate('/subscription');
-  }}
-/>
-  );
-}
+        </Routes>
 
+    <UpgradeLimitModal
+      data={upgradeLimitModal}
+      onClose={() =>
+        setUpgradeLimitModal({
+          open: false,
+          limit: 0,
+          currentUsage: 0,
+          product: 'academy',
+          upgradePlan: 'student',
+        })
+      }
+      onUpgrade={() => {
+        setUpgradeLimitModal({
+          open: false,
+          limit: 0,
+          currentUsage: 0,
+          product: 'academy',
+          upgradePlan: 'student',
+        });
+        navigate('/subscription');
+      }}
+    />
+  </>
+);
+}
 function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');

@@ -354,7 +354,21 @@ const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpda
   const { id } = useParams();
   const [patient, setPatient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const apiFetchRef = useRef(apiFetch);
+  const apiFetch = useCallback((endpoint: string, options: RequestInit = {}) => {
+  const token = localStorage.getItem('token');
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+    'x-product': CURRENT_PRODUCT,
+    ...(options.headers || {}),
+  };
+
+  return fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+}, []);
   apiFetchRef.current = apiFetch;
 
   const loadPatient = React.useCallback(async (showLoading = true) => {
@@ -2174,7 +2188,13 @@ export default function App() {
       } else {
         const data = await res.json();
         if (data.upgrade_required) {
-          setShowAcademyUpgradeModal(true);
+          setUpgradeLimitModal({
+            open: true,
+            limit: data.limit,
+            currentUsage: data.current_usage,
+            product: data.product || 'academy',
+            upgradePlan: data.upgrade_plan || 'student',
+          });
           return;
         }
         showNotification(data.error || 'Erro ao cadastrar paciente', 'error');
@@ -2542,6 +2562,7 @@ export default function App() {
   };
 
   return (
+    <>
     <Routes>
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
@@ -7041,6 +7062,28 @@ export default function App() {
         )
       } />
     </Routes>
+    <UpgradeLimitModal
+  data={upgradeLimitModal}
+  onClose={() =>
+    setUpgradeLimitModal({
+      open: false,
+      limit: 0,
+      currentUsage: 0,
+      product: 'academy',
+      upgradePlan: 'student',
+    })
+  }
+  onUpgrade={() => {
+    setUpgradeLimitModal({
+      open: false,
+      limit: 0,
+      currentUsage: 0,
+      product: 'academy',
+      upgradePlan: 'student',
+    });
+    navigate('/subscription');
+  }}
+/>
   );
 }
 
@@ -7049,6 +7092,13 @@ function ForgotPassword() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [upgradeLimitModal, setUpgradeLimitModal] = useState<any>({
+  open: false,
+  limit: 0,
+  currentUsage: 0,
+  product: 'academy',
+  upgradePlan: 'student',
+});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

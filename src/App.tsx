@@ -354,21 +354,7 @@ const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpda
   const { id } = useParams();
   const [patient, setPatient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const apiFetch = useCallback((endpoint: string, options: RequestInit = {}) => {
-  const token = localStorage.getItem('token');
-
-  const headers = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`,
-    'x-product': CURRENT_PRODUCT,
-    ...(options.headers || {}),
-  };
-
-  return fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
-}, []);
+  const apiFetchRef = useRef(apiFetch);
   apiFetchRef.current = apiFetch;
 
   const loadPatient = React.useCallback(async (showLoading = true) => {

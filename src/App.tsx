@@ -421,11 +421,28 @@ const LegacyClinicalRedirect = () => {
 };
 const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
   const isAcademy = data?.product === 'academy' || CURRENT_PRODUCT === 'academy';
+  const isAppointmentLimit = data?.limit && data.limit > 3 && isAcademy;
   const limit = data?.limit || (isAcademy ? 3 : 15);
   const currentUsage = data?.currentUsage || limit;
   const progress = Math.min(100, Math.round((currentUsage / limit) * 100));
 
   if (!data?.open) return null;
+
+  const headlineText = isAcademy
+    ? (isAppointmentLimit
+        ? 'Você atingiu o limite de agendamentos deste mês.'
+        : 'Seu Academy já tem seus primeiros casos.')
+    : 'Seu OdontoHub está crescendo.';
+
+  const descriptionText = isAcademy
+    ? (isAppointmentLimit
+        ? `Você já agendou ${currentUsage} atendimentos neste mês. Para continuar agendando sem limite, mude para o Academy Student.`
+        : `Você já organizou ${currentUsage} casos. Para continuar acompanhando seus pacientes, evoluções e atendimentos da faculdade, mude para o Academy Student.`)
+    : `Você já organizou ${currentUsage} pacientes. Para continuar cadastrando sem perder o controle, mude para o Pro.`;
+
+  const barLabel = isAcademy
+    ? (isAppointmentLimit ? 'Agendamentos no mês' : 'Casos no Free')
+    : 'Pacientes no Free';
 
   return (
     <AnimatePresence>
@@ -470,21 +487,18 @@ const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
               </p>
 
               <h2 className="mx-auto max-w-[330px] text-[25px] font-bold leading-[1.06] tracking-[-0.055em] text-slate-950 sm:max-w-[360px] sm:text-[28px]">
-                {isAcademy ? 'Seu Academy já tem seus primeiros casos.' : 'Seu OdontoHub está crescendo.'}
+                {headlineText}
               </h2>
 
               <p className="mx-auto mt-3 max-w-[330px] text-[14px] leading-6 text-slate-500 sm:mt-4 sm:max-w-[360px] sm:text-[15px]">
-                {isAcademy
-                  ? `Você já organizou ${currentUsage} casos. Para continuar acompanhando seus pacientes, evoluções e atendimentos da faculdade, mude para o Academy Student.`
-                  : `Você já organizou ${currentUsage} pacientes. Para continuar cadastrando sem perder o controle, mude para o Pro.`
-                }
+                {descriptionText}
               </p>
             </div>
 
             <div className="mt-6 rounded-[22px] border border-slate-100 bg-slate-50/80 p-4 sm:rounded-[24px]">
               <div className="mb-3 flex items-center justify-between">
                 <span className="text-sm font-semibold text-slate-700">
-                  {isAcademy ? 'Casos no Free' : 'Pacientes no Free'}
+                  {barLabel}
                 </span>
 
                 <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-slate-950 shadow-sm ring-1 ring-slate-100">
@@ -694,6 +708,19 @@ export default function App() {
   const [showTreatmentPlanSummary, setShowTreatmentPlanSummary] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
+  const [upgradeLimitModal, setUpgradeLimitModal] = useState<{
+    open: boolean;
+    limit: number;
+    currentUsage: number;
+    product: string;
+    upgradePlan: string;
+  }>({
+    open: false,
+    limit: 0,
+    currentUsage: 0,
+    product: 'academy',
+    upgradePlan: 'student',
+  });
   const [isDentistModalOpen, setIsDentistModalOpen] = useState(false);
   const [isEditDentistModalOpen, setIsEditDentistModalOpen] = useState(false);
   const [editingDentist, setEditingDentist] = useState<any>(null);
@@ -2271,6 +2298,17 @@ export default function App() {
           isFirstAppointment
         );
       } else {
+        if (data.upgrade_required) {
+          setIsModalOpen(false);
+          setUpgradeLimitModal({
+            open: true,
+            limit: data.limit ?? 10,
+            currentUsage: data.current_usage ?? 0,
+            product: data.product || 'academy',
+            upgradePlan: data.upgrade_plan || 'student',
+          });
+          return;
+        }
         setAppointmentFormError(data.error || 'Erro ao realizar agendamento.');
       }
     } catch (error) {
@@ -2302,10 +2340,14 @@ export default function App() {
       } else {
         const data = await res.json();
         if (data.upgrade_required) {
-          if (data.upgrade_required) {
-            showNotification(data.error || 'Seu plano Free chegou ao limite.', 'error');
-            return;
-          }
+          setIsPatientModalOpen(false);
+          setUpgradeLimitModal({
+            open: true,
+            limit: data.limit ?? 3,
+            currentUsage: data.current_usage ?? patients.length,
+            product: data.product || 'academy',
+            upgradePlan: data.upgrade_plan || 'student',
+          });
           return;
         }
         showNotification(data.error || 'Erro ao cadastrar paciente', 'error');
@@ -2673,6 +2715,7 @@ export default function App() {
   };
 
   return (
+    <>
     <Routes>
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
@@ -7173,19 +7216,37 @@ export default function App() {
       } />
         </Routes>
 
-   
+    <UpgradeLimitModal
+      data={upgradeLimitModal}
+      onClose={() =>
+        setUpgradeLimitModal({
+          open: false,
+          limit: 0,
+          currentUsage: 0,
+          product: 'academy',
+          upgradePlan: 'student',
+        })
+      }
+      onUpgrade={() => {
+        setUpgradeLimitModal({
+          open: false,
+          limit: 0,
+          currentUsage: 0,
+          product: 'academy',
+          upgradePlan: 'student',
+        });
+        navigate('/subscription');
+      }}
+    />
+  </>
+);
+}
+
 function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [upgradeLimitModal, setUpgradeLimitModal] = useState<any>({
-  open: false,
-  limit: 0,
-  currentUsage: 0,
-  product: 'academy',
-  upgradePlan: 'student',
-});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

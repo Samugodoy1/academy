@@ -81,6 +81,7 @@ import {
   FreeSlot,
 } from './utils/dateUtils';
 import { CURRENT_PRODUCT, PRODUCT_LABEL, type ProductCode } from './config/product';
+import { deriveAcademyPatientState } from './utils/deriveAcademyPatientState';
 
 // Types
 interface Patient {
@@ -4516,6 +4517,8 @@ export default function App() {
                           return nextAppointment?.notes || (nextAppointment as any)?.procedure || planned?.procedure || 'Avaliação';
                         };
                         const getPatientNextAction = (patient: Patient, meta: ReturnType<typeof getPatientCardMeta>, nextAppointment: Appointment | null) => {
+                          const state = deriveAcademyPatientState(patient, appointments, now);
+                          if (state.finishedWithoutEvolution.length > 0) return 'Fechar evolução';
                           if (nextAppointment && !hasFilledAnamnesis(patient)) return 'Revisar anamnese';
                           if (nextAppointment && hasEvolution(patient)) return 'Revisar última evolução';
                           if (nextAppointment) return 'Preparar conduta';
@@ -4524,6 +4527,8 @@ export default function App() {
                           return 'Acompanhar caso';
                         };
                         const getCasePendingLabel = (patient: Patient, meta: ReturnType<typeof getPatientCardMeta>, nextAppointment: Appointment | null) => {
+                          const state = deriveAcademyPatientState(patient, appointments, now);
+                          if (state.finishedWithoutEvolution.length > 0) return 'Fechar evolução';
                           if (nextAppointment && !hasFilledAnamnesis(patient)) return 'Anamnese pendente';
                           if (nextAppointment && hasEvolution(patient)) return 'Revisar última evolução';
                           if (nextAppointment) return 'Preparar conduta';
@@ -4542,6 +4547,8 @@ export default function App() {
                           return plans.length > 0 && plans.every(plan => ['CONCLUIDO', 'CONCLUÍDO', 'FINALIZADO'].includes(String(plan.status || '').toUpperCase()));
                         };
                         const isCasePending = (patient: Patient, meta: ReturnType<typeof getPatientCardMeta>, intel: any, nextAppointment: Appointment | null) => {
+                          const state = deriveAcademyPatientState(patient, appointments, now);
+                          if (state.finishedWithoutEvolution.length > 0) return true;
                           if (nextAppointment && !hasFilledAnamnesis(patient)) return true;
                           if (meta.attentionStatus.key === 'overdue' || meta.attentionStatus.key === 'review' || meta.isLead) return true;
                           return intel?.priority === 'HIGH' || intel?.status === 'ABANDONO' || intel?.status === 'ATENCAO';

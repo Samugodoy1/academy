@@ -44,6 +44,7 @@ interface PatientClinicalProps {
   setAppActiveTab: (tab: any) => void;
   navigate: any;
   product?: string;
+  pendingEvolutionAppointment?: any;
 }
 
 type InfoTab = 'anamneses' | 'dados' | 'imagens' | 'financeiro';
@@ -244,9 +245,19 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   setAppActiveTab,
   navigate: appNavigate,
   product,
+  pendingEvolutionAppointment,
 }) => {
   const [isAddingEvolution, setIsAddingEvolution] = useState(false);
+  const [evolutionAppointmentContext, setEvolutionAppointmentContext] = useState<any>(null);
   const [infoTab, setInfoTab] = useState<InfoTab>('anamneses');
+
+  // Auto-open evolution when opened from a "Para fechar" pending
+  React.useEffect(() => {
+    if (pendingEvolutionAppointment && !isAddingEvolution) {
+      setEvolutionAppointmentContext(pendingEvolutionAppointment);
+      setIsAddingEvolution(true);
+    }
+  }, [pendingEvolutionAppointment]);
   const isAcademyProduct = product === 'academy';
   const [showAllEvolutions, setShowAllEvolutions] = useState(false);
   const [highlightedTreatmentId, setHighlightedTreatmentId] = useState<string | null>(null);
@@ -2956,6 +2967,8 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
         <div className="fixed inset-0 bg-white z-[200] overflow-y-auto">
           <NovaEvolucao
             patientId={patient.id}
+            patientName={patient.name}
+            appointment={evolutionAppointmentContext}
             onSave={async (evolution) => {
               const updatedPatient = {
                 ...patient,
@@ -2964,8 +2977,9 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               await onUpdatePatient(updatedPatient);
               await onAddEvolution(evolution);
               setIsAddingEvolution(false);
+              setEvolutionAppointmentContext(null);
             }}
-            onClose={() => setIsAddingEvolution(false)}
+            onClose={() => { setIsAddingEvolution(false); setEvolutionAppointmentContext(null); }}
           />
         </div>
       )}

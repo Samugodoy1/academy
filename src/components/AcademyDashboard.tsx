@@ -9,6 +9,7 @@ interface AcademyDashboardProps {
   patients: any[];
   appointments: any[];
   openPatientRecord: (id: number) => void;
+  openPatientEvolution?: (patientId: number, appointment: any) => void;
   setActiveTab: (tab: any) => void;
   setIsPatientModalOpen: (open: boolean) => void;
   openAppointmentModal: () => void;
@@ -501,6 +502,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   patients,
   appointments,
   openPatientRecord,
+  openPatientEvolution,
   setActiveTab,
   setIsPatientModalOpen,
   openAppointmentModal
@@ -571,13 +573,15 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       const patient = getPatient(patients, pendingApp.patient_id);
       return {
         kind: 'evolution',
-        eyebrow: 'Evolução',
-        title: 'Registre enquanto está fresco.',
-        subtitle: patient ? `${firstName(patient.name || pendingApp.patient_name)} já foi atendido. Feche a evolução clínica.` : 'Atendimento concluído. Feche a evolução clínica.',
+        eyebrow: 'Atendimento concluído',
+        title: `${firstName(patient?.name || pendingApp.patient_name)} precisa da evolução clínica.`,
+        subtitle: 'Fechar evolução clínica',
         actionLabel: 'Fechar evolução',
         patient,
         appointment: pendingApp,
-        action: () => openPatientRecord(pendingApp.patient_id)
+        action: () => openPatientEvolution
+          ? openPatientEvolution(pendingApp.patient_id, pendingApp)
+          : openPatientRecord(pendingApp.patient_id)
       };
     }
 
@@ -673,8 +677,10 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   const focusPatientName = focus.patient?.name || focus.appointment?.patient_name || null;
   const focusPhoto = focus.patient?.photo_url || focus.appointment?.photo_url || null;
   const focusInitial = (focusPatientName || '?').charAt(0).toUpperCase();
-  const statusLabel = getStatusLabel(focus.appointment?.status);
   const isFinishedFocus = focus.appointment?.status === 'FINISHED';
+  const statusLabel = isFinishedFocus && focus.kind === 'evolution'
+    ? 'Atendimento concluído · evolução pendente'
+    : getStatusLabel(focus.appointment?.status);
   const scheduleLabel = formatAppointmentChipTime(focus.appointment?.start_time);
   const appointmentMetaLabel = [
     statusLabel,
@@ -690,6 +696,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
     ...paraFecharRows.slice(0, 2).map(row => ({
       id: row.id,
       patientId: row.patientId,
+      appointmentId: row.appointmentId,
       title: row.title,
       meta: 'Evolução aberta. Registre o essencial.',
       tone: 'rose' as const
@@ -698,6 +705,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       ? [{
         id: `clinical-${clinicalPending.id}`,
         patientId: clinicalPending.id,
+        appointmentId: 0,
         title: clinicalPending.name,
         meta: getClinicalAlert(clinicalPending, usableAppointments, now) || 'Complete o prontuário.',
         tone: 'amber' as const
@@ -928,7 +936,16 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
                   title={row.title}
                   meta={row.meta}
                   accent={row.tone === 'rose' ? 'rose' : 'amber'}
-                  onClick={() => openPatientRecord(row.patientId)}
+                  onClick={() => {
+                    if (row.appointmentId && openPatientEvolution) {
+                      const app = usableAppointments.find(a => a.id === row.appointmentId);
+                      if (app) {
+                        openPatientEvolution(row.patientId, app);
+                        return;
+                      }
+                    }
+                    openPatientRecord(row.patientId);
+                  }}
                 />
               </React.Fragment>
             ))}

@@ -11,6 +11,7 @@ interface EvolutionRecord {
   procedure_performed?: string;
   materials?: string;
   observations?: string;
+  appointment_id?: number | null;
 }
 
 interface AppointmentRecord {
@@ -144,15 +145,25 @@ function hasTreatmentActivity(patient: PatientRecord): boolean {
 /**
  * Check whether a FINISHED appointment has a matching evolution record.
  *
- * Since the `clinical_evolution` table has no `appointment_id` column,
- * we match by date: an evolution whose date/created_at is on the same day
- * or after the appointment's start_time is considered to "cover" that
- * appointment.
+ * Primary rule: if any evolution has `appointment_id === appointment.id`,
+ * the appointment is covered.
+ *
+ * Legacy fallback (for evolutions saved before the appointment_id column
+ * was added): match by date — an evolution whose date/created_at is on
+ * the same day or after the appointment's start_time.
  */
 function appointmentHasEvolution(
   appointment: AppointmentRecord,
   patient: PatientRecord,
 ): boolean {
+  const evolutions = getEvolutions(patient);
+
+  // Primary: direct appointment_id match
+  if (evolutions.some(evo => evo.appointment_id != null && evo.appointment_id === appointment.id)) {
+    return true;
+  }
+
+  // Legacy fallback: date-based matching (only for evolutions without appointment_id)
   const start = parseDate(appointment.start_time);
   if (!start) return false;
 
@@ -163,10 +174,12 @@ function appointmentHasEvolution(
     if (lastEvo && lastEvo >= startDay) return true;
   }
 
-  return getEvolutions(patient).some(evo => {
-    const d = parseDate(evo.date || evo.created_at);
-    return d ? d >= startDay : false;
-  });
+  return evolutions
+    .filter(evo => evo.appointment_id == null)
+    .some(evo => {
+      const d = parseDate(evo.date || evo.created_at);
+      return d ? d >= startDay : false;
+    });
 }
 
 // ── Main derivation ────────────────────────────────────────────────────────

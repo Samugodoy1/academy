@@ -351,7 +351,7 @@ const StatusBadge = ({ app, now }: { app: Appointment; now: Date }) => {
   );
 };
 
-const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpdateAnamnesis, onAddEvolution, onAddTransaction, onOpenSidebar, apiFetch, setAppActiveTab, navigate }: any) => {
+const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpdateAnamnesis, onAddEvolution, onAddTransaction, onOpenSidebar, apiFetch, setAppActiveTab, navigate, pendingEvolutionAppointment, onClearPendingEvolution }: any) => {
   const { id } = useParams();
   const [patient, setPatient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -403,15 +403,17 @@ const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpda
         setPatient(updated);
         onUpdatePatient(updated);
       }}
-      onAddEvolution={(data: any) => {
+      onAddEvolution={async (data: any) => {
         setPatient((prev: any) => ({ ...prev, evolution: [data, ...(prev.evolution || [])] }));
-        onAddEvolution(data);
+        await onAddEvolution(data);
+        if (onClearPendingEvolution) onClearPendingEvolution();
       }}
       onRefreshPatient={() => loadPatient(false)}
       apiFetch={apiFetch}
       setAppActiveTab={setAppActiveTab}
       navigate={navigate}
       product={DEFAULT_PRODUCT}
+      pendingEvolutionAppointment={pendingEvolutionAppointment}
     />
   );
 };
@@ -691,6 +693,7 @@ export default function App() {
 
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [selectedPatientTab, setSelectedPatientTab] = useState<'evolucao' | 'imagens' | 'financeiro'>('evolucao');
+  const [pendingEvolutionAppointment, setPendingEvolutionAppointment] = useState<any>(null);
   const [isAnamnesisEditing, setIsAnamnesisEditing] = useState(false);
   const [showTreatmentPlanSummary, setShowTreatmentPlanSummary] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -2471,6 +2474,11 @@ export default function App() {
     }
   };
 
+  const openPatientEvolution = async (patientId: number, appointment: any) => {
+    setPendingEvolutionAppointment(appointment);
+    await openPatientRecord(patientId);
+  };
+
   const handleUpdateAnamnesis = async (patientId: number, anamnesisData: any) => {
     try {
       const res = await apiFetch(`/api/patients/${patientId}/anamnesis`, {
@@ -2545,14 +2553,18 @@ export default function App() {
         method: 'POST',
         body: JSON.stringify({
           notes: evolutionData.notes,
-          procedure_performed: evolutionData.procedure,
+          procedure_performed: evolutionData.procedure_performed || evolutionData.procedure,
           materials: evolutionData.materials,
-          observations: evolutionData.observations
+          observations: evolutionData.observations,
+          appointment_id: evolutionData.appointment_id || undefined,
         })
       });
       if (res.ok) {
+        await fetchData();
         openPatientRecord(selectedPatient.id);
-        showNotification('Evolução clínica registrada!');
+        showNotification(evolutionData.appointment_id
+          ? 'Evolução registrada. Atendimento fechado.'
+          : 'Evolução clínica registrada!');
       } else {
         const data = await res.json();
         showNotification(data.error || 'Erro ao registrar evolução', 'error');
@@ -2765,6 +2777,8 @@ export default function App() {
                 apiFetch={apiFetch}
                 setAppActiveTab={setActiveTab}
                 navigate={navigate}
+                pendingEvolutionAppointment={pendingEvolutionAppointment}
+                onClearPendingEvolution={() => setPendingEvolutionAppointment(null)}
               />
             </main>
           </div>
@@ -3174,6 +3188,7 @@ export default function App() {
                       patients={patients}
                       appointments={appointments}
                       openPatientRecord={openPatientRecord}
+                      openPatientEvolution={openPatientEvolution}
                       setActiveTab={setActiveTab}
                       setIsPatientModalOpen={setIsPatientModalOpen}
                       openAppointmentModal={openAppointmentModal}

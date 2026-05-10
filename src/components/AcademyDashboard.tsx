@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { BookOpen, Calendar, CalendarPlus, CheckCircle2, ChevronRight, ClipboardList, Clock, Plus, Sparkles, Users } from '../icons';
 import { formatAppointmentTime, getAppointmentTime, parseAppointmentDateTime } from '../utils/dateUtils';
+import { buildParaFecharRows, deriveAcademyPatientState } from '../utils/deriveAcademyPatientState';
 
 interface AcademyDashboardProps {
   user?: any;
@@ -512,15 +513,13 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
   }, [appointments]);
 
-  const finishedWithoutEvolution = useMemo(() => {
-    return usableAppointments
-      .filter(app => app.status === 'FINISHED')
-      .filter(app => {
-        const patient = getPatient(patients, app.patient_id);
-        return patient ? !hasEvolutionAfterAppointment(patient, app) : true;
-      })
-      .sort((a, b) => getAppointmentTime(b.start_time) - getAppointmentTime(a.start_time));
+  const paraFecharRows = useMemo(() => {
+    return buildParaFecharRows(patients, usableAppointments, now);
   }, [patients, usableAppointments]);
+
+  const finishedWithoutEvolution = useMemo(() => {
+    return paraFecharRows.map(row => usableAppointments.find(a => a.id === row.appointmentId)).filter(Boolean) as typeof usableAppointments;
+  }, [paraFecharRows, usableAppointments]);
 
   const todayAppointments = useMemo(() => {
     return usableAppointments
@@ -688,20 +687,20 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
     .filter(app => app.id !== focus.appointment?.id)
     .slice(0, 3);
   const pendingRows = [
-    ...finishedWithoutEvolution.slice(0, 2).map(app => ({
-      id: `evolution-${app.id}`,
-      patientId: app.patient_id,
-      title: app.patient_name,
+    ...paraFecharRows.slice(0, 2).map(row => ({
+      id: row.id,
+      patientId: row.patientId,
+      title: row.title,
       meta: 'Evolução aberta. Registre o essencial.',
-      tone: 'rose'
+      tone: 'rose' as const
     })),
-    ...(clinicalPending && !finishedWithoutEvolution.some(app => app.patient_id === clinicalPending.id)
+    ...(clinicalPending && !paraFecharRows.some(row => row.patientId === clinicalPending.id)
       ? [{
         id: `clinical-${clinicalPending.id}`,
         patientId: clinicalPending.id,
         title: clinicalPending.name,
         meta: getClinicalAlert(clinicalPending, usableAppointments, now) || 'Complete o prontuário.',
-        tone: 'amber'
+        tone: 'amber' as const
       }]
       : [])
   ].slice(0, 3);

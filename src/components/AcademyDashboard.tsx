@@ -571,14 +571,21 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
     const pendingApp = finishedWithoutEvolution[0];
     if (pendingApp) {
       const patient = getPatient(patients, pendingApp.patient_id);
+      const pendingRow = paraFecharRows.find(r => r.appointmentId === pendingApp.id);
+      const procedureLabel = pendingRow?.procedure || pendingApp.notes || pendingApp.procedure || 'Atendimento';
+      const dateLabel = pendingRow?.appointmentLabel || '';
       return {
         kind: 'evolution',
         eyebrow: 'Atendimento concluído',
         title: `${firstName(patient?.name || pendingApp.patient_name)} já foi atendido.`,
-        subtitle: 'Falta registrar a evolução para fechar o atendimento.',
-        actionLabel: 'Fechar atendimento',
+        subtitle: dateLabel
+          ? `Fechar atendimento de ${procedureLabel} · ${dateLabel}`
+          : 'Falta registrar a evolução para fechar o atendimento.',
+        actionLabel: `Fechar atendimento${procedureLabel !== 'Atendimento' ? ` de ${procedureLabel}` : ''}`,
         patient,
         appointment: pendingApp,
+        pendingProcedure: procedureLabel,
+        pendingDateLabel: dateLabel,
         action: () => openPatientEvolution
           ? openPatientEvolution(pendingApp.patient_id, pendingApp)
           : openPatientRecord(pendingApp.patient_id)
@@ -678,8 +685,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   const focusPhoto = focus.patient?.photo_url || focus.appointment?.photo_url || null;
   const focusInitial = (focusPatientName || '?').charAt(0).toUpperCase();
   const isFinishedFocus = focus.appointment?.status === 'FINISHED';
+  const pendingDateLabel = (focus as any).pendingDateLabel || '';
   const statusLabel = isFinishedFocus && focus.kind === 'evolution'
-    ? 'Atendimento concluído · evolução pendente'
+    ? `Evolução pendente${pendingDateLabel ? ` · ${pendingDateLabel}` : ''}`
     : getStatusLabel(focus.appointment?.status);
   const scheduleLabel = formatAppointmentChipTime(focus.appointment?.start_time);
   const appointmentMetaLabel = [
@@ -698,7 +706,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       patientId: row.patientId,
       appointmentId: row.appointmentId,
       title: row.title,
-      meta: 'Falta registrar a evolução para fechar o atendimento.',
+      meta: row.meta,
       tone: 'rose' as const
     })),
     ...(clinicalPending && !paraFecharRows.some(row => row.patientId === clinicalPending.id)
@@ -819,11 +827,19 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
                   {lastEvolution && (
                     <HeroDetail label="Última evolução" value={lastEvolution} />
                   )}
-                  {clinicalAlert && (
+                  {clinicalAlert && !isFinishedFocus && (
                     <HeroDetail label="Antes do box" value={clinicalAlert} />
                   )}
+                  {clinicalAlert && isFinishedFocus && (
+                    <HeroDetail label="Pendente no prontuário" value={clinicalAlert.replace('pendente.', 'não registrada.')} />
+                  )}
                   {isFinishedFocus && (
-                    <HeroDetail label="Para fechar" value="Registre a evolução clínica." />
+                    <HeroDetail
+                      label="Para fechar"
+                      value={pendingDateLabel
+                        ? `Registre o que foi feito neste atendimento.`
+                        : 'Registre a evolução clínica.'}
+                    />
                   )}
                 </div>
               </div>
@@ -1048,23 +1064,30 @@ const ListRow = ({
   meta: string;
   accent: 'rose' | 'amber';
   onClick: () => void;
-}) => (
-  <motion.div
-    whileTap={{ backgroundColor: 'var(--academy-bg)' }}
-    transition={{ duration: 0.2 }}
-    className="flex items-center gap-4 p-5 cursor-pointer border-b border-[#C6C6C8]/5 last:border-b-0"
-    onClick={onClick}
-  >
-    <div className="relative">
-      <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[13px] overflow-hidden border border-primary/20 shrink-0">
-        {(title || '?').charAt(0).toUpperCase()}
+}) => {
+  const metaLines = meta.split('\n').filter(Boolean);
+  return (
+    <motion.div
+      whileTap={{ backgroundColor: 'var(--academy-bg)' }}
+      transition={{ duration: 0.2 }}
+      className="flex items-center gap-4 p-5 cursor-pointer border-b border-[#C6C6C8]/5 last:border-b-0"
+      onClick={onClick}
+    >
+      <div className="relative">
+        <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[13px] overflow-hidden border border-primary/20 shrink-0">
+          {(title || '?').charAt(0).toUpperCase()}
+        </div>
+        <div className={`absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full ${accent === 'rose' ? 'bg-rose-400' : 'bg-amber-400'} border-2 border-white`} />
       </div>
-      <div className={`absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full ${accent === 'rose' ? 'bg-rose-400' : 'bg-amber-400'} border-2 border-white`} />
-    </div>
-    <div className="min-w-0 flex-1">
-      <p className="text-[15px] font-semibold text-academy-text truncate">{title}</p>
-      <p className="text-[12px] text-academy-muted mt-0.5 truncate">{meta}</p>
-    </div>
-    <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
-  </motion.div>
-);
+      <div className="min-w-0 flex-1">
+        <p className="text-[15px] font-semibold text-academy-text truncate">{title}</p>
+        {metaLines.map((line, i) => (
+          <p key={i} className={`text-[12px] ${i === 0 && metaLines.length > 1 ? 'font-medium text-academy-text/70' : 'text-academy-muted'} ${i === 0 ? 'mt-0.5' : 'mt-0'} truncate`}>
+            {line}
+          </p>
+        ))}
+      </div>
+      <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
+    </motion.div>
+  );
+};

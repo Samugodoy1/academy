@@ -214,7 +214,36 @@ export function deriveAcademyPatientState(
   const finishedWithoutEvolution = finishedApps.filter(
     a => !appointmentHasEvolution(a, patient),
   );
-  console.log('[deriveState]', { patient_id: patient.id, finishedCount: finishedApps.length, pendingCount: finishedWithoutEvolution.length, evolutions: (patient.evolution || []).map((e: any) => ({ id: e.id, appointment_id: e.appointment_id })) });
+  // ── Debug: detailed per-patient derivation audit ──────────────────────
+  if (typeof console !== 'undefined') {
+    const evolutions = getEvolutions(patient);
+    console.group(`[deriveState] patient=${patient.id} "${patient.name || ''}"`);
+    console.log('appointments (non-cancelled):', relevantAppointments.map(a => ({
+      id: a.id,
+      status: a.status,
+      start_time: a.start_time,
+      procedure: a.notes || a.procedure || '—',
+    })));
+    console.log('evolutions:', evolutions.map(e => ({
+      id: e.id,
+      appointment_id: e.appointment_id ?? null,
+      created_at: e.created_at || e.date,
+      procedure: e.procedure || e.procedure_performed || '—',
+    })));
+    for (const fa of finishedApps) {
+      const matched = appointmentHasEvolution(fa, patient);
+      console.log(
+        `  FINISHED apt=${fa.id} start=${fa.start_time} procedure="${fa.notes || fa.procedure || '—'}" → ${matched ? 'CLOSED (evolution matched)' : 'PENDING (no evolution match)'}`,
+      );
+    }
+    console.log(`summary: ${finishedApps.length} finished, ${finishedWithoutEvolution.length} pending`);
+    if (finishedWithoutEvolution.length > 0) {
+      console.log('reason for Para fechar:', finishedWithoutEvolution.map(a =>
+        `apt=${a.id} "${a.notes || a.procedure || '—'}" at ${a.start_time} has NO matching evolution`
+      ));
+    }
+    console.groupEnd();
+  }
 
   // Deduplicate: keep only the most recent FINISHED appointment per patient
   // (there is only one patient here, but multiple appointments can be pending).
@@ -296,6 +325,19 @@ export function deriveAcademyPatientState(
   };
 }
 
+// ── Format helpers for enriched display ────────────────────────────────
+
+function formatAppointmentLabel(startTime?: string): string {
+  if (!startTime) return '';
+  const d = parseDate(startTime);
+  if (!d) return '';
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${day}/${month} às ${hours}:${minutes}`;
+}
+
 // ── Convenience: derive "Para fechar" rows for the dashboard ───────────
 
 export interface ParaFecharRow {
@@ -304,6 +346,10 @@ export interface ParaFecharRow {
   appointmentId: number;
   title: string;
   meta: string;
+  /** Procedure / conduct from the pending appointment. */
+  procedure: string;
+  /** Formatted date/time of the pending appointment (e.g. "11/05 às 13:30"). */
+  appointmentLabel: string;
   tone: 'rose' | 'amber';
 }
 
@@ -325,12 +371,18 @@ export function buildParaFecharRows(
     for (const app of state.finishedWithoutEvolution) {
       if (seenAppointmentIds.has(app.id)) continue;
       seenAppointmentIds.add(app.id);
+      const procedure = app.notes || app.procedure || 'Atendimento';
+      const label = formatAppointmentLabel(app.start_time);
       rows.push({
         id: `evolution-${app.id}`,
         patientId: patient.id,
         appointmentId: app.id,
         title: patient.name || app.patient_name || 'Paciente',
-        meta: 'Falta registrar a evolução para fechar o atendimento.',
+        meta: label
+          ? `${procedure} · ${label}\nFalta fechar este atendimento.`
+          : `Falta fechar este atendimento.`,
+        procedure,
+        appointmentLabel: label,
         tone: 'rose',
       });
     }
@@ -344,6 +396,18 @@ export function buildParaFecharRows(
     const tB = appB ? new Date(appB.start_time).getTime() : 0;
     return tB - tA;
   });
+
+  if (typeof console !== 'undefined' && rows.length > 0) {
+    console.log('[buildParaFecharRows]', rows.map(r => {
+      const app = appointments.find(x => x.id === r.appointmentId);
+      return {
+        patient: r.title,
+        appointmentId: r.appointmentId,
+        start_time: app?.start_time,
+        procedure: app?.notes || app?.procedure || '—',
+      };
+    }));
+  }
 
   return rows;
 }

@@ -432,10 +432,10 @@ const getSmartDashboardMessage = (
     const count = context.evolutionPendingCount;
     return pickContextMessage([
       count > 1
-        ? `${count} evoluções abertas. Feche a mais recente.`
-        : `Evolução do ${patientName}. Registre enquanto está fresco.`,
-      `Atendimento concluído. Feche a evolução.`,
-      `${patientName} já foi atendido. Registre o essencial.`
+        ? `${count} atendimentos para fechar.`
+        : `Falta registrar a evolução para fechar o atendimento.`,
+      `${patientName} já foi atendido. Feche o atendimento.`,
+      `Atendimento concluído. Registre a evolução para fechar.`
     ], seed);
   }
 
@@ -574,9 +574,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       return {
         kind: 'evolution',
         eyebrow: 'Atendimento concluído',
-        title: `${firstName(patient?.name || pendingApp.patient_name)} precisa da evolução clínica.`,
-        subtitle: 'Fechar evolução clínica',
-        actionLabel: 'Fechar evolução',
+        title: `${firstName(patient?.name || pendingApp.patient_name)} já foi atendido.`,
+        subtitle: 'Falta registrar a evolução para fechar o atendimento.',
+        actionLabel: 'Fechar atendimento',
         patient,
         appointment: pendingApp,
         action: () => openPatientEvolution
@@ -698,7 +698,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       patientId: row.patientId,
       appointmentId: row.appointmentId,
       title: row.title,
-      meta: 'Evolução aberta. Registre o essencial.',
+      meta: 'Falta registrar a evolução para fechar o atendimento.',
       tone: 'rose' as const
     })),
     ...(clinicalPending && !paraFecharRows.some(row => row.patientId === clinicalPending.id)

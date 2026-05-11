@@ -410,10 +410,22 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     const evolutionEvents = mergedEvolutions
       .map((e: any) => {
         const eventType = resolveClinicalEventType(e);
+        // Determine record kind for timeline display
+        const hasAppointmentId = e.appointment_id != null;
+        const recordKind: 'closed' | 'manual' | 'legacy' = hasAppointmentId
+          ? 'closed'
+          : (e.created_at && new Date(e.created_at) > new Date('2026-05-10'))
+            ? 'manual'
+            : 'legacy';
+        const kindLabel = recordKind === 'closed'
+          ? 'Atendimento fechado'
+          : recordKind === 'manual'
+            ? 'Registro manual'
+            : 'Registro antigo';
         return {
           id: `evo-${e.id}`,
           date: e.date,
-          title: e.procedure || 'Evolução clínica',
+          title: e.procedure || kindLabel,
           notes: e.notes || '',
           status:
             eventType === 'PROCEDURE_COMPLETION'
@@ -422,6 +434,9 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                 ? 'OBSERVACAO'
                 : 'EM_ANDAMENTO',
           type: eventType,
+          recordKind,
+          kindLabel,
+          appointmentId: e.appointment_id,
         };
       })
       .filter((event: any) => event.type !== 'DIAGNOSIS');
@@ -1794,7 +1809,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               {/* ── Header ── */}
               <div className="flex items-center justify-between mb-5">
                 <div>
-                  <h3 className="text-base font-bold tracking-[-0.015em] text-slate-900">Evolução clínica</h3>
+                  <h3 className="text-base font-bold tracking-[-0.015em] text-slate-900">Histórico clínico</h3>
                   {timelineItems.length > 0 && (
                     <p className="text-[11px] text-slate-400 mt-0.5 font-medium tabular-nums">
                       {timelineItems.length} registro{timelineItems.length !== 1 ? 's' : ''}
@@ -1806,7 +1821,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 text-white text-xs font-semibold hover:bg-slate-800 ios-press transition-all duration-200 shadow-[0_2px_8px_rgba(15,23,42,0.15)]"
                 >
                   <Plus size={11} />
-                  Registrar
+                  Registro clínico
                 </button>
               </div>
 
@@ -1853,11 +1868,22 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
 
                             {/* card */}
                             <div className={`flex-1 min-w-0 rounded-[18px] bg-white border border-slate-200/70 border-l-[3px] ${cat.borderCls} p-3.5 shadow-[0_1px_4px_rgba(15,23,42,0.03)] transition-all duration-300 ease-out hover:shadow-[0_4px_16px_rgba(15,23,42,0.06)] hover:translate-y-[-1px] ${isNewlyAdded ? 'ring-2 ring-blue-200/60 shadow-[0_4px_16px_rgba(99,102,241,0.08)] animate-glow-pulse' : ''}`}>
-                              {/* row 1: category tag + date */}
+                              {/* row 1: record kind badge + category tag + date */}
                               <div className="flex items-center justify-between gap-2 mb-2">
-                                <span className={`inline-flex text-[10px] font-extrabold uppercase tracking-[0.07em] px-2 py-0.5 rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.03)] ${cat.tagCls}`}>
-                                  {cat.label}
-                                </span>
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  {item.recordKind === 'closed' && (
+                                    <span className="inline-flex text-[9px] font-extrabold uppercase tracking-[0.07em] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 shrink-0">Fechado</span>
+                                  )}
+                                  {item.recordKind === 'manual' && (
+                                    <span className="inline-flex text-[9px] font-extrabold uppercase tracking-[0.07em] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 shrink-0">Manual</span>
+                                  )}
+                                  {item.recordKind === 'legacy' && (
+                                    <span className="inline-flex text-[9px] font-extrabold uppercase tracking-[0.07em] px-1.5 py-0.5 rounded-full bg-slate-50 text-slate-400 shrink-0">Antigo</span>
+                                  )}
+                                  <span className={`inline-flex text-[10px] font-extrabold uppercase tracking-[0.07em] px-2 py-0.5 rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.03)] ${cat.tagCls} truncate`}>
+                                    {cat.label}
+                                  </span>
+                                </div>
                                 <span className="text-[11px] text-slate-400 font-medium tabular-nums shrink-0">{formatDate(item.date)}</span>
                               </div>
 
@@ -1902,13 +1928,13 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     <div className="w-11 h-11 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 animate-gentle-float shadow-[0_4px_12px_rgba(15,23,42,0.04)]">
                       <FileText size={18} />
                     </div>
-                    <p className="text-slate-800 text-sm font-bold">Ainda não há evoluções registradas</p>
-                    <p className="text-slate-500 text-xs leading-relaxed max-w-[260px]">Registre a primeira evolução para iniciar o histórico clínico do paciente.</p>
+                    <p className="text-slate-800 text-sm font-bold">Nenhum registro clínico ainda</p>
+                    <p className="text-slate-500 text-xs leading-relaxed max-w-[260px]">Registre o primeiro atendimento ou observação para iniciar o histórico clínico.</p>
                     <button
                       onClick={() => setIsAddingEvolution(true)}
                       className="mt-2 px-4 py-2.5 rounded-xl bg-slate-950 text-white text-xs font-semibold hover:bg-slate-900 ios-press transition-all duration-200 shadow-[0_2px_8px_rgba(15,23,42,0.15)]"
                     >
-                      Nova evolução
+                      + Registro clínico
                     </button>
                   </div>
                 </div>

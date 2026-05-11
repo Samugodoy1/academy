@@ -191,7 +191,7 @@ function appointmentHasEvolution(
  *
  * Business rules implemented:
  *
- * 1. FINISHED + no evolution  → pending "Fechar evolucao", show in "Para fechar"
+ * 1. FINISHED + no evolution  → pending "Fechar atendimento", show in "Para fechar"
  * 2. FINISHED + has evolution → no pending from this appointment
  * 3. Future appointment       → only prep pendings (anamnesis, odontogram)
  * 4. CANCELLED / NO_SHOW      → ignored, no evolution pending
@@ -214,6 +214,7 @@ export function deriveAcademyPatientState(
   const finishedWithoutEvolution = finishedApps.filter(
     a => !appointmentHasEvolution(a, patient),
   );
+  console.log('[deriveState]', { patient_id: patient.id, finishedCount: finishedApps.length, pendingCount: finishedWithoutEvolution.length, evolutions: (patient.evolution || []).map((e: any) => ({ id: e.id, appointment_id: e.appointment_id })) });
 
   // Deduplicate: keep only the most recent FINISHED appointment per patient
   // (there is only one patient here, but multiple appointments can be pending).
@@ -243,7 +244,7 @@ export function deriveAcademyPatientState(
   for (const app of dedupedFinished) {
     pendings.push({
       kind: 'evolution',
-      label: 'Fechar evolucao',
+      label: 'Fechar atendimento',
       appointmentId: app.id,
     });
   }
@@ -280,7 +281,7 @@ export function deriveAcademyPatientState(
   const showInParaFechar = dedupedFinished.length > 0;
   let pendingLabel: string;
   if (dedupedFinished.length > 0) {
-    pendingLabel = 'Fechar evolucao';
+    pendingLabel = 'Fechar atendimento';
   } else if (pendings.length > 0) {
     pendingLabel = pendings[0].label;
   } else {
@@ -329,7 +330,7 @@ export function buildParaFecharRows(
         patientId: patient.id,
         appointmentId: app.id,
         title: patient.name || app.patient_name || 'Paciente',
-        meta: 'Evolucao aberta. Registre o essencial.',
+        meta: 'Falta registrar a evolução para fechar o atendimento.',
         tone: 'rose',
       });
     }

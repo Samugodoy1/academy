@@ -2548,29 +2548,32 @@ export default function App() {
 
   const addEvolution = async (evolutionData: any) => {
     if (!selectedPatient || !user) return;
+    const payload = {
+      notes: evolutionData.notes,
+      procedure_performed: evolutionData.procedure_performed || evolutionData.procedure,
+      materials: evolutionData.materials,
+      observations: evolutionData.observations,
+      appointment_id: evolutionData.appointment_id || undefined,
+    };
+    console.log('[addEvolution] payload:', { patient_id: selectedPatient.id, appointment_id: payload.appointment_id });
     try {
       const res = await apiFetch(`/api/patients/${selectedPatient.id}/evolution`, {
         method: 'POST',
-        body: JSON.stringify({
-          notes: evolutionData.notes,
-          procedure_performed: evolutionData.procedure_performed || evolutionData.procedure,
-          materials: evolutionData.materials,
-          observations: evolutionData.observations,
-          appointment_id: evolutionData.appointment_id || undefined,
-        })
+        body: JSON.stringify(payload)
       });
+      const data = await res.json();
+      console.log('[addEvolution] response:', { ok: res.ok, data });
       if (res.ok) {
         await fetchData();
         openPatientRecord(selectedPatient.id);
         showNotification(evolutionData.appointment_id
-          ? 'Evolução registrada. Atendimento fechado.'
-          : 'Evolução clínica registrada!');
+          ? 'Atendimento fechado. Evolução salva no prontuário.'
+          : 'Registro clínico salvo!');
       } else {
-        const data = await res.json();
         showNotification(data.error || 'Erro ao registrar evolução', 'error');
       }
     } catch (error) {
-      console.error('Error adding evolution:', error);
+      console.error('[addEvolution] error:', error);
       showNotification('Erro de conexão ao registrar evolução', 'error');
     }
   };
@@ -4533,7 +4536,7 @@ export default function App() {
                         };
                         const getPatientNextAction = (patient: Patient, meta: ReturnType<typeof getPatientCardMeta>, nextAppointment: Appointment | null) => {
                           const state = deriveAcademyPatientState(patient, appointments, now);
-                          if (state.finishedWithoutEvolution.length > 0) return 'Fechar evolução';
+                          if (state.finishedWithoutEvolution.length > 0) return 'Fechar atendimento';
                           if (nextAppointment && !hasFilledAnamnesis(patient)) return 'Revisar anamnese';
                           if (nextAppointment && hasEvolution(patient)) return 'Revisar última evolução';
                           if (nextAppointment) return 'Preparar conduta';
@@ -4543,7 +4546,7 @@ export default function App() {
                         };
                         const getCasePendingLabel = (patient: Patient, meta: ReturnType<typeof getPatientCardMeta>, nextAppointment: Appointment | null) => {
                           const state = deriveAcademyPatientState(patient, appointments, now);
-                          if (state.finishedWithoutEvolution.length > 0) return 'Fechar evolução';
+                          if (state.finishedWithoutEvolution.length > 0) return 'Fechar atendimento';
                           if (nextAppointment && !hasFilledAnamnesis(patient)) return 'Anamnese pendente';
                           if (nextAppointment && hasEvolution(patient)) return 'Revisar última evolução';
                           if (nextAppointment) return 'Preparar conduta';

@@ -153,12 +153,24 @@ export const NovaEvolucao: React.FC<NovaEvolucaoProps> = ({
 
   const isClosingAppointment = Boolean(appointment?.id);
   const displayName = patientName || appointment?.patient_name || 'Paciente';
+
+  // Debug logs
+  console.log('[NovaEvolucao] opened:', { mode: isClosingAppointment ? 'close_appointment' : 'manual_record', patientId, appointment_id: appointment?.id, appointment_status: appointment?.status, appointment_start_time: appointment?.start_time });
   const displayProcedure = appointment?.notes || appointment?.procedure || null;
   const displayDate = appointment?.start_time
     ? (() => {
         try {
           const d = new Date(appointment.start_time);
           return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        } catch { return null; }
+      })()
+    : null;
+  const displayTime = appointment?.start_time
+    ? (() => {
+        try {
+          const d = new Date(appointment.start_time);
+          const h = d.getHours(); const m = d.getMinutes();
+          return (h > 0 || m > 0) ? d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : null;
         } catch { return null; }
       })()
     : null;
@@ -183,6 +195,7 @@ export const NovaEvolucao: React.FC<NovaEvolucaoProps> = ({
   const handleSave = async () => {
     if (inputText.trim() === '') return;
     setIsSaving(true);
+    console.log('[NovaEvolucao] handleSave:', { mode: isClosingAppointment ? 'close_appointment' : 'manual_record', patientId, appointment_id: appointment?.id, textLength: inputText.length });
 
     const newEntry: Record<string, unknown> = {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -239,11 +252,11 @@ export const NovaEvolucao: React.FC<NovaEvolucaoProps> = ({
           </button>
           <div className="min-w-0">
             <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight truncate">
-              {isClosingAppointment ? 'Fechar evolução' : 'Nova evolução'}
+              {isClosingAppointment ? 'Fechar atendimento' : 'Registro clínico'}
             </h2>
-            {isClosingAppointment && (
-              <p className="text-[10px] text-slate-400 font-medium truncate">Registre só o essencial do atendimento.</p>
-            )}
+            <p className="text-[10px] text-slate-400 font-medium truncate">
+              {isClosingAppointment ? 'Registre só o essencial antes de seguir.' : 'Adicione uma observação clínica ao prontuário.'}
+            </p>
           </div>
         </div>
 
@@ -264,7 +277,7 @@ export const NovaEvolucao: React.FC<NovaEvolucaoProps> = ({
             ) : isClosingAppointment ? (
               'Salvar e fechar atendimento'
             ) : (
-              'Salvar evolução'
+              'Salvar registro'
             )}
           </button>
         </div>
@@ -298,7 +311,9 @@ export const NovaEvolucao: React.FC<NovaEvolucaoProps> = ({
                       <span className="text-slate-300">·</span>
                     )}
                     {displayDate && (
-                      <span className="text-[11px] text-slate-400 font-medium">{displayDate}</span>
+                      <span className="text-[11px] text-slate-400 font-medium">
+                        {displayDate}{displayTime ? ` · ${displayTime}` : ''}
+                      </span>
                     )}
                   </div>
                   <div className="flex items-center gap-1.5 mt-1.5">
@@ -319,7 +334,9 @@ export const NovaEvolucao: React.FC<NovaEvolucaoProps> = ({
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder={
-                'Escreva como você falaria para lembrar depois:\no que foi feito, em quais dentes, materiais usados e o próximo passo.'
+                isClosingAppointment
+                ? 'Ex: Acesso coronário no dente 47, odontometria realizada, instrumentação inicial com lima #15. Paciente sem intercorrências. Retorno em 7 dias para obturação.'
+                : 'Descreva a observação clínica...'
               }
               className="flex-1 w-full bg-transparent border-none focus:ring-0 text-slate-900 text-base sm:text-lg leading-relaxed placeholder:text-slate-200 font-medium resize-none outline-none"
             />
@@ -346,6 +363,21 @@ export const NovaEvolucao: React.FC<NovaEvolucaoProps> = ({
                 ))}
               </div>
             </div>
+
+            {/* "O que não pode faltar" hint — only when textarea is empty */}
+            {isClosingAppointment && inputText.length === 0 && (
+              <div className="mt-3 pt-3 border-t border-slate-50">
+                <p className="text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">O que não pode faltar</p>
+                <div className="text-[11px] text-slate-300 font-medium leading-relaxed space-y-0.5">
+                  <p>• Dente/região</p>
+                  <p>• Conduta realizada</p>
+                  <p>• Material usado</p>
+                  <p>• Intercorrência, se teve</p>
+                  <p>• Próximo passo</p>
+                  <p>• Retorno</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── "O que entendi" — subtle interpretation card ── */}
@@ -423,8 +455,8 @@ export const NovaEvolucao: React.FC<NovaEvolucaoProps> = ({
             </div>
             <span className="text-[13px] font-semibold">
               {isClosingAppointment
-                ? 'Evolução registrada. Atendimento fechado.'
-                : 'Evolução salva com sucesso'}
+                ? 'Atendimento fechado. A evolução ficou salva no prontuário.'
+                : 'Registro salvo no prontuário.'}
             </span>
           </motion.div>
         )}

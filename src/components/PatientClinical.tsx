@@ -407,25 +407,65 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       ),
     ];
 
+    const patientAppts = appointments.filter((a: any) => a.patient_id === patient?.id);
+
     const evolutionEvents = mergedEvolutions
       .map((e: any) => {
         const eventType = resolveClinicalEventType(e);
-        // Determine record kind for timeline display
         const hasAppointmentId = e.appointment_id != null;
         const recordKind: 'closed' | 'manual' | 'legacy' = hasAppointmentId
           ? 'closed'
           : (e.created_at && new Date(e.created_at) > new Date('2026-05-10'))
             ? 'manual'
             : 'legacy';
-        const kindLabel = recordKind === 'closed'
-          ? 'Atendimento fechado'
-          : recordKind === 'manual'
-            ? 'Registro manual'
-            : 'Registro antigo';
+
+        // Enrich with appointment data when available
+        const linkedAppointment = hasAppointmentId
+          ? patientAppts.find((a: any) => a.id === e.appointment_id)
+          : null;
+        const appointmentProcedure = linkedAppointment?.notes || linkedAppointment?.procedure || null;
+        const appointmentDate = linkedAppointment?.start_time
+          ? (() => {
+            try {
+              const d = new Date(linkedAppointment.start_time);
+              if (isNaN(d.getTime())) return null;
+              const day = String(d.getDate()).padStart(2, '0');
+              const month = String(d.getMonth() + 1).padStart(2, '0');
+              const hours = String(d.getHours()).padStart(2, '0');
+              const minutes = String(d.getMinutes()).padStart(2, '0');
+              return `${day}/${month} às ${hours}:${minutes}`;
+            } catch { return null; }
+          })()
+          : null;
+        const registeredDate = e.created_at
+          ? (() => {
+            try {
+              const d = new Date(e.created_at);
+              if (isNaN(d.getTime())) return null;
+              const day = String(d.getDate()).padStart(2, '0');
+              const month = String(d.getMonth() + 1).padStart(2, '0');
+              const hours = String(d.getHours()).padStart(2, '0');
+              const minutes = String(d.getMinutes()).padStart(2, '0');
+              return `${day}/${month} às ${hours}:${minutes}`;
+            } catch { return null; }
+          })()
+          : null;
+
+        let kindLabel: string;
+        if (recordKind === 'closed') {
+          kindLabel = appointmentProcedure
+            ? `Atendimento fechado — ${appointmentProcedure}`
+            : 'Atendimento fechado';
+        } else if (recordKind === 'manual') {
+          kindLabel = 'Registro manual';
+        } else {
+          kindLabel = 'Registro antigo';
+        }
+
         return {
           id: `evo-${e.id}`,
           date: e.date,
-          title: e.procedure || kindLabel,
+          title: e.procedure || (appointmentProcedure ? `${appointmentProcedure}` : (recordKind === 'closed' ? 'Atendimento fechado' : kindLabel)),
           notes: e.notes || '',
           status:
             eventType === 'PROCEDURE_COMPLETION'
@@ -437,6 +477,8 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
           recordKind,
           kindLabel,
           appointmentId: e.appointment_id,
+          appointmentDate,
+          registeredDate,
         };
       })
       .filter((event: any) => event.type !== 'DIAGNOSIS');
@@ -444,7 +486,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     return evolutionEvents.sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
-  }, [patient?.evolution, optimisticEvolutions]);
+  }, [patient?.evolution, patient?.id, optimisticEvolutions, appointments]);
 
   const mergedOdontogram = useMemo(
     () => ({
@@ -1895,10 +1937,24 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                                 <p className="text-[12px] text-slate-500 mt-1.5 leading-relaxed line-clamp-2">{item.notes}</p>
                               )}
 
+                              {/* row 3b: appointment context (enriched) */}
+                              {item.recordKind === 'closed' && (item.appointmentDate || item.registeredDate) && (
+                                <div className="mt-1.5 text-[11px] text-slate-400 leading-relaxed space-y-0.5">
+                                  {item.appointmentDate && (
+                                    <p>Atendido em {item.appointmentDate}</p>
+                                  )}
+                                  {item.registeredDate && item.registeredDate !== item.appointmentDate && (
+                                    <p>Registrado em {item.registeredDate}</p>
+                                  )}
+                                </div>
+                              )}
+
                               {/* row 4: status */}
                               <div className="mt-2.5 flex items-center gap-1.5">
                                 <div className={`w-[7px] h-[7px] rounded-full flex-shrink-0 ${statusStyle.dot}`} />
-                                <span className={`text-[11px] font-semibold ${statusStyle.text}`}>{statusStyle.label}</span>
+                                <span className={`text-[11px] font-semibold ${statusStyle.text}`}>
+                                  {item.recordKind === 'closed' ? 'Fechado' : statusStyle.label}
+                                </span>
                               </div>
                             </div>
                           </motion.div>

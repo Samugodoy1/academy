@@ -68,7 +68,9 @@ import {
   addMinutesToLocalDateTime,
   createLocalDateTime,
   formatAppointmentDate,
+  formatAppointmentDateInputValue,
   formatAppointmentTime,
+  formatAppointmentTimeInputValue,
   formatDate,
   formatDateInputValue,
   formatTimeInputValue,
@@ -107,6 +109,8 @@ interface Patient {
     date: string;
     notes: string;
     procedure_performed: string;
+    appointment_id?: number | null;
+    created_at?: string;
   }>;
   files?: Array<{
     id: number;
@@ -157,7 +161,14 @@ interface Patient {
     notes: string;
     materials?: string;
     observations?: string;
+    procedure_performed?: string;
+    appointment_id?: number | null;
+    created_at?: string;
   }>;
+  last_evolution_date?: string;
+  evolution_count?: number;
+  odontogram_data?: unknown;
+  has_odontogram_record?: boolean;
   financial?: {
     transactions: Transaction[];
     paymentPlans: PaymentPlan[];
@@ -305,8 +316,8 @@ const BottomNavItem = ({ id, icon: Icon, label, activeTab, setActiveTab, navigat
 );
 
 const StatusBadge = ({ app, now }: { app: Appointment; now: Date }) => {
-  const startTime = parseAppointmentDateTime(app.start_time) || new Date(app.start_time);
-  const diffInMinutes = Math.floor((startTime.getTime() - now.getTime()) / 60000);
+  const startTime = parseAppointmentDateTime(app.start_time);
+  const diffInMinutes = startTime ? Math.floor((startTime.getTime() - now.getTime()) / 60000) : 0;
 
   let label = '';
   let style = '';
@@ -351,7 +362,20 @@ const StatusBadge = ({ app, now }: { app: Appointment; now: Date }) => {
   );
 };
 
-const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpdateAnamnesis, onAddEvolution, onAddTransaction, onOpenSidebar, apiFetch, setAppActiveTab, navigate, pendingEvolutionAppointment, onClearPendingEvolution }: any) => {
+const patientHasEvolutionForAppointment = (patient: any, appointment: any) => {
+  if (!patient || !appointment?.id) return false;
+  const appointmentId = Number(appointment.id);
+  if (!Number.isFinite(appointmentId)) return false;
+
+  const evolutions = [
+    ...(Array.isArray(patient.evolution) ? patient.evolution : []),
+    ...(Array.isArray(patient.clinicalEvolution) ? patient.clinicalEvolution : []),
+  ];
+
+  return evolutions.some((evolution: any) => Number(evolution?.appointment_id) === appointmentId);
+};
+
+const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpdateAnamnesis, onAddEvolution, onAddTransaction, onOpenSidebar, apiFetch, setAppActiveTab, navigate, pendingEvolutionAppointment, onClearPendingEvolution, onPatientLoaded }: any) => {
   const { id } = useParams();
   const [patient, setPatient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -370,6 +394,7 @@ const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpda
       if (res.ok) {
         const data = await res.json();
         setPatient(data);
+        onPatientLoaded?.(data);
       }
     } catch (error) {
       console.error('Error loading patient:', error);
@@ -383,6 +408,14 @@ const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpda
   useEffect(() => {
     loadPatient(true);
   }, [loadPatient]);
+
+  const pendingEvolutionAlreadyClosed = patientHasEvolutionForAppointment(patient, pendingEvolutionAppointment);
+
+  useEffect(() => {
+    if (pendingEvolutionAlreadyClosed) {
+      onClearPendingEvolution?.();
+    }
+  }, [pendingEvolutionAlreadyClosed, onClearPendingEvolution]);
 
   if (loading) return (
     <div className="flex-1 flex items-center justify-center bg-slate-50">
@@ -404,8 +437,9 @@ const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpda
         onUpdatePatient(updated);
       }}
       onAddEvolution={async (data: any) => {
-        setPatient((prev: any) => ({ ...prev, evolution: [data, ...(prev.evolution || [])] }));
-        await onAddEvolution(data);
+        const evolutionWithPatient = { ...data, patient_id: patient.id };
+        setPatient((prev: any) => ({ ...prev, evolution: [evolutionWithPatient, ...(prev.evolution || [])] }));
+        await onAddEvolution(evolutionWithPatient);
         if (onClearPendingEvolution) onClearPendingEvolution();
       }}
       onRefreshPatient={() => loadPatient(false)}
@@ -413,7 +447,7 @@ const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpda
       setAppActiveTab={setAppActiveTab}
       navigate={navigate}
       product={DEFAULT_PRODUCT}
-      pendingEvolutionAppointment={pendingEvolutionAppointment}
+      pendingEvolutionAppointment={pendingEvolutionAlreadyClosed ? null : pendingEvolutionAppointment}
     />
   );
 };
@@ -1258,7 +1292,47 @@ export default function App() {
       const pData = await pRes.json();
       const aData = await aRes.json();
 
-      if (Array.isArray(pData)) setPatients(pData);
+      let hydratedPatients = Array.isArray(pData) ? pData : [];
+      if (DEFAULT_PRODUCT === 'academy' && Array.isArray(pData) && Array.isArray(aData)) {
+        const relevantPatientIds = Array.from(new Set(
+          aData
+            .filter((appointment: any) => !['CANCELLED', 'NO_SHOW'].includes(String(appointment.status || '').toUpperCase()))
+            .map((appointment: any) => Number(appointment.patient_id))
+            .filter((patientId: number) => Number.isFinite(patientId))
+        ));
+
+        if (relevantPatientIds.length > 0) {
+          const details = await Promise.all(
+            relevantPatientIds.map(async (patientId) => {
+              try {
+                const detailRes = await apiFetch(`/api/patients/${patientId}`, { explicitToken });
+                return detailRes.ok ? await detailRes.json() : null;
+              } catch (error) {
+                console.error('[fetchData] Error hydrating academy patient:', { patientId, error });
+                return null;
+              }
+            })
+          );
+
+          const detailById = new Map(
+            details
+              .filter(Boolean)
+              .map((patient: any) => [Number(patient.id), patient])
+          );
+
+          hydratedPatients = pData.map((patient: any) => {
+            const detail = detailById.get(Number(patient.id));
+            return detail ? { ...patient, ...detail } : patient;
+          });
+
+          console.log('[fetchData] academy patient hydration:', {
+            requested: relevantPatientIds,
+            loaded: Array.from(detailById.keys()),
+          });
+        }
+      }
+
+      if (Array.isArray(pData)) setPatients(hydratedPatients);
       if (Array.isArray(aData)) setAppointments(aData);
       setTransactions([]);
       setFinancialSummary(null);
@@ -1802,8 +1876,8 @@ export default function App() {
       patient_id: appointment.patient_id.toString(),
       patient_name: appointment.patient_name || '',
       dentist_id: appointment.dentist_id?.toString() || (user?.id ? user.id.toString() : ''),
-      date: formatDateInputValue(startDate),
-      time: formatTimeInputValue(startDate),
+      date: formatAppointmentDateInputValue(startDate),
+      time: formatAppointmentTimeInputValue(startDate),
       duration: durationMinutes.toString(),
       notes: appointment.notes || ''
     });
@@ -2250,7 +2324,7 @@ export default function App() {
     if (conflicting) {
       setAppointmentConflict(conflicting);
       setAppointmentFormError(
-        `Conflito: ${conflicting.patient_name} às ${new Date(conflicting.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}–${new Date(conflicting.end_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+        `Conflito: ${conflicting.patient_name} às ${formatAppointmentTime(conflicting.start_time)}-${formatAppointmentTime(conflicting.end_time)}`
       );
       return;
     }
@@ -2456,6 +2530,7 @@ export default function App() {
       const res = await apiFetch(`/api/patients/${id}`);
       const data = await res.json();
       setSelectedPatient(data);
+      setPatients(prev => prev.map(p => p.id === data.id ? { ...p, ...data } : p));
       setMilestone('recordOpened');
       try {
         await apiFetch('/api/profile/onboarding', {
@@ -2486,12 +2561,15 @@ export default function App() {
         body: JSON.stringify(anamnesisData)
       });
       if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const savedAnamnesis = data?.anamnesis || anamnesisData;
         setPatients(prev => prev.map(p => {
           if (p.id === patientId) {
-            return { ...p, anamnesis: anamnesisData };
+            return { ...p, anamnesis: savedAnamnesis };
           }
           return p;
         }));
+        setSelectedPatient(prev => prev?.id === patientId ? { ...prev, anamnesis: savedAnamnesis } : prev);
         showNotification('Anamnese salva com sucesso!');
       } else {
         const data = await res.json();
@@ -2547,17 +2625,30 @@ export default function App() {
   };
 
   const addEvolution = async (evolutionData: any) => {
-    if (!selectedPatient || !user) return;
+    if (!user) return;
+    const patientId = Number(evolutionData.patient_id || selectedPatient?.id);
+    if (!Number.isFinite(patientId)) {
+      console.error('[addEvolution] missing patient_id:', { selected_patient_id: selectedPatient?.id, evolutionData });
+      showNotification('Nao foi possivel identificar o paciente da evolucao', 'error');
+      return;
+    }
+    const appointmentId = evolutionData.appointment_id === undefined || evolutionData.appointment_id === null || evolutionData.appointment_id === ''
+      ? undefined
+      : Number(evolutionData.appointment_id);
     const payload = {
       notes: evolutionData.notes,
       procedure_performed: evolutionData.procedure_performed || evolutionData.procedure,
       materials: evolutionData.materials,
       observations: evolutionData.observations,
-      appointment_id: evolutionData.appointment_id || undefined,
+      appointment_id: Number.isFinite(appointmentId) ? appointmentId : undefined,
     };
-    console.log('[addEvolution] payload:', { patient_id: selectedPatient.id, appointment_id: payload.appointment_id });
+    console.log('[addEvolution] payload:', {
+      patient_id: patientId,
+      selected_patient_id: selectedPatient?.id,
+      appointment_id: payload.appointment_id,
+    });
     try {
-      const res = await apiFetch(`/api/patients/${selectedPatient.id}/evolution`, {
+      const res = await apiFetch(`/api/patients/${patientId}/evolution`, {
         method: 'POST',
         body: JSON.stringify(payload)
       });
@@ -2565,7 +2656,9 @@ export default function App() {
       console.log('[addEvolution] response:', { ok: res.ok, data });
       if (res.ok) {
         await fetchData();
-        openPatientRecord(selectedPatient.id);
+        if (selectedPatient?.id === patientId) {
+          openPatientRecord(patientId);
+        }
         showNotification(evolutionData.appointment_id
           ? 'Atendimento fechado. Evolução salva no prontuário.'
           : 'Registro clínico salvo!');
@@ -2782,6 +2875,9 @@ export default function App() {
                 navigate={navigate}
                 pendingEvolutionAppointment={pendingEvolutionAppointment}
                 onClearPendingEvolution={() => setPendingEvolutionAppointment(null)}
+                onPatientLoaded={(loadedPatient: Patient) => {
+                  setPatients(prev => prev.map(p => p.id === loadedPatient.id ? { ...p, ...loadedPatient } : p));
+                }}
               />
             </main>
           </div>
@@ -4717,7 +4813,7 @@ export default function App() {
                         const featuredCase = caseSummaries
                           .filter(({ patient, meta, intel, nextAppointment }) => nextAppointment || isCasePending(patient, meta, intel, nextAppointment))
                           .sort((a, b) => {
-                            if (a.nextAppointment && b.nextAppointment) return new Date(a.nextAppointment.start_time).getTime() - new Date(b.nextAppointment.start_time).getTime();
+                            if (a.nextAppointment && b.nextAppointment) return getAppointmentTime(a.nextAppointment.start_time) - getAppointmentTime(b.nextAppointment.start_time);
                             if (a.nextAppointment) return -1;
                             if (b.nextAppointment) return 1;
                             return 0;

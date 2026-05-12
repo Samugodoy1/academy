@@ -31,7 +31,7 @@ import {
 import { AnimatePresence, motion } from 'motion/react';
 import { NovaEvolucao } from './NovaEvolucao';
 import { Odontogram } from './Odontogram';
-import { formatAppointmentTime, formatDate, getAppointmentTime } from '../utils/dateUtils';
+import { formatAppointmentDate, formatAppointmentTime, formatDate, getAppointmentTime } from '../utils/dateUtils';
 import { boxGuideProcedures, boxGuides, type BoxGuideProcedure } from '../data/boxGuides';
 
 interface PatientClinicalProps {
@@ -426,15 +426,9 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
         const appointmentProcedure = linkedAppointment?.notes || linkedAppointment?.procedure || null;
         const appointmentDate = linkedAppointment?.start_time
           ? (() => {
-            try {
-              const d = new Date(linkedAppointment.start_time);
-              if (isNaN(d.getTime())) return null;
-              const day = String(d.getDate()).padStart(2, '0');
-              const month = String(d.getMonth() + 1).padStart(2, '0');
-              const hours = String(d.getHours()).padStart(2, '0');
-              const minutes = String(d.getMinutes()).padStart(2, '0');
-              return `${day}/${month} às ${hours}:${minutes}`;
-            } catch { return null; }
+            const date = formatAppointmentDate(linkedAppointment.start_time, { day: '2-digit', month: '2-digit' });
+            const time = formatAppointmentTime(linkedAppointment.start_time);
+            return date && time !== '--:--' ? `${date} às ${time}` : null;
           })()
           : null;
         const registeredDate = e.created_at

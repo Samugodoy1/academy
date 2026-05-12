@@ -21,8 +21,20 @@ export const formatDate = (dateStr: string | undefined | null) => {
   return `${day}/${month}/${year}`;
 };
 
-const LOCAL_DATE_TIME_RE = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2}))?)?/;
+export const ACADEMY_TIME_ZONE = 'America/Sao_Paulo';
+
+const LOCAL_DATE_TIME_RE = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2}))?)?$/;
 const EXPLICIT_TIMEZONE_RE = /(Z|[+-]\d{2}:?\d{2})$/i;
+const zonedFormatterCache = new Map<string, Intl.DateTimeFormat>();
+
+type LocalDateTimeParts = {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  second: number;
+};
 
 export const padDatePart = (value: number) => String(value).padStart(2, '0');
 
@@ -32,6 +44,122 @@ export const formatDateInputValue = (date: Date) => {
 
 export const formatTimeInputValue = (date: Date) => {
   return `${padDatePart(date.getHours())}:${padDatePart(date.getMinutes())}`;
+};
+
+const getZonedFormatter = (timeZone: string) => {
+  let formatter = zonedFormatterCache.get(timeZone);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23',
+    });
+    zonedFormatterCache.set(timeZone, formatter);
+  }
+  return formatter;
+};
+
+const partsToRecord = (parts: Intl.DateTimeFormatPart[]) => {
+  return parts.reduce<Record<string, string>>((acc, part) => {
+    if (part.type !== 'literal') acc[part.type] = part.value;
+    return acc;
+  }, {});
+};
+
+const getZonedDateTimeParts = (date: Date, timeZone = ACADEMY_TIME_ZONE): LocalDateTimeParts => {
+  const parts = partsToRecord(getZonedFormatter(timeZone).formatToParts(date));
+  return {
+    year: Number(parts.year),
+    month: Number(parts.month),
+    day: Number(parts.day),
+    hour: Number(parts.hour),
+    minute: Number(parts.minute),
+    second: Number(parts.second),
+  };
+};
+
+const parseLocalDateTimeParts = (value: string): LocalDateTimeParts | null => {
+  const match = value.trim().match(LOCAL_DATE_TIME_RE);
+  if (!match) return null;
+
+  const [, year, month, day, hour = '00', minute = '00', second = '00'] = match;
+  const parts = {
+    year: Number(year),
+    month: Number(month),
+    day: Number(day),
+    hour: Number(hour),
+    minute: Number(minute),
+    second: Number(second),
+  };
+
+  if (
+    parts.month < 1 || parts.month > 12 ||
+    parts.day < 1 || parts.day > 31 ||
+    parts.hour < 0 || parts.hour > 23 ||
+    parts.minute < 0 || parts.minute > 59 ||
+    parts.second < 0 || parts.second > 59
+  ) {
+    return null;
+  }
+
+  return parts;
+};
+
+const getTimeZoneOffsetMs = (date: Date, timeZone = ACADEMY_TIME_ZONE) => {
+  const parts = getZonedDateTimeParts(date, timeZone);
+  return Date.UTC(
+    parts.year,
+    parts.month - 1,
+    parts.day,
+    parts.hour,
+    parts.minute,
+    parts.second
+  ) - date.getTime();
+};
+
+const sameWallClock = (a: LocalDateTimeParts, b: LocalDateTimeParts) => (
+  a.year === b.year &&
+  a.month === b.month &&
+  a.day === b.day &&
+  a.hour === b.hour &&
+  a.minute === b.minute &&
+  a.second === b.second
+);
+
+const createAcademyDateFromWallClock = (
+  parts: LocalDateTimeParts,
+  timeZone = ACADEMY_TIME_ZONE
+) => {
+  const utcGuess = Date.UTC(
+    parts.year,
+    parts.month - 1,
+    parts.day,
+    parts.hour,
+    parts.minute,
+    parts.second
+  );
+
+  let instant = new Date(utcGuess - getTimeZoneOffsetMs(new Date(utcGuess), timeZone));
+  instant = new Date(utcGuess - getTimeZoneOffsetMs(instant, timeZone));
+
+  return Number.isNaN(instant.getTime()) || !sameWallClock(getZonedDateTimeParts(instant, timeZone), parts)
+    ? null
+    : instant;
+};
+
+export const formatAppointmentDateInputValue = (date: Date) => {
+  const parts = getZonedDateTimeParts(date);
+  return `${parts.year}-${padDatePart(parts.month)}-${padDatePart(parts.day)}`;
+};
+
+export const formatAppointmentTimeInputValue = (date: Date) => {
+  const parts = getZonedDateTimeParts(date);
+  return `${padDatePart(parts.hour)}:${padDatePart(parts.minute)}`;
 };
 
 export const createLocalDateTime = (date: string, time: string, seconds = '00') => {
@@ -54,16 +182,8 @@ export const parseAppointmentDateTime = (value: string | undefined | null): Date
 
   const match = raw.match(LOCAL_DATE_TIME_RE);
   if (match) {
-    const [, year, month, day, hour = '00', minute = '00', second = '00'] = match;
-    const parsed = new Date(
-      Number(year),
-      Number(month) - 1,
-      Number(day),
-      Number(hour),
-      Number(minute),
-      Number(second)
-    );
-    return Number.isNaN(parsed.getTime()) ? null : parsed;
+    const parts = parseLocalDateTimeParts(raw);
+    return parts ? createAcademyDateFromWallClock(parts) : null;
   }
 
   const parsed = new Date(raw);
@@ -73,25 +193,25 @@ export const parseAppointmentDateTime = (value: string | undefined | null): Date
 export const addMinutesToLocalDateTime = (value: string, minutes: number) => {
   const parsed = parseAppointmentDateTime(value);
   if (!parsed) return '';
-  parsed.setMinutes(parsed.getMinutes() + minutes);
-  return `${formatDateInputValue(parsed)} ${formatTimeInputValue(parsed)}:00`;
+  const shifted = new Date(parsed.getTime() + minutes * 60000);
+  return `${formatAppointmentDateInputValue(shifted)} ${formatAppointmentTimeInputValue(shifted)}:00`;
 };
 
 export const formatAppointmentDate = (value: string | undefined | null, options?: Intl.DateTimeFormatOptions) => {
   const parsed = parseAppointmentDateTime(value);
   if (!parsed) return '';
-  return parsed.toLocaleDateString('pt-BR', options);
+  return parsed.toLocaleDateString('pt-BR', { ...options, timeZone: ACADEMY_TIME_ZONE });
 };
 
 export const formatAppointmentTime = (value: string | undefined | null) => {
   const parsed = parseAppointmentDateTime(value);
   if (!parsed) return '--:--';
-  return parsed.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  return parsed.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: ACADEMY_TIME_ZONE });
 };
 
 export const isSameAppointmentDay = (value: string | undefined | null, date: Date) => {
   const parsed = parseAppointmentDateTime(value);
-  return !!parsed && parsed.toDateString() === date.toDateString();
+  return !!parsed && formatAppointmentDateInputValue(parsed) === formatDateInputValue(date);
 };
 
 export const getAppointmentTime = (value: string | undefined | null) => {

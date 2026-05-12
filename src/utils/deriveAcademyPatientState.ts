@@ -1,9 +1,9 @@
-import { parseAppointmentDateTime } from './dateUtils';
+import { formatAppointmentDate, formatAppointmentTime, getAppointmentTime, parseAppointmentDateTime } from './dateUtils';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
 interface EvolutionRecord {
-  id?: number;
+  id?: number | string;
   date?: string;
   created_at?: string;
   notes?: string;
@@ -11,12 +11,12 @@ interface EvolutionRecord {
   procedure_performed?: string;
   materials?: string;
   observations?: string;
-  appointment_id?: number | null;
+  appointment_id?: number | string | null;
 }
 
 interface AppointmentRecord {
-  id: number;
-  patient_id: number;
+  id: number | string;
+  patient_id: number | string;
   patient_name?: string;
   start_time: string;
   end_time?: string;
@@ -38,7 +38,7 @@ interface AnamnesisRecord {
 }
 
 interface PatientRecord {
-  id: number;
+  id: number | string;
   name?: string;
   evolution?: EvolutionRecord[];
   clinicalEvolution?: EvolutionRecord[];
@@ -96,17 +96,27 @@ const ACTIVE_STATUSES = new Set(['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS']);
 
 const norm = (s?: string) => String(s || '').toUpperCase();
 
+const toNumberId = (value: unknown): number | null => {
+  if (value === null || value === undefined || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+};
+
 const parseDate = (value?: string | null): Date | null => {
   if (!value) return null;
   return parseAppointmentDateTime(value);
 };
 
-function hasFilledAnamnesis(anamnesis?: AnamnesisRecord): boolean {
-  if (!anamnesis) return false;
-  return ANAMNESIS_FIELDS.some(field => {
+function getFilledAnamnesisFields(anamnesis?: AnamnesisRecord): string[] {
+  if (!anamnesis) return [];
+  return ANAMNESIS_FIELDS.filter(field => {
     const v = anamnesis[field];
     return typeof v === 'string' ? v.trim().length > 0 : Boolean(v);
   });
+}
+
+function hasFilledAnamnesis(anamnesis?: AnamnesisRecord): boolean {
+  return getFilledAnamnesisFields(anamnesis).length > 0;
 }
 
 function hasObjectData(value: unknown): boolean {
@@ -131,8 +141,28 @@ function hasOdontogramData(patient: PatientRecord): boolean {
 }
 
 function getEvolutions(patient: PatientRecord): EvolutionRecord[] {
-  const evos = patient.evolution || patient.clinicalEvolution || [];
-  return Array.isArray(evos) ? evos : [];
+  const sources = [patient.evolution, patient.clinicalEvolution].filter(Array.isArray) as EvolutionRecord[][];
+  const seen = new Set<string>();
+  const result: EvolutionRecord[] = [];
+
+  for (const source of sources) {
+    for (const evo of source) {
+      const key = evo.id != null
+        ? `id:${evo.id}`
+        : [
+            'legacy',
+            evo.appointment_id ?? '',
+            evo.date || evo.created_at || '',
+            evo.procedure || evo.procedure_performed || '',
+            evo.notes || '',
+          ].join('|');
+      if (seen.has(key)) continue;
+      seen.add(key);
+      result.push(evo);
+    }
+  }
+
+  return result;
 }
 
 function hasTreatmentActivity(patient: PatientRecord): boolean {
@@ -152,34 +182,80 @@ function hasTreatmentActivity(patient: PatientRecord): boolean {
  * was added): match by date — an evolution whose date/created_at is on
  * the same day or after the appointment's start_time.
  */
-function appointmentHasEvolution(
+interface EvolutionMatchResult {
+  matched: boolean;
+  reason: string;
+  matchedEvolution?: EvolutionRecord;
+}
+
+function getAppointmentEvolutionMatch(
   appointment: AppointmentRecord,
   patient: PatientRecord,
-): boolean {
+): EvolutionMatchResult {
   const evolutions = getEvolutions(patient);
+  const appointmentId = toNumberId(appointment.id);
 
   // Primary: direct appointment_id match
-  if (evolutions.some(evo => evo.appointment_id != null && evo.appointment_id === appointment.id)) {
-    return true;
+  const directMatch = evolutions.find(evo => {
+    const evoAppointmentId = toNumberId(evo.appointment_id);
+    return appointmentId !== null && evoAppointmentId !== null && evoAppointmentId === appointmentId;
+  });
+
+  if (directMatch) {
+    return {
+      matched: true,
+      reason: `clinical_evolution.appointment_id=${directMatch.appointment_id} matches appointment.id=${appointment.id}`,
+      matchedEvolution: directMatch,
+    };
   }
 
   // Legacy fallback: date-based matching (only for evolutions without appointment_id)
   const start = parseDate(appointment.start_time);
-  if (!start) return false;
+  if (!start) {
+    return {
+      matched: false,
+      reason: `appointment.id=${appointment.id} has invalid start_time; no direct appointment_id match found`,
+    };
+  }
 
   const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
 
   if (patient.last_evolution_date) {
     const lastEvo = parseDate(patient.last_evolution_date);
-    if (lastEvo && lastEvo >= startDay) return true;
+    if (lastEvo && lastEvo >= startDay) {
+      return {
+        matched: true,
+        reason: `patient.last_evolution_date=${patient.last_evolution_date} is on/after appointment day`,
+      };
+    }
   }
 
-  return evolutions
+  const legacyMatch = evolutions
     .filter(evo => evo.appointment_id == null)
-    .some(evo => {
+    .find(evo => {
       const d = parseDate(evo.date || evo.created_at);
       return d ? d >= startDay : false;
     });
+
+  if (legacyMatch) {
+    return {
+      matched: true,
+      reason: `legacy evolution without appointment_id is on/after appointment day`,
+      matchedEvolution: legacyMatch,
+    };
+  }
+
+  return {
+    matched: false,
+    reason: `no clinical_evolution row with appointment_id=${appointment.id}; no legacy evolution on/after appointment day`,
+  };
+}
+
+function appointmentHasEvolution(
+  appointment: AppointmentRecord,
+  patient: PatientRecord,
+): boolean {
+  return getAppointmentEvolutionMatch(appointment, patient).matched;
 }
 
 // ── Main derivation ────────────────────────────────────────────────────────
@@ -202,7 +278,11 @@ export function deriveAcademyPatientState(
   appointments: AppointmentRecord[],
   now: Date = new Date(),
 ): PatientStateResult {
-  const patientAppointments = appointments.filter(a => a.patient_id === patient.id);
+  const patientId = toNumberId(patient.id);
+  const patientAppointments = appointments.filter(a => {
+    const appointmentPatientId = toNumberId(a.patient_id);
+    return patientId !== null && appointmentPatientId !== null && appointmentPatientId === patientId;
+  });
 
   // ── Rule 4: filter out CANCELLED / NO_SHOW ──────────────────────────
   const relevantAppointments = patientAppointments.filter(
@@ -250,8 +330,10 @@ export function deriveAcademyPatientState(
   // We still keep all pending appointments, but deduplicate by appointment id.
   const seenAppIds = new Set<number>();
   const dedupedFinished = finishedWithoutEvolution.filter(a => {
-    if (seenAppIds.has(a.id)) return false;
-    seenAppIds.add(a.id);
+    const appointmentId = toNumberId(a.id);
+    if (appointmentId === null) return false;
+    if (seenAppIds.has(appointmentId)) return false;
+    seenAppIds.add(appointmentId);
     return true;
   });
 
@@ -271,10 +353,12 @@ export function deriveAcademyPatientState(
 
   // 1. Evolution pendings (one per un-evolved FINISHED appointment)
   for (const app of dedupedFinished) {
+    const appointmentId = toNumberId(app.id);
+    if (appointmentId === null) continue;
     pendings.push({
       kind: 'evolution',
       label: 'Fechar atendimento',
-      appointmentId: app.id,
+      appointmentId,
     });
   }
 
@@ -307,6 +391,54 @@ export function deriveAcademyPatientState(
   }
 
   // ── Derive summary label ─────────────────────────────────────────────
+  if (typeof console !== 'undefined') {
+    const evolutions = getEvolutions(patient);
+    const finishedChecks = finishedApps.map(app => ({
+      appointment_id: app.id,
+      patient_id: app.patient_id,
+      status: app.status,
+      start_time: app.start_time,
+      ...getAppointmentEvolutionMatch(app, patient),
+    }));
+    const pendingEvolutionReasons = finishedChecks
+      .filter(check => !check.matched)
+      .map(check => ({
+        appointment_id: check.appointment_id,
+        reason: check.reason,
+      }));
+    const filledAnamnesisFields = getFilledAnamnesisFields(patient.anamnesis);
+    const shouldRequireAnamnesis = hasRelevantAppointments || hasTreatmentActivity(patient);
+    const anamnesisPending = pendings.some(p => p.kind === 'anamnesis');
+    const anamnesisReason = filledAnamnesisFields.length > 0
+      ? `anamnese preenchida nos campos: ${filledAnamnesisFields.join(', ')}`
+      : shouldRequireAnamnesis
+        ? 'nenhum campo de anamnesis usado pela Rotina tem valor preenchido'
+        : 'anamnese vazia, mas sem atendimento relevante ou atividade clinica para exigir pendencia';
+
+    console.groupCollapsed(`[deriveAcademyPatientState] patient_id=${patient.id} pending_appointments=${dedupedFinished.map(a => a.id).join(',') || 'none'}`);
+    console.log('patient_id:', patient.id);
+    console.log('appointment_id pendente:', dedupedFinished.map(a => a.id));
+    console.log('appointments recebidos:', relevantAppointments.map(a => ({
+      id: a.id,
+      patient_id: a.patient_id,
+      status: a.status,
+      start_time: a.start_time,
+      procedure: a.notes || a.procedure || null,
+    })));
+    console.log('evolutions recebidas:', evolutions.map(e => ({
+      id: e.id,
+      appointment_id: e.appointment_id ?? null,
+      date: e.date || null,
+      created_at: e.created_at || null,
+      procedure: e.procedure || e.procedure_performed || null,
+    })));
+    console.log('anamnese recebida:', patient.anamnesis || null);
+    console.log('motivo evolucao pendente:', pendingEvolutionReasons.length > 0 ? pendingEvolutionReasons : 'nenhuma evolucao pendente');
+    console.log('motivo anamnese nao registrada:', anamnesisPending ? anamnesisReason : `sem pendencia de anamnese: ${anamnesisReason}`);
+    console.log('resultado pendings:', pendings);
+    console.groupEnd();
+  }
+
   const showInParaFechar = dedupedFinished.length > 0;
   let pendingLabel: string;
   if (dedupedFinished.length > 0) {
@@ -329,13 +461,9 @@ export function deriveAcademyPatientState(
 
 function formatAppointmentLabel(startTime?: string): string {
   if (!startTime) return '';
-  const d = parseDate(startTime);
-  if (!d) return '';
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const hours = String(d.getHours()).padStart(2, '0');
-  const minutes = String(d.getMinutes()).padStart(2, '0');
-  return `${day}/${month} às ${hours}:${minutes}`;
+  const day = formatAppointmentDate(startTime, { day: '2-digit', month: '2-digit' });
+  const time = formatAppointmentTime(startTime);
+  return day && time !== '--:--' ? `${day} às ${time}` : '';
 }
 
 // ── Convenience: derive "Para fechar" rows for the dashboard ───────────
@@ -369,14 +497,17 @@ export function buildParaFecharRows(
   for (const patient of patients) {
     const state = deriveAcademyPatientState(patient, appointments, now);
     for (const app of state.finishedWithoutEvolution) {
-      if (seenAppointmentIds.has(app.id)) continue;
-      seenAppointmentIds.add(app.id);
+      const appointmentId = toNumberId(app.id);
+      const patientId = toNumberId(patient.id);
+      if (appointmentId === null || patientId === null) continue;
+      if (seenAppointmentIds.has(appointmentId)) continue;
+      seenAppointmentIds.add(appointmentId);
       const procedure = app.notes || app.procedure || 'Atendimento';
       const label = formatAppointmentLabel(app.start_time);
       rows.push({
-        id: `evolution-${app.id}`,
-        patientId: patient.id,
-        appointmentId: app.id,
+        id: `evolution-${appointmentId}`,
+        patientId,
+        appointmentId,
         title: patient.name || app.patient_name || 'Paciente',
         meta: label
           ? `${procedure} · ${label}\nFalta fechar este atendimento.`
@@ -390,16 +521,16 @@ export function buildParaFecharRows(
 
   // Sort by appointment start_time descending (most recent first)
   rows.sort((a, b) => {
-    const appA = appointments.find(x => x.id === a.appointmentId);
-    const appB = appointments.find(x => x.id === b.appointmentId);
-    const tA = appA ? new Date(appA.start_time).getTime() : 0;
-    const tB = appB ? new Date(appB.start_time).getTime() : 0;
+    const appA = appointments.find(x => toNumberId(x.id) === a.appointmentId);
+    const appB = appointments.find(x => toNumberId(x.id) === b.appointmentId);
+    const tA = appA ? getAppointmentTime(appA.start_time) : 0;
+    const tB = appB ? getAppointmentTime(appB.start_time) : 0;
     return tB - tA;
   });
 
   if (typeof console !== 'undefined' && rows.length > 0) {
     console.log('[buildParaFecharRows]', rows.map(r => {
-      const app = appointments.find(x => x.id === r.appointmentId);
+      const app = appointments.find(x => toNumberId(x.id) === r.appointmentId);
       return {
         patient: r.title,
         appointmentId: r.appointmentId,

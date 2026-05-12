@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Check, Sparkles, Activity, MapPin, Zap, Info, FlaskConical, Lock, Palette, Calendar, User, FileText, ArrowRight } from '../icons';
 import { useNavigate } from 'react-router-dom';
+import { formatAppointmentDate, formatAppointmentTime } from '../utils/dateUtils';
 
 // ── Interpretation engine (kept from original) ─────────────────────────────
 
@@ -146,32 +147,27 @@ export const NovaEvolucao: React.FC<NovaEvolucaoProps> = ({
 }) => {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [inputText, setInputText] = useState('');
+  const isClosingAppointment = Boolean(appointment?.id);
+  const automaticDraftText = isClosingAppointment
+    ? 'Ex: Acesso coronário no dente 47, odontometria realizada, instrumentação inicial com lima #15. Paciente sem intercorrências. Retorno em 7 dias para obturação.'
+    : '';
+  const [inputText, setInputText] = useState(automaticDraftText);
   const [interpretation, setInterpretation] = useState<Interpretation>({ teeth: [], procedures: [], materials: [], nextStep: null });
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const isClosingAppointment = Boolean(appointment?.id);
   const displayName = patientName || appointment?.patient_name || 'Paciente';
 
   // Debug logs
   console.log('[NovaEvolucao] opened:', { mode: isClosingAppointment ? 'close_appointment' : 'manual_record', patientId, appointment_id: appointment?.id, appointment_status: appointment?.status, appointment_start_time: appointment?.start_time });
   const displayProcedure = appointment?.notes || appointment?.procedure || null;
   const displayDate = appointment?.start_time
-    ? (() => {
-        try {
-          const d = new Date(appointment.start_time);
-          return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        } catch { return null; }
-      })()
+    ? formatAppointmentDate(appointment.start_time, { day: '2-digit', month: '2-digit', year: 'numeric' }) || null
     : null;
   const displayTime = appointment?.start_time
     ? (() => {
-        try {
-          const d = new Date(appointment.start_time);
-          const h = d.getHours(); const m = d.getMinutes();
-          return (h > 0 || m > 0) ? d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : null;
-        } catch { return null; }
+        const time = formatAppointmentTime(appointment.start_time);
+        return time === '--:--' ? null : time;
       })()
     : null;
 
@@ -335,7 +331,7 @@ export const NovaEvolucao: React.FC<NovaEvolucaoProps> = ({
               onChange={(e) => setInputText(e.target.value)}
               placeholder={
                 isClosingAppointment
-                ? 'Ex: Acesso coronário no dente 47, odontometria realizada, instrumentação inicial com lima #15. Paciente sem intercorrências. Retorno em 7 dias para obturação.'
+                ? ''
                 : 'Descreva a observação clínica...'
               }
               className="flex-1 w-full bg-transparent border-none focus:ring-0 text-slate-900 text-base sm:text-lg leading-relaxed placeholder:text-slate-200 font-medium resize-none outline-none"

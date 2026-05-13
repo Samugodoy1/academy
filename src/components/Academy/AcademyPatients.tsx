@@ -27,7 +27,7 @@ export const AcademyPatients: React.FC<AcademyPatientsProps> = () => {
           </div>
 
           <div className="relative mb-3">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-academy-muted/70" />
             <input
               type="text"
               placeholder="Buscar paciente, conduta ou pendência"
@@ -59,9 +59,9 @@ export const AcademyPatients: React.FC<AcademyPatientsProps> = () => {
               animate={{ opacity: 1 }}
               className="text-center py-12"
             >
-              <Users size={40} className="mx-auto mb-3 text-slate-300" />
-              <p className="text-slate-500 font-medium">Nenhum paciente encontrado</p>
-              <p className="text-sm text-slate-400 mt-1">A tela ainda nao possui uma API real de pacientes Academy.</p>
+              <Users size={40} className="mx-auto mb-3 text-academy-muted/50" />
+              <p className="text-academy-muted font-medium">Nenhum paciente encontrado</p>
+              <p className="text-sm text-academy-muted/70 mt-1">A tela ainda nao possui uma API real de pacientes Academy.</p>
             </motion.div>
           )}
         </div>

@@ -15,6 +15,7 @@ import {
   Clock3,
   CreditCard,
   FileText,
+  GripVertical,
   Info,
   Lock,
   Loader2,
@@ -26,6 +27,7 @@ import {
   User,
   UserRound,
   WalletCards,
+  X,
   Zap,
 } from '../icons';
 import { AnimatePresence, motion } from 'motion/react';
@@ -216,6 +218,7 @@ const inferBoxProcedure = (value?: string): BoxGuideProcedure | null => {
   if (/perio|raspag|profilax|sondag|cureta|t[aá]rtaro|calculo/.test(text)) return 'Periodontia';
   if (/prot|coroa|molde|moldag|ciment|prova|ajuste|placa/.test(text)) return 'Protese';
   if (/urg|dor|abscesso|f[ií]stula|edema|diagn[oó]st/.test(text)) return 'Urgencia';
+  if (/consult|avalia|primeira|triag|exame|anamnese|retorno|acolh/.test(text)) return 'Consulta';
   return null;
 };
 
@@ -271,9 +274,16 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   const [optimisticEvolutions, setOptimisticEvolutions] = useState<any[]>([]);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [isBoxModeOpen, setIsBoxModeOpen] = useState(false);
-  const [selectedBoxProcedure, setSelectedBoxProcedure] = useState<BoxGuideProcedure>('Endodontia');
+  const [selectedBoxProcedure, setSelectedBoxProcedure] = useState<BoxGuideProcedure>('Consulta');
   const [selectedBoxDoubt, setSelectedBoxDoubt] = useState<string | null>(null);
   const [boxStep, setBoxStep] = useState(0);
+  const [boxTrayOpen, setBoxTrayOpen] = useState(false);
+  const [boxTrayChecked, setBoxTrayChecked] = useState<Set<number>>(new Set());
+  const [isReorderMode, setIsReorderMode] = useState(false);
+  const [reorderItems, setReorderItems] = useState<any[]>([]);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
   const [isUploadingProfilePhoto, setIsUploadingProfilePhoto] = useState(false);
   const [isUploadingClinicalImage, setIsUploadingClinicalImage] = useState(false);
   const [uploadFeedback, setUploadFeedback] = useState<string | null>(null);
@@ -1322,43 +1332,99 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   const selectedDoubtItems = selectedBoxDoubt
     ? selectedBoxGuide.chipContent[selectedBoxDoubt] || []
     : [];
-  const boxSteps = [
+  const orderedBoxItems =
+    selectedBoxGuide.chipContent.Sequencia ||
+    selectedBoxGuide.blocks.find((block) => block.ordered)?.items ||
+    [];
+  const boxMaterialItems = selectedBoxGuide.blocks[0]?.items || [];
+  const boxRecordItems =
+    selectedBoxGuide.chipContent.Evolucao ||
+    selectedBoxGuide.blocks.find((block) => block.emphasis === 'record')?.items ||
+    [];
+  const boxProcedureDetail = primaryTreatment
+    ? `${primaryTreatment.procedure}${primaryTreatment.tooth_number ? ` - dente ${primaryTreatment.tooth_number}` : ''}`
+    : upcomingAppointment
+      ? (upcomingAppointment.procedure || upcomingAppointment.notes || selectedBoxGuide.label)
+      : selectedBoxGuide.label;
+  const boxSafetyChip = selectedBoxGuide.doubtChips.includes('Anamnese')
+    ? 'Anamnese'
+    : selectedBoxGuide.doubtChips.includes('Anestesia')
+      ? 'Anestesia'
+      : selectedBoxGuide.doubtChips[0];
+  const boxSequenceChip = selectedBoxGuide.doubtChips.includes('Sequencia')
+    ? 'Sequencia'
+    : selectedBoxGuide.doubtChips[0];
+  const boxEvolutionChip = selectedBoxGuide.doubtChips.includes('Evolucao')
+    ? 'Evolucao'
+    : selectedBoxGuide.doubtChips[selectedBoxGuide.doubtChips.length - 1];
+  // Detect if this is a first consultation / evaluation based on patient context
+  const isFirstConsultation = (() => {
+    const hasEvolutions = (patient?.evolution || []).length > 0;
+    const hasTreatmentPlan = treatmentInProgress.length > 0;
+    const appointmentNotes = String(upcomingAppointment?.notes || upcomingAppointment?.procedure || '').toLowerCase();
+    const isExplicitConsulta = /consult|avalia|primeira|triag|exame|acolh/.test(appointmentNotes);
+    return isExplicitConsulta || (!hasEvolutions && !hasTreatmentPlan);
+  })();
+
+  const boxIsConsulta = selectedBoxProcedure === 'Consulta';
+
+  const boxSteps = boxIsConsulta ? [
     {
-      label: 'Seguranca primeiro',
-      title: 'Primeiro, so confirme se esta seguro',
-      text: anamnesisAlert
-        ? `${anamnesisAlert}. Respira: antes da anestesia, confira PA e medicacao em uso. Se algo parecer fora, chame o professor.`
-        : 'Antes de comecar, confira anamnese, PA, alergias e medicacoes. So isso agora.',
+      label: 'Acolhimento',
+      title: 'Acolha o paciente',
+      text: 'Confirme dados, entenda a queixa e revise o historico antes de examinar.',
+      steps: [
+        'Confirmar nome, idade e dados cadastrais',
+        anamnesisAlert ? `Atencao: ${anamnesisAlert}` : 'Perguntar queixa principal',
+        'Revisar alergias, medicacoes e condicoes sistemicas',
+        'Verificar PA se indicado',
+      ],
       actions: [
-        { label: 'Tudo certo', onClick: () => setBoxStep(1), primary: true },
-        { label: 'Quero revisar', onClick: () => setSelectedBoxDoubt('Anestesia') },
+        { label: 'Anamnese conferida', onClick: () => setBoxStep(1), primary: true },
+        { label: 'Preciso revisar', onClick: () => setSelectedBoxDoubt('Anamnese') },
       ],
     },
     {
-      label: 'Caso certo',
-      title: primaryTreatment?.tooth_number ? `Agora confirme o dente ${primaryTreatment.tooth_number}` : 'Agora confirme o caso',
-      text: primaryTreatment
-        ? `Olhe a radiografia, confira o dente na boca e confirme o plano: ${primaryTreatment.procedure}. Sem pressa nessa parte.`
-        : `Olhe a radiografia, confirme a regiao e alinhe o procedimento antes de iniciar. Sem pressa nessa parte.`,
+      label: 'Exame',
+      title: 'Faca o exame clinico',
+      text: 'Examine sistematicamente e registre os achados.',
+      steps: [
+        'Inspecao extra-oral: face, linfonodos, ATM',
+        'Inspecao intra-oral: mucosa, gengiva, lingua',
+        'Exame dentario: caries, restauracoes, ausencias',
+        'Sondagem periodontal quando indicado',
+        'Solicitar radiografia se necessario',
+      ],
       actions: [
-        { label: 'Caso confirmado', onClick: () => setBoxStep(2), primary: true },
-        { label: 'Me mostra a sequencia', onClick: () => setSelectedBoxDoubt('Sequencia') },
+        { label: 'Exame concluido', onClick: () => setBoxStep(2), primary: true },
+        { label: 'Ajuda no exame', onClick: () => setSelectedBoxDoubt('Exame') },
       ],
     },
     {
-      label: 'Durante',
-      title: 'Agora e so seguir a proxima parte',
-      text: 'Nao precisa pensar no atendimento inteiro. Faca um passo, confira o paciente, depois o proximo.',
-      steps: selectedBoxGuide.chipContent.Sequencia?.slice(1, 6) || selectedBoxGuide.blocks.find((block) => block.ordered)?.items.slice(0, 5) || [],
+      label: 'Plano',
+      title: 'Defina o plano com o professor',
+      text: 'Organize os achados, priorize as necessidades e valide a conduta.',
+      steps: [
+        'Listar achados principais do exame',
+        'Definir hipotese diagnostica',
+        'Priorizar necessidades clinicas',
+        'Alinhar plano e proximos passos com o professor',
+      ],
       actions: [
-        { label: 'Terminei essa parte', onClick: () => setBoxStep(3), primary: true },
-        { label: 'Travei um pouco', onClick: () => setSelectedBoxDoubt('Sequencia') },
+        { label: 'Plano definido', onClick: () => setBoxStep(3), primary: true },
+        { label: 'Rever orientacoes', onClick: () => setSelectedBoxDoubt('Plano') },
       ],
     },
     {
-      label: 'Fechar bem',
-      title: 'Antes de sair, deixa o caso fechado',
-      text: 'Anote o que foi feito enquanto esta fresco: conduta, intercorrencias, orientacoes e retorno.',
+      label: 'Fechar',
+      title: 'Registre e oriente',
+      text: 'Registre a evolucao, oriente o paciente e defina retorno.',
+      steps: [
+        'Registrar queixa, achados e hipotese',
+        'Registrar plano de tratamento proposto',
+        'Orientar paciente sobre achados e proximos passos',
+        'Definir retorno ou proximo atendimento',
+      ],
       actions: [
         {
           label: 'Registrar agora',
@@ -1369,12 +1435,80 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
           primary: true,
         },
         {
-          label: 'Definir retorno',
+          label: 'Revisar registro',
+          onClick: () => setSelectedBoxDoubt('Evolucao'),
+        },
+      ],
+    },
+  ] : [
+    {
+      label: 'Antes',
+      title: 'Confirme se esta seguro iniciar',
+      text: anamnesisAlert
+        ? `${anamnesisAlert}. Confira PA, medicacao em uso e chame o professor se houver qualquer alteracao.`
+        : 'Revise anamnese, alergias, medicacoes e PA antes de seguir.',
+      steps: [
+        anamnesisAlert ? `Revisar alerta: ${anamnesisAlert}` : 'Conferir anamnese, alergias e medicacoes',
+        boxMaterialItems[0] || `Separar materiais de ${selectedBoxGuide.label}`,
+        boxMaterialItems[1] || 'Conferir campo, isolamento e instrumentais',
+        'Confirmar professor por perto se surgir duvida',
+      ],
+      actions: [
+        { label: 'Tudo certo', onClick: () => setBoxStep(1), primary: true },
+        { label: 'Revisar antes', onClick: () => setSelectedBoxDoubt(boxSafetyChip) },
+      ],
+    },
+    {
+      label: 'Caso',
+      title: primaryTreatment?.tooth_number ? `Confirme o dente ${primaryTreatment.tooth_number}` : 'Confirme o caso de hoje',
+      text: primaryTreatment
+        ? `Plano de hoje: ${primaryTreatment.procedure}. Confira radiografia, boca e conduta antes de iniciar.`
+        : `Confira radiografia, regiao e objetivo clinico antes de iniciar ${selectedBoxGuide.label}.`,
+      steps: [
+        `Procedimento: ${boxProcedureDetail}`,
+        primaryTreatment?.tooth_number ? `Conferir dente ${primaryTreatment.tooth_number} na boca e no RX` : 'Conferir dente/regiao na boca e no RX',
+        orderedBoxItems[0] || `Validar primeira etapa de ${selectedBoxGuide.label}`,
+        'Alinhar conduta com o professor se algo nao bater',
+      ],
+      actions: [
+        { label: 'Caso confirmado', onClick: () => setBoxStep(2), primary: true },
+        { label: 'Rever sequencia', onClick: () => setSelectedBoxDoubt(boxSequenceChip) },
+      ],
+    },
+    {
+      label: 'Durante',
+      title: 'Agora siga a proxima parte',
+      text: `Sequencia pratica para ${selectedBoxGuide.label}. Faca uma acao por vez e confirme antes de avancar.`,
+      steps: orderedBoxItems.slice(1, 6).length > 0
+        ? orderedBoxItems.slice(1, 6)
+        : orderedBoxItems.slice(0, 5),
+      actions: [
+        { label: 'Terminei essa parte', onClick: () => setBoxStep(3), primary: true },
+        { label: 'Pedir ajuda', onClick: () => setSelectedBoxDoubt(boxSequenceChip) },
+      ],
+    },
+    {
+      label: 'Fechar',
+      title: 'Feche o caso antes de sair',
+      text: 'Registre a evolucao enquanto tudo esta fresco e deixe o proximo passo claro.',
+      steps: (boxRecordItems.length > 0 ? boxRecordItems : [
+        'Registrar conduta realizada',
+        'Registrar intercorrencias ou ausencia delas',
+        'Anotar orientacoes dadas ao paciente',
+        'Definir retorno ou proxima etapa',
+      ]).slice(0, 5),
+      actions: [
+        {
+          label: 'Registrar agora',
           onClick: () => {
             setIsBoxModeOpen(false);
-            setAppActiveTab('agenda');
-            appNavigate('/agenda');
+            setIsAddingEvolution(true);
           },
+          primary: true,
+        },
+        {
+          label: 'Revisar registro',
+          onClick: () => setSelectedBoxDoubt(boxEvolutionChip),
         },
       ],
     },
@@ -1384,9 +1518,18 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   useEffect(() => {
     if (!isBoxModeOpen) return;
     const inferred = inferBoxProcedure(boxContextProcedure);
-    if (inferred) setSelectedBoxProcedure(inferred);
+    if (inferred) {
+      setSelectedBoxProcedure(inferred);
+    } else if (isFirstConsultation) {
+      setSelectedBoxProcedure('Consulta');
+    } else {
+      // No procedure detected and not clearly a first visit — default to Consulta (safe neutral)
+      setSelectedBoxProcedure('Consulta');
+    }
     setSelectedBoxDoubt(null);
     setBoxStep(0);
+    setBoxTrayOpen(false);
+    setBoxTrayChecked(new Set());
   }, [isBoxModeOpen, boxContextProcedure]);
 
   return (
@@ -1643,6 +1786,20 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     <p className="text-xs text-slate-500 mt-0.5">Nenhum procedimento ativo</p>
                   )}
                 </div>
+                <div className="flex items-center gap-2">
+                  {isAcademyProduct && treatmentInProgress.length > 1 && !isReorderMode && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setReorderItems([...treatmentInProgress]);
+                        setIsReorderMode(true);
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold text-slate-500 border border-slate-200 bg-white transition-all duration-200 hover:text-slate-700 hover:border-slate-300 hover:shadow-sm"
+                    >
+                      <GripVertical size={12} />
+                      Reordenar
+                    </button>
+                  )}
                 {!isAcademyProduct && treatmentInProgress.length > 0 && (() => {
                   const activeUnpaid = treatmentInProgress.filter((item: any) => !item.prepayment_confirmed);
                   const allActive = activeUnpaid.length > 0 && activeUnpaid.every((item: any) => item.requires_prepayment);
@@ -1672,10 +1829,48 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                   );
                 })()}
               </div>
+            </div>
 
               <div className="space-y-3">
-                {treatmentInProgress.length > 0 ? (
-                  treatmentInProgress.map((item: any, idx: number) => {
+                {isReorderMode && (
+                  <div className="flex items-center gap-2.5 mb-2 p-1.5 rounded-[18px] bg-slate-50/80 border border-slate-200/60 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                    <button
+                      type="button"
+                      disabled={isSavingOrder}
+                      onClick={async () => {
+                        setIsSavingOrder(true);
+                        try {
+                          const reorderedIds = new Set(reorderItems.map((i: any) => i.id));
+                          const completedItems = mergedTreatmentPlan.filter(
+                            (item: any) => !reorderedIds.has(item.id)
+                          );
+                          const nextPlan = [...reorderItems, ...completedItems];
+                          await onUpdatePatient({ ...patient, treatmentPlan: nextPlan });
+                          await onRefreshPatient?.();
+                        } catch (error) {
+                          console.error('Error saving reorder:', error);
+                        } finally {
+                          setIsSavingOrder(false);
+                          setIsReorderMode(false);
+                        }
+                      }}
+                      className="flex-1 rounded-2xl bg-slate-950 text-white text-[13px] font-bold py-2.5 transition-all hover:bg-slate-800 active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2 shadow-[0_2px_8px_rgba(15,23,42,0.15)]"
+                    >
+                      {isSavingOrder ? <Loader2 size={14} className="animate-spin" /> : <Check size={13} />}
+                      Salvar nova ordem
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setIsReorderMode(false); setReorderItems([]); }}
+                      className="rounded-2xl border border-slate-200/80 bg-white text-slate-600 text-[13px] font-bold px-4 py-2.5 transition-all hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98] shadow-sm"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                )}
+
+                {(isReorderMode ? reorderItems : treatmentInProgress).length > 0 ? (
+                  (isReorderMode ? reorderItems : treatmentInProgress).map((item: any, idx: number) => {
                     const isPriority = idx === 0;
                     const rawStatus = String(item.status || '').toUpperCase();
                     const isPrepaid = !isAcademyProduct && item.requires_prepayment && item.prepayment_confirmed;
@@ -1689,19 +1884,46 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     return (
                       <div
                         key={item.id}
-                        className={`rounded-2xl border p-4 flex flex-col gap-3 transition-all duration-300 ease-out sm:flex-row sm:items-center sm:justify-between ios-hover-lift ${
-                          isPrepaid
-                            ? 'border-emerald-200/80 bg-gradient-to-r from-emerald-50/30 to-emerald-50/10 shadow-[0_4px_14px_rgba(16,185,129,0.05)]'
-                            : isPriority
-                              ? 'border-slate-200/80 bg-white shadow-[0_4px_16px_rgba(15,23,42,0.05)]'
-                              : 'border-slate-100 bg-slate-50/50 hover:border-slate-200'
+                        draggable={isReorderMode}
+                        onDragStart={isReorderMode ? () => setDragIdx(idx) : undefined}
+                        onDragOver={isReorderMode ? (e) => { e.preventDefault(); setDragOverIdx(idx); } : undefined}
+                        onDragEnd={isReorderMode ? () => { setDragIdx(null); setDragOverIdx(null); } : undefined}
+                        onDrop={isReorderMode ? (e) => {
+                          e.preventDefault();
+                          if (dragIdx === null || dragIdx === idx) return;
+                          const next = [...reorderItems];
+                          const [moved] = next.splice(dragIdx, 1);
+                          next.splice(idx, 0, moved);
+                          setReorderItems(next);
+                          setDragIdx(null);
+                          setDragOverIdx(null);
+                        } : undefined}
+                        className={`rounded-2xl border p-4 flex flex-col gap-3 transition-all duration-300 ease-out sm:flex-row sm:items-center sm:justify-between ${
+                          isReorderMode
+                            ? 'cursor-grab active:cursor-grabbing select-none'
+                            : 'ios-hover-lift'
                         } ${
-                          highlightedTreatmentId === item.id
+                          isReorderMode && dragIdx === idx
+                            ? 'opacity-40 scale-[0.98] border-slate-300 bg-slate-50'
+                            : isReorderMode && dragOverIdx === idx
+                              ? 'border-academy-primary/40 bg-academy-primary/[0.03] shadow-[0_0_0_1px_rgba(47,143,163,0.15)]'
+                              : isPrepaid
+                                ? 'border-emerald-200/80 bg-gradient-to-r from-emerald-50/30 to-emerald-50/10 shadow-[0_4px_14px_rgba(16,185,129,0.05)]'
+                                : isPriority
+                                  ? 'border-slate-200/80 bg-white shadow-[0_4px_16px_rgba(15,23,42,0.05)]'
+                                  : 'border-slate-100 bg-slate-50/50 hover:border-slate-200'
+                        } ${
+                          !isReorderMode && highlightedTreatmentId === item.id
                             ? 'ring-2 ring-indigo-200/70 shadow-[0_6px_20px_rgba(99,102,241,0.1)] animate-glow-pulse'
                             : ''
                         }`}
                         style={{ animationDelay: `${idx * 50}ms` }}
                       >
+                        {isReorderMode && (
+                          <div className="flex shrink-0 items-center justify-center pr-2">
+                            <GripVertical size={20} className="text-slate-300" />
+                          </div>
+                        )}
                         <div className="min-w-0 flex-1">
                           {/* row 1: procedure name */}
                           <div className="flex items-start justify-between gap-2">
@@ -1772,16 +1994,18 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                           </div>
                         </div>
 
-                        <button
-                          onClick={() => setSelectedTreatmentAction(item)}
-                          className={`w-full sm:w-auto shrink-0 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 ios-press ${
-                            isPriority
-                              ? 'bg-slate-950 text-white hover:bg-slate-800 shadow-[0_2px_8px_rgba(15,23,42,0.15)]'
-                              : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm'
-                          }`}
-                        >
-                          Continuar
-                        </button>
+                        {!isReorderMode && (
+                          <button
+                            onClick={() => setSelectedTreatmentAction(item)}
+                            className={`w-full sm:w-auto shrink-0 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 ios-press ${
+                              isPriority
+                                ? 'bg-slate-950 text-white hover:bg-slate-800 shadow-[0_2px_8px_rgba(15,23,42,0.15)]'
+                                : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm'
+                            }`}
+                          >
+                            Continuar
+                          </button>
+                        )}
                       </div>
                     );
                   })
@@ -1802,6 +2026,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     </div>
                   </div>
                 )}
+                  </div>
 
                 {/* Receber pelo orçamento completo */}
                 {!isAcademyProduct && (() => {
@@ -1837,7 +2062,6 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     </button>
                   );
                 })()}
-              </div>
             </section>
 
             {!isFocusMode && (
@@ -2520,6 +2744,163 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       </main>
 
       {isBoxModeOpen && (
+        <div className="fixed inset-0 z-[197] overflow-y-auto bg-white font-sans text-[#061414]">
+          <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 pb-10 pt-5 sm:px-8">
+            {/* ── Topo ── */}
+            <header className="flex items-center justify-between gap-3 mb-1">
+              <div className="flex items-center gap-2">
+                <span className="text-[14px] font-bold text-[#17232D]">Modo Box</span>
+                <span className="rounded-md bg-[#EEF3F7] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.05em] text-[#5A6B7B]">
+                  {activeBoxStep.label}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsBoxModeOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-[#8E9AA6] transition-colors hover:bg-[#F1F4F7] active:scale-95"
+                aria-label="Fechar Modo Box"
+              >
+                <X size={16} />
+              </button>
+            </header>
+
+            {/* ── Progress dots ── */}
+            <div className="flex items-center gap-1.5 mb-6">
+              {boxSteps.map((_s, i) => (
+                <div
+                  key={i}
+                  className={`h-1 rounded-full transition-all duration-300 ${
+                    i === boxStep ? 'w-6 bg-academy-primary' : i < boxStep ? 'w-3 bg-academy-primary/40' : 'w-3 bg-[#E2E8F0]'
+                  }`}
+                />
+              ))}
+            </div>
+
+            {/* ── Preparar mesa (collapsible) ── */}
+            {boxStep === 0 && boxMaterialItems.length > 0 && (
+              <div className="mb-5">
+                <button
+                  type="button"
+                  onClick={() => setBoxTrayOpen((v) => !v)}
+                  className="flex w-full items-center justify-between gap-2 rounded-xl bg-[#F6F8FA] px-3.5 py-2.5 text-left transition-colors hover:bg-[#EEF1F5] active:bg-[#E8ECF0]"
+                >
+                  <span className="text-[12px] font-bold text-[#5A6B7B] uppercase tracking-[0.06em]">Preparar mesa</span>
+                  <ChevronDown
+                    size={14}
+                    className={`text-[#8E9AA6] transition-transform duration-200 ${boxTrayOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {boxTrayOpen && (
+                  <ul className="mt-2 space-y-1 px-1">
+                    {boxMaterialItems.slice(0, 6).map((item, idx) => {
+                      const isChecked = boxTrayChecked.has(idx);
+                      return (
+                        <li key={idx}>
+                          <button
+                            type="button"
+                            onClick={() => setBoxTrayChecked((prev) => {
+                              const next = new Set(prev);
+                              if (next.has(idx)) next.delete(idx); else next.add(idx);
+                              return next;
+                            })}
+                            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-[#F6F8FA] active:bg-[#EEF1F5]"
+                          >
+                            <span className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] border transition-all duration-150 ${
+                              isChecked
+                                ? 'border-academy-primary bg-academy-primary text-white'
+                                : 'border-[#C8D1DA] bg-white'
+                            }`}>
+                              {isChecked && <Check size={11} strokeWidth={3} />}
+                            </span>
+                            <span className={`text-[13px] leading-snug transition-colors duration-150 ${
+                              isChecked ? 'text-[#8E9AA6] line-through' : 'text-[#3A4A58]'
+                            }`}>
+                              {item}
+                            </span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            )}
+
+            {/* ── Etapa atual ── */}
+            <div className="mb-6">
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#8EA0C4] mb-1">
+                Etapa {boxStep + 1} de {boxSteps.length}
+              </p>
+              <h2 className="text-[24px] sm:text-[28px] font-bold leading-[1.15] tracking-[-0.02em] text-[#061414]">
+                {activeBoxStep.title}
+              </h2>
+              <p className="mt-2 text-[14px] leading-relaxed text-[#6F7D89]">
+                {activeBoxStep.text}
+              </p>
+            </div>
+
+            {/* ── Checklist ── */}
+            <ol className="space-y-4 flex-1">
+              {(activeBoxStep.steps || []).slice(0, 5).map((step: string, index: number) => (
+                <li key={`${index}-${step}`} className="flex items-start gap-3">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-academy-primary/10 text-[11px] font-bold text-academy-primary">
+                    {index + 1}
+                  </span>
+                  <span className="pt-[2px] text-[14px] font-medium leading-snug text-[#17313D]">
+                    {step}
+                  </span>
+                </li>
+              ))}
+            </ol>
+
+            {/* ── Ajuda (só aparece depois de clicar no botão secundário) ── */}
+            {selectedBoxDoubt && (
+              <section className="mt-6 rounded-2xl border border-[#E7ECF2] bg-[#FAFBFC] px-4 py-4">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <p className="text-[12px] font-bold text-academy-primary">
+                    {selectedBoxDoubt}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedBoxDoubt(null)}
+                    className="text-[11px] font-medium text-[#8E9AA6] hover:text-[#4F5F6D]"
+                  >
+                    Fechar
+                  </button>
+                </div>
+                <div className="space-y-2.5">
+                  {selectedDoubtItems.slice(0, 4).map((item) => (
+                    <div key={item} className="flex gap-2.5">
+                      <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-academy-primary/60" />
+                      <span className="text-[13px] leading-relaxed text-[#4F5F6D]">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ── Botões ── */}
+            <div className="mt-8 grid gap-2.5">
+              {activeBoxStep.actions.map((action) => (
+                <button
+                  key={action.label}
+                  type="button"
+                  onClick={action.onClick}
+                  className={`rounded-2xl px-4 py-3.5 text-[14px] font-bold transition-all active:scale-[0.985] ${
+                    action.primary
+                      ? 'bg-academy-primary text-white hover:brightness-110'
+                      : 'border border-[#E7ECF2] bg-white text-[#6F7D89] hover:bg-[#F8F9FA]'
+                  }`}
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {false && isBoxModeOpen && (
         <div className="fixed inset-0 z-[197] bg-[#F2F2F7] overflow-y-auto font-sans">
           <div className="min-h-screen pb-10">
             {/* Header iOS Style */}

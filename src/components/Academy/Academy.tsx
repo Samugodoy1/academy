@@ -27,10 +27,10 @@ const EmptyState: React.FC<{ icon: React.ElementType; title: string; description
     animate={{ opacity: 1, scale: 1 }}
     className="px-4 mb-6"
   >
-    <div className="ios-card bg-slate-50 text-center py-8">
-      <Icon size={40} className="mx-auto mb-3 text-slate-300" />
-      <p className="text-slate-500 font-medium">{title}</p>
-      {description && <p className="text-sm text-slate-400 mt-1">{description}</p>}
+    <div className="ios-card bg-academy-study text-center py-8">
+      <Icon size={40} className="mx-auto mb-3 text-academy-muted/50" />
+      <p className="text-academy-muted font-medium">{title}</p>
+      {description && <p className="text-sm text-academy-muted/70 mt-1">{description}</p>}
     </div>
   </motion.div>
 );
@@ -53,7 +53,7 @@ const SectionCard: React.FC<{
       </div>
     </div>
     <h3 className="font-bold text-academy-text mb-1">{title}</h3>
-    <p className="text-[13px] text-slate-600 mb-3">{description}</p>
+    <p className="text-[13px] text-academy-muted mb-3">{description}</p>
     <div className="flex items-center gap-1 text-primary font-medium text-sm">
       Ver <ChevronRight size={16} />
     </div>
@@ -104,14 +104,14 @@ export const Academy: React.FC<AcademyProps> = ({ onNavigate }) => {
           transition={{ duration: 0.3, delay: 0.1 }}
           className="px-4 mb-6"
         >
-          <div className="ios-card bg-gradient-to-br from-primary/5 to-primary/2">
+          <div className="ios-card bg-academy-study border border-academy-border/70">
             <div className="flex items-start gap-3 mb-4">
               <div className="bg-primary/10 rounded-full p-2">
                 <Zap size={20} className="text-primary" />
               </div>
               <div className="flex-1">
                 <h3 className="font-bold text-academy-text">Preparacao rapida</h3>
-                <p className="text-[13px] text-slate-600">Nenhum roteiro disponivel</p>
+                <p className="text-[13px] text-academy-muted">Nenhum roteiro disponivel</p>
               </div>
             </div>
             <button className="w-full mt-4 py-2 bg-primary text-white rounded-[16px] font-semibold text-sm hover:opacity-95 transition-all">

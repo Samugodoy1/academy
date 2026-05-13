@@ -76,8 +76,8 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
     duration: '15 min',
     level: 'Base de toda clinica',
     icon: ClipboardList,
-    color: 'bg-slate-100 text-slate-600',
-    borderColor: 'border-slate-200',
+    color: 'bg-stone-100 text-stone-600',
+    borderColor: 'border-stone-200',
     objective: 'Organizar o raciocinio clinico antes de qualquer procedimento: ouvir, examinar, registrar achados e transformar sinais em um plano justificavel.',
     modules: [
       {
@@ -130,8 +130,8 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
     duration: '13 min',
     level: 'Diagnostico complementar',
     icon: Search,
-    color: 'bg-cyan-50 text-cyan-600',
-    borderColor: 'border-cyan-100',
+    color: 'bg-stone-100 text-stone-600',
+    borderColor: 'border-stone-200',
     objective: 'Escolher a tomada radiografica correta, executar com tecnica e interpretar sem pular etapas de anatomia, qualidade e achados patologicos.',
     modules: [
       {
@@ -184,8 +184,8 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
     duration: '17 min',
     level: 'Procedimento diario',
     icon: Pill,
-    color: 'bg-violet-50 text-violet-600',
-    borderColor: 'border-violet-100',
+    color: 'bg-academy-attention text-academy-attention-text',
+    borderColor: 'border-academy-border',
     objective: 'Revisar fundamentos para anestesiar com previsibilidade: indicacao, anatomia, dose, aspiracao, latencia e conduta diante de falhas.',
     modules: [
       {
@@ -292,8 +292,8 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
     duration: '18 min',
     level: 'Muito comum na clinica',
     icon: Activity,
-    color: 'bg-teal-50 text-teal-600',
-    borderColor: 'border-teal-100',
+    color: 'bg-green-50 text-green-700',
+    borderColor: 'border-green-100',
     objective: 'Revisar diagnostico periodontal inicial e execucao de raspagem/profilaxia com foco em inflamacao, biofilme e manutencao.',
     modules: [
       {
@@ -400,8 +400,8 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
     duration: '18 min',
     level: 'Clinico essencial',
     icon: Activity,
-    color: 'bg-rose-50 text-rose-500',
-    borderColor: 'border-rose-100',
+    color: 'bg-academy-attention text-academy-attention-text',
+    borderColor: 'border-academy-border',
     objective: 'Chegar ao atendimento com um roteiro claro para diagnostico, acesso, preparo quimico-mecanico e orientacoes finais.',
     modules: [
       {
@@ -454,8 +454,8 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
     duration: '14 min',
     level: 'Pratico',
     icon: Tooth,
-    color: 'bg-blue-50 text-blue-500',
-    borderColor: 'border-blue-100',
+    color: 'bg-green-50 text-green-700',
+    borderColor: 'border-green-100',
     objective: 'Preparar a sequencia para restauracoes diretas com isolamento, adesao controlada e anatomia funcional.',
     modules: [
       {
@@ -508,8 +508,8 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
     duration: '16 min',
     level: 'Seguranca clinica',
     icon: Syringe,
-    color: 'bg-amber-50 text-amber-500',
-    borderColor: 'border-amber-100',
+    color: 'bg-academy-attention text-academy-attention-text',
+    borderColor: 'border-academy-border',
     objective: 'Organizar avaliacao, anestesia, tecnica cirurgica e orientacoes para reduzir intercorrencias.',
     modules: [
       {
@@ -562,8 +562,8 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
     duration: '19 min',
     level: 'Clinica integrada',
     icon: FileText,
-    color: 'bg-indigo-50 text-indigo-600',
-    borderColor: 'border-indigo-100',
+    color: 'bg-stone-100 text-stone-600',
+    borderColor: 'border-stone-200',
     objective: 'Revisar etapas proteticas comuns na graduacao: planejamento, preparo conservador, moldagem/escaneamento, provisiorio e ajuste oclusal.',
     modules: [
       {
@@ -616,8 +616,8 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
     duration: '18 min',
     level: 'Atendimento supervisionado',
     icon: Stethoscope,
-    color: 'bg-pink-50 text-pink-600',
-    borderColor: 'border-pink-100',
+    color: 'bg-emerald-50 text-emerald-700',
+    borderColor: 'border-emerald-100',
     objective: 'Revisar o atendimento infantil com foco em comportamento, prevencao, diagnostico de carie e procedimentos conservadores comuns na clinica escola.',
     modules: [
       {
@@ -801,12 +801,12 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         <motion.section
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`rounded-[32px] border ${activeMaterial.borderColor} bg-white p-6 sm:p-7 shadow-xl shadow-slate-200/60 overflow-hidden relative`}
+          className={`rounded-[32px] border ${activeMaterial.borderColor} bg-white p-6 sm:p-7 shadow-xl shadow-slate-200/50 overflow-hidden relative`}
         >
           <div className={`w-14 h-14 rounded-[18px] flex items-center justify-center ${activeMaterial.color} mb-5`}>
             <Icon size={28} />
           </div>
-          <p className="text-[13px] font-bold uppercase tracking-widest text-academy-primary mb-2">
+          <p className="text-[13px] font-bold uppercase tracking-widest text-academy-study-text mb-2">
             Material de estudo
           </p>
           <h2 className="text-[32px] sm:text-[38px] font-bold text-academy-text leading-[1.05] tracking-tight">
@@ -817,15 +817,15 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           </p>
 
           <div className="grid grid-cols-2 gap-3 mt-6">
-            <div className="rounded-[18px] bg-academy-soft px-4 py-3">
-              <div className="flex items-center gap-2 text-academy-primary-dark font-bold text-[13px]">
+            <div className="rounded-[18px] bg-academy-neutral px-4 py-3">
+              <div className="flex items-center gap-2 text-academy-study-text font-bold text-[13px]">
                 <Clock size={15} />
                 {activeMaterial.duration}
               </div>
               <p className="text-[11px] text-academy-muted font-semibold mt-1">Tempo sugerido</p>
             </div>
-            <div className="rounded-[18px] bg-slate-50 px-4 py-3">
-              <div className="flex items-center gap-2 text-slate-700 font-bold text-[13px]">
+            <div className="rounded-[18px] bg-academy-neutral px-4 py-3">
+              <div className="flex items-center gap-2 text-academy-muted font-bold text-[13px]">
                 <Target size={15} />
                 {activeMaterial.level}
               </div>
@@ -842,10 +842,10 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: moduleIndex * 0.05 }}
-              className="bg-white rounded-[24px] border border-slate-100 p-5 shadow-sm"
+              className="bg-white rounded-[24px] border border-academy-border/70 p-5 shadow-sm"
             >
               <div className="flex items-start gap-4">
-                <div className="w-9 h-9 rounded-full bg-academy-primary text-white flex items-center justify-center text-[13px] font-bold shrink-0">
+                <div className="w-9 h-9 rounded-full bg-academy-neutral text-academy-muted flex items-center justify-center text-[13px] font-bold shrink-0">
                   {moduleIndex + 1}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -853,8 +853,8 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
                   <p className="text-[13px] text-academy-muted font-medium mt-1">{module.description}</p>
                   <div className="space-y-2.5 mt-4">
                     {module.steps.map(step => (
-                      <div key={step} className="flex gap-2.5 text-[13px] text-slate-600 leading-relaxed">
-                        <CheckCircle2 size={16} className="text-academy-primary shrink-0 mt-0.5" />
+                      <div key={step} className="flex gap-2.5 text-[13px] text-academy-muted leading-relaxed">
+                        <CheckCircle2 size={16} className="text-academy-muted shrink-0 mt-0.5" />
                         <span>{step}</span>
                       </div>
                     ))}
@@ -866,35 +866,35 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         </section>
 
         <section className="grid gap-4 mt-8">
-          <div className="bg-white rounded-[24px] border border-slate-100 p-5">
+          <div className="bg-white rounded-[24px] border border-academy-border/70 p-5">
             <h3 className="text-[15px] font-bold text-academy-text mb-4">Checklist antes do atendimento</h3>
             <div className="grid gap-2.5">
               {activeMaterial.checklist.map(item => (
-                <div key={item} className="flex items-center gap-2.5 text-[13px] font-medium text-slate-600">
-                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                <div key={item} className="flex items-center gap-2.5 text-[13px] font-medium text-academy-muted">
+                  <CheckCircle2 size={16} className="text-academy-success-text shrink-0" />
                   {item}
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="bg-white rounded-[24px] border border-slate-100 p-5">
+          <div className="bg-white rounded-[24px] border border-academy-border/70 p-5">
             <h3 className="text-[15px] font-bold text-academy-text mb-4">Pontos de atencao</h3>
             <div className="grid gap-3">
               {activeMaterial.pitfalls.map(item => (
-                <p key={item} className="text-[13px] leading-relaxed text-slate-600 bg-amber-50/70 rounded-[16px] px-4 py-3">
+                <p key={item} className="text-[13px] leading-relaxed text-academy-attention-text bg-academy-attention rounded-[16px] px-4 py-3">
                   {item}
                 </p>
               ))}
             </div>
           </div>
 
-          <div className="bg-academy-primary-dark rounded-[24px] p-5 text-white">
+          <div className="bg-white border border-academy-border rounded-[24px] p-5 text-academy-text">
             <div className="flex items-center gap-2 mb-3">
-              <UserCircle size={18} />
+              <UserCircle size={18} className="text-academy-muted" />
               <h3 className="text-[15px] font-bold">Como explicar ao paciente</h3>
             </div>
-            <p className="text-[14px] leading-relaxed text-white/85">{activeMaterial.patientTalk}</p>
+            <p className="text-[14px] leading-relaxed text-academy-muted">{activeMaterial.patientTalk}</p>
           </div>
         </section>
       </div>
@@ -917,7 +917,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.08 }}
-          className="flex items-start gap-3 rounded-2xl px-5 py-4 bg-academy-primary/10"
+          className="flex items-start gap-3 rounded-2xl px-5 py-4 bg-academy-neutral/80 border border-academy-border/80"
         >
           <Sparkles size={20} className="mt-0.5 shrink-0 text-academy-primary" />
           <p className="text-[14px] font-medium text-[#3A3A3C] leading-snug">
@@ -934,26 +934,26 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           className="space-y-4"
         >
           <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Seu proximo passo</h3>
-          <div className="bg-gradient-to-br from-academy-primary-dark via-academy-primary to-academy-primary rounded-[32px] p-7 shadow-2xl shadow-slate-300/40 relative overflow-hidden flex flex-col min-h-[280px]">
-            <div className="absolute -right-8 -bottom-8 opacity-10 text-white pointer-events-none">
+          <div className="bg-white rounded-[32px] p-7 shadow-[0_16px_54px_rgba(15,23,42,0.08)] border border-academy-border/80 relative overflow-hidden flex flex-col min-h-[280px]">
+            <div className="absolute -right-8 -bottom-8 opacity-[0.06] text-academy-primary pointer-events-none">
               <nextCaseTopic.icon size={200} />
             </div>
 
             <div className="flex-1 relative z-10 flex flex-col">
-              <span className="text-white/70 text-[12px] font-bold uppercase tracking-widest mb-1">
+              <span className="text-academy-primary text-[12px] font-bold uppercase tracking-widest mb-1">
                 Foco do atendimento
               </span>
-              <h2 className="text-[28px] sm:text-[32px] font-bold text-white leading-[1.15] mt-2 mb-6">
-                {getDayPhrase(nextCase.date)} <span className="text-white">{firstName(nextCase.app.patient_name)}</span>.
+              <h2 className="text-[28px] sm:text-[32px] font-bold text-academy-text leading-[1.15] mt-2 mb-6">
+                {getDayPhrase(nextCase.date)} <span>{firstName(nextCase.app.patient_name)}</span>.
               </h2>
 
               <div className="mt-auto space-y-4">
-                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[20px] p-4">
+                <div className="bg-academy-neutral border border-academy-border/80 rounded-[20px] p-4">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white">
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-academy-primary shadow-sm">
                       <nextCaseTopic.icon size={16} />
                     </div>
-                    <span className="text-[14px] font-bold text-white leading-snug">Revise: {nextCaseTopic.topics}</span>
+                    <span className="text-[14px] font-bold text-academy-text leading-snug">Revise: {nextCaseTopic.topics}</span>
                   </div>
                 </div>
 
@@ -961,14 +961,14 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
                   <button
                     type="button"
                     onClick={() => setSelectedStudy(nextCaseTopic.id)}
-                    className="w-full bg-white text-academy-primary-dark font-bold text-[15px] py-[16px] rounded-[20px] shadow-lg hover:scale-[0.98] transition-transform active:scale-95"
+                    className="w-full bg-academy-primary text-white font-bold text-[15px] py-[16px] rounded-[20px] shadow-lg hover:scale-[0.98] transition-transform active:scale-95"
                   >
                     Estudar roteiro
                   </button>
                   <button
                     type="button"
                     onClick={() => openPatientRecord?.(nextCase.patient.id)}
-                    className="w-full bg-white/12 text-white border border-white/25 font-bold text-[15px] py-[16px] rounded-[20px] hover:bg-white/18 transition-colors active:scale-95"
+                    className="w-full bg-white text-academy-muted border border-academy-border font-bold text-[15px] py-[16px] rounded-[20px] hover:bg-academy-neutral transition-colors active:scale-95"
                   >
                     Abrir caso
                   </button>
@@ -1019,7 +1019,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
                 transition={{ duration: 0.3, delay: 0.2 + i * 0.1 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedStudy(cat.id)}
-                className="bg-white rounded-[20px] p-4 border border-slate-100 shadow-sm cursor-pointer flex items-center gap-4 hover:border-academy-primary/30 transition-all text-left"
+                className="bg-white rounded-[20px] p-4 border border-academy-border/70 shadow-sm cursor-pointer flex items-center gap-4 hover:border-stone-300 transition-all text-left"
               >
                 <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 ${cat.color}`}>
                   <cat.icon size={24} />
@@ -1055,7 +1055,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
               key={`lib-${cat.id}`}
               whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedStudy(cat.id)}
-              className="bg-white rounded-[24px] p-5 border border-slate-100 shadow-sm cursor-pointer group transition-all hover:shadow-lg text-left"
+              className="bg-white rounded-[24px] p-5 border border-academy-border/70 shadow-sm cursor-pointer group transition-all hover:shadow-lg text-left"
             >
               <div className="flex items-start gap-4">
                 <div className={`w-12 h-12 rounded-[16px] flex items-center justify-center shrink-0 ${cat.color} bg-opacity-50`}>
@@ -1063,7 +1063,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
                 </div>
                 <div className="flex-1 min-w-0 pt-0.5">
                   <h4 className="text-[16px] font-bold text-academy-text">{cat.title}</h4>
-                  <p className="text-[12px] font-semibold text-academy-primary mt-0.5">
+                  <p className="text-[12px] font-semibold text-academy-muted mt-0.5">
                     {cat.duration} - {cat.level}
                   </p>
                   <p className="text-[13px] text-academy-muted mt-1 leading-relaxed">
@@ -1071,7 +1071,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
                   </p>
                 </div>
                 <div className="pt-2">
-                  <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-slate-100 transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-academy-neutral flex items-center justify-center text-academy-muted group-hover:bg-academy-study transition-colors">
                     <ChevronRight size={16} />
                   </div>
                 </div>

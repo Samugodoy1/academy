@@ -707,7 +707,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       appointmentId: row.appointmentId,
       title: row.title,
       meta: row.meta,
-      tone: 'rose' as const
+      tone: 'coral' as const
     })),
     ...(clinicalPending && !paraFecharRows.some(row => row.patientId === clinicalPending.id)
       ? [{
@@ -716,7 +716,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         appointmentId: 0,
         title: clinicalPending.name,
         meta: getClinicalAlert(clinicalPending, usableAppointments, now) || 'Complete o prontuário.',
-        tone: 'amber' as const
+        tone: 'coral' as const
       }]
       : [])
   ].slice(0, 3);
@@ -755,7 +755,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.08 }}
-          className="flex items-start gap-3 rounded-2xl px-5 py-4 bg-academy-primary/10"
+          className="flex items-start gap-3 rounded-2xl px-5 py-4 bg-academy-neutral/80 border border-academy-border/70"
         >
           <Sparkles size={16} className="mt-0.5 shrink-0 text-academy-primary" />
           <p className="text-[14px] font-medium text-[#3A3A3C] leading-snug">
@@ -771,9 +771,10 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         >
           <div
-            className="overflow-hidden rounded-[32px] shadow-[0_24px_80px_rgba(0,0,0,0.10)] flex flex-col bg-gradient-to-br from-academy-primary-dark via-academy-primary to-academy-primary"
+            className="relative overflow-hidden rounded-[32px] bg-academy-primary shadow-[0_24px_80px_rgba(82,5,123,0.22)] flex flex-col"
             style={{ minHeight: 'min(60svh, 520px)' }}
           >
+            <div className="absolute inset-x-0 top-0 h-1.5 bg-white/10" />
             <div className="flex-1 px-8 pt-12 pb-6 flex flex-col gap-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
@@ -806,7 +807,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   
               <div className="flex items-center gap-2.5 flex-wrap">
                 {appointmentMetaLabel && (
-                  <span className="px-3 py-1.5 rounded-full text-[12px] font-bold bg-white/90 text-academy-primary-dark">
+                  <span className="px-3 py-1.5 rounded-full text-[12px] font-bold bg-white/15 text-white">
                     {appointmentMetaLabel}
                   </span>
                 )}
@@ -850,7 +851,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
                 whileTap={{ scale: 0.98, opacity: 0.92 }}
                 transition={{ duration: 0.18, ease: 'easeOut' }}
                 onClick={focus.action}
-                className="w-full py-[20px] rounded-[26px] text-[18px] font-bold bg-white shadow-[0_8px_32px_rgba(0,0,0,0.18)] transition-all text-academy-primary-dark"
+                className="w-full py-[20px] rounded-[26px] text-[18px] font-bold bg-white shadow-[0_12px_30px_rgba(0,0,0,0.18)] transition-all text-academy-primary"
               >
                 {focus.actionLabel}
               </motion.button>
@@ -882,7 +883,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           <motion.button
             whileTap={{ scale: 0.96 }}
             onClick={() => setIsPatientModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-[12px] rounded-xl bg-primary/10 text-primary text-[13px] font-bold transition-all"
+            className="flex items-center gap-1.5 px-4 py-[12px] rounded-xl bg-academy-soft text-academy-primary border border-academy-primary/12 text-[13px] font-bold transition-all shadow-[0_6px_18px_rgba(82,5,123,0.06)]"
           >
             <Plus size={14} strokeWidth={2.5} />
             Caso
@@ -890,7 +891,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           <motion.button
             whileTap={{ scale: 0.96 }}
             onClick={openAppointmentModal}
-            className="flex items-center gap-1.5 px-4 py-[12px] rounded-xl bg-[#F3E8FF] text-academy-primary-dark text-[13px] font-bold transition-all"
+            className="flex items-center gap-1.5 px-4 py-[12px] rounded-xl bg-academy-primary text-white text-[13px] font-bold transition-all shadow-sm"
           >
             <CalendarPlus size={14} strokeWidth={2.5} />
             Atendimento
@@ -904,11 +905,11 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="rounded-[24px] bg-white border border-academy-border/60 shadow-[0_2px_12px_rgba(0,0,0,0.04)] overflow-hidden">
+          <div className="rounded-[24px] bg-white border border-academy-border/70 shadow-[0_8px_28px_rgba(15,23,42,0.05)] overflow-hidden">
             <div className="px-6 pt-6 pb-2">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-[12px] bg-academy-primary/10 flex items-center justify-center">
-                  <BookOpen size={16} className="text-academy-primary" />
+                <div className="w-8 h-8 rounded-[12px] bg-academy-neutral flex items-center justify-center">
+                  <BookOpen size={16} className="text-academy-muted" />
                 </div>
                 <span className="text-[12px] font-bold uppercase tracking-[0.08em] text-academy-muted">Antes do box</span>
               </div>
@@ -940,18 +941,18 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-2 h-2 bg-rose-500 rounded-full animate-pulse" />
+              <div className="w-1 h-5 bg-academy-attention-text rounded-full" />
               <h3 className="text-[15px] font-bold text-academy-text tracking-tight">Para fechar</h3>
             </div>
-            <span className="text-[12px] font-bold text-rose-400">{pendingRows.length}</span>
+            <span className="text-[12px] font-bold text-academy-attention-text">{pendingRows.length}</span>
           </div>
-          <div className="rounded-[20px] overflow-hidden bg-white/80 backdrop-blur-sm border border-rose-100/40 shadow-[0_2px_12px_rgba(244,63,94,0.06)]">
+          <div className="rounded-[20px] overflow-hidden bg-white border border-rose-100 shadow-[0_8px_28px_rgba(225,29,72,0.08)]">
             {pendingRows.map(row => (
               <React.Fragment key={row.id}>
                 <ListRow
                   title={row.title}
                   meta={row.meta}
-                  accent={row.tone === 'rose' ? 'rose' : 'amber'}
+                  accent="coral"
                   onClick={() => {
                     if (row.appointmentId && openPatientEvolution) {
                       const app = usableAppointments.find(a => a.id === row.appointmentId);
@@ -972,12 +973,15 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       {otherAppointments.length > 0 && (
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-[15px] font-bold text-academy-text tracking-tight">Próximos boxes</h3>
-            <button onClick={() => setActiveTab('agenda')} className="text-[13px] font-semibold text-primary">
+            <div className="flex items-center gap-2.5">
+              <div className="w-1 h-5 bg-academy-primary rounded-full" />
+              <h3 className="text-[15px] font-bold text-academy-text tracking-tight">Próximos boxes</h3>
+            </div>
+            <button onClick={() => setActiveTab('agenda')} className="text-[13px] font-semibold text-academy-primary">
               Ver tudo
             </button>
           </div>
-          <div className="rounded-[20px] overflow-hidden bg-white border border-academy-border/80 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
+          <div className="rounded-[20px] overflow-hidden bg-white border border-academy-border/80 shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
             {otherAppointments.map((app, index) => {
               const dateTime = formatAgendaListDateTime(app.start_time);
               return (
@@ -990,14 +994,14 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     <div className="flex flex-col items-start shrink-0 w-14">
-                      <span className="text-[12px] font-bold text-primary leading-none">
+                      <span className="text-[12px] font-bold text-academy-primary leading-none">
                         {dateTime.date}
                       </span>
-                      <span className="text-[15px] font-bold text-primary leading-none mt-1">
+                      <span className="text-[15px] font-bold text-academy-primary leading-none mt-1">
                         {dateTime.time}
                       </span>
                     </div>
-                    <div className="w-px h-8 bg-primary/15 shrink-0" />
+                    <div className="w-px h-8 bg-academy-primary/12 shrink-0" />
                     <div className="flex flex-col gap-0.5 min-w-0">
                       <span className="text-[15px] font-semibold text-academy-text truncate">{app.patient_name}</span>
                       <span className="text-[12px] text-academy-muted truncate">{app.notes || 'Atendimento'}</span>
@@ -1016,9 +1020,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           <motion.button
             whileTap={{ scale: 0.98, opacity: 0.9 }}
             onClick={() => openPatientRecord(pausedCase.id)}
-            className="w-full flex items-center gap-4 bg-academy-bg rounded-[20px] px-5 py-4 transition-all"
+            className="w-full flex items-center gap-4 bg-academy-alert rounded-[20px] px-5 py-4 transition-all"
           >
-            <div className="w-10 h-10 bg-white rounded-[14px] flex items-center justify-center text-primary shadow-sm shrink-0">
+            <div className="w-10 h-10 bg-white rounded-[14px] flex items-center justify-center text-academy-alert-text shadow-sm shrink-0">
               <Clock size={20} />
             </div>
             <div className="flex-1 min-w-0 text-left">
@@ -1032,8 +1036,8 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
       {patients.length > 0 && pendingRows.length === 0 && otherAppointments.length === 0 && !pausedCase && (
         <section>
-          <div className="w-full flex items-center gap-4 bg-academy-bg rounded-[20px] px-5 py-4">
-            <div className="w-10 h-10 bg-white rounded-[14px] flex items-center justify-center text-primary shadow-sm shrink-0">
+          <div className="w-full flex items-center gap-4 bg-academy-success rounded-[20px] px-5 py-4">
+            <div className="w-10 h-10 bg-white rounded-[14px] flex items-center justify-center text-academy-success-text shadow-sm shrink-0">
               <CheckCircle2 size={20} />
             </div>
             <div className="flex-1 min-w-0 text-left">
@@ -1048,7 +1052,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 };
 
 const HeroDetail = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-[18px] bg-white/12 border border-white/15 px-4 py-3">
+  <div className="rounded-[18px] bg-white/10 border border-white/15 px-4 py-3">
     <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.12em]">{label}</span>
     <p className="text-[14px] font-semibold text-white mt-0.5 leading-snug line-clamp-2">{value}</p>
   </div>
@@ -1062,7 +1066,7 @@ const ListRow = ({
 }: {
   title: string;
   meta: string;
-  accent: 'rose' | 'amber';
+  accent: 'coral';
   onClick: () => void;
 }) => {
   const metaLines = meta.split('\n').filter(Boolean);
@@ -1074,10 +1078,10 @@ const ListRow = ({
       onClick={onClick}
     >
       <div className="relative">
-        <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[13px] overflow-hidden border border-primary/20 shrink-0">
+        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-[13px] overflow-hidden border shrink-0 bg-academy-attention text-academy-attention-text border-rose-100">
           {(title || '?').charAt(0).toUpperCase()}
         </div>
-        <div className={`absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full ${accent === 'rose' ? 'bg-rose-400' : 'bg-amber-400'} border-2 border-white`} />
+        <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-academy-attention-text border-2 border-white" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-[15px] font-semibold text-academy-text truncate">{title}</p>

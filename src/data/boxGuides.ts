@@ -1,4 +1,5 @@
 export type BoxGuideProcedure =
+  | 'Consulta'
   | 'Endodontia'
   | 'Cirurgia'
   | 'Dentistica'
@@ -22,6 +23,95 @@ export type BoxGuide = {
 };
 
 export const boxGuides: Record<BoxGuideProcedure, BoxGuide> = {
+  Consulta: {
+    label: 'Consulta / Avaliacao',
+    shortLabel: 'Consulta',
+    doubtChips: ['Anamnese', 'Exame', 'Radiografia', 'Plano', 'Orientacoes', 'Evolucao'],
+    chipContent: {
+      Anamnese: [
+        'Perguntar queixa principal com suas palavras',
+        'Checar alergias, medicacoes e condicoes sistemicas',
+        'Verificar pressao arterial se indicado',
+        'Registrar historico medico relevante',
+      ],
+      Exame: [
+        'Inspecao visual intra e extra-oral',
+        'Palpacao de linfonodos e tecidos moles',
+        'Sondagem periodontal quando indicado',
+        'Avaliar mucosa, gengiva e dentes',
+      ],
+      Radiografia: [
+        'Solicitar radiografia conforme necessidade',
+        'Correlacionar achados clinicos com imagem',
+        'Registrar achados radiograficos relevantes',
+      ],
+      Plano: [
+        'Listar achados principais',
+        'Priorizar necessidades clinicas',
+        'Definir proximos passos com o professor',
+        'Orientar paciente sobre o plano proposto',
+      ],
+      Orientacoes: [
+        'Explicar achados ao paciente',
+        'Orientar higiene e cuidados',
+        'Esclarecer duvidas do paciente',
+        'Definir retorno ou proxima etapa',
+      ],
+      Evolucao: [
+        'Registrar queixa e achados do exame',
+        'Registrar hipotese diagnostica',
+        'Registrar plano proposto e proxima etapa',
+        'Registrar orientacoes dadas ao paciente',
+      ],
+    },
+    blocks: [
+      {
+        title: 'Materiais para consulta',
+        items: [
+          'Espelho, sonda e pinca clinica',
+          'Sonda periodontal',
+          'Gaze e sugador',
+          'Ficha clinica e prontuario',
+          'Esfigmomanometro se indicado',
+        ],
+      },
+      {
+        title: 'Sequencia da consulta',
+        ordered: true,
+        items: [
+          'Acolher paciente e confirmar dados',
+          'Ouvir queixa principal',
+          'Revisar anamnese, alergias e medicacoes',
+          'Verificar PA se indicado',
+          'Exame clinico intra e extra-oral',
+          'Solicitar exames complementares se necessario',
+          'Definir hipotese e plano com professor',
+          'Orientar paciente e definir retorno',
+        ],
+      },
+      {
+        title: 'Nao esquecer',
+        emphasis: 'warning',
+        items: [
+          'Confirmar anamnese antes de qualquer procedimento',
+          'Registrar queixa nas palavras do paciente',
+          'Checar alergias e medicacoes em uso',
+          'Validar plano com o professor antes de comunicar ao paciente',
+        ],
+      },
+      {
+        title: 'Registro/evolucao sugerida',
+        emphasis: 'record',
+        items: [
+          'Queixa principal e historico',
+          'Achados do exame clinico',
+          'Hipotese diagnostica',
+          'Plano de tratamento proposto',
+          'Orientacoes e retorno',
+        ],
+      },
+    ],
+  },
   Endodontia: {
     label: 'Endodontia',
     shortLabel: 'Endo',

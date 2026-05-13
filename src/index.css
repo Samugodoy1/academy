@@ -4,12 +4,21 @@
 :root {
   --academy-primary: #52057B;
   --academy-primary-dark: #3B0459;
-  --academy-soft: #F4E8FA;
-  --academy-bg: #FAFCFD;
+  --academy-soft: #F4F1F6;
+  --academy-bg: #F6F8FA;
   --academy-card: #FFFFFF;
-  --academy-text: #132026;
-  --academy-muted: #667A80;
-  --academy-border: #E8D4F1;
+  --academy-text: #07111F;
+  --academy-muted: #7B8491;
+  --academy-border: #E6EBF0;
+  --academy-neutral: #F1F4F7;
+  --academy-study: #F7F8FA;
+  --academy-study-text: #667085;
+  --academy-alert: #FFF7E8;
+  --academy-alert-text: #9A6B12;
+  --academy-attention: #FFF0F3;
+  --academy-attention-text: #E11D48;
+  --academy-success: #ECF8F2;
+  --academy-success-text: #08785A;
 }
 
 @theme {
@@ -24,6 +33,15 @@
   --color-academy-text: var(--academy-text);
   --color-academy-muted: var(--academy-muted);
   --color-academy-border: var(--academy-border);
+  --color-academy-neutral: var(--academy-neutral);
+  --color-academy-study: var(--academy-study);
+  --color-academy-study-text: var(--academy-study-text);
+  --color-academy-alert: var(--academy-alert);
+  --color-academy-alert-text: var(--academy-alert-text);
+  --color-academy-attention: var(--academy-attention);
+  --color-academy-attention-text: var(--academy-attention-text);
+  --color-academy-success: var(--academy-success);
+  --color-academy-success-text: var(--academy-success-text);
 }
 
 @layer base {
@@ -229,7 +247,7 @@
 
   /* iOS drag handle */
   .ios-drag-handle {
-    @apply w-9 h-[5px] rounded-full bg-slate-300/60 mx-auto mb-4;
+    @apply w-9 h-[5px] rounded-full bg-stone-300/60 mx-auto mb-4;
   }
 
   /* Refined card hover */

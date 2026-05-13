@@ -81,6 +81,7 @@ import {
   X              as PhX,
   Tooth          as PhTooth,
   Syringe        as PhSyringe,
+  DotsSixVertical as PhDotsSixVertical,
 } from '@phosphor-icons/react';
 
 // ─── Prop types ──────────────────────────────────────────────────────────────
@@ -195,3 +196,4 @@ export const Loader2 = bold(PhCircleNotch);
 
 export const Tooth = fill(PhTooth);
 export const Syringe = fill(PhSyringe);
+export const GripVertical = bold(PhDotsSixVertical);

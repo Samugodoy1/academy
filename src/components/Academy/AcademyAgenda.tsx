@@ -320,7 +320,7 @@ export const AcademyAgenda: React.FC<AcademyAgendaProps> = ({
               animate={{ opacity: 1, y: 0 }}
               className="rounded-[28px] bg-white border border-academy-border/70 px-6 py-10 text-center shadow-[0_2px_14px_rgba(0,0,0,0.03)]"
             >
-              <div className="w-12 h-12 rounded-[18px] bg-academy-primary/10 flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 rounded-[18px] bg-academy-study flex items-center justify-center mx-auto mb-4">
                 <Calendar size={22} className="text-academy-primary" />
               </div>
               <h2 className="text-[18px] font-bold text-academy-text">Nenhum atendimento nesta semana.</h2>
@@ -366,7 +366,7 @@ export const AcademyAgenda: React.FC<AcademyAgendaProps> = ({
                               <p className="text-[15px] font-bold text-academy-text truncate">
                                 {appointment.patient_name || appointment.patient?.name || 'Paciente'}
                               </p>
-                              <span className="shrink-0 rounded-full bg-academy-primary/10 px-2.5 py-1 text-[11px] font-bold text-academy-primary">
+                              <span className="shrink-0 rounded-full bg-academy-success px-2.5 py-1 text-[11px] font-bold text-academy-success-text">
                                 {getStatusLabel(appointment.status)}
                               </span>
                             </div>

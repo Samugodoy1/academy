@@ -290,6 +290,9 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
 
   const selectedActionRef = useRef<HTMLDivElement | null>(null);
   const paymentModalRef = useRef<HTMLDivElement | null>(null);
+  const reorderPointerIdRef = useRef<number | null>(null);
+  const reorderDragIdxRef = useRef<number | null>(null);
+  const reorderHandleRef = useRef<HTMLElement | null>(null);
 
   // Auto-dismiss upload feedback
   useEffect(() => {
@@ -408,6 +411,112 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       ),
     [mergedTreatmentPlan]
   );
+
+  const moveReorderItem = (fromIndex: number, toIndex: number) => {
+    setReorderItems((current) => {
+      if (
+        fromIndex === toIndex ||
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= current.length ||
+        toIndex >= current.length
+      ) {
+        return current;
+      }
+
+      const next = [...current];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
+  };
+
+  const moveReorderItemByStep = (index: number, step: -1 | 1) => {
+    const targetIndex = index + step;
+    if (targetIndex < 0 || targetIndex >= reorderItems.length) return;
+    moveReorderItem(index, targetIndex);
+    setDragIdx(null);
+    setDragOverIdx(targetIndex);
+  };
+
+  const endPointerReorder = () => {
+    if (reorderHandleRef.current && reorderPointerIdRef.current !== null) {
+      try {
+        reorderHandleRef.current.releasePointerCapture(reorderPointerIdRef.current);
+      } catch {
+        // The browser can release capture itself after pointer cancellation.
+      }
+    }
+
+    reorderPointerIdRef.current = null;
+    reorderDragIdxRef.current = null;
+    reorderHandleRef.current = null;
+    setDragIdx(null);
+    setDragOverIdx(null);
+    document.body.style.userSelect = '';
+  };
+
+  useEffect(() => {
+    if (!isReorderMode) {
+      endPointerReorder();
+    }
+  }, [isReorderMode]);
+
+  useEffect(() => {
+    return () => endPointerReorder();
+  }, []);
+
+  const startPointerReorder = (event: React.PointerEvent<HTMLButtonElement>, index: number) => {
+    if (!isReorderMode || isSavingOrder || event.button !== 0) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture(event.pointerId);
+
+    reorderPointerIdRef.current = event.pointerId;
+    reorderDragIdxRef.current = index;
+    reorderHandleRef.current = event.currentTarget;
+    setDragIdx(index);
+    setDragOverIdx(index);
+    document.body.style.userSelect = 'none';
+  };
+
+  useEffect(() => {
+    if (!isReorderMode) return;
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (reorderPointerIdRef.current !== event.pointerId || reorderDragIdxRef.current === null) return;
+
+      event.preventDefault();
+      const target = document.elementFromPoint(event.clientX, event.clientY);
+      const row = target?.closest('[data-reorder-index]');
+      if (!row) return;
+
+      const overIndex = Number((row as HTMLElement).dataset.reorderIndex);
+      const fromIndex = reorderDragIdxRef.current;
+      if (!Number.isFinite(overIndex) || overIndex === fromIndex) return;
+
+      moveReorderItem(fromIndex, overIndex);
+      reorderDragIdxRef.current = overIndex;
+      setDragIdx(overIndex);
+      setDragOverIdx(overIndex);
+    };
+
+    const handlePointerEnd = (event: PointerEvent) => {
+      if (reorderPointerIdRef.current !== event.pointerId) return;
+      endPointerReorder();
+    };
+
+    window.addEventListener('pointermove', handlePointerMove, { passive: false });
+    window.addEventListener('pointerup', handlePointerEnd);
+    window.addEventListener('pointercancel', handlePointerEnd);
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerEnd);
+      window.removeEventListener('pointercancel', handlePointerEnd);
+    };
+  }, [isReorderMode]);
 
   const timelineItems = useMemo(() => {
     const mergedEvolutions = [
@@ -1884,23 +1993,10 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     return (
                       <div
                         key={item.id}
-                        draggable={isReorderMode}
-                        onDragStart={isReorderMode ? () => setDragIdx(idx) : undefined}
-                        onDragOver={isReorderMode ? (e) => { e.preventDefault(); setDragOverIdx(idx); } : undefined}
-                        onDragEnd={isReorderMode ? () => { setDragIdx(null); setDragOverIdx(null); } : undefined}
-                        onDrop={isReorderMode ? (e) => {
-                          e.preventDefault();
-                          if (dragIdx === null || dragIdx === idx) return;
-                          const next = [...reorderItems];
-                          const [moved] = next.splice(dragIdx, 1);
-                          next.splice(idx, 0, moved);
-                          setReorderItems(next);
-                          setDragIdx(null);
-                          setDragOverIdx(null);
-                        } : undefined}
+                        data-reorder-index={idx}
                         className={`rounded-2xl border p-4 flex flex-col gap-3 transition-all duration-300 ease-out sm:flex-row sm:items-center sm:justify-between ${
                           isReorderMode
-                            ? 'cursor-grab active:cursor-grabbing select-none'
+                            ? 'select-none'
                             : 'ios-hover-lift'
                         } ${
                           isReorderMode && dragIdx === idx
@@ -1920,8 +2016,37 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                         style={{ animationDelay: `${idx * 50}ms` }}
                       >
                         {isReorderMode && (
-                          <div className="flex shrink-0 items-center justify-center pr-2">
-                            <GripVertical size={20} className="text-slate-300" />
+                          <div className="flex shrink-0 items-center gap-1.5 sm:pr-2">
+                            <button
+                              type="button"
+                              onPointerDown={(event) => startPointerReorder(event, idx)}
+                              disabled={isSavingOrder}
+                              aria-label={`Arrastar ${item.procedure}`}
+                              title="Arrastar"
+                              className="h-10 w-10 shrink-0 touch-none rounded-xl border border-slate-200 bg-white text-slate-400 transition-all hover:border-slate-300 hover:text-slate-600 active:scale-[0.97] disabled:opacity-50 cursor-grab active:cursor-grabbing flex items-center justify-center"
+                            >
+                              <GripVertical size={20} />
+                            </button>
+                            <div className="flex shrink-0 items-center gap-1 sm:hidden">
+                              <button
+                                type="button"
+                                onClick={() => moveReorderItemByStep(idx, -1)}
+                                disabled={idx === 0 || isSavingOrder}
+                                aria-label={`Subir ${item.procedure}`}
+                                className="h-8 w-8 rounded-lg border border-slate-200 bg-white text-slate-400 transition-all active:scale-[0.96] disabled:opacity-30 disabled:active:scale-100 flex items-center justify-center"
+                              >
+                                <ChevronDown size={14} className="rotate-180" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => moveReorderItemByStep(idx, 1)}
+                                disabled={idx === reorderItems.length - 1 || isSavingOrder}
+                                aria-label={`Descer ${item.procedure}`}
+                                className="h-8 w-8 rounded-lg border border-slate-200 bg-white text-slate-400 transition-all active:scale-[0.96] disabled:opacity-30 disabled:active:scale-100 flex items-center justify-center"
+                              >
+                                <ChevronDown size={14} />
+                              </button>
+                            </div>
                           </div>
                         )}
                         <div className="min-w-0 flex-1">

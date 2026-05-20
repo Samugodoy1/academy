@@ -5054,6 +5054,14 @@ export default function App() {
                                               >
                                                 <MessageCircle size={16} />
                                               </button>
+                                              <button
+                                                type="button"
+                                                title="Link Portal do Paciente"
+                                                onClick={() => generatePatientPortalLink(patient)}
+                                                className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                              >
+                                                <LinkIcon size={16} />
+                                              </button>
                                             </>
                                           )}
                                         </div>

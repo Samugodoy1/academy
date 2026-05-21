@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Activity,
@@ -12,7 +12,6 @@ import {
   FileText,
   FlaskConical,
   Heart,
-  MessageCircle,
   Pill,
   Search,
   Shield,
@@ -21,10 +20,9 @@ import {
   Syringe,
   Target,
   Tooth,
-  UserCircle,
-  Zap
+  UserCircle
 } from '../icons';
-import { parseAppointmentDateTime } from '../utils/dateUtils';
+import { getAppointmentTime, parseAppointmentDateTime } from '../utils/dateUtils';
 
 interface AcademyEstudosProps {
   patients?: any[];
@@ -44,7 +42,6 @@ type StudyKey =
   | 'endodontia'
   | 'cirurgia'
   | 'protese'
-  | 'diagnostico'
   | 'odontopediatria';
 
 type StudyMaterial = {
@@ -69,95 +66,6 @@ type StudyMaterial = {
 };
 
 const ACTIVE_STATUSES = new Set(['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS']);
-
-type StudyIntent = 'agora' | 'prova' | 'trabalho' | 'clinica' | 'duvida' | 'biblioteca';
-
-type ExamPlan = {
-  disciplina: string;
-  tema: string;
-  dataProva: string;
-  tempoDisponivel: string;
-  created: boolean;
-};
-
-type WorkPlan = {
-  tema: string;
-  tipo: 'seminario' | 'apresentacao' | 'resumo' | 'relatorio';
-  prazo: string;
-  integrantes: string;
-  created: boolean;
-};
-
-const STORAGE_KEYS = {
-  exam: 'academy-estudos-prova',
-  work: 'academy-estudos-trabalho'
-};
-
-const DEFAULT_EXAM_PLAN: ExamPlan = {
-  disciplina: '',
-  tema: '',
-  dataProva: '',
-  tempoDisponivel: '',
-  created: false
-};
-
-const DEFAULT_WORK_PLAN: WorkPlan = {
-  tema: '',
-  tipo: 'seminario',
-  prazo: '',
-  integrantes: '',
-  created: false
-};
-
-const STUDY_INTENTS: Array<{ id: StudyIntent; label: string; icon: React.ElementType }> = [
-  { id: 'agora', label: 'Agora', icon: Sparkles },
-  { id: 'prova', label: 'Prova', icon: Target },
-  { id: 'trabalho', label: 'Trabalho', icon: FileText },
-  { id: 'clinica', label: 'Clínica', icon: Stethoscope },
-  { id: 'duvida', label: 'Dúvida rápida', icon: MessageCircle },
-  { id: 'biblioteca', label: 'Biblioteca', icon: BookOpen }
-];
-
-const QUICK_QUESTION_SUGGESTIONS = [
-  'Quando indicar pino?',
-  'Pulpite reversível x irreversível',
-  'O que é IDS?',
-  'Anestesia em hipertenso'
-];
-
-const REQUIRED_LIBRARY_KEYS: StudyKey[] = [
-  'exame-clinico',
-  'radiologia',
-  'anestesia',
-  'isolamento',
-  'periodontia',
-  'dentistica',
-  'endodontia',
-  'cirurgia',
-  'protese',
-  'diagnostico'
-];
-
-function loadStoredStudyState<T>(key: string, fallback: T): T {
-  if (typeof window === 'undefined') return fallback;
-
-  try {
-    const stored = window.localStorage.getItem(key);
-    return stored ? { ...fallback, ...JSON.parse(stored) } : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function saveStoredStudyState<T>(key: string, value: T) {
-  if (typeof window === 'undefined') return;
-
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Local state still works if storage is unavailable.
-  }
-}
 
 const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
   'exame-clinico': {
@@ -213,60 +121,6 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
       'Confundir achado radiografico com diagnostico final sem correlacao clinica.'
     ],
     patientTalk: 'Explique que a primeira consulta serve para entender a causa do problema e montar uma ordem segura de tratamento, nao apenas olhar um dente isolado.'
-  },
-  diagnostico: {
-    id: 'diagnostico',
-    title: 'Diagnóstico',
-    subtitle: 'Hipóteses, diferenciais e decisão',
-    topics: 'Sinais, sintomas, testes, hipóteses e conduta inicial.',
-    duration: '16 min',
-    level: 'Raciocínio clínico',
-    icon: FlaskConical,
-    color: 'bg-violet-50 text-academy-primary',
-    borderColor: 'border-violet-100',
-    objective: 'Organizar o raciocínio antes da conduta: transformar queixa, exame e testes complementares em uma hipótese defensável e um próximo passo seguro.',
-    modules: [
-      {
-        title: 'Coleta de dados',
-        description: 'Diagnóstico bom começa separando fato de interpretação.',
-        steps: [
-          'Registrar queixa, duração, gatilhos, intensidade, histórico sistêmico e uso de medicamentos.',
-          'Anotar achados clínicos objetivos: localização, extensão, dor provocada, sangramento, mobilidade e alterações visuais.',
-          'Conferir exames complementares apenas quando eles respondem uma pergunta clínica real.'
-        ]
-      },
-      {
-        title: 'Hipóteses e diferenciais',
-        description: 'Liste possibilidades antes de fechar a decisão.',
-        steps: [
-          'Definir hipótese principal e pelo menos um diagnóstico diferencial quando houver dúvida.',
-          'Relacionar cada hipótese com sinais que sustentam ou enfraquecem a conclusão.',
-          'Identificar sinais de urgência, risco sistêmico ou necessidade de encaminhamento.'
-        ]
-      },
-      {
-        title: 'Conduta inicial',
-        description: 'A primeira decisão deve reduzir risco e aumentar clareza.',
-        steps: [
-          'Priorizar dor, infecção, trauma, função e risco de progressão.',
-          'Explicar ao paciente o que já está claro e o que ainda precisa confirmar.',
-          'Registrar plano, justificativa e próximos exames ou reavaliações.'
-        ]
-      }
-    ],
-    checklist: [
-      'Queixa principal clara',
-      'Sinais e sintomas separados',
-      'Testes indicados registrados',
-      'Hipótese principal definida',
-      'Conduta inicial justificada'
-    ],
-    pitfalls: [
-      'Fechar diagnóstico só pela radiografia pode ignorar sinais clínicos importantes.',
-      'Tratar dor sem investigar causa pode mascarar evolução do caso.',
-      'Não registrar hipótese e justificativa dificulta supervisão e continuidade.'
-    ],
-    patientTalk: 'Explique que o diagnóstico junta conversa, exame e testes para escolher a conduta mais segura, sem pular etapas.'
   },
   radiologia: {
     id: 'radiologia',
@@ -841,57 +695,59 @@ const mapProcedureToTopic = (procedure: string | null): StudyKey | null => {
   return null;
 };
 
+const getDayPhrase = (date: Date) => {
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  if (date.toDateString() === today.toDateString()) return 'Hoje voce atende';
+  if (date.toDateString() === tomorrow.toDateString()) return 'Amanha voce atende';
+  const weekday = date.toLocaleDateString('pt-BR', { weekday: 'long' }).split('-')[0];
+  const prefix = ['sabado', 'domingo'].includes(weekday.toLowerCase()) ? 'No' : 'Na';
+  return `${prefix} ${weekday} voce atende`;
+};
+
+const firstName = (name?: string) => (name || 'paciente').trim().split(' ')[0] || 'paciente';
+
 export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
   patients = [],
   appointments = [],
   setActiveTab,
   openPatientRecord
 }) => {
-  const [activeIntent, setActiveIntent] = useState<StudyIntent>('agora');
   const [selectedStudy, setSelectedStudy] = useState<StudyKey | null>(null);
-  const [examPlan, setExamPlan] = useState<ExamPlan>(() =>
-    loadStoredStudyState(STORAGE_KEYS.exam, DEFAULT_EXAM_PLAN)
-  );
-  const [workPlan, setWorkPlan] = useState<WorkPlan>(() =>
-    loadStoredStudyState(STORAGE_KEYS.work, DEFAULT_WORK_PLAN)
-  );
-  const [quickQuestion, setQuickQuestion] = useState('');
-
-  useEffect(() => {
-    saveStoredStudyState(STORAGE_KEYS.exam, examPlan);
-  }, [examPlan]);
-
-  useEffect(() => {
-    saveStoredStudyState(STORAGE_KEYS.work, workPlan);
-  }, [workPlan]);
-
-  const upcomingAppointments = useMemo(() => {
-    const current = new Date();
-    const limit = new Date(current);
-    limit.setDate(limit.getDate() + 30);
-
-    return appointments
-      .filter(app => ACTIVE_STATUSES.has(String(app.status || 'SCHEDULED').toUpperCase()))
-      .map(app => {
-        const date = parseDate(app.start_time || app.date);
-        const patientId = Number(app.patient_id);
-        const patient = Number.isFinite(patientId) ? getPatient(patients, patientId) : null;
-        const proc = getProcedureHint(app, patient);
-        const topicKey = mapProcedureToTopic(proc);
-        return { app, patient, proc, topicKey, date };
-      })
-      .filter(item => item.date && item.date > current && item.date <= limit)
-      .sort((a, b) => (a.date?.getTime() || 0) - (b.date?.getTime() || 0));
-  }, [appointments, patients]);
+  const now = new Date();
 
   const upcomingCases = useMemo(() => {
-    return upcomingAppointments.filter(item => item.topicKey);
-  }, [upcomingAppointments]);
+    const limit = new Date(now);
+    limit.setDate(limit.getDate() + 15);
 
-  const nextAppointment = upcomingAppointments[0];
+    const usable = appointments
+      .filter(app => ACTIVE_STATUSES.has(String(app.status).toUpperCase()))
+      .filter(app => {
+        const d = parseDate(app.start_time);
+        return d && d > now && d <= limit;
+      })
+      .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
+
+    return usable.map(app => {
+      const patient = getPatient(patients, app.patient_id);
+      const proc = getProcedureHint(app, patient);
+      const topicKey = mapProcedureToTopic(proc);
+      return {
+        app,
+        patient,
+        topicKey,
+        proc,
+        date: parseDate(app.start_time)!
+      };
+    }).filter(c => c.topicKey && c.patient);
+  }, [appointments, patients]);
+
+  const nextCase = upcomingCases[0];
+  const nextCaseTopic = nextCase?.topicKey ? STUDY_LIBRARY[nextCase.topicKey] : null;
 
   const weekReviews = useMemo(() => {
-    const otherCases = upcomingCases.filter(item => item.app.id !== nextAppointment?.app?.id);
+    const otherCases = upcomingCases.slice(1);
     const keys = otherCases.map(c => c.topicKey).filter(Boolean) as StudyKey[];
     const uniqueKeys = Array.from(new Set(keys));
 
@@ -909,7 +765,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
         if (diffDays === 1) {
-          contextPhrase = `${category.title} amanhã`;
+          contextPhrase = `${category.title} amanha`;
         } else if (diffDays <= 7) {
           contextPhrase = `${category.title} nesta semana`;
         } else {
@@ -922,186 +778,10 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         contextPhrase
       };
     }).slice(0, 3);
-  }, [nextAppointment, upcomingCases]);
+  }, [upcomingCases]);
 
-  const requestedLibraryItems = REQUIRED_LIBRARY_KEYS.map(key => STUDY_LIBRARY[key]);
-  const extraLibraryItems = Object.values(STUDY_LIBRARY).filter(item => !REQUIRED_LIBRARY_KEYS.includes(item.id));
+  const allLibraryItems = Object.values(STUDY_LIBRARY);
   const activeMaterial = selectedStudy ? STUDY_LIBRARY[selectedStudy] : null;
-  const workMembers = workPlan.integrantes
-    .split(/[,\n]/)
-    .map(item => item.trim())
-    .filter(Boolean);
-
-  const canCreateExam = Boolean(
-    examPlan.disciplina.trim() ||
-    examPlan.tema.trim() ||
-    examPlan.dataProva ||
-    examPlan.tempoDisponivel.trim()
-  );
-
-  const canCreateWork = Boolean(
-    workPlan.tema.trim() ||
-    workPlan.prazo ||
-    workPlan.integrantes.trim()
-  );
-
-  const openIntent = (intent: StudyIntent) => {
-    setActiveIntent(intent);
-    setSelectedStudy(null);
-  };
-
-  const ActionCard = ({
-    icon: Icon,
-    title,
-    description,
-    intent
-  }: {
-    icon: React.ElementType;
-    title: string;
-    description: string;
-    intent: StudyIntent;
-  }) => (
-    <motion.button
-      type="button"
-      whileTap={{ scale: 0.98 }}
-      onClick={() => openIntent(intent)}
-      className="rounded-[24px] bg-white p-5 text-left border border-academy-border/75 shadow-[0_10px_32px_rgba(15,23,42,0.04)] transition-all hover:border-academy-primary/20 hover:shadow-[0_16px_40px_rgba(82,5,123,0.08)]"
-    >
-      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-[16px] bg-academy-soft text-academy-primary">
-        <Icon size={22} />
-      </div>
-      <h3 className="text-[16px] font-bold text-academy-text">{title}</h3>
-      <p className="mt-1 text-[13px] font-medium leading-relaxed text-academy-muted">{description}</p>
-    </motion.button>
-  );
-
-  const PlanBlock = ({
-    title,
-    children
-  }: {
-    title: string;
-    children: React.ReactNode;
-  }) => (
-    <div className="rounded-[22px] border border-academy-border/70 bg-white px-5 py-4 shadow-sm">
-      <h4 className="text-[14px] font-bold text-academy-text">{title}</h4>
-      <div className="mt-2 text-[13px] font-medium leading-relaxed text-academy-muted">
-        {children}
-      </div>
-    </div>
-  );
-
-  const EmptyState = ({
-    icon: Icon,
-    title,
-    description,
-    actionLabel,
-    onAction
-  }: {
-    icon: React.ElementType;
-    title: string;
-    description?: string;
-    actionLabel?: string;
-    onAction?: () => void;
-  }) => (
-    <div className="rounded-[28px] border border-academy-border/70 bg-white px-6 py-9 text-center shadow-sm">
-      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[20px] bg-academy-soft text-academy-primary">
-        <Icon size={25} />
-      </div>
-      <h3 className="text-[17px] font-bold text-academy-text">{title}</h3>
-      {description && <p className="mx-auto mt-2 max-w-sm text-[13px] font-medium leading-relaxed text-academy-muted">{description}</p>}
-      {actionLabel && onAction && (
-        <button
-          type="button"
-          onClick={onAction}
-          className="mt-5 rounded-full bg-academy-primary px-5 py-3 text-[13px] font-bold text-white shadow-[0_12px_28px_rgba(82,5,123,0.16)] transition-all active:scale-95"
-        >
-          {actionLabel}
-        </button>
-      )}
-    </div>
-  );
-
-  const AppointmentStudyCard: React.FC<{ item: any }> = ({ item }) => {
-    const topic = item.topicKey ? STUDY_LIBRARY[item.topicKey as StudyKey] : null;
-    const appointmentName = item.app.patient_name || item.patient?.name || 'Atendimento agendado';
-    const dateLabel = item.date?.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'short' });
-    const timeLabel = item.date?.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    const Icon = topic?.icon || Stethoscope;
-
-    return (
-      <motion.article
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-[26px] border border-academy-border/75 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.05)]"
-      >
-        <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[17px] bg-academy-soft text-academy-primary">
-            <Icon size={23} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-[12px] font-bold uppercase text-academy-primary">
-              {dateLabel} {timeLabel ? `· ${timeLabel}` : ''}
-            </p>
-            <h3 className="mt-1 truncate text-[17px] font-bold text-academy-text">{appointmentName}</h3>
-            <p className="mt-1 text-[13px] font-medium leading-relaxed text-academy-muted">
-              {topic
-                ? `Revisão sugerida: ${topic.title}.`
-                : 'Adicione procedimento ou observações na agenda para sugerir uma revisão específica.'}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-          <button
-            type="button"
-            onClick={() => topic ? setSelectedStudy(topic.id) : openIntent('biblioteca')}
-            className="flex-1 rounded-full bg-academy-primary px-4 py-3 text-[13px] font-bold text-white transition-all active:scale-95"
-          >
-            Preparar atendimento
-          </button>
-          {item.patient?.id && (
-            <button
-              type="button"
-              onClick={() => openPatientRecord?.(item.patient.id)}
-              className="flex-1 rounded-full border border-academy-border bg-white px-4 py-3 text-[13px] font-bold text-academy-muted transition-all hover:bg-academy-neutral active:scale-95"
-            >
-              Abrir caso
-            </button>
-          )}
-        </div>
-      </motion.article>
-    );
-  };
-
-  const LibraryCard: React.FC<{ item: StudyMaterial }> = ({ item }) => (
-    <motion.button
-      type="button"
-      key={`lib-${item.id}`}
-      whileTap={{ scale: 0.98 }}
-      onClick={() => setSelectedStudy(item.id)}
-      className="group cursor-pointer rounded-[24px] border border-academy-border/70 bg-white p-5 text-left shadow-sm transition-all hover:border-academy-primary/20 hover:shadow-[0_14px_34px_rgba(82,5,123,0.08)]"
-    >
-      <div className="flex items-start gap-4">
-        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] ${item.color}`}>
-          <item.icon size={22} />
-        </div>
-        <div className="min-w-0 flex-1 pt-0.5">
-          <h4 className="text-[16px] font-bold text-academy-text">{item.title}</h4>
-          <p className="mt-0.5 text-[12px] font-semibold text-academy-muted">
-            {item.duration} · {item.level}
-          </p>
-          <p className="mt-1 text-[13px] leading-relaxed text-academy-muted">
-            {item.topics}
-          </p>
-        </div>
-        <div className="pt-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-academy-neutral text-academy-muted transition-colors group-hover:bg-academy-soft group-hover:text-academy-primary">
-            <ChevronRight size={16} />
-          </div>
-        </div>
-      </div>
-    </motion.button>
-  );
 
   if (activeMaterial) {
     const Icon = activeMaterial.icon;
@@ -1222,387 +902,184 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-5 pb-32 pt-8 sm:px-6">
-      <section className="space-y-5">
-        <div className="pt-4">
-          <p className="mb-2 text-[15px] font-semibold text-academy-muted">Estudos</p>
-          <h2 className="text-[32px] font-bold leading-[1.08] text-academy-text sm:text-[36px]">
-            O que você precisa preparar hoje?
-          </h2>
-          <p className="mt-3 max-w-xl text-[15px] font-medium leading-relaxed text-academy-muted">
-            Estude pelo que você precisa resolver agora. Prova, trabalho, clínica ou dúvida rápida.
+    <div className="max-w-2xl mx-auto px-5 sm:px-6 space-y-12 pt-8 pb-32">
+      <section className="space-y-8">
+        <div className="pt-6">
+          <p className="text-[16px] font-medium text-academy-muted mb-2">
+            Estudos
           </p>
+          <h2 className="text-[34px] sm:text-[38px] font-bold text-academy-text leading-[1.1] tracking-tight mt-1">
+            O que revisar agora
+          </h2>
         </div>
 
-        <div className="-mx-5 overflow-x-auto px-5 no-scrollbar sm:-mx-6 sm:px-6">
-          <div className="flex min-w-max gap-2 pb-1">
-            {STUDY_INTENTS.map(intent => {
-              const Icon = intent.icon;
-              const isActive = activeIntent === intent.id;
-
-              return (
-                <button
-                  type="button"
-                  key={intent.id}
-                  onClick={() => openIntent(intent.id)}
-                  className={`inline-flex h-11 items-center gap-2 rounded-full border px-4 text-[13px] font-bold transition-all ${
-                    isActive
-                      ? 'border-academy-primary/20 bg-white text-academy-primary shadow-[0_10px_28px_rgba(82,5,123,0.12)]'
-                      : 'border-transparent bg-academy-neutral/75 text-academy-muted hover:bg-white hover:text-academy-text'
-                  }`}
-                >
-                  <Icon size={16} />
-                  {intent.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.08 }}
+          className="flex items-start gap-3 rounded-2xl px-5 py-4 bg-academy-neutral/80 border border-academy-border/80"
+        >
+          <Sparkles size={20} className="mt-0.5 shrink-0 text-academy-primary" />
+          <p className="text-[14px] font-medium text-[#3A3A3C] leading-snug">
+            Separei revisoes com base nos seus proximos atendimentos.
+          </p>
+        </motion.div>
       </section>
 
-      <motion.div
-        key={activeIntent}
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.28, ease: 'easeOut' }}
-        className="mt-8"
-      >
-        {activeIntent === 'agora' && (
-          <section className="space-y-6">
-            <div>
-              <h3 className="text-[22px] font-bold leading-tight text-academy-text">
-                Separei o que pode te ajudar agora.
-              </h3>
-              <p className="mt-2 text-[14px] font-medium text-academy-muted">
-                A biblioteca continua aqui quando você quiser procurar por conta própria.
-              </p>
+      {nextCase && nextCaseTopic ? (
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-4"
+        >
+          <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Seu proximo passo</h3>
+          <div className="bg-white rounded-[32px] p-7 shadow-[0_16px_54px_rgba(15,23,42,0.08)] border border-academy-border/80 relative overflow-hidden flex flex-col min-h-[280px]">
+            <div className="absolute -right-8 -bottom-8 opacity-[0.06] text-academy-primary pointer-events-none">
+              <nextCaseTopic.icon size={200} />
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <ActionCard icon={Target} title="Preparar para prova" description="Monte uma revisão curta com prioridade e perguntas." intent="prova" />
-              <ActionCard icon={FileText} title="Organizar trabalho" description="Estruture tema, grupo, fala e checklist." intent="trabalho" />
-              <ActionCard icon={Stethoscope} title="Revisar para clínica" description="Veja atendimentos reais e revise o procedimento." intent="clinica" />
-              <ActionCard icon={MessageCircle} title="Tirar dúvida rápida" description="Deixe a pergunta pronta para a futura resposta do Academy." intent="duvida" />
-            </div>
+            <div className="flex-1 relative z-10 flex flex-col">
+              <span className="text-academy-primary text-[12px] font-bold uppercase tracking-widest mb-1">
+                Foco do atendimento
+              </span>
+              <h2 className="text-[28px] sm:text-[32px] font-bold text-academy-text leading-[1.15] mt-2 mb-6">
+                {getDayPhrase(nextCase.date)} <span>{firstName(nextCase.app.patient_name)}</span>.
+              </h2>
 
-            {nextAppointment ? (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 px-1">
-                  <Stethoscope size={16} className="text-academy-primary" />
-                  <h4 className="text-[15px] font-bold text-academy-text">Clínica próxima</h4>
-                </div>
-                <AppointmentStudyCard item={nextAppointment} />
-              </div>
-            ) : (
-              <EmptyState
-                icon={Calendar}
-                title="Nenhum atendimento próximo para preparar agora."
-                description="Quando houver atendimento real na sua agenda, ele aparece aqui sem inventar paciente ou procedimento."
-                actionLabel="Ver agenda"
-                onAction={() => setActiveTab?.('agenda')}
-              />
-            )}
-          </section>
-        )}
-
-        {activeIntent === 'prova' && (
-          <section className="space-y-5">
-            <div className="rounded-[28px] border border-academy-border/75 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
-              <div className="mb-5 flex items-start gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-[17px] bg-academy-soft text-academy-primary">
-                  <Target size={24} />
-                </div>
-                <div>
-                  <h3 className="text-[20px] font-bold text-academy-text">Criar revisão para prova</h3>
-                  <p className="mt-1 text-[13px] font-medium text-academy-muted">Um roteiro simples, pronto para integração futura.</p>
-                </div>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="grid gap-1.5">
-                  <span className="text-[12px] font-bold text-academy-muted">Disciplina</span>
-                  <input
-                    value={examPlan.disciplina}
-                    onChange={(e) => setExamPlan(prev => ({ ...prev, disciplina: e.target.value }))}
-                    className="rounded-[18px] border border-academy-border bg-academy-neutral px-4 py-3 text-[14px] font-semibold text-academy-text outline-none focus:ring-2 focus:ring-academy-primary/10"
-                    placeholder="Ex.: Endodontia"
-                  />
-                </label>
-                <label className="grid gap-1.5">
-                  <span className="text-[12px] font-bold text-academy-muted">Tema</span>
-                  <input
-                    value={examPlan.tema}
-                    onChange={(e) => setExamPlan(prev => ({ ...prev, tema: e.target.value }))}
-                    className="rounded-[18px] border border-academy-border bg-academy-neutral px-4 py-3 text-[14px] font-semibold text-academy-text outline-none focus:ring-2 focus:ring-academy-primary/10"
-                    placeholder="Tema da avaliação"
-                  />
-                </label>
-                <label className="grid gap-1.5">
-                  <span className="text-[12px] font-bold text-academy-muted">Data da prova</span>
-                  <input
-                    type="date"
-                    value={examPlan.dataProva}
-                    onChange={(e) => setExamPlan(prev => ({ ...prev, dataProva: e.target.value }))}
-                    className="rounded-[18px] border border-academy-border bg-academy-neutral px-4 py-3 text-[14px] font-semibold text-academy-text outline-none focus:ring-2 focus:ring-academy-primary/10"
-                  />
-                </label>
-                <label className="grid gap-1.5">
-                  <span className="text-[12px] font-bold text-academy-muted">Tempo disponível</span>
-                  <input
-                    value={examPlan.tempoDisponivel}
-                    onChange={(e) => setExamPlan(prev => ({ ...prev, tempoDisponivel: e.target.value }))}
-                    className="rounded-[18px] border border-academy-border bg-academy-neutral px-4 py-3 text-[14px] font-semibold text-academy-text outline-none focus:ring-2 focus:ring-academy-primary/10"
-                    placeholder="Ex.: 45 min hoje"
-                  />
-                </label>
-              </div>
-
-              <button
-                type="button"
-                disabled={!canCreateExam}
-                onClick={() => setExamPlan(prev => ({ ...prev, created: true }))}
-                className="mt-5 w-full rounded-full bg-academy-primary px-5 py-3.5 text-[14px] font-bold text-white transition-all active:scale-95 disabled:cursor-not-allowed disabled:bg-academy-border disabled:text-academy-muted"
-              >
-                Criar revisão
-              </button>
-            </div>
-
-            {examPlan.created && (
-              <div className="grid gap-3">
-                <PlanBlock title="O que revisar primeiro">
-                  {examPlan.tema || examPlan.disciplina
-                    ? `Comece por ${examPlan.tema || examPlan.disciplina}. Separe conceitos, indicações e etapas que costumam cair.`
-                    : 'Defina disciplina ou tema para ordenar a revisão.'}
-                </PlanBlock>
-                <PlanBlock title="Revisão rápida">
-                  Monte um resumo de uma página com definições, sequência clínica e pontos de atenção.
-                </PlanBlock>
-                <PlanBlock title="Simulado/perguntas">
-                  Transforme cada tópico em perguntas curtas e responda sem olhar o material.
-                </PlanBlock>
-                <PlanBlock title="Pontos para reforçar">
-                  Marque erros, dúvidas recorrentes e itens que precisam de professor, monitoria ou biblioteca.
-                </PlanBlock>
-              </div>
-            )}
-          </section>
-        )}
-
-        {activeIntent === 'trabalho' && (
-          <section className="space-y-5">
-            <div className="rounded-[28px] border border-academy-border/75 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
-              <div className="mb-5 flex items-start gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-[17px] bg-academy-soft text-academy-primary">
-                  <FileText size={24} />
-                </div>
-                <div>
-                  <h3 className="text-[20px] font-bold text-academy-text">Organizar trabalho</h3>
-                  <p className="mt-1 text-[13px] font-medium text-academy-muted">Estrutura local, sem depender de backend agora.</p>
-                </div>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="grid gap-1.5 sm:col-span-2">
-                  <span className="text-[12px] font-bold text-academy-muted">Tema</span>
-                  <input
-                    value={workPlan.tema}
-                    onChange={(e) => setWorkPlan(prev => ({ ...prev, tema: e.target.value }))}
-                    className="rounded-[18px] border border-academy-border bg-academy-neutral px-4 py-3 text-[14px] font-semibold text-academy-text outline-none focus:ring-2 focus:ring-academy-primary/10"
-                    placeholder="Tema do trabalho"
-                  />
-                </label>
-                <label className="grid gap-1.5">
-                  <span className="text-[12px] font-bold text-academy-muted">Tipo</span>
-                  <select
-                    value={workPlan.tipo}
-                    onChange={(e) => setWorkPlan(prev => ({ ...prev, tipo: e.target.value as WorkPlan['tipo'] }))}
-                    className="rounded-[18px] border border-academy-border bg-academy-neutral px-4 py-3 text-[14px] font-semibold text-academy-text outline-none focus:ring-2 focus:ring-academy-primary/10"
-                  >
-                    <option value="seminario">Seminário</option>
-                    <option value="apresentacao">Apresentação</option>
-                    <option value="resumo">Resumo</option>
-                    <option value="relatorio">Relatório</option>
-                  </select>
-                </label>
-                <label className="grid gap-1.5">
-                  <span className="text-[12px] font-bold text-academy-muted">Prazo</span>
-                  <input
-                    type="date"
-                    value={workPlan.prazo}
-                    onChange={(e) => setWorkPlan(prev => ({ ...prev, prazo: e.target.value }))}
-                    className="rounded-[18px] border border-academy-border bg-academy-neutral px-4 py-3 text-[14px] font-semibold text-academy-text outline-none focus:ring-2 focus:ring-academy-primary/10"
-                  />
-                </label>
-                <label className="grid gap-1.5 sm:col-span-2">
-                  <span className="text-[12px] font-bold text-academy-muted">Integrantes</span>
-                  <input
-                    value={workPlan.integrantes}
-                    onChange={(e) => setWorkPlan(prev => ({ ...prev, integrantes: e.target.value }))}
-                    className="rounded-[18px] border border-academy-border bg-academy-neutral px-4 py-3 text-[14px] font-semibold text-academy-text outline-none focus:ring-2 focus:ring-academy-primary/10"
-                    placeholder="Separe nomes por vírgula"
-                  />
-                </label>
-              </div>
-
-              <button
-                type="button"
-                disabled={!canCreateWork}
-                onClick={() => setWorkPlan(prev => ({ ...prev, created: true }))}
-                className="mt-5 w-full rounded-full bg-academy-primary px-5 py-3.5 text-[14px] font-bold text-white transition-all active:scale-95 disabled:cursor-not-allowed disabled:bg-academy-border disabled:text-academy-muted"
-              >
-                Gerar estrutura
-              </button>
-            </div>
-
-            {workPlan.created && (
-              <div className="grid gap-3">
-                <PlanBlock title="Tópicos principais">
-                  {workPlan.tema
-                    ? `Comece com contexto, conceitos essenciais, desenvolvimento do tema "${workPlan.tema}" e fechamento.`
-                    : 'Defina o tema para organizar os tópicos principais.'}
-                </PlanBlock>
-                <PlanBlock title="Divisão do grupo">
-                  {workMembers.length > 0 ? (
-                    <div className="grid gap-1.5">
-                      {workMembers.map((member, index) => (
-                        <span key={`${member}-${index}`}>{member}: parte {index + 1} do roteiro.</span>
-                      ))}
+              <div className="mt-auto space-y-4">
+                <div className="bg-academy-neutral border border-academy-border/80 rounded-[20px] p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-academy-primary shadow-sm">
+                      <nextCaseTopic.icon size={16} />
                     </div>
-                  ) : (
-                    'Adicione integrantes para sugerir uma divisão sem inventar nomes.'
-                  )}
-                </PlanBlock>
-                <PlanBlock title="Roteiro de fala">
-                  Abertura, problema, explicação principal, exemplo clínico quando houver e conclusão objetiva.
-                </PlanBlock>
-                <PlanBlock title="Checklist do que falta">
-                  Referências, slides ou arquivo final, revisão de linguagem, ensaio e conferência do prazo.
-                </PlanBlock>
-              </div>
-            )}
-          </section>
-        )}
-
-        {activeIntent === 'clinica' && (
-          <section className="space-y-5">
-            <div>
-              <h3 className="text-[22px] font-bold text-academy-text">Prepare a clínica com dados reais.</h3>
-              <p className="mt-2 text-[14px] font-medium leading-relaxed text-academy-muted">
-                Próximos atendimentos, revisões relacionadas e nenhum caso inventado.
-              </p>
-            </div>
-
-            {upcomingAppointments.length > 0 ? (
-              <div className="grid gap-3">
-                {upcomingAppointments.slice(0, 5).map((item: any, index) => (
-                  <AppointmentStudyCard key={item.app.id || `${item.app.patient_name}-${index}`} item={item} />
-                ))}
-              </div>
-            ) : (
-              <EmptyState
-                icon={Calendar}
-                title="Nenhum atendimento próximo para preparar agora."
-                description="Quando a agenda tiver um atendimento real, o Academy usa esse contexto aqui."
-                actionLabel="Ver agenda"
-                onAction={() => setActiveTab?.('agenda')}
-              />
-            )}
-
-            {weekReviews.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="px-1 text-[15px] font-bold text-academy-text">Revisões relacionadas</h4>
-                <div className="grid gap-3">
-                  {weekReviews.map((cat) => (
-                    <button
-                      type="button"
-                      key={cat.id}
-                      onClick={() => setSelectedStudy(cat.id)}
-                      className="flex items-center gap-4 rounded-[22px] border border-academy-border/70 bg-white p-4 text-left shadow-sm transition-all hover:border-academy-primary/20"
-                    >
-                      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[15px] ${cat.color}`}>
-                        <cat.icon size={21} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h5 className="text-[15px] font-bold text-academy-text">{cat.title}</h5>
-                        <p className="mt-0.5 text-[12px] font-semibold text-academy-muted">{cat.contextPhrase}</p>
-                      </div>
-                      <ChevronRight size={16} className="shrink-0 text-academy-muted" />
-                    </button>
-                  ))}
+                    <span className="text-[14px] font-bold text-academy-text leading-snug">Revise: {nextCaseTopic.topics}</span>
+                  </div>
                 </div>
-              </div>
-            )}
-          </section>
-        )}
 
-        {activeIntent === 'duvida' && (
-          <section className="space-y-5">
-            <div>
-              <h3 className="text-[22px] font-bold text-academy-text">Dúvida rápida</h3>
-              <p className="mt-2 text-[14px] font-medium text-academy-muted">Digite uma pergunta clínica ou teórica.</p>
-            </div>
-
-            <div className="rounded-[28px] border border-academy-border/75 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
-              <textarea
-                value={quickQuestion}
-                onChange={(e) => setQuickQuestion(e.target.value)}
-                className="min-h-[130px] w-full resize-none rounded-[22px] border border-academy-border bg-academy-neutral px-4 py-4 text-[15px] font-semibold leading-relaxed text-academy-text outline-none focus:ring-2 focus:ring-academy-primary/10"
-                placeholder="Digite uma dúvida clínica ou teórica"
-              />
-
-              <div className="mt-4 flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-                {QUICK_QUESTION_SUGGESTIONS.map(suggestion => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     type="button"
-                    key={suggestion}
-                    onClick={() => setQuickQuestion(suggestion)}
-                    className="shrink-0 rounded-full border border-academy-border bg-white px-4 py-2 text-[12px] font-bold text-academy-muted transition-all hover:border-academy-primary/20 hover:text-academy-primary"
+                    onClick={() => setSelectedStudy(nextCaseTopic.id)}
+                    className="w-full bg-academy-primary text-white font-bold text-[15px] py-[16px] rounded-[20px] shadow-lg hover:scale-[0.98] transition-transform active:scale-95"
                   >
-                    {suggestion}
+                    Estudar roteiro
                   </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-[24px] border border-academy-primary/10 bg-academy-soft px-5 py-4">
-              <div className="flex items-start gap-3">
-                <Zap size={18} className="mt-0.5 shrink-0 text-academy-primary" />
-                <p className="text-[14px] font-semibold leading-relaxed text-academy-primary-dark">
-                  Em breve, o Academy vai responder dúvidas rápidas com explicações objetivas.
-                </p>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {activeIntent === 'biblioteca' && (
-          <section className="space-y-5">
-            <div>
-              <h3 className="text-[22px] font-bold text-academy-text">Biblioteca</h3>
-              <p className="mt-2 text-[14px] font-medium leading-relaxed text-academy-muted">
-                A biblioteca continua aqui quando você quiser procurar por conta própria.
-              </p>
-            </div>
-
-            <div className="grid gap-4">
-              {requestedLibraryItems.map(item => (
-                <LibraryCard key={item.id} item={item} />
-              ))}
-            </div>
-
-            {extraLibraryItems.length > 0 && (
-              <div className="space-y-3 pt-2">
-                <h4 className="px-1 text-[14px] font-bold text-academy-muted">Também disponíveis</h4>
-                <div className="grid gap-4">
-                  {extraLibraryItems.map(item => (
-                    <LibraryCard key={item.id} item={item} />
-                  ))}
+                  <button
+                    type="button"
+                    onClick={() => openPatientRecord?.(nextCase.patient.id)}
+                    className="w-full bg-white text-academy-muted border border-academy-border font-bold text-[15px] py-[16px] rounded-[20px] hover:bg-academy-neutral transition-colors active:scale-95"
+                  >
+                    Abrir caso
+                  </button>
                 </div>
               </div>
-            )}
-          </section>
-        )}
-      </motion.div>
+            </div>
+          </div>
+        </motion.section>
+      ) : (
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          className="bg-white rounded-[32px] border border-academy-border shadow-sm p-8 text-center flex flex-col items-center justify-center min-h-[220px]"
+        >
+          <div className="w-16 h-16 bg-academy-bg rounded-full flex items-center justify-center mb-4">
+            <Calendar size={28} className="text-academy-muted" />
+          </div>
+          <h3 className="text-[18px] font-bold text-academy-text mb-2">Nenhum atendimento mapeado</h3>
+          <p className="text-[14px] text-academy-muted max-w-xs mx-auto mb-6">
+            Nao encontrei procedimentos especificos na sua agenda proxima.
+          </p>
+          <button
+            type="button"
+            onClick={() => setActiveTab?.('agenda')}
+            className="px-6 py-3 bg-academy-primary text-white text-[14px] font-bold rounded-full hover:opacity-90 transition-opacity shadow-md"
+          >
+            Ver agenda completa
+          </button>
+        </motion.section>
+      )}
+
+      {weekReviews.length > 0 && (
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-4"
+        >
+          <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Revisoes da semana</h3>
+          <div className="grid gap-3">
+            {weekReviews.map((cat, i) => (
+              <motion.button
+                type="button"
+                key={cat.id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: 0.2 + i * 0.1 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedStudy(cat.id)}
+                className="bg-white rounded-[20px] p-4 border border-academy-border/70 shadow-sm cursor-pointer flex items-center gap-4 hover:border-stone-300 transition-all text-left"
+              >
+                <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 ${cat.color}`}>
+                  <cat.icon size={24} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-[15px] font-bold text-academy-text">{cat.title}</h4>
+                  <p className="text-[12px] font-semibold text-academy-muted mt-0.5">
+                    {cat.contextPhrase}
+                  </p>
+                </div>
+                <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
+              </motion.button>
+            ))}
+          </div>
+        </motion.section>
+      )}
+
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        className="space-y-4 pt-4 border-t border-academy-border/50"
+      >
+        <div className="flex items-center gap-2 mb-2">
+          <BookOpen size={16} className="text-academy-muted" />
+          <h3 className="text-[15px] font-bold text-academy-text tracking-tight">Biblioteca Geral</h3>
+        </div>
+
+        <div className="grid gap-4">
+          {allLibraryItems.map(cat => (
+            <motion.button
+              type="button"
+              key={`lib-${cat.id}`}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setSelectedStudy(cat.id)}
+              className="bg-white rounded-[24px] p-5 border border-academy-border/70 shadow-sm cursor-pointer group transition-all hover:shadow-lg text-left"
+            >
+              <div className="flex items-start gap-4">
+                <div className={`w-12 h-12 rounded-[16px] flex items-center justify-center shrink-0 ${cat.color} bg-opacity-50`}>
+                  <cat.icon size={22} />
+                </div>
+                <div className="flex-1 min-w-0 pt-0.5">
+                  <h4 className="text-[16px] font-bold text-academy-text">{cat.title}</h4>
+                  <p className="text-[12px] font-semibold text-academy-muted mt-0.5">
+                    {cat.duration} - {cat.level}
+                  </p>
+                  <p className="text-[13px] text-academy-muted mt-1 leading-relaxed">
+                    {cat.topics}
+                  </p>
+                </div>
+                <div className="pt-2">
+                  <div className="w-8 h-8 rounded-full bg-academy-neutral flex items-center justify-center text-academy-muted group-hover:bg-academy-study transition-colors">
+                    <ChevronRight size={16} />
+                  </div>
+                </div>
+              </div>
+            </motion.button>
+          ))}
+        </div>
+      </motion.section>
     </div>
   );
 };

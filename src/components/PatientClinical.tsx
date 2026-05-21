@@ -2809,7 +2809,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               <section className="mt-6 rounded-2xl border border-[#E7ECF2] bg-[#FAFBFC] px-4 py-4">
                 <div className="flex items-center justify-between gap-3 mb-3">
                   <p className="text-[12px] font-bold text-academy-primary">
-                    {selectedBoxDoubt}
+                    Ajuda / Dicas
                   </p>
                   <button
                     type="button"
@@ -2819,8 +2819,26 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     Fechar
                   </button>
                 </div>
+                <div className="-mx-4 overflow-x-auto pb-3 mb-3 border-b border-[#E7ECF2] hide-scrollbar">
+                  <div className="flex min-w-max gap-2 px-4">
+                    {selectedBoxGuide.doubtChips.map((chip) => (
+                      <button
+                        key={chip}
+                        type="button"
+                        onClick={() => setSelectedBoxDoubt(chip)}
+                        className={`rounded-full px-3 py-1.5 text-[12px] font-bold transition-colors ${
+                          selectedBoxDoubt === chip 
+                            ? 'bg-[#52057B] text-white' 
+                            : 'bg-white border border-[#E7ECF2] text-[#4F5F6D] hover:bg-slate-50'
+                        }`}
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div className="space-y-2.5">
-                  {selectedDoubtItems.slice(0, 4).map((item) => (
+                  {selectedDoubtItems.map((item) => (
                     <div key={item} className="flex gap-2.5">
                       <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-academy-primary/60" />
                       <span className="text-[13px] leading-relaxed text-[#4F5F6D]">{item}</span>

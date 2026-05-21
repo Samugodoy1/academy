@@ -35,6 +35,14 @@ import { NovaEvolucao } from './NovaEvolucao';
 import { Odontogram } from './Odontogram';
 import { formatAppointmentDate, formatAppointmentTime, formatDate, getAppointmentTime } from '../utils/dateUtils';
 import { boxGuideProcedures, boxGuides, type BoxGuideProcedure } from '../data/boxGuides';
+import {
+  generateBoxContext,
+  generateIntelligentSteps,
+  generateSmartChipContent,
+  generateSmartMaterials,
+  generateBoxNowItems,
+  generateBoxNowSteps
+} from '../data/boxIntelligence';
 
 interface PatientClinicalProps {
   patient: any;
@@ -1415,213 +1423,31 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   const boxContextProcedure = primaryTreatment?.procedure || upcomingAppointment?.procedure || upcomingAppointment?.notes || '';
   const boxContextTooth = primaryTreatment?.tooth_number ? `Dente ${primaryTreatment.tooth_number}` : '';
   const inferredBoxProcedure = inferBoxProcedure(boxContextProcedure);
-  const lastBoxEvolution = (patient?.evolution || [])[0] || null;
-  const anamnesisAlert = getAnamnesisAlert(patient);
-  const lastEvolutionLabel = lastBoxEvolution?.procedure || lastBoxEvolution?.procedure_performed || lastBoxEvolution?.notes || '';
-  const boxNowItems = [
-    anamnesisAlert
-      ? `Atencao sistemica: ${anamnesisAlert}. Antes de anestesiar, confirme PA, medicacao em uso e peca orientacao do professor se houver alteracao.`
-      : 'Atencao sistemica: confirme anamnese, alergias, medicacoes e PA antes de iniciar.',
-    primaryTreatment
-      ? `Procedimento de hoje: ${primaryTreatment.procedure}${primaryTreatment.tooth_number ? ` do dente ${primaryTreatment.tooth_number}` : ''}. Confira radiografia e dente correto antes de iniciar.`
-      : upcomingAppointment
-        ? `Procedimento de hoje: ${upcomingAppointment.procedure || upcomingAppointment.notes || 'atendimento agendado'}. Confira objetivo, radiografia e dente/regiao antes de iniciar.`
-        : 'Sem procedimento em foco: revise odontograma, queixa e plano clinico antes de escolher a conduta.',
-    lastBoxEvolution
-      ? `Ultimo registro: ${lastEvolutionLabel}. Ao terminar, registre o que foi feito e defina retorno.`
-      : 'Ultimo registro: ainda nao ha evolucao anterior. Ao terminar, registre conduta, orientacoes e retorno.',
-    'Depois do atendimento, registre evolucao e defina retorno',
-  ].filter(Boolean);
-  const boxNowSteps = [
-    'Confirmar PA/anamnese',
-    primaryTreatment?.tooth_number ? `Conferir radiografia e dente ${primaryTreatment.tooth_number}` : 'Conferir radiografia e dente/regiao',
-    'Iniciar atendimento',
-    'Registrar evolucao no final',
-  ];
-  const selectedDoubtItems = selectedBoxDoubt
-    ? selectedBoxGuide.chipContent[selectedBoxDoubt] || []
-    : [];
-  const orderedBoxItems =
-    selectedBoxGuide.chipContent.Sequencia ||
-    selectedBoxGuide.blocks.find((block) => block.ordered)?.items ||
-    [];
-  const boxMaterialItems = selectedBoxGuide.blocks[0]?.items || [];
-  const boxRecordItems =
-    selectedBoxGuide.chipContent.Evolucao ||
-    selectedBoxGuide.blocks.find((block) => block.emphasis === 'record')?.items ||
-    [];
-  const boxProcedureDetail = primaryTreatment
-    ? `${primaryTreatment.procedure}${primaryTreatment.tooth_number ? ` - dente ${primaryTreatment.tooth_number}` : ''}`
-    : upcomingAppointment
-      ? (upcomingAppointment.procedure || upcomingAppointment.notes || selectedBoxGuide.label)
-      : selectedBoxGuide.label;
-  const boxSafetyChip = selectedBoxGuide.doubtChips.includes('Anamnese')
-    ? 'Anamnese'
-    : selectedBoxGuide.doubtChips.includes('Anestesia')
-      ? 'Anestesia'
-      : selectedBoxGuide.doubtChips[0];
-  const boxSequenceChip = selectedBoxGuide.doubtChips.includes('Sequencia')
-    ? 'Sequencia'
-    : selectedBoxGuide.doubtChips[0];
-  const boxEvolutionChip = selectedBoxGuide.doubtChips.includes('Evolucao')
-    ? 'Evolucao'
-    : selectedBoxGuide.doubtChips[selectedBoxGuide.doubtChips.length - 1];
-  // Detect if this is a first consultation / evaluation based on patient context
-  const isFirstConsultation = (() => {
-    const hasEvolutions = (patient?.evolution || []).length > 0;
-    const hasTreatmentPlan = treatmentInProgress.length > 0;
-    const appointmentNotes = String(upcomingAppointment?.notes || upcomingAppointment?.procedure || '').toLowerCase();
-    const isExplicitConsulta = /consult|avalia|primeira|triag|exame|acolh/.test(appointmentNotes);
-    return isExplicitConsulta || (!hasEvolutions && !hasTreatmentPlan);
-  })();
 
-  const boxIsConsulta = selectedBoxProcedure === 'Consulta';
+  const boxIntelContext = useMemo(() => 
+    generateBoxContext(patient, treatmentInProgress, upcomingAppointment),
+  [patient, treatmentInProgress, upcomingAppointment]);
+  const boxNowItems = useMemo(() => generateBoxNowItems(boxIntelContext), [boxIntelContext]);
+  const boxNowSteps = useMemo(() => generateBoxNowSteps(boxIntelContext), [boxIntelContext]);
+  const smartChipContent = useMemo(() => generateSmartChipContent(boxIntelContext, selectedBoxProcedure), [boxIntelContext, selectedBoxProcedure]);
+  const selectedDoubtItems = selectedBoxDoubt ? smartChipContent[selectedBoxDoubt] || [] : [];
+  const boxMaterialItems = useMemo(() => generateSmartMaterials(boxIntelContext, selectedBoxProcedure), [boxIntelContext, selectedBoxProcedure]);
+  
+  const isFirstConsultation = boxIntelContext.isFirstConsultation;
 
-  const boxSteps = boxIsConsulta ? [
-    {
-      label: 'Acolhimento',
-      title: 'Acolha o paciente',
-      text: 'Confirme dados, entenda a queixa e revise o historico antes de examinar.',
-      steps: [
-        'Confirmar nome, idade e dados cadastrais',
-        anamnesisAlert ? `Atencao: ${anamnesisAlert}` : 'Perguntar queixa principal',
-        'Revisar alergias, medicacoes e condicoes sistemicas',
-        'Verificar PA se indicado',
-      ],
-      actions: [
-        { label: 'Anamnese conferida', onClick: () => setBoxStep(1), primary: true },
-        { label: 'Preciso revisar', onClick: () => setSelectedBoxDoubt('Anamnese') },
-      ],
-    },
-    {
-      label: 'Exame',
-      title: 'Faca o exame clinico',
-      text: 'Examine sistematicamente e registre os achados.',
-      steps: [
-        'Inspecao extra-oral: face, linfonodos, ATM',
-        'Inspecao intra-oral: mucosa, gengiva, lingua',
-        'Exame dentario: caries, restauracoes, ausencias',
-        'Sondagem periodontal quando indicado',
-        'Solicitar radiografia se necessario',
-      ],
-      actions: [
-        { label: 'Exame concluido', onClick: () => setBoxStep(2), primary: true },
-        { label: 'Ajuda no exame', onClick: () => setSelectedBoxDoubt('Exame') },
-      ],
-    },
-    {
-      label: 'Plano',
-      title: 'Defina o plano com o professor',
-      text: 'Organize os achados, priorize as necessidades e valide a conduta.',
-      steps: [
-        'Listar achados principais do exame',
-        'Definir hipotese diagnostica',
-        'Priorizar necessidades clinicas',
-        'Alinhar plano e proximos passos com o professor',
-      ],
-      actions: [
-        { label: 'Plano definido', onClick: () => setBoxStep(3), primary: true },
-        { label: 'Rever orientacoes', onClick: () => setSelectedBoxDoubt('Plano') },
-      ],
-    },
-    {
-      label: 'Fechar',
-      title: 'Registre e oriente',
-      text: 'Registre a evolucao, oriente o paciente e defina retorno.',
-      steps: [
-        'Registrar queixa, achados e hipotese',
-        'Registrar plano de tratamento proposto',
-        'Orientar paciente sobre achados e proximos passos',
-        'Definir retorno ou proximo atendimento',
-      ],
-      actions: [
-        {
-          label: 'Registrar agora',
-          onClick: () => {
-            setIsBoxModeOpen(false);
-            setIsAddingEvolution(true);
-          },
-          primary: true,
-        },
-        {
-          label: 'Revisar registro',
-          onClick: () => setSelectedBoxDoubt('Evolucao'),
-        },
-      ],
-    },
-  ] : [
-    {
-      label: 'Antes',
-      title: 'Confirme se esta seguro iniciar',
-      text: anamnesisAlert
-        ? `${anamnesisAlert}. Confira PA, medicacao em uso e chame o professor se houver qualquer alteracao.`
-        : 'Revise anamnese, alergias, medicacoes e PA antes de seguir.',
-      steps: [
-        anamnesisAlert ? `Revisar alerta: ${anamnesisAlert}` : 'Conferir anamnese, alergias e medicacoes',
-        boxMaterialItems[0] || `Separar materiais de ${selectedBoxGuide.label}`,
-        boxMaterialItems[1] || 'Conferir campo, isolamento e instrumentais',
-        'Confirmar professor por perto se surgir duvida',
-      ],
-      actions: [
-        { label: 'Tudo certo', onClick: () => setBoxStep(1), primary: true },
-        { label: 'Revisar antes', onClick: () => setSelectedBoxDoubt(boxSafetyChip) },
-      ],
-    },
-    {
-      label: 'Caso',
-      title: primaryTreatment?.tooth_number ? `Confirme o dente ${primaryTreatment.tooth_number}` : 'Confirme o caso de hoje',
-      text: primaryTreatment
-        ? `Plano de hoje: ${primaryTreatment.procedure}. Confira radiografia, boca e conduta antes de iniciar.`
-        : `Confira radiografia, regiao e objetivo clinico antes de iniciar ${selectedBoxGuide.label}.`,
-      steps: [
-        `Procedimento: ${boxProcedureDetail}`,
-        primaryTreatment?.tooth_number ? `Conferir dente ${primaryTreatment.tooth_number} na boca e no RX` : 'Conferir dente/regiao na boca e no RX',
-        orderedBoxItems[0] || `Validar primeira etapa de ${selectedBoxGuide.label}`,
-        'Alinhar conduta com o professor se algo nao bater',
-      ],
-      actions: [
-        { label: 'Caso confirmado', onClick: () => setBoxStep(2), primary: true },
-        { label: 'Rever sequencia', onClick: () => setSelectedBoxDoubt(boxSequenceChip) },
-      ],
-    },
-    {
-      label: 'Durante',
-      title: 'Agora siga a proxima parte',
-      text: `Sequencia pratica para ${selectedBoxGuide.label}. Faca uma acao por vez e confirme antes de avancar.`,
-      steps: orderedBoxItems.slice(1, 6).length > 0
-        ? orderedBoxItems.slice(1, 6)
-        : orderedBoxItems.slice(0, 5),
-      actions: [
-        { label: 'Terminei essa parte', onClick: () => setBoxStep(3), primary: true },
-        { label: 'Pedir ajuda', onClick: () => setSelectedBoxDoubt(boxSequenceChip) },
-      ],
-    },
-    {
-      label: 'Fechar',
-      title: 'Feche o caso antes de sair',
-      text: 'Registre a evolucao enquanto tudo esta fresco e deixe o proximo passo claro.',
-      steps: (boxRecordItems.length > 0 ? boxRecordItems : [
-        'Registrar conduta realizada',
-        'Registrar intercorrencias ou ausencia delas',
-        'Anotar orientacoes dadas ao paciente',
-        'Definir retorno ou proxima etapa',
-      ]).slice(0, 5),
-      actions: [
-        {
-          label: 'Registrar agora',
-          onClick: () => {
-            setIsBoxModeOpen(false);
-            setIsAddingEvolution(true);
-          },
-          primary: true,
-        },
-        {
-          label: 'Revisar registro',
-          onClick: () => setSelectedBoxDoubt(boxEvolutionChip),
-        },
-      ],
-    },
-  ];
+  const boxSteps = useMemo(() => {
+    return generateIntelligentSteps(
+      boxIntelContext,
+      selectedBoxProcedure,
+      (chip) => setSelectedBoxDoubt(chip),
+      (step) => setBoxStep(step),
+      () => {
+        setIsBoxModeOpen(false);
+        setIsAddingEvolution(true);
+      }
+    );
+  }, [boxIntelContext, selectedBoxProcedure]);
+
   const activeBoxStep = boxSteps[boxStep] || boxSteps[0];
 
   useEffect(() => {

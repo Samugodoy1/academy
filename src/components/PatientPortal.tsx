@@ -789,7 +789,7 @@ export function PatientPortal() {
             ) : (
               <>
                 <div className="w-[22px] h-[22px] rounded-full border-[1.5px] border-white flex items-center justify-center">
-                  <CheckCircle2 size={14} className="text-white" weight="bold" />
+                  <CheckCircle2 size={14} className="text-white" strokeWidth={3} />
                 </div>
                 Confirmar minha ida
               </>

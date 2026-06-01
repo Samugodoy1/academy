@@ -1,4 +1,8 @@
 import { TREATMENT_SCOPES, type TreatmentScope, getProcedureDefinition } from '../constants/clinicalProcedures';
+import {
+  type DentitionMode,
+  getQuadrantTeethForMode,
+} from '../constants/dentition';
 
 export { TREATMENT_SCOPES, type TreatmentScope } from '../constants/clinicalProcedures';
 
@@ -30,12 +34,20 @@ export interface NormalizedTreatment extends TreatmentPlanItemLike {
   procedure_key?: string;
 }
 
+/** Dentes permanentes por quadrante (compatibilidade legada). */
 export const QUADRANT_TEETH: Record<QuadrantId, number[]> = {
   1: [18, 17, 16, 15, 14, 13, 12, 11],
   2: [21, 22, 23, 24, 25, 26, 27, 28],
   3: [31, 32, 33, 34, 35, 36, 37, 38],
   4: [48, 47, 46, 45, 44, 43, 42, 41],
 };
+
+export function getQuadrantTeeth(
+  quadrant: QuadrantId,
+  dentitionMode: DentitionMode = 'permanent'
+): number[] {
+  return getQuadrantTeethForMode(quadrant, dentitionMode);
+}
 
 export const ACTIVE_TREATMENT_STATUSES = new Set(['APROVADO', 'PENDENTE', 'PLANEJADO']);
 
@@ -210,14 +222,17 @@ export function formatActiveTreatmentCounter(
   return parts.join(' • ');
 }
 
-export function getTeethForScope(item: TreatmentPlanItemLike): number[] {
+export function getTeethForScope(
+  item: TreatmentPlanItemLike,
+  dentitionMode: DentitionMode = 'permanent'
+): number[] {
   const normalized = normalizeTreatmentItem(item);
   if (normalized.scope === TREATMENT_SCOPES.TOOTH && normalized.tooth_number) {
     return [normalized.tooth_number];
   }
   if (normalized.scope === TREATMENT_SCOPES.QUADRANT) {
     const q = resolveQuadrant(normalized);
-    return q ? QUADRANT_TEETH[q] : [];
+    return q ? getQuadrantTeeth(q, dentitionMode) : [];
   }
   return [];
 }

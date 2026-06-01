@@ -1,5 +1,13 @@
 import React from 'react';
 import { X } from '../icons';
+import {
+  type DentitionMode,
+  getAllTeethInMode,
+  getDentitionLayout,
+  isToothActionAllowed,
+  MIXED_DECIDUOUS_GRID_SLOTS,
+  type QuadrantTeethLayout,
+} from '../constants/dentition';
 import { deriveToothFlagsPure } from '../utils/toothStatusDerivation';
 import { normalizeTreatmentItem, type QuadrantId } from '../utils/treatmentPlanScope';
 
@@ -61,14 +69,8 @@ interface OdontogramProps {
   highlightedToothNumber?: number | null;
   highlightedQuadrant?: QuadrantId | null;
   readOnly?: boolean;
+  dentitionMode?: DentitionMode;
 }
-
-const toothNumbers = {
-  upperRight: [18, 17, 16, 15, 14, 13, 12, 11],
-  upperLeft: [21, 22, 23, 24, 25, 26, 27, 28],
-  lowerLeft: [38, 37, 36, 35, 34, 33, 32, 31],
-  lowerRight: [41, 42, 43, 44, 45, 46, 47, 48],
-};
 
 // Conditions that represent PENDING treatment needs (feeds into intelligence)
 const PENDING_STATUSES: Set<ToothStatus> = new Set([
@@ -229,13 +231,30 @@ interface ToothProps {
   isUrgent: boolean;
   isPriority: boolean;
   disabled: boolean;
+  compact?: boolean;
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
   onHover: (event: React.MouseEvent<HTMLButtonElement>, num: number) => void;
   onLeave: () => void;
   buttonRef?: (el: HTMLButtonElement | null) => void;
 }
 
-const Tooth: React.FC<ToothProps> = ({ number, status, selected, isInTreatment, hasDiagnosis, isCompleted, isPending, isUrgent, isPriority, disabled, onClick, onHover, onLeave, buttonRef }) => {
+const Tooth: React.FC<ToothProps> = ({
+  number,
+  status,
+  selected,
+  isInTreatment,
+  hasDiagnosis,
+  isCompleted,
+  isPending,
+  isUrgent,
+  isPriority,
+  disabled,
+  compact = false,
+  onClick,
+  onHover,
+  onLeave,
+  buttonRef,
+}) => {
   return (
     <div className="relative">
       <button
@@ -246,8 +265,9 @@ const Tooth: React.FC<ToothProps> = ({ number, status, selected, isInTreatment, 
         onMouseEnter={(event) => onHover(event, number)}
         onMouseLeave={onLeave}
         className={`
-          w-10 h-[3.6rem] sm:w-12 sm:h-[4.1rem] rounded-[16px] sm:rounded-[18px] border
-          flex items-center justify-center text-[10px] sm:text-[12px] font-semibold tracking-tight
+          ${compact ? 'w-9 h-[3.15rem] sm:w-10 sm:h-[3.5rem] rounded-[14px] text-[9px] sm:text-[10px]' : 'w-10 h-[3.6rem] sm:w-12 sm:h-[4.1rem] rounded-[16px] sm:rounded-[18px] text-[10px] sm:text-[12px]'}
+          border
+          flex items-center justify-center font-semibold tracking-tight
           transition-all duration-200
           ${statusColors[status]}
           ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}
@@ -291,6 +311,7 @@ interface ActionMenuProps {
   onClose: () => void;
   onAction: (action: { label: string; status: ToothStatus; category: 'diagnosis' | 'procedure'; mode: 'initial' | 'continuity' }) => void;
   onReset?: () => void;
+  isActionAllowed?: (actionKey: string) => boolean;
 }
 
 const ActionMenu: React.FC<ActionMenuProps> = ({
@@ -305,6 +326,7 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
   onClose,
   onAction,
   onReset,
+  isActionAllowed,
 }) => {
   const menuRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -334,7 +356,10 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
 
   if (!open || selectedTooth === null) return null;
 
-  const actions = hasTreatment ? continuationActions : [...diagnosisActions, ...procedureActions];
+  const rawActions = hasTreatment ? continuationActions : [...diagnosisActions, ...procedureActions];
+  const actions = isActionAllowed
+    ? rawActions.filter((action) => isActionAllowed(action.key))
+    : rawActions;
   const recentHistory = toothHistory.slice(0, 4);
 
   if (mobile) {
@@ -506,8 +531,17 @@ export const Odontogram: React.FC<OdontogramProps> = ({
   priorityToothNumber = null,
   highlightedToothNumber = null,
   highlightedQuadrant = null,
-  readOnly = false 
+  readOnly = false,
+  dentitionMode = 'permanent',
 }) => {
+  const dentitionLayout = React.useMemo(
+    () => getDentitionLayout(dentitionMode),
+    [dentitionMode]
+  );
+  const visibleTeeth = React.useMemo(
+    () => getAllTeethInMode(dentitionMode),
+    [dentitionMode]
+  );
   const [selectedTooth, setSelectedTooth] = React.useState<number | null>(null);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(false);
@@ -545,15 +579,6 @@ export const Odontogram: React.FC<OdontogramProps> = ({
     });
     return map;
   }, [treatments]);
-
-  const getQuadrantJawClass = (quadrant: QuadrantId) => {
-    const isActive = activeQuadrantSet.has(quadrant);
-    const isHighlighted = highlightedQuadrant === quadrant;
-    if (!isActive && !isHighlighted) return '';
-    return isHighlighted
-      ? 'ring-2 ring-indigo-400/70 bg-indigo-50/25 shadow-[0_0_0_1px_rgba(99,102,241,0.12)]'
-      : 'ring-2 ring-emerald-300/70 bg-emerald-50/20';
-  };
 
   const deriveToothFlags = React.useCallback(
     (num: number) => {
@@ -726,13 +751,14 @@ export const Odontogram: React.FC<OdontogramProps> = ({
     }
   };
 
-  const renderTooth = (num: number) => {
+  const renderTooth = (num: number, compact = false) => {
     const toothStatus = getToothStatus(num);
     const flags = deriveToothFlags(num);
     return (
       <Tooth
         key={num}
         number={num}
+        compact={compact}
         status={toothStatus}
         selected={(selectedTooth === num && isMenuOpen) || highlightedToothNumber === num}
         isInTreatment={flags.isInTreatment}
@@ -760,13 +786,91 @@ export const Odontogram: React.FC<OdontogramProps> = ({
     );
   };
 
-  const renderJawSection = (quadrant: QuadrantId, teeth: number[], reverse = false) => {
-    const list = reverse ? [...teeth].reverse() : teeth;
+  type ArchHalfKey = 'upperRight' | 'upperLeft' | 'lowerLeft' | 'lowerRight';
+
+  const halfQuadrants: Record<ArchHalfKey, QuadrantId[]> = {
+    upperRight: [1],
+    upperLeft: [2],
+    lowerLeft: [3],
+    lowerRight: [4],
+  };
+
+  const getHalfHighlightClass = (halfKey: ArchHalfKey) => {
+    const quadrants = halfQuadrants[halfKey];
+    const isActive = quadrants.some((q) => activeQuadrantSet.has(q));
+    const isHighlighted = quadrants.some((q) => highlightedQuadrant === q);
+    if (!isActive && !isHighlighted) return '';
+    return isHighlighted
+      ? 'ring-1 ring-indigo-300/50 bg-indigo-50/15'
+      : 'ring-1 ring-emerald-200/50 bg-emerald-50/10';
+  };
+
+  const renderArchHalf = (
+    halfKey: ArchHalfKey,
+    block: QuadrantTeethLayout,
+    reversePermanent: boolean
+  ) => {
+    const highlight = getHalfHighlightClass(halfKey);
+    const permanent = block.permanent
+      ? reversePermanent
+        ? [...block.permanent].reverse()
+        : block.permanent
+      : [];
+    const deciduous = block.deciduous
+      ? reversePermanent
+        ? [...block.deciduous].reverse()
+        : block.deciduous
+      : [];
+
+    if (dentitionMode === 'mixed' && permanent.length > 0 && deciduous.length > 0) {
+      const slots = MIXED_DECIDUOUS_GRID_SLOTS[halfKey];
+      const slotTeeth = reversePermanent ? [...slots].reverse() : slots;
+      return (
+        <div className={`flex min-w-0 flex-1 flex-col gap-0.5 rounded-xl px-0.5 py-0.5 ${highlight}`}>
+          <div className="grid grid-cols-8 gap-1">
+            {permanent.map((num) => (
+              <div key={num} className="flex justify-center">
+                {renderTooth(num, false)}
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-8 gap-1">
+            {slotTeeth.map((num, idx) => (
+              <div key={`${halfKey}-slot-${idx}`} className="flex justify-center">
+                {num ? (
+                  renderTooth(num, true)
+                ) : (
+                  <div className="w-9 sm:w-10" aria-hidden />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    const teeth = permanent.length > 0 ? permanent : deciduous;
+    const compact = permanent.length === 0;
     return (
-      <div
-        className={`relative rounded-xl sm:rounded-2xl border border-slate-200/70 bg-slate-50/60 p-1.5 sm:p-2.5 transition-all duration-300 ${getQuadrantJawClass(quadrant)}`}
-      >
-        <div className="flex gap-1.5">{list.map(renderTooth)}</div>
+      <div className={`flex min-w-0 flex-1 justify-center gap-1.5 rounded-xl px-0.5 py-0.5 ${highlight}`}>
+        {teeth.map((num) => renderTooth(num, compact))}
+      </div>
+    );
+  };
+
+  const renderArch = (arch: 'upper' | 'lower') => {
+    const layout = dentitionLayout[arch];
+    const reverseLower = arch === 'lower';
+    const rightKey: ArchHalfKey = arch === 'upper' ? 'upperRight' : 'lowerRight';
+    const leftKey: ArchHalfKey = arch === 'upper' ? 'upperLeft' : 'lowerLeft';
+
+    return (
+      <div className="rounded-[20px] border border-slate-200/70 bg-white px-2 py-2 sm:rounded-[22px] sm:px-3 sm:py-2.5">
+        <div className="flex items-stretch justify-center gap-2 sm:gap-3">
+          {renderArchHalf(rightKey, layout.right, reverseLower)}
+          <div className="w-px shrink-0 self-stretch bg-slate-200/80" aria-hidden />
+          {renderArchHalf(leftKey, layout.left, reverseLower)}
+        </div>
       </div>
     );
   };
@@ -774,32 +878,12 @@ export const Odontogram: React.FC<OdontogramProps> = ({
   return (
     <div className="space-y-4 p-1 sm:p-2 bg-transparent rounded-none shadow-none border-none">
       <div className="overflow-x-auto pb-2">
-        <div className="mx-auto min-w-max space-y-5">
-          {/* Upper Jaw */}
-          <div className="rounded-[22px] sm:rounded-[24px] border border-slate-200/80 bg-white/80 px-2.5 py-2.5 sm:px-4 sm:py-3.5">
-            <div className="flex items-center justify-center gap-2 sm:gap-3">
-              {renderJawSection(1, toothNumbers.upperRight)}
-              <div className="flex h-[4.1rem] sm:h-[5.2rem] w-2.5 sm:w-4 items-center justify-center">
-                <span className="h-full w-px bg-slate-200" />
-              </div>
-              {renderJawSection(2, toothNumbers.upperLeft)}
-            </div>
+        <div className="mx-auto min-w-max space-y-3">
+          {renderArch('upper')}
+          <div className="flex justify-center px-4" aria-hidden>
+            <span className="h-px w-16 bg-slate-200/80" />
           </div>
-
-          <div className="flex items-center justify-center px-4">
-            <span className="h-px w-20 bg-slate-200" />
-          </div>
-
-          {/* Lower Jaw */}
-          <div className="rounded-[22px] sm:rounded-[24px] border border-slate-200/80 bg-white/80 px-2.5 py-2.5 sm:px-4 sm:py-3.5">
-            <div className="flex items-center justify-center gap-2 sm:gap-3">
-              {renderJawSection(4, toothNumbers.lowerRight, true)}
-              <div className="flex h-[4.1rem] sm:h-[5.2rem] w-2.5 sm:w-4 items-center justify-center">
-                <span className="h-full w-px bg-slate-200" />
-              </div>
-              {renderJawSection(3, toothNumbers.lowerLeft, true)}
-            </div>
-          </div>
+          {renderArch('lower')}
         </div>
       </div>
 
@@ -827,7 +911,7 @@ export const Odontogram: React.FC<OdontogramProps> = ({
 
       {/* Clinical insight summary */}
       {(() => {
-        const allTeeth = [...toothNumbers.upperRight, ...toothNumbers.upperLeft, ...toothNumbers.lowerLeft, ...toothNumbers.lowerRight];
+        const allTeeth = visibleTeeth;
         const urgentTeeth = allTeeth.filter(n => deriveToothFlags(n).isUrgent);
         const pendingTeeth = allTeeth.filter(n => deriveToothFlags(n).isPending);
         const completedTeeth = allTeeth.filter(n => deriveToothFlags(n).isCompleted);
@@ -862,6 +946,9 @@ export const Odontogram: React.FC<OdontogramProps> = ({
         onClose={() => setIsMenuOpen(false)}
         onAction={handleAction}
         onReset={onResetTooth ? handleResetTooth : undefined}
+        isActionAllowed={(actionKey) =>
+          isToothActionAllowed(actionKey, selectedTooth, dentitionMode)
+        }
       />
 
       {!isMobile && hoveredTooth !== null && hoverRect && (

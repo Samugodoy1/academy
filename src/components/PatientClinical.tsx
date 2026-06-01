@@ -33,9 +33,20 @@ import {
 import { AnimatePresence, motion } from 'motion/react';
 import { CLINICAL_PROCEDURES, getProcedureDefinition, resolveProcedureValue } from '../constants/clinicalProcedures';
 import { NovaEvolucao } from './NovaEvolucao';
+import { DentitionIndicator, DentitionRevealHint } from './DentitionIndicator';
 import { Odontogram } from './Odontogram';
 import { OdontogramActiveSummary } from './OdontogramActiveSummary';
 import { ScopeProcedureMenu } from './ScopeProcedureMenu';
+import {
+  type DentitionMode,
+  type DentitionSource,
+  inferDentitionFromAge,
+  isToothVisibleInMode,
+  resolveEffectiveDentitionMode,
+  resolveSuggestedDentitionMode,
+  shouldPromptDentitionUpdate,
+  suggestModeToRevealTooth,
+} from '../constants/dentition';
 import {
   TREATMENT_SCOPES,
   countActiveTreatmentsByScope,
@@ -287,6 +298,11 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   const [highlightedTimelineId, setHighlightedTimelineId] = useState<string | null>(null);
   const [highlightedToothNumber, setHighlightedToothNumber] = useState<number | null>(null);
   const [highlightedQuadrant, setHighlightedQuadrant] = useState<QuadrantId | null>(null);
+  const [dismissedDentitionSuggestion, setDismissedDentitionSuggestion] = useState<string | null>(null);
+  const [pendingRevealTooth, setPendingRevealTooth] = useState<{
+    tooth: number;
+    mode: DentitionMode;
+  } | null>(null);
   const [scopeProcedureWarning, setScopeProcedureWarning] = useState<string | null>(null);
   const [selectedTreatmentAction, setSelectedTreatmentAction] = useState<any | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -406,6 +422,36 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   }, [isAcademyProduct, infoTab, patient?.id]);
 
   const age = getAge(patient?.birth_date);
+  const hasBirthDate = Boolean(patient?.birth_date);
+  const effectiveDentitionMode = useMemo(
+    () => resolveEffectiveDentitionMode(patient, age),
+    [patient?.dentition_mode, patient?.birth_date, age]
+  );
+  const suggestedDentitionMode = useMemo(
+    () => resolveSuggestedDentitionMode(age),
+    [age]
+  );
+  const dentitionSource: DentitionSource | null =
+    patient?.dentition_mode_source === 'manual' ? 'manual' : patient?.dentition_mode ? 'auto' : null;
+  const dentitionSuggestionToken = `${patient?.id}:${suggestedDentitionMode}:${effectiveDentitionMode}`;
+  const showDentitionUpdatePrompt =
+    shouldPromptDentitionUpdate(effectiveDentitionMode, suggestedDentitionMode, dentitionSource) &&
+    dismissedDentitionSuggestion !== dentitionSuggestionToken;
+
+  useEffect(() => {
+    setDismissedDentitionSuggestion(null);
+    setPendingRevealTooth(null);
+  }, [patient?.id]);
+
+  useEffect(() => {
+    if (!patient?.id || !patient?.birth_date || patient?.dentition_mode) return;
+    const mode = inferDentitionFromAge(getAge(patient.birth_date));
+    void onUpdatePatient({
+      ...patient,
+      dentition_mode: mode,
+      dentition_mode_source: 'auto',
+    });
+  }, [patient?.id, patient?.birth_date, patient?.dentition_mode]);
   const clinicalStatus = resolveClinicalStatus(patient, appointments);
   const clinicalBadge = statusConfig[clinicalStatus];
   const patientAppointments = useMemo(
@@ -1520,6 +1566,16 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     });
   };
 
+  useEffect(() => {
+    if (!pendingRevealTooth) return;
+    if (isToothVisibleInMode(pendingRevealTooth.tooth, effectiveDentitionMode)) {
+      setHighlightedToothNumber(pendingRevealTooth.tooth);
+      window.setTimeout(() => setHighlightedToothNumber(null), 2600);
+      setPendingRevealTooth(null);
+      focusOdontogram();
+    }
+  }, [effectiveDentitionMode, pendingRevealTooth]);
+
   const focusTreatmentSection = () => {
     requestAnimationFrame(() => {
       treatmentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1530,6 +1586,36 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     setHighlightedToothNumber(toothNumber);
     window.setTimeout(() => setHighlightedToothNumber(null), 2600);
     focusOdontogram();
+  };
+
+  const handleDentitionModeSelect = async (mode: DentitionMode, source: DentitionSource) => {
+    setDismissedDentitionSuggestion(null);
+    await onUpdatePatient({
+      ...patient,
+      dentition_mode: mode,
+      dentition_mode_source: source,
+    });
+  };
+
+  const handleAcceptDentitionSuggestion = () => {
+    if (!suggestedDentitionMode) return;
+    void handleDentitionModeSelect(suggestedDentitionMode, 'auto');
+  };
+
+  const handleDismissDentitionSuggestion = () => {
+    setDismissedDentitionSuggestion(dentitionSuggestionToken);
+  };
+
+  const handleSelectToothFromSummary = (toothNumber: number) => {
+    if (!isToothVisibleInMode(toothNumber, effectiveDentitionMode)) {
+      const revealMode = suggestModeToRevealTooth(toothNumber, effectiveDentitionMode);
+      if (revealMode) {
+        setPendingRevealTooth({ tooth: toothNumber, mode: revealMode });
+        focusOdontogram();
+        return;
+      }
+    }
+    flashToothHighlight(toothNumber);
   };
 
   const flashQuadrantHighlight = (quadrant: QuadrantId) => {
@@ -1888,18 +1974,43 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
             />
           </div>
 
-          <OdontogramActiveSummary
-            items={treatmentInProgress}
-            teethCounterLabel={isAcademyProduct ? 'em plano clínico' : 'em tratamento'}
-            toothStatuses={mergedOdontogram}
-            highlightedTreatmentId={highlightedTreatmentId}
-            onSelectTooth={flashToothHighlight}
-            onSelectQuadrant={flashQuadrantHighlight}
-            onSelectPatientItem={flashTreatmentHighlight}
-            onRemoveTreatment={handleRemoveScopeTreatment}
-          />
+          <div className="mb-2 flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <OdontogramActiveSummary
+                items={treatmentInProgress}
+                teethCounterLabel={isAcademyProduct ? 'em plano clínico' : 'em tratamento'}
+                toothStatuses={mergedOdontogram}
+                highlightedTreatmentId={highlightedTreatmentId}
+                onSelectTooth={handleSelectToothFromSummary}
+                onSelectQuadrant={flashQuadrantHighlight}
+                onSelectPatientItem={flashTreatmentHighlight}
+                onRemoveTreatment={handleRemoveScopeTreatment}
+              />
+            </div>
+            <DentitionIndicator
+              effectiveMode={effectiveDentitionMode}
+              suggestedMode={suggestedDentitionMode}
+              source={dentitionSource}
+              ageYears={age}
+              hasBirthDate={hasBirthDate}
+              showUpdatePrompt={showDentitionUpdatePrompt}
+              onSelectMode={handleDentitionModeSelect}
+              onAcceptSuggestion={handleAcceptDentitionSuggestion}
+              onDismissSuggestion={handleDismissDentitionSuggestion}
+            />
+          </div>
 
-          <div className="rounded-[26px] p-1 sm:p-1.5 bg-slate-50/50 ring-1 ring-slate-100/60">
+          {pendingRevealTooth && (
+            <DentitionRevealHint
+              tooth={pendingRevealTooth.tooth}
+              currentMode={effectiveDentitionMode}
+              targetMode={pendingRevealTooth.mode}
+              onReveal={() => void handleDentitionModeSelect(pendingRevealTooth.mode, 'manual')}
+              onDismiss={() => setPendingRevealTooth(null)}
+            />
+          )}
+
+          <div className="rounded-[24px] p-0.5 sm:p-1 ring-1 ring-slate-100/50">
             <Odontogram
               data={mergedOdontogram}
               history={patient?.toothHistory || []}
@@ -1913,6 +2024,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               priorityToothNumber={priorityToothNumber}
               highlightedToothNumber={highlightedToothNumber}
               highlightedQuadrant={highlightedQuadrant}
+              dentitionMode={effectiveDentitionMode}
             />
           </div>
         </section>

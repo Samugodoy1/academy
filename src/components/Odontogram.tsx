@@ -1,6 +1,7 @@
 import React from 'react';
 import { X } from '../icons';
 import { deriveToothFlagsPure } from '../utils/toothStatusDerivation';
+import { normalizeTreatmentItem, type QuadrantId } from '../utils/treatmentPlanScope';
 
 export type ToothStatus = 
   | 'healthy' 
@@ -48,12 +49,17 @@ interface OdontogramProps {
   treatments?: Array<{
     id: string;
     tooth_number?: number;
+    quadrant?: number;
     procedure?: string;
+    procedure_key?: string;
+    scope?: string;
     status?: string;
   }>;
   activeToothNumbers?: number[];
+  activeQuadrants?: QuadrantId[];
   priorityToothNumber?: number | null;
   highlightedToothNumber?: number | null;
+  highlightedQuadrant?: QuadrantId | null;
   readOnly?: boolean;
 }
 
@@ -139,7 +145,7 @@ const legendItems: LegendItem[] = [
   },
   {
     key: 'in-progress',
-    label: 'Em curso',
+    label: 'Em andamento',
     swatchClass: 'bg-white border border-slate-300',
     markerClass: 'bg-emerald-500',
     markerPosition: 'top',
@@ -178,6 +184,8 @@ const continuationActions = [
   { key: 'crown', label: 'Coroa', status: 'crown' as ToothStatus, category: 'procedure' as const },
   { key: 'implant', label: 'Implante', status: 'implant' as ToothStatus, category: 'procedure' as const },
 ];
+
+const COMPACT_LEGEND_KEYS = new Set(['attention', 'in-progress', 'done']);
 
 const resolveHistoryTag = (procedure?: string, notes?: string) => {
   const text = `${procedure || ''} ${notes || ''}`.toLowerCase();
@@ -494,8 +502,10 @@ export const Odontogram: React.FC<OdontogramProps> = ({
   onSelectProcedure,
   treatments = [],
   activeToothNumbers = [],
+  activeQuadrants = [],
   priorityToothNumber = null,
   highlightedToothNumber = null,
+  highlightedQuadrant = null,
   readOnly = false 
 }) => {
   const [selectedTooth, setSelectedTooth] = React.useState<number | null>(null);
@@ -505,8 +515,17 @@ export const Odontogram: React.FC<OdontogramProps> = ({
   const [hoveredTooth, setHoveredTooth] = React.useState<number | null>(null);
   const [hoverRect, setHoverRect] = React.useState<DOMRect | null>(null);
   const [optimisticHistory, setOptimisticHistory] = React.useState<ToothRecord[]>([]);
+  const [legendExpanded, setLegendExpanded] = React.useState(false);
   const toothRefs = React.useRef<Record<number, HTMLButtonElement | null>>({});
   const activeToothSet = React.useMemo(() => new Set(activeToothNumbers), [activeToothNumbers]);
+  const activeQuadrantSet = React.useMemo(() => new Set(activeQuadrants), [activeQuadrants]);
+  const visibleLegendItems = React.useMemo(
+    () =>
+      legendExpanded
+        ? legendItems
+        : legendItems.filter((item) => COMPACT_LEGEND_KEYS.has(item.key)),
+    [legendExpanded]
+  );
 
   const getToothStatus = React.useCallback((num: number): ToothStatus => {
     return data[num]?.status || 'healthy';
@@ -515,7 +534,9 @@ export const Odontogram: React.FC<OdontogramProps> = ({
   const treatmentsByTooth = React.useMemo(() => {
     const map = new Map<number, Array<{ id?: string; procedure?: string; status?: string }>>();
     treatments.forEach((item) => {
-      const toothNumber = Number(item.tooth_number);
+      const normalized = normalizeTreatmentItem(item);
+      if (normalized.scope !== 'tooth') return;
+      const toothNumber = Number(normalized.tooth_number);
       if (Number.isFinite(toothNumber) && toothNumber > 0) {
         const list = map.get(toothNumber) || [];
         list.push({ id: item.id, procedure: item.procedure, status: item.status });
@@ -524,6 +545,15 @@ export const Odontogram: React.FC<OdontogramProps> = ({
     });
     return map;
   }, [treatments]);
+
+  const getQuadrantJawClass = (quadrant: QuadrantId) => {
+    const isActive = activeQuadrantSet.has(quadrant);
+    const isHighlighted = highlightedQuadrant === quadrant;
+    if (!isActive && !isHighlighted) return '';
+    return isHighlighted
+      ? 'ring-2 ring-indigo-400/70 bg-indigo-50/25 shadow-[0_0_0_1px_rgba(99,102,241,0.12)]'
+      : 'ring-2 ring-emerald-300/70 bg-emerald-50/20';
+  };
 
   const deriveToothFlags = React.useCallback(
     (num: number) => {
@@ -547,7 +577,9 @@ export const Odontogram: React.FC<OdontogramProps> = ({
     const map = new Map<number, ToothRecord[]>();
     const treatmentHistory: ToothRecord[] = (treatments || [])
       .map((item) => {
-        const tooth = Number(item.tooth_number);
+        const normalized = normalizeTreatmentItem(item);
+        if (normalized.scope !== 'tooth') return null;
+        const tooth = Number(normalized.tooth_number);
         if (!Number.isFinite(tooth) || tooth <= 0 || !item.procedure) return null;
 
         return {
@@ -728,28 +760,29 @@ export const Odontogram: React.FC<OdontogramProps> = ({
     );
   };
 
+  const renderJawSection = (quadrant: QuadrantId, teeth: number[], reverse = false) => {
+    const list = reverse ? [...teeth].reverse() : teeth;
+    return (
+      <div
+        className={`relative rounded-xl sm:rounded-2xl border border-slate-200/70 bg-slate-50/60 p-1.5 sm:p-2.5 transition-all duration-300 ${getQuadrantJawClass(quadrant)}`}
+      >
+        <div className="flex gap-1.5">{list.map(renderTooth)}</div>
+      </div>
+    );
+  };
+
   return (
-    <div className="space-y-5 p-1 sm:p-2 bg-transparent rounded-none shadow-none border-none">
+    <div className="space-y-4 p-1 sm:p-2 bg-transparent rounded-none shadow-none border-none">
       <div className="overflow-x-auto pb-2">
         <div className="mx-auto min-w-max space-y-5">
           {/* Upper Jaw */}
           <div className="rounded-[22px] sm:rounded-[24px] border border-slate-200/80 bg-white/80 px-2.5 py-2.5 sm:px-4 sm:py-3.5">
             <div className="flex items-center justify-center gap-2 sm:gap-3">
-              <div className="rounded-xl sm:rounded-2xl border border-slate-200/70 bg-slate-50/60 p-1.5 sm:p-2.5">
-                <div className="flex gap-1.5">
-                  {toothNumbers.upperRight.map(renderTooth)}
-                </div>
-              </div>
-
+              {renderJawSection(1, toothNumbers.upperRight)}
               <div className="flex h-[4.1rem] sm:h-[5.2rem] w-2.5 sm:w-4 items-center justify-center">
                 <span className="h-full w-px bg-slate-200" />
               </div>
-
-              <div className="rounded-xl sm:rounded-2xl border border-slate-200/70 bg-slate-50/60 p-1.5 sm:p-2.5">
-                <div className="flex gap-1.5">
-                  {toothNumbers.upperLeft.map(renderTooth)}
-                </div>
-              </div>
+              {renderJawSection(2, toothNumbers.upperLeft)}
             </div>
           </div>
 
@@ -760,39 +793,36 @@ export const Odontogram: React.FC<OdontogramProps> = ({
           {/* Lower Jaw */}
           <div className="rounded-[22px] sm:rounded-[24px] border border-slate-200/80 bg-white/80 px-2.5 py-2.5 sm:px-4 sm:py-3.5">
             <div className="flex items-center justify-center gap-2 sm:gap-3">
-              <div className="rounded-xl sm:rounded-2xl border border-slate-200/70 bg-slate-50/60 p-1.5 sm:p-2.5">
-                <div className="flex gap-1.5">
-                  {[...toothNumbers.lowerRight].reverse().map(renderTooth)}
-                </div>
-              </div>
-
+              {renderJawSection(4, toothNumbers.lowerRight, true)}
               <div className="flex h-[4.1rem] sm:h-[5.2rem] w-2.5 sm:w-4 items-center justify-center">
                 <span className="h-full w-px bg-slate-200" />
               </div>
-
-              <div className="rounded-xl sm:rounded-2xl border border-slate-200/70 bg-slate-50/60 p-1.5 sm:p-2.5">
-                <div className="flex gap-1.5">
-                  {[...toothNumbers.lowerLeft].reverse().map(renderTooth)}
-                </div>
-              </div>
+              {renderJawSection(3, toothNumbers.lowerLeft, true)}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-200/80">
-        {legendItems.map((item) => (
-          <div key={item.key} className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5">
-            <span className={`relative h-3 w-3 rounded-[4px] ${item.swatchClass}`}>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-2 border-t border-slate-100">
+        {visibleLegendItems.map((item) => (
+          <div key={item.key} className="inline-flex items-center gap-1.5 py-0.5">
+            <span className={`relative h-2.5 w-2.5 rounded-[3px] ${item.swatchClass}`}>
               {item.markerClass && (
                 <span
-                  className={`absolute ${item.markerPosition === 'top' ? '-top-1 -right-1' : '-bottom-1 -right-1'} h-2 w-2 rounded-full border border-white ${item.markerClass}`}
+                  className={`absolute ${item.markerPosition === 'top' ? '-top-0.5 -right-0.5' : '-bottom-0.5 -right-0.5'} h-1.5 w-1.5 rounded-full border border-white ${item.markerClass}`}
                 />
               )}
             </span>
-            <span className="text-[11px] font-medium text-slate-500">{item.label}</span>
+            <span className="text-[10px] font-medium text-slate-400">{item.label}</span>
           </div>
         ))}
+        <button
+          type="button"
+          onClick={() => setLegendExpanded((prev) => !prev)}
+          className="text-[10px] font-medium text-slate-400 hover:text-slate-600 transition-colors"
+        >
+          {legendExpanded ? 'Menos' : 'Legenda'}
+        </button>
       </div>
 
       {/* Clinical insight summary */}
@@ -802,33 +832,21 @@ export const Odontogram: React.FC<OdontogramProps> = ({
         const pendingTeeth = allTeeth.filter(n => deriveToothFlags(n).isPending);
         const completedTeeth = allTeeth.filter(n => deriveToothFlags(n).isCompleted);
         if (pendingTeeth.length === 0 && urgentTeeth.length === 0 && completedTeeth.length === 0) return null;
+        const insightParts: string[] = [];
+        if (urgentTeeth.length > 0) {
+          insightParts.push(
+            `${urgentTeeth.length} urgente${urgentTeeth.length > 1 ? 's' : ''} (${urgentTeeth.slice(0, 4).join(', ')}${urgentTeeth.length > 4 ? '…' : ''})`
+          );
+        }
+        if (pendingTeeth.length > urgentTeeth.length) {
+          const n = pendingTeeth.length - urgentTeeth.length;
+          insightParts.push(`${n} pendente${n > 1 ? 's' : ''}`);
+        }
+        if (completedTeeth.length > 0) {
+          insightParts.push(`${completedTeeth.length} concluído${completedTeeth.length > 1 ? 's' : ''}`);
+        }
         return (
-          <div className="flex flex-wrap items-center gap-3 px-1">
-            {urgentTeeth.length > 0 && (
-              <div className="flex items-center gap-2 rounded-xl bg-rose-50 border border-rose-200 px-3 py-2">
-                <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
-                <span className="text-[11px] font-bold text-rose-700">
-                  {urgentTeeth.length} urgente{urgentTeeth.length > 1 ? 's' : ''}: {urgentTeeth.slice(0, 4).join(', ')}{urgentTeeth.length > 4 ? '…' : ''}
-                </span>
-              </div>
-            )}
-            {pendingTeeth.length > urgentTeeth.length && (
-              <div className="flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2">
-                <span className="h-2 w-2 rounded-full bg-amber-400" />
-                <span className="text-[11px] font-bold text-amber-700">
-                  {pendingTeeth.length - urgentTeeth.length} pendente{(pendingTeeth.length - urgentTeeth.length) > 1 ? 's' : ''}
-                </span>
-              </div>
-            )}
-            {completedTeeth.length > 0 && (
-              <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                <span className="text-[11px] font-bold text-emerald-700">
-                  {completedTeeth.length} concluído{completedTeeth.length > 1 ? 's' : ''}
-                </span>
-              </div>
-            )}
-          </div>
+          <p className="px-0.5 text-[11px] font-medium text-slate-400">{insightParts.join(' • ')}</p>
         );
       })()}
 

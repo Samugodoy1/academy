@@ -31,8 +31,20 @@ import {
   Zap,
 } from '../icons';
 import { AnimatePresence, motion } from 'motion/react';
+import { CLINICAL_PROCEDURES, getProcedureDefinition, resolveProcedureValue } from '../constants/clinicalProcedures';
 import { NovaEvolucao } from './NovaEvolucao';
 import { Odontogram } from './Odontogram';
+import { OdontogramActiveSummary } from './OdontogramActiveSummary';
+import { ScopeProcedureMenu } from './ScopeProcedureMenu';
+import {
+  TREATMENT_SCOPES,
+  countActiveTreatmentsByScope,
+  formatTreatmentAnchor,
+  isActiveTreatmentStatus,
+  normalizeTreatmentItem,
+  resolveQuadrant,
+  type QuadrantId,
+} from '../utils/treatmentPlanScope';
 import { formatAppointmentDate, formatAppointmentTime, formatDate, getAppointmentTime } from '../utils/dateUtils';
 import { boxGuideProcedures, boxGuides, type BoxGuideProcedure } from '../data/boxGuides';
 import {
@@ -274,6 +286,8 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   const [highlightedTreatmentId, setHighlightedTreatmentId] = useState<string | null>(null);
   const [highlightedTimelineId, setHighlightedTimelineId] = useState<string | null>(null);
   const [highlightedToothNumber, setHighlightedToothNumber] = useState<number | null>(null);
+  const [highlightedQuadrant, setHighlightedQuadrant] = useState<QuadrantId | null>(null);
+  const [scopeProcedureWarning, setScopeProcedureWarning] = useState<string | null>(null);
   const [selectedTreatmentAction, setSelectedTreatmentAction] = useState<any | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [editingValues, setEditingValues] = useState<Record<string, string>>({});
@@ -365,6 +379,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   const [isLoadingFinancial, setIsLoadingFinancial] = useState(false);
   const infoPanelRef = useRef<HTMLElement | null>(null);
   const odontogramRef = useRef<HTMLElement | null>(null);
+  const treatmentSectionRef = useRef<HTMLElement | null>(null);
   const profilePhotoInputRef = useRef<HTMLInputElement | null>(null);
   const clinicalImageInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -695,7 +710,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       const treatmentValue = Number(treatment.value) || 0;
       if (treatmentValue > 0) {
         const procedureLabel = treatment.procedure || 'Procedimento';
-        const toothLabel = treatment.tooth_number ? ` — dente ${treatment.tooth_number}` : '';
+        const toothLabel = ` — ${formatTreatmentAnchor(treatment)}`;
         apiFetch('/api/finance', {
           method: 'POST',
           body: JSON.stringify({
@@ -819,6 +834,110 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     }
   };
 
+  const handleScopeProcedureSelect = async ({
+    procedureKey,
+    procedure,
+    scope,
+    quadrant,
+  }: {
+    procedureKey: string;
+    procedure: string;
+    scope: 'patient' | 'quadrant';
+    quadrant?: QuadrantId;
+  }) => {
+    const ts = Date.now();
+    const treatmentId = `tp-${ts}-${Math.random().toString(36).slice(2, 9)}`;
+    const evolutionId = `evo-scope-${ts}-${Math.random().toString(36).slice(2, 8)}`;
+    const nowIso = new Date().toISOString();
+    const def = CLINICAL_PROCEDURES[procedureKey];
+
+    if (scope === 'patient') {
+      const duplicateCount = treatmentInProgress.filter((item: any) => {
+        const normalized = normalizeTreatmentItem(item);
+        return (
+          normalized.scope === TREATMENT_SCOPES.PATIENT &&
+          (normalized.procedure_key === procedureKey ||
+            String(normalized.procedure || '').toLowerCase() === procedure.toLowerCase())
+        );
+      }).length;
+      if (duplicateCount > 0) {
+        setScopeProcedureWarning(
+          `Já existe outro ${procedure} ativo. Será adicionado um novo registro.`
+        );
+        window.setTimeout(() => setScopeProcedureWarning(null), 4500);
+      }
+    }
+
+    if (scope === 'quadrant' && quadrant) {
+      const existingQuadrant = treatmentInProgress.find((item: any) => {
+        const normalized = normalizeTreatmentItem(item);
+        return (
+          normalized.scope === TREATMENT_SCOPES.QUADRANT &&
+          resolveQuadrant(normalized) === quadrant &&
+          (normalized.procedure_key === procedureKey ||
+            String(normalized.procedure || '').toLowerCase() === procedure.toLowerCase())
+        );
+      });
+      if (existingQuadrant?.id) {
+        flashQuadrantHighlight(quadrant);
+        flashTreatmentHighlight(String(existingQuadrant.id));
+        return;
+      }
+    }
+
+    const anchorLabel =
+      scope === 'quadrant' && quadrant ? `quadrante ${quadrant}` : 'paciente';
+    const newTreatment: any = {
+      id: treatmentId,
+      procedure,
+      procedure_key: procedureKey,
+      scope,
+      value: def?.defaultValue ?? resolveProcedureValue(procedure, procedureKey),
+      status: 'PLANEJADO',
+      requires_prepayment: !isAcademyProduct,
+      created_at: nowIso,
+      ...(scope === 'quadrant' && quadrant
+        ? { quadrant, region: { quadrant } }
+        : {}),
+    };
+
+    const evolutionNotes = `Início de tratamento (${anchorLabel}): ${procedure}.`;
+    const evolutionProcedure = `Início - ${procedure}`;
+    const optimisticEvolution = {
+      id: evolutionId,
+      date: nowIso,
+      notes: evolutionNotes,
+      procedure_performed: 'Início de tratamento',
+      procedure: evolutionProcedure,
+      event_type: 'TREATMENT_START',
+    };
+
+    setOptimisticTreatments((prev) => [newTreatment, ...prev]);
+    setOptimisticEvolutions((prev) => [optimisticEvolution, ...prev]);
+
+    try {
+      await onUpdatePatient({
+        ...patient,
+        treatmentPlan: [...(patient.treatmentPlan || []), newTreatment],
+        evolution: [optimisticEvolution, ...(patient.evolution || [])],
+      });
+      if (scope === 'quadrant' && quadrant) {
+        flashQuadrantHighlight(quadrant);
+      } else {
+        flashTreatmentHighlight(treatmentId);
+      }
+    } catch (error) {
+      console.error('Error creating scope treatment:', error);
+    }
+
+    persistEvolution({
+      notes: evolutionNotes,
+      procedure_performed: 'Início de tratamento',
+    }).catch((error) => {
+      console.error('Error persisting scope evolution:', error);
+    });
+  };
+
   const handleOdontoProcedureSelect = async ({
     toothNumber,
     procedure,
@@ -848,9 +967,16 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       Extracao: 200,
     };
 
-    const existingTreatment = (patient.treatmentPlan || []).find(
-      (item: any) => Number(item.tooth_number) === toothNumber && ['APROVADO', 'PENDENTE', 'PLANEJADO'].includes(String(item.status || '').toUpperCase())
-    );
+    const procedureKey = getProcedureDefinition(procedure)?.key;
+
+    const existingTreatment = (patient.treatmentPlan || []).find((item: any) => {
+      const normalized = normalizeTreatmentItem(item);
+      return (
+        normalized.scope === TREATMENT_SCOPES.TOOTH &&
+        Number(normalized.tooth_number) === toothNumber &&
+        isActiveTreatmentStatus(normalized.status)
+      );
+    });
 
     const isCompletionAction =
       mode === 'continuity' &&
@@ -876,9 +1002,11 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
             ...(patient.treatmentPlan || []),
             {
               id: treatmentId,
+              scope: TREATMENT_SCOPES.TOOTH,
               tooth_number: toothNumber,
               procedure,
-              value: values[procedure] || 0,
+              procedure_key: procedureKey,
+              value: isAcademyProduct ? 0 : resolveProcedureValue(procedure, procedureKey),
               status: 'PLANEJADO',
               requires_prepayment: !isAcademyProduct,
               created_at: nowIso,
@@ -897,9 +1025,11 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
           : { ...existingTreatment, status: 'APROVADO', updated_at: nowIso }
         : {
             id: treatmentId,
+            scope: TREATMENT_SCOPES.TOOTH,
             tooth_number: toothNumber,
             procedure,
-            value: values[procedure] || 0,
+            procedure_key: procedureKey,
+            value: isAcademyProduct ? 0 : resolveProcedureValue(procedure, procedureKey),
             status: 'PLANEJADO',
             requires_prepayment: !isAcademyProduct,
             created_at: nowIso,
@@ -1066,7 +1196,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       const alreadyPaidViaPrePayment = treatment.requires_prepayment && treatment.prepayment_confirmed;
       if (!isAcademyProduct && treatmentValue > 0 && !alreadyPaidViaPrePayment) {
         const procedureLabel = treatment.procedure || 'Procedimento';
-        const toothLabel = treatment.tooth_number ? ` — dente ${treatment.tooth_number}` : '';
+        const toothLabel = ` — ${formatTreatmentAnchor(treatment)}`;
         apiFetch('/api/finance', {
           method: 'POST',
           body: JSON.stringify({
@@ -1104,8 +1234,9 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       console.error('Error persisting completion evolution:', error);
     });
 
-    if (Number.isFinite(Number(treatment.tooth_number))) {
-      const toothNumber = Number(treatment.tooth_number);
+    const completedScope = normalizeTreatmentItem(treatment);
+    if (completedScope.scope === TREATMENT_SCOPES.TOOTH && completedScope.tooth_number) {
+      const toothNumber = Number(completedScope.tooth_number);
       const procedureText = String(treatment.procedure || '').toLowerCase();
       const completionStatus =
         procedureText.includes('canal')
@@ -1187,12 +1318,50 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     setSelectedTreatmentAction(null);
     setHighlightedTreatmentId(treatment.id);
     setHighlightedTimelineId(`evo-${evolutionId}`);
-    if (Number.isFinite(Number(treatment.tooth_number))) {
-      setHighlightedToothNumber(Number(treatment.tooth_number));
+    const convertedScope = normalizeTreatmentItem(treatment);
+    if (convertedScope.scope === TREATMENT_SCOPES.TOOTH && convertedScope.tooth_number) {
+      setHighlightedToothNumber(Number(convertedScope.tooth_number));
       window.setTimeout(() => setHighlightedToothNumber(null), 2600);
     }
     window.setTimeout(() => setHighlightedTreatmentId(null), 2200);
     window.setTimeout(() => setHighlightedTimelineId(null), 2200);
+  };
+
+  const handleRemoveScopeTreatment = async (treatment: any) => {
+    const normalized = normalizeTreatmentItem(treatment);
+    if (
+      normalized.scope !== TREATMENT_SCOPES.PATIENT &&
+      normalized.scope !== TREATMENT_SCOPES.QUADRANT
+    ) {
+      return;
+    }
+
+    const status = String(treatment.status || '').toUpperCase();
+    const needsConfirm =
+      status === 'APROVADO' ||
+      Boolean(treatment.prepayment_confirmed) ||
+      status === 'REALIZADO';
+
+    if (
+      needsConfirm &&
+      !window.confirm(
+        `Remover ${treatment.procedure} (${formatTreatmentAnchor(treatment)}) do plano de tratamento?`
+      )
+    ) {
+      return;
+    }
+
+    const nextPlan = (mergedTreatmentPlan || []).filter((item: any) => item.id !== treatment.id);
+    setOptimisticTreatments((prev) => prev.filter((item: any) => item.id !== treatment.id));
+
+    try {
+      await onUpdatePatient({ ...patient, treatmentPlan: nextPlan });
+      if (highlightedTreatmentId === treatment.id) {
+        setHighlightedTreatmentId(null);
+      }
+    } catch (error) {
+      console.error('Error removing scope treatment:', error);
+    }
   };
 
   const handleAddToothHistory = async (record: { tooth_number: number; procedure: string; notes: string; date: string }) => {
@@ -1351,6 +1520,30 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     });
   };
 
+  const focusTreatmentSection = () => {
+    requestAnimationFrame(() => {
+      treatmentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  };
+
+  const flashToothHighlight = (toothNumber: number) => {
+    setHighlightedToothNumber(toothNumber);
+    window.setTimeout(() => setHighlightedToothNumber(null), 2600);
+    focusOdontogram();
+  };
+
+  const flashQuadrantHighlight = (quadrant: QuadrantId) => {
+    setHighlightedQuadrant(quadrant);
+    window.setTimeout(() => setHighlightedQuadrant(null), 2600);
+    focusOdontogram();
+  };
+
+  const flashTreatmentHighlight = (treatmentId: string) => {
+    setHighlightedTreatmentId(treatmentId);
+    window.setTimeout(() => setHighlightedTreatmentId(null), 2600);
+    focusTreatmentSection();
+  };
+
   const saveAnamnese = async () => {
     setIsSavingAnamnese(true);
     try {
@@ -1369,17 +1562,33 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     }
   };
 
-  const activeToothNumbers = useMemo(
-    () =>
-      treatmentInProgress
-        .map((item: any) => Number(item.tooth_number))
-        .filter((toothNumber: number) => Number.isFinite(toothNumber) && toothNumber > 0),
+  const activeToothNumbers = useMemo(() => {
+    const toothSet = new Set<number>();
+    treatmentInProgress.forEach((item: any) => {
+      const normalized = normalizeTreatmentItem(item);
+      if (normalized.scope === TREATMENT_SCOPES.TOOTH && Number(normalized.tooth_number) > 0) {
+        toothSet.add(Number(normalized.tooth_number));
+      }
+    });
+    return [...toothSet];
+  }, [treatmentInProgress]);
+
+  const activeTreatmentCounts = useMemo(
+    () => countActiveTreatmentsByScope(treatmentInProgress),
     [treatmentInProgress]
   );
 
+  const activeQuadrants = useMemo(
+    () => [...activeTreatmentCounts.quadrantSet],
+    [activeTreatmentCounts]
+  );
+
   const priorityToothNumber = useMemo(() => {
-    const first = treatmentInProgress[0];
-    const toothNumber = Number(first?.tooth_number);
+    const firstToothItem = treatmentInProgress.find((item: any) => {
+      const normalized = normalizeTreatmentItem(item);
+      return normalized.scope === TREATMENT_SCOPES.TOOTH && Number(normalized.tooth_number) > 0;
+    });
+    const toothNumber = Number(firstToothItem?.tooth_number);
     return Number.isFinite(toothNumber) && toothNumber > 0 ? toothNumber : null;
   }, [treatmentInProgress]);
 
@@ -1393,7 +1602,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
 
   const primaryTreatment = treatmentInProgress[0] || null;
   const primaryActionTitle = primaryTreatment
-    ? `${primaryTreatment.procedure}${primaryTreatment.tooth_number ? ` • dente ${primaryTreatment.tooth_number}` : ''}`
+    ? `${primaryTreatment.procedure} • ${formatTreatmentAnchor(primaryTreatment)}`
     : upcomingAppointment
       ? 'Preparar atendimento agendado'
       : 'Começar pelo odontograma';
@@ -1569,7 +1778,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-400 mb-0.5">Próximo passo</p>
                     <p className="text-[13px] font-semibold text-slate-900 truncate">
-                      {primaryTreatment.procedure}{primaryTreatment.tooth_number ? ` · dente ${primaryTreatment.tooth_number}` : ''}
+                      {primaryTreatment.procedure} · {formatTreatmentAnchor(primaryTreatment)}
                     </p>
                   </div>
                   {upcomingAppointment && (
@@ -1671,20 +1880,26 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
         )}
 
         <section ref={odontogramRef} className="rounded-[30px] p-4 sm:p-5 border border-slate-200/60 bg-white/95 shadow-[0_10px_28px_rgba(15,23,42,0.04),0_1px_3px_rgba(15,23,42,0.06)] transition-shadow duration-500 hover:shadow-[0_14px_36px_rgba(15,23,42,0.06)]">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h2 className="text-[24px] sm:text-[28px] font-semibold tracking-[-0.02em] text-slate-950">Odontograma</h2>
-              {activeToothNumbers.length > 0 && (
-                <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-breathe" />
-                  {activeToothNumbers.length} dente{activeToothNumbers.length !== 1 ? 's' : ''} {isAcademyProduct ? 'em plano clínico' : 'em tratamento'}
-                </p>
-              )}
-            </div>
-            <span className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400 bg-slate-50/80 px-2.5 py-1.5 rounded-full border border-slate-200/60 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">Interativo</span>
+          <div className="flex items-center justify-between gap-3 mb-1">
+            <h2 className="text-[24px] sm:text-[28px] font-semibold tracking-[-0.02em] text-slate-950">Odontograma</h2>
+            <ScopeProcedureMenu
+              onSelect={handleScopeProcedureSelect}
+              hint={scopeProcedureWarning}
+            />
           </div>
 
-          <div className="rounded-[26px] p-1.5 sm:p-2 bg-slate-50/70 ring-1 ring-slate-100/80">
+          <OdontogramActiveSummary
+            items={treatmentInProgress}
+            teethCounterLabel={isAcademyProduct ? 'em plano clínico' : 'em tratamento'}
+            toothStatuses={mergedOdontogram}
+            highlightedTreatmentId={highlightedTreatmentId}
+            onSelectTooth={flashToothHighlight}
+            onSelectQuadrant={flashQuadrantHighlight}
+            onSelectPatientItem={flashTreatmentHighlight}
+            onRemoveTreatment={handleRemoveScopeTreatment}
+          />
+
+          <div className="rounded-[26px] p-1 sm:p-1.5 bg-slate-50/50 ring-1 ring-slate-100/60">
             <Odontogram
               data={mergedOdontogram}
               history={patient?.toothHistory || []}
@@ -1694,15 +1909,20 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               onSelectProcedure={handleOdontoProcedureSelect}
               treatments={mergedTreatmentPlan}
               activeToothNumbers={activeToothNumbers}
+              activeQuadrants={activeQuadrants}
               priorityToothNumber={priorityToothNumber}
               highlightedToothNumber={highlightedToothNumber}
+              highlightedQuadrant={highlightedQuadrant}
             />
           </div>
         </section>
 
         <div className={`grid grid-cols-1 gap-6 ${isFocusMode ? '' : 'xl:grid-cols-[1.7fr_1fr]'}`}>
           <div className="space-y-6">
-            <section className="rounded-[28px] border border-slate-200/60 bg-white/95 p-5 sm:p-6 shadow-[0_10px_28px_rgba(15,23,42,0.04),0_1px_3px_rgba(15,23,42,0.06)] transition-shadow duration-500 hover:shadow-[0_14px_36px_rgba(15,23,42,0.06)]">
+            <section
+              ref={treatmentSectionRef}
+              className="rounded-[28px] border border-slate-200/60 bg-white/95 p-5 sm:p-6 shadow-[0_10px_28px_rgba(15,23,42,0.04),0_1px_3px_rgba(15,23,42,0.06)] transition-shadow duration-500 hover:shadow-[0_14px_36px_rgba(15,23,42,0.06)]"
+            >
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-lg sm:text-xl font-semibold tracking-[-0.02em] text-slate-950">{isAcademyProduct ? 'Plano clínico' : 'Tratamento atual'}</h3>
@@ -1886,11 +2106,31 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                                 {item.procedure}
                               </p>
                             </div>
-                            {item.tooth_number && (
-                              <span className="shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                                dente {item.tooth_number}
+                            <div className="flex shrink-0 items-center gap-1">
+                              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                                {formatTreatmentAnchor(item)}
                               </span>
-                            )}
+                              {!isReorderMode && (() => {
+                                const itemScope = normalizeTreatmentItem(item);
+                                if (
+                                  itemScope.scope !== TREATMENT_SCOPES.PATIENT &&
+                                  itemScope.scope !== TREATMENT_SCOPES.QUADRANT
+                                ) {
+                                  return null;
+                                }
+                                return (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveScopeTreatment(item)}
+                                    className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                                    aria-label={`Remover ${item.procedure}`}
+                                    title="Remover"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                );
+                              })()}
+                            </div>
                           </div>
 
                           {/* row 2: status + value */}
@@ -3429,11 +3669,9 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               <div className="mb-5">
               <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400 mb-1.5">O que fazer agora?</p>
               <h3 id="treatment-action-title" className="text-xl font-bold text-slate-950 tracking-[-0.02em]">{selectedTreatmentAction.procedure}</h3>
-              {selectedTreatmentAction.tooth_number && (
-                <span className="mt-2 inline-flex text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                  dente {selectedTreatmentAction.tooth_number}
-                </span>
-              )}
+              <span className="mt-2 inline-flex text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                {formatTreatmentAnchor(selectedTreatmentAction)}
+              </span>
             </div>
 
             <div className="space-y-2.5">

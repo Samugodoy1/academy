@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Activity,
@@ -23,6 +23,9 @@ import {
   UserCircle
 } from '../icons';
 import { getAppointmentTime, parseAppointmentDateTime } from '../utils/dateUtils';
+import { mapProcedureToTopic, StudyKey } from '../utils/studyTopics';
+
+const STUDY_TOPIC_STORAGE_KEY = 'academy_study_topic';
 
 interface AcademyEstudosProps {
   patients?: any[];
@@ -30,19 +33,6 @@ interface AcademyEstudosProps {
   setActiveTab?: (tab: any) => void;
   openPatientRecord?: (id: number) => void;
 }
-
-type StudyKey =
-  | 'exame-clinico'
-  | 'radiologia'
-  | 'anestesia'
-  | 'isolamento'
-  | 'periodontia'
-  | 'preventiva'
-  | 'dentistica'
-  | 'endodontia'
-  | 'cirurgia'
-  | 'protese'
-  | 'odontopediatria';
 
 type StudyMaterial = {
   id: StudyKey;
@@ -678,23 +668,6 @@ const getProcedureHint = (appointment?: any, patient?: any) => {
   return appointment?.notes || appointment?.procedure || treatment?.procedure || null;
 };
 
-const mapProcedureToTopic = (procedure: string | null): StudyKey | null => {
-  if (!procedure) return null;
-  const lower = procedure.toLowerCase();
-  if (lower.includes('anamn') || lower.includes('exame') || lower.includes('avaliacao') || lower.includes('diagnost') || lower.includes('plano de tratamento')) return 'exame-clinico';
-  if (lower.includes('radio') || lower.includes('rx') || lower.includes('periapical') || lower.includes('bite') || lower.includes('panoram')) return 'radiologia';
-  if (lower.includes('anestes') || lower.includes('bloqueio') || lower.includes('infiltrativa')) return 'anestesia';
-  if (lower.includes('isolamento') || lower.includes('dique') || lower.includes('lencol') || lower.includes('grampo')) return 'isolamento';
-  if (lower.includes('rasp') || lower.includes('period') || lower.includes('gengiv') || lower.includes('calculo') || lower.includes('tartaro') || lower.includes('profilaxia periodontal')) return 'periodontia';
-  if (lower.includes('profilax') || lower.includes('fluor') || lower.includes('selante') || lower.includes('prevent') || lower.includes('biofilme')) return 'preventiva';
-  if (lower.includes('endo') || lower.includes('canal') || lower.includes('pulpar') || lower.includes('tratamento endodontico')) return 'endodontia';
-  if (lower.includes('restaura') || lower.includes('resin') || lower.includes('clareamento') || lower.includes('facet') || lower.includes('lente') || lower.includes('dentistic')) return 'dentistica';
-  if (lower.includes('extra') || lower.includes('siso') || lower.includes('cirurg') || lower.includes('implant') || lower.includes('exodontia')) return 'cirurgia';
-  if (lower.includes('protese') || lower.includes('provisor') || lower.includes('moldagem') || lower.includes('coroa') || lower.includes('ciment')) return 'protese';
-  if (lower.includes('pediatr') || lower.includes('crianca') || lower.includes('deciduo') || lower.includes('infantil') || lower.includes('art')) return 'odontopediatria';
-  return null;
-};
-
 const getDayPhrase = (date: Date) => {
   const today = new Date();
   const tomorrow = new Date(today);
@@ -716,6 +689,14 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
 }) => {
   const [selectedStudy, setSelectedStudy] = useState<StudyKey | null>(null);
   const now = new Date();
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem(STUDY_TOPIC_STORAGE_KEY) as StudyKey | null;
+    if (stored) {
+      setSelectedStudy(stored);
+      sessionStorage.removeItem(STUDY_TOPIC_STORAGE_KEY);
+    }
+  }, []);
 
   const upcomingCases = useMemo(() => {
     const limit = new Date(now);
@@ -963,7 +944,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
                     onClick={() => setSelectedStudy(nextCaseTopic.id)}
                     className="w-full bg-academy-primary text-white font-bold text-[15px] py-[16px] rounded-[20px] shadow-lg hover:scale-[0.98] transition-transform active:scale-95"
                   >
-                    Estudar roteiro
+                    Revisar sequência
                   </button>
                   <button
                     type="button"

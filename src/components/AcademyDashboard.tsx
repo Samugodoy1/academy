@@ -1,8 +1,23 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Calendar, CalendarPlus, CheckCircle2, ChevronRight, ClipboardList, Clock, Plus, Sparkles, Users } from '../icons';
+import { BookOpen, Calendar, CalendarPlus, CheckCircle2, ChevronRight, ClipboardList, Clock, Plus, Users } from '../icons';
+import { BoxModePrep } from './BoxModePrep';
+import { ClinicalObservation } from './ClinicalObservation';
+import { ClinicalProgressionCard } from './ClinicalProgressionCard';
 import { formatAppointmentTime, getAppointmentTime, parseAppointmentDateTime } from '../utils/dateUtils';
-import { buildParaFecharRows, deriveAcademyPatientState } from '../utils/deriveAcademyPatientState';
+import { buildParaFecharRows } from '../utils/deriveAcademyPatientState';
+import {
+  buildTodayContext,
+  getBoxPrepItems,
+  getClinicalObservation,
+  getStudyRefreshSuggestion,
+  getTodayHeadline,
+  shouldShowBoxMode,
+} from '../utils/clinicalIntelligence';
+import { countClinicalSkills, suggestNextClinicalStep, getTopSkillHighlights } from '../utils/clinicalProgression';
+import { STUDY_TOPIC_LABELS, StudyKey } from '../utils/studyTopics';
+
+const STUDY_TOPIC_STORAGE_KEY = 'academy_study_topic';
 
 interface AcademyDashboardProps {
   user?: any;
@@ -327,12 +342,6 @@ const getClinicalPending = (patients: any[], appointments: any[], now: Date) => 
   return patients.find(patient => Boolean(getClinicalAlert(patient, appointments, now))) || null;
 };
 
-const pickContextMessage = (messages: string[], seed: string) => {
-  if (messages.length === 0) return '';
-  const value = seed.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  return messages[value % messages.length];
-};
-
 const getShortClinicalMoment = (focus: any) => {
   const text = String(getProcedureHint(focus.appointment, focus.patient) || '').trim();
   if (!text) return null;
@@ -356,20 +365,6 @@ const getClinicalActionCopy = (moment: string) => {
   if (moment === 'clareamento') return 'Confira protocolo e sensibilidade.';
   if (moment === 'avaliar') return 'Comece pela queixa principal.';
   return 'Revise a conduta.';
-};
-
-const formatDashboardStartLabel = (value?: string, now: Date = new Date()) => {
-  const parsed = parseDate(value);
-  if (!parsed) return null;
-
-  const tomorrow = new Date(now);
-  tomorrow.setDate(now.getDate() + 1);
-
-  if (sameDay(parsed, now)) return 'Hoje';
-  if (sameDay(parsed, tomorrow)) return 'Amanhã';
-
-  const label = parsed.toLocaleDateString('pt-BR', { weekday: 'long' }).replace('-feira', '');
-  return label.charAt(0).toUpperCase() + label.slice(1);
 };
 
 const getClinicalAlertCopy = (patient: any, appointment: any, appointments: any[], now: Date) => {
@@ -401,100 +396,6 @@ const getAppointmentActionCopy = (patient: any, appointment: any, appointments: 
   if (getEvolutionSummary(patient)) return 'Revisar última evolução';
 
   return 'Abrir preparo do caso';
-};
-
-const getSmartDashboardMessage = (
-  focus: any,
-  context: {
-    now: Date;
-    todayCount: number;
-    upcomingCount: number;
-    evolutionPendingCount: number;
-    hasClinicalPending: boolean;
-    appointments: any[];
-  }
-) => {
-  const patientName = firstName(focus.patient?.name || focus.appointment?.patient_name);
-  const startLabel = formatDashboardStartLabel(focus.appointment?.start_time, context.now);
-  const dayPart = context.now.getHours() < 12 ? 'morning' : context.now.getHours() < 18 ? 'afternoon' : 'night';
-  const seed = [
-    focus.kind,
-    patientName,
-    context.now.toDateString(),
-    dayPart,
-    context.todayCount,
-    context.upcomingCount,
-    context.evolutionPendingCount,
-    context.hasClinicalPending ? 'pending' : 'clear'
-  ].join('|');
-
-  if (focus.kind === 'evolution') {
-    const count = context.evolutionPendingCount;
-    return pickContextMessage([
-      count > 1
-        ? `${count} atendimentos para fechar.`
-        : `Falta registrar a evolução para fechar o atendimento.`,
-      `${patientName} já foi atendido. Feche o atendimento.`,
-      `Atendimento concluído. Registre a evolução para fechar.`
-    ], seed);
-  }
-
-  if (focus.kind === 'today') {
-    if (context.todayCount > 2) {
-      return pickContextMessage([
-        `Hoje a clínica pede foco.`,
-        `Dia cheio. Comece com ${patientName}.`,
-        `Hoje começa com ${patientName}.`
-      ], seed);
-    }
-
-    return pickContextMessage([
-      `Hoje começa com ${patientName}.`,
-      `${patientName} abre a clínica hoje.`,
-      `Primeiro box: ${patientName}.`
-    ], seed);
-  }
-
-  if (focus.kind === 'next') {
-    return pickContextMessage([
-      `${startLabel || 'A clínica'} começa com ${patientName}.`,
-      `${patientName} abre o próximo box.`,
-      `Próximo atendimento: ${patientName}.`
-    ], seed);
-  }
-
-  if (focus.kind === 'paused') {
-    const name = firstName(focus.patient?.name);
-    return pickContextMessage([
-      `${name} ficou sem retorno. Revise o plano.`,
-      `Caso parado: ${name}. Defina o próximo passo.`,
-      `${name} precisa de follow-up. Veja a evolução.`
-    ], seed);
-  }
-
-  if (focus.kind === 'pending') {
-    const name = firstName(focus.patient?.name);
-    const alert = getClinicalAlert(focus.patient, context.appointments, context.now) || 'Pendência clínica.';
-    return pickContextMessage([
-      `${name}: ${alert}`,
-      `Antes da clínica: revise ${name}.`,
-      `${name} tem ajuste no prontuário.`
-    ], seed);
-  }
-
-  if (focus.kind === 'start') {
-    return pickContextMessage([
-      `Cadastre o primeiro paciente.`,
-      `Comece pelo primeiro caso.`,
-      `Monte sua base clínica.`
-    ], seed);
-  }
-
-  return pickContextMessage([
-    `Sem paciente marcado hoje. Organize retornos.`,
-    `Agenda livre. Revise casos antigos.`,
-    `Hoje sem box. Atualize prontuários.`
-  ], seed);
 };
 
 export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
@@ -672,14 +573,37 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   })();
 
   const greetingName = getGreetingName(user);
-  const smartMessage = getSmartDashboardMessage(focus, {
-    now,
-    todayCount: todayAppointments.length,
-    upcomingCount: nextAppointments.length,
-    evolutionPendingCount: finishedWithoutEvolution.length,
-    hasClinicalPending: Boolean(clinicalPending),
-    appointments: usableAppointments
+
+  const todayContext = useMemo(
+    () => buildTodayContext(patients, usableAppointments, now),
+    [patients, usableAppointments, now]
+  );
+
+  const skillCounts = useMemo(() => countClinicalSkills(patients), [patients]);
+  const skillHighlights = useMemo(() => getTopSkillHighlights(skillCounts), [skillCounts]);
+  const nextClinicalStep = useMemo(() => suggestNextClinicalStep(skillCounts), [skillCounts]);
+
+  const smartMessage = getTodayHeadline(todayContext, {
+    kind: focus.kind,
+    patientName: focus.patient?.name || focus.appointment?.patient_name,
   });
+
+  const isCalmState = focus.kind === 'calm' && finishedWithoutEvolution.length === 0;
+  const clinicalObservation = getClinicalObservation(todayContext, {
+    hasEvolutionPending: finishedWithoutEvolution.length > 0,
+    evolutionCount: finishedWithoutEvolution.length,
+    hasClinicalPending: Boolean(clinicalPending),
+    isCalm: isCalmState,
+  });
+
+  const showBoxMode = shouldShowBoxMode(todayContext) && focus.kind !== 'evolution';
+  const boxPrepItems = getBoxPrepItems(todayContext.nextProcedure);
+  const boxScheduleLabel = formatAppointmentChipTime(todayContext.nextAppointment?.start_time);
+
+  const openStudyTopic = (topic: StudyKey) => {
+    sessionStorage.setItem(STUDY_TOPIC_STORAGE_KEY, topic);
+    setActiveTab('estudos');
+  };
 
   const focusPatientName = focus.patient?.name || focus.appointment?.patient_name || null;
   const focusPhoto = focus.patient?.photo_url || focus.appointment?.photo_url || null;
@@ -722,27 +646,27 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   ].slice(0, 3);
 
   const studySuggestion = useMemo(() => {
-    if (focus.kind === 'evolution' || focus.kind === 'calm' || focus.kind === 'start') return null;
+    if (focus.kind === 'evolution' || focus.kind === 'start') return null;
+    if (showBoxMode) return null;
 
-    const procedure = procedureHint;
-    if (!procedure) return null;
-
-    const patientName = focusPatientName ? firstName(focusPatientName) : null;
-    const reason = patientName
-      ? `Para o caso de ${patientName}.`
-      : 'Para o próximo atendimento.';
+    const refresh = getStudyRefreshSuggestion(todayContext);
+    if (!refresh) return null;
 
     return {
-      topic: procedure,
-      reason,
-      duration: '8 min',
+      topicKey: refresh.topic,
+      topic: STUDY_TOPIC_LABELS[refresh.topic],
+      reason: refresh.reason,
+      duration: refresh.duration,
     };
-  }, [focus.kind, procedureHint, focusPatientName]);
+  }, [focus.kind, showBoxMode, todayContext]);
 
   return (
     <div className="max-w-2xl mx-auto px-5 sm:px-6 space-y-12 pt-8 pb-32">
-      <section className="space-y-8">
+      <section className="space-y-5">
         <div className="pt-6">
+          <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-academy-primary mb-2">
+            Hoje
+          </p>
           <p className="text-[16px] font-medium text-academy-muted mb-2">
             {getTimeGreeting()}{greetingName ? `, ${greetingName}` : ''} {getGreetingEmoji()}
           </p>
@@ -751,17 +675,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           </h2>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.08 }}
-          className="flex items-start gap-3 rounded-2xl px-5 py-4 bg-academy-neutral/80 border border-academy-border/70"
-        >
-          <Sparkles size={16} className="mt-0.5 shrink-0 text-academy-primary" />
-          <p className="text-[14px] font-medium text-[#3A3A3C] leading-snug">
-            {focus.subtitle}
-          </p>
-        </motion.div>
+        <ClinicalObservation observation={clinicalObservation} />
       </section>
 
       <div className="space-y-4">
@@ -899,6 +813,29 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         </div>
       </div>
 
+      {showBoxMode && todayContext.nextAppointment && todayContext.nextProcedure && (
+        <BoxModePrep
+          patientName={todayContext.nextAppointment.patient_name || todayContext.nextAppointmentPatient?.name || 'Paciente'}
+          procedure={todayContext.nextProcedure}
+          items={boxPrepItems}
+          scheduleLabel={boxScheduleLabel}
+          onReviewItem={(item) => item.studyTopic && openStudyTopic(item.studyTopic)}
+          onOpenCase={() => openPatientRecord(todayContext.nextAppointment!.patient_id)}
+        />
+      )}
+
+      {!showBoxMode && (skillHighlights.length > 0 || nextClinicalStep) && (
+        <ClinicalProgressionCard
+          highlights={skillHighlights}
+          nextStep={nextClinicalStep}
+          onReviewNextStep={
+            nextClinicalStep?.studyTopic
+              ? () => openStudyTopic(nextClinicalStep.studyTopic!)
+              : undefined
+          }
+        />
+      )}
+
       {studySuggestion && (
         <motion.section
           initial={{ opacity: 0, y: 14 }}
@@ -927,7 +864,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
               </span>
               <motion.button
                 whileTap={{ scale: 0.96, opacity: 0.9 }}
-                onClick={() => setActiveTab('estudos')}
+                onClick={() => openStudyTopic(studySuggestion.topicKey)}
                 className="px-5 py-2.5 rounded-[14px] bg-academy-primary text-white text-[13px] font-bold transition-all shadow-sm"
               >
                 Revisar

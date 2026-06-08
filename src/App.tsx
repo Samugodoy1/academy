@@ -2116,6 +2116,52 @@ export default function App() {
     };
   };
 
+  // Auto-select most urgent filter when opening pacientes tab
+  const patientsFilterAutoAppliedRef = useRef(false);
+  useEffect(() => {
+    if (activeTab !== 'pacientes') {
+      patientsFilterAutoAppliedRef.current = false;
+      return;
+    }
+    if (loading || patientsFilterAutoAppliedRef.current) return;
+
+    const uniquePatients = Array.from(
+      new Map(patients.map((patient: Patient) => [patient.id, patient])).values()
+    ) as Patient[];
+    const intelMap = new Map<number, any>();
+    patientIntelligence.forEach((pi: any) => intelMap.set(pi.patient_id, pi));
+
+    const getNextAppt = (patient: Patient) => appointments
+      .filter(app =>
+        app.patient_id === patient.id &&
+        getAppointmentTime(app.start_time) >= now.getTime() &&
+        !['CANCELLED', 'NO_SHOW'].includes(String(app.status || '').toUpperCase())
+      )
+      .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time))[0] || null;
+
+    const hasFilledAnamnesis = (patient: Patient) => {
+      const anamnesis = patient.anamnesis || {};
+      return Object.values(anamnesis).some(value => typeof value === 'string' ? value.trim().length > 0 : Boolean(value));
+    };
+
+    const isPending = (patient: Patient) => {
+      const meta = getPatientCardMeta(patient);
+      const intel = intelMap.get(patient.id) || null;
+      const nextAppointment = getNextAppt(patient);
+      const state = deriveAcademyPatientState(patient, appointments, now);
+      if (state.finishedWithoutEvolution.length > 0) return true;
+      if (nextAppointment && !hasFilledAnamnesis(patient)) return true;
+      if (meta.attentionStatus.key === 'overdue' || meta.attentionStatus.key === 'review' || meta.isLead) return true;
+      return intel?.priority === 'HIGH' || intel?.status === 'ABANDONO' || intel?.status === 'ATENCAO';
+    };
+
+    const totalPending = uniquePatients.filter(isPending).length;
+    const totalScheduled = uniquePatients.filter(patient => Boolean(getNextAppt(patient))).length;
+
+    setPatientListFilter(totalPending > 0 ? 'pending' : totalScheduled > 0 ? 'scheduled' : 'all');
+    patientsFilterAutoAppliedRef.current = true;
+  }, [activeTab, loading, patients, patientIntelligence, appointments, now]);
+
   const formatProcedure = (input: string) => {
     const normalized = (input || '').trim();
     if (!normalized) return '';

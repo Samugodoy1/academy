@@ -2,15 +2,17 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Activity,
+  AlertCircle,
   ArrowLeft,
+  ArrowUpRight,
   BookOpen,
   Calendar,
+  Check,
   CheckCircle2,
   ChevronRight,
   ClipboardList,
   Clock,
   FileText,
-  FlaskConical,
   Heart,
   Pill,
   Search,
@@ -24,6 +26,13 @@ import {
 } from '../icons';
 import { getAppointmentTime, parseAppointmentDateTime } from '../utils/dateUtils';
 import { mapProcedureToTopic, StudyKey } from '../utils/studyTopics';
+import { generateBoxContext, BoxIntelligenceContext } from '../data/boxIntelligence';
+import {
+  countClinicalSkills,
+  detectClinicalGaps,
+  getLastPerformedSkill,
+  mapSkillToStudyTopic,
+} from '../utils/clinicalProgression';
 
 const STUDY_TOPIC_STORAGE_KEY = 'academy_study_topic';
 
@@ -672,14 +681,62 @@ const getDayPhrase = (date: Date) => {
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
-  if (date.toDateString() === today.toDateString()) return 'Hoje voce atende';
-  if (date.toDateString() === tomorrow.toDateString()) return 'Amanha voce atende';
+  if (date.toDateString() === today.toDateString()) return 'Hoje você atende';
+  if (date.toDateString() === tomorrow.toDateString()) return 'Amanhã você atende';
   const weekday = date.toLocaleDateString('pt-BR', { weekday: 'long' }).split('-')[0];
-  const prefix = ['sabado', 'domingo'].includes(weekday.toLowerCase()) ? 'No' : 'Na';
-  return `${prefix} ${weekday} voce atende`;
+  const prefix = ['sábado', 'domingo'].includes(weekday.toLowerCase()) ? 'No' : 'Na';
+  return `${prefix} ${weekday} você atende`;
+};
+
+const getWhenLabel = (date: Date) => {
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+  if (date.toDateString() === today.toDateString()) return `Hoje · ${time}`;
+  if (date.toDateString() === tomorrow.toDateString()) return `Amanhã · ${time}`;
+  const day = date.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
+  return `${day} · ${time}`;
 };
 
 const firstName = (name?: string) => (name || 'paciente').trim().split(' ')[0] || 'paciente';
+
+const cleanCheckpoint = (value?: string) => String(value || '').replace(/^⚠️\s*/, '').trim();
+
+/** Fallback topic mapping when the appointment text alone is not enough. */
+const BOX_PROCEDURE_TOPIC: Record<string, StudyKey> = {
+  Consulta: 'exame-clinico',
+  Endodontia: 'endodontia',
+  Dentistica: 'dentistica',
+  Cirurgia: 'cirurgia',
+  Periodontia: 'periodontia',
+  Protese: 'protese',
+  Urgencia: 'exame-clinico',
+};
+
+const SKILL_PT: Record<string, string> = {
+  restauracao: 'restaurações',
+  raspagem: 'raspagens',
+  exodontia: 'exodontias',
+  endodontia: 'endodontias',
+  profilaxia: 'profilaxias',
+  clareamento: 'clareamentos',
+  isolamento: 'isolamento absoluto',
+  anestesia: 'anestesias',
+  consulta: 'consultas',
+  protese: 'próteses',
+  cirurgia: 'cirurgias',
+};
+
+interface UpcomingCase {
+  app: any;
+  patient: any;
+  topicKey: StudyKey;
+  proc: string | null;
+  date: Date;
+  box: BoxIntelligenceContext;
+}
 
 export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
   patients = [],
@@ -688,17 +745,23 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
   openPatientRecord
 }) => {
   const [selectedStudy, setSelectedStudy] = useState<StudyKey | null>(null);
+  const [selectedCase, setSelectedCase] = useState<UpcomingCase | null>(null);
+  const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
   const now = new Date();
 
   useEffect(() => {
     const stored = sessionStorage.getItem(STUDY_TOPIC_STORAGE_KEY) as StudyKey | null;
-    if (stored) {
+    if (stored && STUDY_LIBRARY[stored]) {
       setSelectedStudy(stored);
       sessionStorage.removeItem(STUDY_TOPIC_STORAGE_KEY);
     }
   }, []);
 
-  const upcomingCases = useMemo(() => {
+  useEffect(() => {
+    setCheckedItems(new Set());
+  }, [selectedStudy]);
+
+  const upcomingCases = useMemo<UpcomingCase[]>(() => {
     const limit = new Date(now);
     limit.setDate(limit.getDate() + 15);
 
@@ -710,74 +773,154 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
       })
       .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
 
-    return usable.map(app => {
+    const cases: UpcomingCase[] = [];
+    for (const app of usable) {
       const patient = getPatient(patients, app.patient_id);
+      if (!patient) continue;
+
+      const treatments = (patient.treatmentPlan || []).filter((item: any) =>
+        ['APROVADO', 'PENDENTE', 'PLANEJADO'].includes(String(item?.status || '').toUpperCase())
+      );
+      const patientAppointments = appointments.filter(
+        a => String(a.patient_id) === String(patient.id)
+      );
+      const box = generateBoxContext(patient, treatments, patientAppointments);
+
       const proc = getProcedureHint(app, patient);
-      const topicKey = mapProcedureToTopic(proc);
-      return {
-        app,
-        patient,
-        topicKey,
-        proc,
-        date: parseDate(app.start_time)!
-      };
-    }).filter(c => c.topicKey && c.patient);
+      const topicKey =
+        mapProcedureToTopic(proc) ||
+        (box.procedureInferred ? BOX_PROCEDURE_TOPIC[box.procedureInferred] : null) ||
+        (box.isFirstConsultation ? 'exame-clinico' : null);
+
+      if (!topicKey) continue;
+      cases.push({ app, patient, topicKey, proc, date: parseDate(app.start_time)!, box });
+    }
+    return cases;
   }, [appointments, patients]);
 
-  const nextCase = upcomingCases[0];
-  const nextCaseTopic = nextCase?.topicKey ? STUDY_LIBRARY[nextCase.topicKey] : null;
+  const nextCase = upcomingCases[0] || null;
+  const nextCaseTopic = nextCase ? STUDY_LIBRARY[nextCase.topicKey] : null;
 
-  const weekReviews = useMemo(() => {
-    const otherCases = upcomingCases.slice(1);
-    const keys = otherCases.map(c => c.topicKey).filter(Boolean) as StudyKey[];
-    const uniqueKeys = Array.from(new Set(keys));
-
-    return uniqueKeys.map(k => {
-      const caseInfo = otherCases.find(c => c.topicKey === k);
-      const category = STUDY_LIBRARY[k];
-
-      let contextPhrase = category.title;
-      if (caseInfo && caseInfo.date) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const caseDate = new Date(caseInfo.date);
-        caseDate.setHours(0, 0, 0, 0);
-        const diffTime = caseDate.getTime() - today.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays === 1) {
-          contextPhrase = `${category.title} amanha`;
-        } else if (diffDays <= 7) {
-          contextPhrase = `${category.title} nesta semana`;
-        } else {
-          contextPhrase = `${category.title} em breve`;
-        }
-      }
-
-      return {
-        ...category,
-        contextPhrase
-      };
+  const laterCases = useMemo(() => {
+    const seen = new Set<string>();
+    return upcomingCases.slice(1).filter(c => {
+      const key = `${c.patient.id}-${c.topicKey}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
     }).slice(0, 3);
   }, [upcomingCases]);
+
+  const upcomingTopicSet = useMemo(
+    () => new Set(upcomingCases.map(c => c.topicKey)),
+    [upcomingCases]
+  );
+
+  const skillCounts = useMemo(() => countClinicalSkills(patients), [patients]);
+
+  const clinicalGaps = useMemo(() => {
+    return detectClinicalGaps(skillCounts)
+      .filter(gap => gap.studyTopic && !upcomingTopicSet.has(gap.studyTopic))
+      .slice(0, 2);
+  }, [skillCounts, upcomingTopicSet]);
+
+  const consolidation = useMemo(() => {
+    const lastSkill = getLastPerformedSkill(patients);
+    if (!lastSkill) return null;
+    const topic = mapSkillToStudyTopic(lastSkill);
+    if (!topic) return null;
+    if (upcomingTopicSet.has(topic)) return null;
+    if (clinicalGaps.some(gap => gap.studyTopic === topic)) return null;
+    return { skill: lastSkill, skillLabel: SKILL_PT[lastSkill] || lastSkill, topic };
+  }, [patients, upcomingTopicSet, clinicalGaps]);
 
   const allLibraryItems = Object.values(STUDY_LIBRARY);
   const activeMaterial = selectedStudy ? STUDY_LIBRARY[selectedStudy] : null;
 
+  const openStudy = (key: StudyKey, caseInfo: UpcomingCase | null = null) => {
+    setSelectedCase(caseInfo);
+    setSelectedStudy(key);
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0 });
+  };
+
+  const closeStudy = () => {
+    setSelectedStudy(null);
+    setSelectedCase(null);
+  };
+
+  const toggleChecklistItem = (item: string) => {
+    setCheckedItems(prev => {
+      const next = new Set(prev);
+      if (next.has(item)) next.delete(item);
+      else next.add(item);
+      return next;
+    });
+  };
+
+  // ── Material view ────────────────────────────────────────────────────
   if (activeMaterial) {
     const Icon = activeMaterial.icon;
+    const caseBox = selectedCase?.box || null;
+    const checkedCount = activeMaterial.checklist.filter(item => checkedItems.has(item)).length;
 
     return (
       <div className="max-w-2xl mx-auto px-5 sm:px-6 pt-6 pb-32">
         <motion.button
           type="button"
-          onClick={() => setSelectedStudy(null)}
+          onClick={closeStudy}
           whileTap={{ scale: 0.97 }}
           className="mb-6 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[13px] font-bold text-academy-muted shadow-sm border border-academy-border hover:text-academy-text transition-colors"
         >
           <ArrowLeft size={15} />
           Voltar
         </motion.button>
+
+        {selectedCase && caseBox && (
+          <motion.section
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 rounded-[28px] bg-academy-primary text-white p-6 shadow-[0_16px_44px_rgba(82,5,123,0.25)] overflow-hidden relative"
+          >
+            <span className="text-white/60 text-[11px] font-bold uppercase tracking-[0.12em]">
+              Revisão para um caso real
+            </span>
+            <h3 className="text-[22px] font-bold leading-snug mt-1.5">
+              {firstName(selectedCase.patient?.name || selectedCase.app?.patient_name)} · {getWhenLabel(selectedCase.date)}
+            </h3>
+
+            <div className="mt-4 grid gap-2.5">
+              {caseBox.boxProcedureDetail && (
+                <div className="rounded-[16px] bg-white/10 border border-white/15 px-4 py-2.5">
+                  <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.1em]">Conduta planejada</span>
+                  <p className="text-[13px] font-semibold mt-0.5 leading-snug">{caseBox.boxProcedureDetail}</p>
+                </div>
+              )}
+              {cleanCheckpoint(caseBox.criticalCheckpoint) && (
+                <div className="rounded-[16px] bg-white/10 border border-white/15 px-4 py-2.5">
+                  <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.1em]">O que importa neste caso</span>
+                  <p className="text-[13px] font-semibold mt-0.5 leading-snug">{cleanCheckpoint(caseBox.criticalCheckpoint)}</p>
+                </div>
+              )}
+              {caseBox.anamnesisAlert && (
+                <div className="rounded-[16px] bg-white px-4 py-2.5 flex items-start gap-2.5">
+                  <AlertCircle size={16} className="text-academy-attention-text shrink-0 mt-0.5" />
+                  <p className="text-[13px] font-semibold text-academy-attention-text leading-snug">{caseBox.anamnesisAlert}</p>
+                </div>
+              )}
+            </div>
+
+            {openPatientRecord && (
+              <button
+                type="button"
+                onClick={() => openPatientRecord(selectedCase.patient.id)}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white/15 border border-white/20 px-4 py-2 text-[13px] font-bold text-white active:scale-95 transition-transform"
+              >
+                Abrir caso
+                <ArrowUpRight size={14} />
+              </button>
+            )}
+          </motion.section>
+        )}
 
         <motion.section
           initial={{ opacity: 0, y: 12 }}
@@ -810,13 +953,13 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
                 <Target size={15} />
                 {activeMaterial.level}
               </div>
-              <p className="text-[11px] text-academy-muted font-semibold mt-1">Nivel</p>
+              <p className="text-[11px] text-academy-muted font-semibold mt-1">Nível</p>
             </div>
           </div>
         </motion.section>
 
         <section className="space-y-4 mt-8">
-          <h3 className="text-[16px] font-bold text-academy-text px-1">Roteiro de revisao</h3>
+          <h3 className="text-[16px] font-bold text-academy-text px-1">Roteiro de revisão</h3>
           {activeMaterial.modules.map((module, moduleIndex) => (
             <motion.article
               key={module.title}
@@ -848,19 +991,44 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
 
         <section className="grid gap-4 mt-8">
           <div className="bg-white rounded-[24px] border border-academy-border/70 p-5">
-            <h3 className="text-[15px] font-bold text-academy-text mb-4">Checklist antes do atendimento</h3>
-            <div className="grid gap-2.5">
-              {activeMaterial.checklist.map(item => (
-                <div key={item} className="flex items-center gap-2.5 text-[13px] font-medium text-academy-muted">
-                  <CheckCircle2 size={16} className="text-academy-success-text shrink-0" />
-                  {item}
-                </div>
-              ))}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-[15px] font-bold text-academy-text">Checklist antes do atendimento</h3>
+              <span className="text-[12px] font-bold text-academy-muted">
+                {checkedCount}/{activeMaterial.checklist.length}
+              </span>
+            </div>
+            <div className="grid gap-1.5">
+              {activeMaterial.checklist.map(item => {
+                const isChecked = checkedItems.has(item);
+                return (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => toggleChecklistItem(item)}
+                    className={`flex items-center gap-3 rounded-[14px] px-3 py-2.5 text-left transition-colors ${
+                      isChecked ? 'bg-academy-success' : 'hover:bg-academy-neutral'
+                    }`}
+                  >
+                    <span
+                      className={`w-[22px] h-[22px] rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                        isChecked
+                          ? 'bg-academy-success-text border-academy-success-text text-white'
+                          : 'border-academy-border bg-white text-transparent'
+                      }`}
+                    >
+                      <Check size={12} />
+                    </span>
+                    <span className={`text-[13px] font-medium ${isChecked ? 'text-academy-success-text' : 'text-academy-muted'}`}>
+                      {item}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           <div className="bg-white rounded-[24px] border border-academy-border/70 p-5">
-            <h3 className="text-[15px] font-bold text-academy-text mb-4">Pontos de atencao</h3>
+            <h3 className="text-[15px] font-bold text-academy-text mb-4">Pontos de atenção</h3>
             <div className="grid gap-3">
               {activeMaterial.pitfalls.map(item => (
                 <p key={item} className="text-[13px] leading-relaxed text-academy-attention-text bg-academy-attention rounded-[16px] px-4 py-3">
@@ -877,20 +1045,37 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
             </div>
             <p className="text-[14px] leading-relaxed text-academy-muted">{activeMaterial.patientTalk}</p>
           </div>
+
+          {selectedCase && openPatientRecord && (
+            <button
+              type="button"
+              onClick={() => openPatientRecord(selectedCase.patient.id)}
+              className="w-full bg-academy-primary text-white font-bold text-[15px] py-[16px] rounded-[20px] shadow-lg active:scale-95 transition-transform"
+            >
+              Revisei. Abrir caso de {firstName(selectedCase.patient?.name || selectedCase.app?.patient_name)}
+            </button>
+          )}
         </section>
       </div>
     );
   }
 
+  // ── List view ────────────────────────────────────────────────────────
+  const preceptorMessage = nextCase
+    ? `Preparei a revisão pelo caso de ${firstName(nextCase.patient?.name || nextCase.app?.patient_name)}, não por catálogo.`
+    : clinicalGaps.length > 0
+      ? 'Sem atendimento próximo na agenda. Sugeri revisões pelas lacunas do seu histórico clínico.'
+      : 'Nada urgente para estudar agora. Quando um caso entrar na agenda, a revisão certa aparece aqui primeiro.';
+
   return (
-    <div className="max-w-2xl mx-auto px-5 sm:px-6 space-y-12 pt-8 pb-32">
-      <section className="space-y-8">
+    <div className="max-w-2xl mx-auto px-5 sm:px-6 space-y-10 pt-8 pb-32">
+      <section className="space-y-6">
         <div className="pt-6">
           <p className="text-[16px] font-medium text-academy-muted mb-2">
             Estudos
           </p>
           <h2 className="text-[34px] sm:text-[38px] font-bold text-academy-text leading-[1.1] tracking-tight mt-1">
-            O que revisar agora
+            {nextCase ? 'O que revisar agora' : 'Sua revisão clínica'}
           </h2>
         </div>
 
@@ -902,7 +1087,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         >
           <Sparkles size={20} className="mt-0.5 shrink-0 text-academy-primary" />
           <p className="text-[14px] font-medium text-[#3A3A3C] leading-snug">
-            Separei revisoes com base nos seus proximos atendimentos.
+            {preceptorMessage}
           </p>
         </motion.div>
       </section>
@@ -914,37 +1099,76 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
           className="space-y-4"
         >
-          <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Seu proximo passo</h3>
-          <div className="bg-white rounded-[32px] p-7 shadow-[0_16px_54px_rgba(15,23,42,0.08)] border border-academy-border/80 relative overflow-hidden flex flex-col min-h-[280px]">
+          <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Antes do próximo atendimento</h3>
+          <div className="bg-white rounded-[32px] p-7 shadow-[0_16px_54px_rgba(15,23,42,0.08)] border border-academy-border/80 relative overflow-hidden flex flex-col">
             <div className="absolute -right-8 -bottom-8 opacity-[0.06] text-academy-primary pointer-events-none">
               <nextCaseTopic.icon size={200} />
             </div>
 
-            <div className="flex-1 relative z-10 flex flex-col">
-              <span className="text-academy-primary text-[12px] font-bold uppercase tracking-widest mb-1">
+            <div className="relative z-10 flex flex-col">
+              <span className="text-academy-primary text-[12px] font-bold uppercase tracking-widest">
                 Foco do atendimento
               </span>
-              <h2 className="text-[28px] sm:text-[32px] font-bold text-academy-text leading-[1.15] mt-2 mb-6">
-                {getDayPhrase(nextCase.date)} <span>{firstName(nextCase.app.patient_name)}</span>.
+              <h2 className="text-[26px] sm:text-[30px] font-bold text-academy-text leading-[1.15] mt-2">
+                {getDayPhrase(nextCase.date)} {firstName(nextCase.app.patient_name || nextCase.patient?.name)}.
               </h2>
 
-              <div className="mt-auto space-y-4">
-                <div className="bg-academy-neutral border border-academy-border/80 rounded-[20px] p-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-academy-primary shadow-sm">
-                      <nextCaseTopic.icon size={16} />
+              <div className="flex items-center gap-2 flex-wrap mt-3">
+                <span className="px-3 py-1.5 rounded-full text-[12px] font-bold bg-academy-soft text-academy-primary">
+                  {getWhenLabel(nextCase.date)}
+                </span>
+                {nextCase.box.targetTooth && (
+                  <span className="px-3 py-1.5 rounded-full text-[12px] font-bold bg-academy-neutral text-academy-muted">
+                    Dente {nextCase.box.targetTooth}
+                  </span>
+                )}
+                {nextCase.box.clinicalStageLabel && (
+                  <span className="px-3 py-1.5 rounded-full text-[12px] font-bold bg-academy-neutral text-academy-muted">
+                    {nextCase.box.clinicalStageLabel}
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-5 space-y-3">
+                {cleanCheckpoint(nextCase.box.criticalCheckpoint) && (
+                  <div className="bg-academy-neutral border border-academy-border/80 rounded-[20px] px-4 py-3.5">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-academy-muted">O que importa neste caso</span>
+                    <p className="text-[14px] font-semibold text-academy-text leading-snug mt-1">
+                      {cleanCheckpoint(nextCase.box.criticalCheckpoint)}
+                    </p>
+                  </div>
+                )}
+
+                {nextCase.box.anamnesisAlert && (
+                  <div className="bg-academy-attention rounded-[20px] px-4 py-3.5 flex items-start gap-2.5">
+                    <AlertCircle size={17} className="text-academy-attention-text shrink-0 mt-0.5" />
+                    <p className="text-[13px] font-semibold text-academy-attention-text leading-snug">
+                      {nextCase.box.anamnesisAlert}
+                    </p>
+                  </div>
+                )}
+
+                <div className="bg-academy-soft border border-academy-primary/10 rounded-[20px] px-4 py-3.5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-academy-primary shadow-sm shrink-0">
+                      <nextCaseTopic.icon size={17} />
                     </div>
-                    <span className="text-[14px] font-bold text-academy-text leading-snug">Revise: {nextCaseTopic.topics}</span>
+                    <div className="min-w-0">
+                      <p className="text-[14px] font-bold text-academy-text leading-snug">{nextCaseTopic.title}</p>
+                      <p className="text-[12px] font-semibold text-academy-muted mt-0.5">
+                        Revisão de {nextCaseTopic.duration} · {nextCaseTopic.subtitle}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                   <button
                     type="button"
-                    onClick={() => setSelectedStudy(nextCaseTopic.id)}
+                    onClick={() => openStudy(nextCase.topicKey, nextCase)}
                     className="w-full bg-academy-primary text-white font-bold text-[15px] py-[16px] rounded-[20px] shadow-lg hover:scale-[0.98] transition-transform active:scale-95"
                   >
-                    Revisar sequência
+                    Revisar para este caso
                   </button>
                   <button
                     type="button"
@@ -963,58 +1187,135 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          className="bg-white rounded-[32px] border border-academy-border shadow-sm p-8 text-center flex flex-col items-center justify-center min-h-[220px]"
+          className="bg-white rounded-[32px] border border-academy-border shadow-sm p-8 flex items-start gap-4"
         >
-          <div className="w-16 h-16 bg-academy-bg rounded-full flex items-center justify-center mb-4">
-            <Calendar size={28} className="text-academy-muted" />
+          <div className="w-12 h-12 bg-academy-success rounded-full flex items-center justify-center shrink-0">
+            <CheckCircle2 size={24} className="text-academy-success-text" />
           </div>
-          <h3 className="text-[18px] font-bold text-academy-text mb-2">Nenhum atendimento mapeado</h3>
-          <p className="text-[14px] text-academy-muted max-w-xs mx-auto mb-6">
-            Nao encontrei procedimentos especificos na sua agenda proxima.
-          </p>
-          <button
-            type="button"
-            onClick={() => setActiveTab?.('agenda')}
-            className="px-6 py-3 bg-academy-primary text-white text-[14px] font-bold rounded-full hover:opacity-90 transition-opacity shadow-md"
-          >
-            Ver agenda completa
-          </button>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-[17px] font-bold text-academy-text">Nenhum caso exigindo revisão</h3>
+            <p className="text-[14px] text-academy-muted mt-1 leading-relaxed">
+              Sua agenda próxima está tranquila. Se quiser, use o tempo para uma lacuna ou para a biblioteca abaixo.
+            </p>
+            <button
+              type="button"
+              onClick={() => setActiveTab?.('agenda')}
+              className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-bold text-academy-primary"
+            >
+              <Calendar size={15} />
+              Ver agenda
+            </button>
+          </div>
         </motion.section>
       )}
 
-      {weekReviews.length > 0 && (
+      {laterCases.length > 0 && (
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           className="space-y-4"
         >
-          <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Revisoes da semana</h3>
-          <div className="grid gap-3">
-            {weekReviews.map((cat, i) => (
-              <motion.button
-                type="button"
-                key={cat.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: 0.2 + i * 0.1 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedStudy(cat.id)}
-                className="bg-white rounded-[20px] p-4 border border-academy-border/70 shadow-sm cursor-pointer flex items-center gap-4 hover:border-stone-300 transition-all text-left"
-              >
-                <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 ${cat.color}`}>
-                  <cat.icon size={24} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-[15px] font-bold text-academy-text">{cat.title}</h4>
-                  <p className="text-[12px] font-semibold text-academy-muted mt-0.5">
-                    {cat.contextPhrase}
-                  </p>
-                </div>
-                <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
-              </motion.button>
-            ))}
+          <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Casos seguintes</h3>
+          <div className="rounded-[24px] overflow-hidden bg-white border border-academy-border/70 shadow-sm">
+            {laterCases.map((caseInfo, index) => {
+              const material = STUDY_LIBRARY[caseInfo.topicKey];
+              return (
+                <motion.button
+                  type="button"
+                  key={`${caseInfo.app.id}`}
+                  whileTap={{ scale: 0.99 }}
+                  onClick={() => openStudy(caseInfo.topicKey, caseInfo)}
+                  className={`w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-academy-neutral/60 transition-colors ${
+                    index !== laterCases.length - 1 ? 'border-b border-academy-border/60' : ''
+                  }`}
+                >
+                  <div className={`w-11 h-11 rounded-[14px] flex items-center justify-center shrink-0 ${material.color}`}>
+                    <material.icon size={20} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-[15px] font-bold text-academy-text truncate">
+                        {firstName(caseInfo.app.patient_name || caseInfo.patient?.name)}
+                      </h4>
+                      {caseInfo.box.anamnesisAlert && (
+                        <span className="w-2 h-2 rounded-full bg-academy-attention-text shrink-0" />
+                      )}
+                    </div>
+                    <p className="text-[12px] font-semibold text-academy-muted mt-0.5 truncate">
+                      {getWhenLabel(caseInfo.date)} · {material.title} · {material.duration}
+                    </p>
+                  </div>
+                  <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
+                </motion.button>
+              );
+            })}
           </div>
+        </motion.section>
+      )}
+
+      {clinicalGaps.length > 0 && (
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-4"
+        >
+          <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Lacunas no seu histórico</h3>
+          <div className="grid gap-3">
+            {clinicalGaps.map(gap => {
+              const material = gap.studyTopic ? STUDY_LIBRARY[gap.studyTopic] : null;
+              if (!material) return null;
+              return (
+                <motion.button
+                  type="button"
+                  key={gap.id}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => openStudy(gap.studyTopic!)}
+                  className="bg-academy-alert rounded-[20px] px-5 py-4 text-left flex items-center gap-4 transition-all"
+                >
+                  <div className="w-10 h-10 rounded-[14px] bg-white flex items-center justify-center text-academy-alert-text shadow-sm shrink-0">
+                    <material.icon size={20} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[14px] font-semibold text-academy-text leading-snug">{gap.message}</p>
+                    <p className="text-[12px] font-bold text-academy-alert-text mt-1">
+                      Revisar {material.title.toLowerCase()} · {material.duration}
+                    </p>
+                  </div>
+                  <ChevronRight size={16} className="text-academy-alert-text/50 shrink-0" />
+                </motion.button>
+              );
+            })}
+          </div>
+        </motion.section>
+      )}
+
+      {consolidation && (
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <motion.button
+            type="button"
+            whileTap={{ scale: 0.98 }}
+            onClick={() => openStudy(consolidation.topic)}
+            className="w-full bg-white rounded-[20px] px-5 py-4 border border-academy-border/70 shadow-sm text-left flex items-center gap-4 hover:border-stone-300 transition-all"
+          >
+            <div className="w-10 h-10 rounded-[14px] bg-academy-success flex items-center justify-center text-academy-success-text shrink-0">
+              <Activity size={20} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[14px] font-semibold text-academy-text leading-snug">
+                Você praticou {consolidation.skillLabel} recentemente.
+              </p>
+              <p className="text-[12px] font-bold text-academy-muted mt-1">
+                Consolidar {STUDY_LIBRARY[consolidation.topic].title.toLowerCase()} · {STUDY_LIBRARY[consolidation.topic].duration}
+              </p>
+            </div>
+            <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
+          </motion.button>
         </motion.section>
       )}
 
@@ -1024,39 +1325,37 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         transition={{ duration: 0.45, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
         className="space-y-4 pt-4 border-t border-academy-border/50"
       >
-        <div className="flex items-center gap-2 mb-2">
-          <BookOpen size={16} className="text-academy-muted" />
-          <h3 className="text-[15px] font-bold text-academy-text tracking-tight">Biblioteca Geral</h3>
+        <div className="px-1">
+          <div className="flex items-center gap-2">
+            <BookOpen size={16} className="text-academy-muted" />
+            <h3 className="text-[15px] font-bold text-academy-text tracking-tight">Biblioteca</h3>
+          </div>
+          <p className="text-[12px] font-medium text-academy-muted mt-1">
+            Para quando você quiser ir além do que a agenda pede.
+          </p>
         </div>
 
-        <div className="grid gap-4">
-          {allLibraryItems.map(cat => (
+        <div className="rounded-[24px] overflow-hidden bg-white border border-academy-border/70 shadow-sm">
+          {allLibraryItems.map((cat, index) => (
             <motion.button
               type="button"
               key={`lib-${cat.id}`}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setSelectedStudy(cat.id)}
-              className="bg-white rounded-[24px] p-5 border border-academy-border/70 shadow-sm cursor-pointer group transition-all hover:shadow-lg text-left"
+              whileTap={{ scale: 0.99 }}
+              onClick={() => openStudy(cat.id)}
+              className={`w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-academy-neutral/60 transition-colors ${
+                index !== allLibraryItems.length - 1 ? 'border-b border-academy-border/60' : ''
+              }`}
             >
-              <div className="flex items-start gap-4">
-                <div className={`w-12 h-12 rounded-[16px] flex items-center justify-center shrink-0 ${cat.color} bg-opacity-50`}>
-                  <cat.icon size={22} />
-                </div>
-                <div className="flex-1 min-w-0 pt-0.5">
-                  <h4 className="text-[16px] font-bold text-academy-text">{cat.title}</h4>
-                  <p className="text-[12px] font-semibold text-academy-muted mt-0.5">
-                    {cat.duration} - {cat.level}
-                  </p>
-                  <p className="text-[13px] text-academy-muted mt-1 leading-relaxed">
-                    {cat.topics}
-                  </p>
-                </div>
-                <div className="pt-2">
-                  <div className="w-8 h-8 rounded-full bg-academy-neutral flex items-center justify-center text-academy-muted group-hover:bg-academy-study transition-colors">
-                    <ChevronRight size={16} />
-                  </div>
-                </div>
+              <div className={`w-11 h-11 rounded-[14px] flex items-center justify-center shrink-0 ${cat.color}`}>
+                <cat.icon size={20} />
               </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-[15px] font-bold text-academy-text">{cat.title}</h4>
+                <p className="text-[12px] font-semibold text-academy-muted mt-0.5 truncate">
+                  {cat.duration} · {cat.subtitle}
+                </p>
+              </div>
+              <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
             </motion.button>
           ))}
         </div>
@@ -1064,3 +1363,4 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
     </div>
   );
 };
+

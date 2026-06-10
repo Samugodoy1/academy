@@ -61,6 +61,10 @@ type StudyMaterial = {
   }>;
   checklist: string[];
   pitfalls: string[];
+  /** Key facts and numbers the student must have memorized before the box. */
+  quickFacts: Array<{ label: string; value: string }>;
+  /** Active-recall questions: answer hidden until tapped. */
+  selfTest: Array<{ question: string; answer: string }>;
   patientTalk: string;
 };
 
@@ -119,6 +123,26 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
       'Ignorar medicamento de uso continuo pode mudar anestesia, sangramento ou prescricao.',
       'Confundir achado radiografico com diagnostico final sem correlacao clinica.'
     ],
+    quickFacts: [
+      { label: 'Ordem do exame', value: 'Extraoral → intraoral → dentes → periodonto → exames complementares.' },
+      { label: 'Queixa principal', value: 'Registrar com as palavras do paciente + início, duração e intensidade.' },
+      { label: 'Prioridade', value: 'Dor, infecção e risco funcional sempre antes de eletivos.' },
+      { label: 'Diagnóstico', value: 'Clínica + imagem + testes. Nunca um achado isolado.' }
+    ],
+    selfTest: [
+      {
+        question: 'O que não pode faltar no registro da queixa principal?',
+        answer: 'As palavras do próprio paciente, início, duração, intensidade e o que alivia ou piora. Isso orienta urgência e hipótese diagnóstica.'
+      },
+      {
+        question: 'O paciente quer "só restaurar o dente da frente", mas tem dor espontânea em outro dente. O que vem primeiro?',
+        answer: 'A urgência. Dor, infecção e risco funcional sempre antes de tratamento eletivo — e isso precisa ser explicado ao paciente.'
+      },
+      {
+        question: 'Achado radiográfico sugestivo fecha o diagnóstico?',
+        answer: 'Não. Radiografia é dado complementar: precisa de correlação com história, inspeção e testes clínicos antes de virar conduta.'
+      }
+    ],
     patientTalk: 'Explique que a primeira consulta serve para entender a causa do problema e montar uma ordem segura de tratamento, nao apenas olhar um dente isolado.'
   },
   radiologia: {
@@ -172,6 +196,26 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
       'Pedir panoramica para diagnosticar carie proximal pequena costuma ser insuficiente.',
       'Sobreposicao proximal invalida avaliacao de carie interproximal.',
       'Radiografia nao substitui teste clinico de vitalidade pulpar.'
+    ],
+    quickFacts: [
+      { label: 'Periapical', value: 'Ápice, lesão periapical, endodontia e trauma localizado.' },
+      { label: 'Bite-wing', value: 'Cárie proximal, adaptação de restauração e crista óssea posterior.' },
+      { label: 'Panorâmica', value: 'Visão geral, terceiros molares e lesões extensas — não serve para cárie pequena.' },
+      { label: 'Leitura', value: 'Anatomia normal primeiro; depois procurar alteração.' }
+    ],
+    selfTest: [
+      {
+        question: 'Suspeita de cárie proximal pequena em pré-molar. Qual tomada pedir?',
+        answer: 'Bite-wing. A panorâmica não tem definição suficiente para lesão proximal incipiente.'
+      },
+      {
+        question: 'A imagem saiu com o dente alongado. Qual foi o erro provável?',
+        answer: 'Angulação vertical insuficiente na técnica da bissetriz (alongamento). Angulação excessiva causa o contrário: encurtamento.'
+      },
+      {
+        question: 'Como descrever um achado radiográfico no laudo?',
+        answer: 'Localização, tamanho, limites (definidos ou não), densidade (radiolúcida/radiopaca) e relação com dentes e estruturas vizinhas.'
+      }
     ],
     patientTalk: 'Explique que a imagem ajuda a ver areas que o exame visual nao mostra, usando a menor exposicao necessaria para responder a duvida clinica.'
   },
@@ -227,6 +271,26 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
       'Iniciar antes da latencia completa gera dor e perda de confianca.',
       'Confundir ansiedade com alergia pode levar a registros incorretos.'
     ],
+    quickFacts: [
+      { label: 'Lidocaína 2%', value: 'Dose máxima usual ~4,4 mg/kg. 1 tubete (1,8 ml) = 36 mg. Confirme o protocolo da disciplina.' },
+      { label: 'Criança / baixo peso', value: 'Dose SEMPRE calculada por peso — nunca "1 tubete padrão".' },
+      { label: 'Antes de injetar', value: 'Aspirar sempre; deposição lenta (~1 ml/min).' },
+      { label: 'Latência', value: 'Aguardar e TESTAR a região antes de iniciar o procedimento.' }
+    ],
+    selfTest: [
+      {
+        question: 'O que conferir na anamnese antes de escolher o anestésico?',
+        answer: 'Peso, idade, alergias relatadas, cardiopatia/hipertensão, medicamentos em uso, gestação e histórico de reação anterior.'
+      },
+      {
+        question: 'O bloqueio do alveolar inferior falhou. Qual o primeiro passo?',
+        answer: 'Reavaliar antes de repetir: técnica e referências anatômicas (rafe pterigomandibular, plano oclusal), tempo de latência e inflamação local. Repetir dose sem critério só soma risco.'
+      },
+      {
+        question: 'Logo após a injeção o paciente fica pálido, suando e tonto. O que é mais provável?',
+        answer: 'Lipotimia (reação vasovagal) — muito mais comum que alergia verdadeira. Deitar o paciente, elevar as pernas e monitorar. Não registrar como "alergia" sem critério.'
+      }
+    ],
     patientTalk: 'Explique que a anestesia sera aplicada devagar para dar conforto e seguranca, e que voce testara a regiao antes de comecar o procedimento.'
   },
   isolamento: {
@@ -280,6 +344,26 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
       'Grampo instavel e risco de acidente; deve ser corrigido antes de iniciar.',
       'Campo aparentemente isolado, mas com vazamento cervical, compromete adesao.',
       'Perfuracao mal posicionada dificulta inversao e retrai mal a borracha.'
+    ],
+    quickFacts: [
+      { label: 'Segurança', value: 'Fio dental amarrado no grampo, sempre — é o resgate se ele soltar.' },
+      { label: 'Grampo', value: 'Testar estabilidade no dente ANTES de levar o lençol.' },
+      { label: 'Inversão', value: 'Instrumento rombo + jato de ar; amarrilho se precisar.' },
+      { label: 'Vazamento cervical', value: 'Barreira gengival ou teflon — não dá para "ignorar e aderir".' }
+    ],
+    selfTest: [
+      {
+        question: 'Para que serve o fio dental amarrado no grampo?',
+        answer: 'Resgate: se o grampo soltar ou fraturar, o fio impede aspiração ou deglutição. É item de segurança, não opcional.'
+      },
+      {
+        question: 'O campo parece isolado, mas há umidade subindo pela cervical. Pode adesivar?',
+        answer: 'Não. Vazamento cervical contamina a margem e compromete a adesão. Corrigir com inversão, barreira gengival ou troca de grampo antes de continuar.'
+      },
+      {
+        question: 'O que define a escolha do grampo?',
+        answer: 'Anatomia cervical do dente, grau de erupção, retenção disponível e o acesso necessário para o procedimento.'
+      }
     ],
     patientTalk: 'Explique que o isolamento cria uma area seca e protegida, evitando saliva no procedimento e diminuindo risco de engolir materiais.'
   },
@@ -335,6 +419,26 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
       'Nao registrar sondagem impede acompanhar evolucao.',
       'Prometer cura sem manutencao periodontal cria expectativa errada.'
     ],
+    quickFacts: [
+      { label: 'Sulco saudável', value: 'Até ~3 mm de sondagem, sem sangramento.' },
+      { label: 'Gengivite', value: 'Inflamação SEM perda de inserção — reversível.' },
+      { label: 'Periodontite', value: 'Perda de inserção/osso — exige raspagem e manutenção.' },
+      { label: 'Reavaliação', value: 'Em geral 30–45 dias após a raspagem (confirme com a disciplina).' }
+    ],
+    selfTest: [
+      {
+        question: 'O que diferencia gengivite de periodontite na prática?',
+        answer: 'Perda de inserção e de osso. Gengivite é inflamação reversível sem perda; periodontite tem perda de inserção, e o plano muda.'
+      },
+      {
+        question: 'Paciente com cálculo subgengival: profilaxia com taça resolve?',
+        answer: 'Não. Polimento não alcança o depósito subgengival — precisa raspagem e alisamento radicular, senão a causa permanece.'
+      },
+      {
+        question: 'O que registrar na sondagem?',
+        answer: 'Profundidade por sítio, sangramento, recessão, mobilidade e furca. Sem registro não há como acompanhar evolução na reavaliação.'
+      }
+    ],
     patientTalk: 'Explique que o sangramento gengival geralmente indica inflamacao por biofilme e que o tratamento combina limpeza profissional com higiene diaria bem orientada.'
   },
   preventiva: {
@@ -388,6 +492,26 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
       'Profilaxia sem orientacao dura pouco como estrategia preventiva.',
       'Selante em campo contaminado falha precocemente.',
       'Tratar carie sem abordar frequencia de acucar mantem a doenca ativa.'
+    ],
+    quickFacts: [
+      { label: 'Risco de cárie', value: 'Dieta (frequência de açúcar) + higiene + flúor + histórico de lesões.' },
+      { label: 'Lesão ativa', value: 'Mancha branca OPACA e rugosa = atividade. Brilhante e lisa = inativa.' },
+      { label: 'Selante', value: 'Fóssulas/fissuras retentivas em dente com risco — campo seco obrigatório.' },
+      { label: 'Flúor', value: 'Indicação conforme idade e risco, não "automática" em toda consulta.' }
+    ],
+    selfTest: [
+      {
+        question: 'Mancha branca opaca e rugosa perto da cervical: o que significa e o que fazer?',
+        answer: 'Lesão de cárie ATIVA não cavitada. Conduta: controle de biofilme, flúor e dieta — não broca. Remineralizar antes de pensar em restaurar.'
+      },
+      {
+        question: 'Quando o selante é bem indicado?',
+        answer: 'Sulcos retentivos em paciente com risco de cárie, especialmente molares recém-erupcionados — com isolamento e condicionamento adequados.'
+      },
+      {
+        question: 'Por que profilaxia sem orientação tem pouco efeito?',
+        answer: 'O biofilme se reorganiza em horas. Sem mudança de hábito (higiene + frequência de açúcar), a doença continua ativa.'
+      }
     ],
     patientTalk: 'Explique que prevenir nao e so limpar: e reduzir o risco de novas lesoes com habitos, fluor e protecao das areas mais vulneraveis.'
   },
@@ -443,6 +567,26 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
       'Instrumentar sem irrigacao suficiente reduz previsibilidade.',
       'Dor espontanea persistente pede reavaliacao do diagnostico.'
     ],
+    quickFacts: [
+      { label: 'Isolamento', value: 'Absoluto, sempre. Endodontia sem isolamento não se discute.' },
+      { label: 'Odontometria', value: 'CT com localizador apical + confirmação radiográfica.' },
+      { label: 'Irrigação', value: 'A cada troca de lima. Nunca instrumentar canal seco.' },
+      { label: 'Registro', value: 'CT, lima final, irrigante, medicação e selamento — em toda sessão.' }
+    ],
+    selfTest: [
+      {
+        question: 'Dor espontânea, noturna, que piora com frio e demora a passar: hipótese principal?',
+        answer: 'Pulpite irreversível (provável). Confirmar com testes de vitalidade, percussão e imagem antes de definir conduta.'
+      },
+      {
+        question: 'A sessão anterior registrou "acesso + odontometria, CT 21 mm". O que fazer hoje?',
+        answer: 'Continuar de onde parou: confirmar canais e CT e instrumentar. Não refazer acesso — remover mais estrutura só enfraquece o dente.'
+      },
+      {
+        question: 'O que não pode faltar na evolução de uma sessão de endo?',
+        answer: 'Dente, CT, lima final, irrigante usado, medicação intracanal ou obturação, tipo de selamento e o próximo passo combinado.'
+      }
+    ],
     patientTalk: 'Explique que o objetivo e remover a infeccao ou inflamacao interna do dente, aliviar a dor e preservar a estrutura dentaria.'
   },
   dentistica: {
@@ -496,6 +640,26 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
       'Contaminacao por saliva compromete a adesao.',
       'Excesso proximal dificulta higiene e causa inflamacao gengival.',
       'Nao conferir oclusao pode gerar dor ao mastigar.'
+    ],
+    quickFacts: [
+      { label: 'Cor', value: 'Escolher ANTES de isolar, com dente hidratado e boa luz.' },
+      { label: 'Incrementos', value: 'Até ~2 mm; fotoativar pelo tempo do fabricante.' },
+      { label: 'Contaminação', value: 'Saliva no campo adesivo = lavar, secar e recondicionar. Sem atalho.' },
+      { label: 'Final', value: 'Checar oclusão com carbono ANTES do polimento.' }
+    ],
+    selfTest: [
+      {
+        question: 'Por que a cor precisa ser escolhida antes do isolamento?',
+        answer: 'O dente desidrata sob isolamento e fica temporariamente mais claro e opaco — a cor escolhida depois sai errada.'
+      },
+      {
+        question: 'Saliva contaminou a cavidade depois do adesivo. Qual a conduta?',
+        answer: 'Não prosseguir por cima: lavar, secar e repetir condicionamento/adesivo na área contaminada. Adesão sobre contaminação falha.'
+      },
+      {
+        question: 'Paciente volta com dor ao mastigar no dente restaurado ontem. Primeira suspeita?',
+        answer: 'Contato oclusal alto. Conferir com papel articular e ajustar — é a causa mais comum e a de resolução mais simples.'
+      }
     ],
     patientTalk: 'Explique que a restauracao devolve forma e funcao ao dente e que acabamento e polimento ajudam conforto, higiene e durabilidade.'
   },
@@ -551,6 +715,26 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
       'Nao revisar medicamentos pode elevar risco de sangramento.',
       'Orientacao vaga no pos-operatorio gera retorno evitavel.'
     ],
+    quickFacts: [
+      { label: 'RX pré-op', value: 'Conferir na hora: raízes, curvaturas, seio maxilar e canal mandibular.' },
+      { label: 'Antes de luxar', value: 'Anestesia TESTADA + sindesmotomia completa.' },
+      { label: 'Força', value: 'Luxação progressiva e apoio correto — força bruta fratura raiz.' },
+      { label: 'Alta', value: 'Pós-operatório por escrito: gaze, gelo, repouso e sinais de alerta.' }
+    ],
+    selfTest: [
+      {
+        question: 'O que checar na radiografia antes de uma exodontia?',
+        answer: 'Número e curvatura das raízes, hipercementose, proximidade com seio maxilar ou canal mandibular e condição do osso ao redor.'
+      },
+      {
+        question: 'Paciente em uso de anticoagulante. Suspende antes da extração?',
+        answer: 'Não por conta própria. Alinhar com professor/médico; em geral o manejo é hemostasia local bem planejada (compressão, sutura, hemostático), não suspensão.'
+      },
+      {
+        question: 'O alvéolo continua sangrando após a compressão inicial. Sequência?',
+        answer: 'Compressão prolongada com gaze, sutura, hemostático local se disponível — e revisar a história médica se o sangramento persistir.'
+      }
+    ],
     patientTalk: 'Explique o passo a passo com linguagem simples, incluindo anestesia, remocao controlada e cuidados para cicatrizacao.'
   },
   protese: {
@@ -605,6 +789,26 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
       'Moldagem com sangue/saliva costuma falhar na copia do termino.',
       'Provisorio alto em oclusao gera dor, mobilidade ou soltura.'
     ],
+    quickFacts: [
+      { label: 'Moldagem', value: 'Margem visível, limpa e seca. Término incompleto = refazer.' },
+      { label: 'Subgengival', value: 'Afastamento gengival antes de registrar a margem.' },
+      { label: 'Provisório', value: 'Protege o preparo e testa forma, função e resposta gengival.' },
+      { label: 'Oclusão', value: 'Conferir em MIC e nos movimentos excursivos.' }
+    ],
+    selfTest: [
+      {
+        question: 'A moldagem saiu com uma bolha exatamente no término. Aceita?',
+        answer: 'Não. O laboratório não adivinha a margem — peça nova moldagem. Término incompleto vira coroa desadaptada.'
+      },
+      {
+        question: 'Qual a função do provisório além da estética?',
+        answer: 'Proteger dentina exposta, manter posição do dente e do espaço, condicionar a gengiva e testar forma e oclusão antes da peça final.'
+      },
+      {
+        question: 'Provisório ficou alto na oclusão. O que pode acontecer?',
+        answer: 'Dor, mobilidade, fratura ou descimentação. Ajustar oclusão é parte da instalação, não opcional.'
+      }
+    ],
     patientTalk: 'Explique que a protese reconstrui forma e funcao, mas depende de etapas precisas para encaixar bem, proteger a gengiva e mastigar confortavelmente.'
   },
   odontopediatria: {
@@ -658,6 +862,26 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
       'Tratar a crianca como adulto pequeno piora colaboracao.',
       'Ignorar cronologia de esfoliacao pode levar a tratamento excessivo.',
       'Prescrever sem peso/idade e sem supervisao aumenta risco.'
+    ],
+    quickFacts: [
+      { label: 'Manejo', value: 'Dizer-mostrar-fazer, comandos curtos, reforço do comportamento certo.' },
+      { label: 'Anestésico', value: 'Dose SEMPRE por peso (mg/kg). Confirmar máximo com o professor.' },
+      { label: 'Decíduo', value: 'Checar cronologia de esfoliação antes de indicar tratamento.' },
+      { label: 'Responsável', value: 'Informado e com consentimento registrado, sempre.' }
+    ],
+    selfTest: [
+      {
+        question: 'Como se calcula anestésico em criança?',
+        answer: 'Por peso (mg/kg), nunca "1 tubete padrão". Criança de 20 kg tolera muito menos que um adulto — calcular antes, não durante.'
+      },
+      {
+        question: 'Molar decíduo com cárie extensa, mobilidade e sucessor visível no RX. Tratar?',
+        answer: 'Avaliar esfoliação primeiro: se está próxima, tratamento invasivo pode não se justificar. Controlar dor/infecção e discutir com o professor.'
+      },
+      {
+        question: 'A criança chora e não colabora de jeito nenhum. Qual a conduta?',
+        answer: 'Encurtar a consulta, resolver só o essencial e replanejar. Forçar o atendimento piora a colaboração em todas as consultas seguintes.'
+      }
     ],
     patientTalk: 'Explique ao responsavel que o foco e controlar a doenca e criar uma experiencia segura, para que a crianca aceite melhor os proximos cuidados.'
   }
@@ -738,6 +962,32 @@ interface UpcomingCase {
   box: BoxIntelligenceContext;
 }
 
+// ── Clinical confidence (self-reported, persisted) ─────────────────────
+// Founder doc: "Avaliação de confiança clínica, não apenas de horas consumidas."
+
+type ConfidenceLevel = 'confident' | 'review' | 'ask';
+
+const CONFIDENCE_STORAGE_KEY = 'academy_study_confidence_v1';
+
+type ConfidenceMap = Partial<Record<StudyKey, { level: ConfidenceLevel; at: string }>>;
+
+const loadConfidenceMap = (): ConfidenceMap => {
+  try {
+    return JSON.parse(localStorage.getItem(CONFIDENCE_STORAGE_KEY) || '{}');
+  } catch {
+    return {};
+  }
+};
+
+const CONFIDENCE_OPTIONS: Array<{ level: ConfidenceLevel; label: string; hint: string }> = [
+  { level: 'confident', label: 'Entraria confiante', hint: 'Sigo para o caso.' },
+  { level: 'review', label: 'Quero rever de novo', hint: 'Mantenho este tema visível para você.' },
+  { level: 'ask', label: 'Vou perguntar ao professor', hint: 'Anote a dúvida agora para não esquecer no box.' },
+];
+
+const normalizeSearch = (value: string) =>
+  value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
 export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
   patients = [],
   appointments = [],
@@ -747,6 +997,9 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
   const [selectedStudy, setSelectedStudy] = useState<StudyKey | null>(null);
   const [selectedCase, setSelectedCase] = useState<UpcomingCase | null>(null);
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
+  const [revealedAnswers, setRevealedAnswers] = useState<Set<number>>(new Set());
+  const [confidenceMap, setConfidenceMap] = useState<ConfidenceMap>(loadConfidenceMap);
+  const [librarySearch, setLibrarySearch] = useState('');
   const now = new Date();
 
   useEffect(() => {
@@ -759,7 +1012,27 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
 
   useEffect(() => {
     setCheckedItems(new Set());
+    setRevealedAnswers(new Set());
   }, [selectedStudy]);
+
+  const setTopicConfidence = (topic: StudyKey, level: ConfidenceLevel) => {
+    setConfidenceMap(prev => {
+      const next: ConfidenceMap = { ...prev, [topic]: { level, at: new Date().toISOString() } };
+      try {
+        localStorage.setItem(CONFIDENCE_STORAGE_KEY, JSON.stringify(next));
+      } catch { /* storage indisponível: segue só em memória */ }
+      return next;
+    });
+  };
+
+  const toggleAnswer = (index: number) => {
+    setRevealedAnswers(prev => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  };
 
   const upcomingCases = useMemo<UpcomingCase[]>(() => {
     const limit = new Date(now);
@@ -834,7 +1107,30 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
     return { skill: lastSkill, skillLabel: SKILL_PT[lastSkill] || lastSkill, topic };
   }, [patients, upcomingTopicSet, clinicalGaps]);
 
+  const reviewRequests = useMemo(() => {
+    return (Object.entries(confidenceMap) as Array<[StudyKey, { level: ConfidenceLevel; at: string }]>)
+      .filter(([topic, value]) =>
+        (value.level === 'review' || value.level === 'ask') &&
+        STUDY_LIBRARY[topic] &&
+        !upcomingTopicSet.has(topic)
+      )
+      .sort((a, b) => new Date(b[1].at).getTime() - new Date(a[1].at).getTime())
+      .slice(0, 3)
+      .map(([topic, value]) => ({ topic, level: value.level }));
+  }, [confidenceMap, upcomingTopicSet]);
+
   const allLibraryItems = Object.values(STUDY_LIBRARY);
+
+  const filteredLibraryItems = useMemo(() => {
+    const query = normalizeSearch(librarySearch.trim());
+    if (!query) return allLibraryItems;
+    const mappedTopic = mapProcedureToTopic(librarySearch);
+    return allLibraryItems.filter(cat =>
+      cat.id === mappedTopic ||
+      normalizeSearch(`${cat.title} ${cat.subtitle} ${cat.topics} ${cat.level}`).includes(query)
+    );
+  }, [librarySearch]);
+
   const activeMaterial = selectedStudy ? STUDY_LIBRARY[selectedStudy] : null;
 
   const openStudy = (key: StudyKey, caseInfo: UpcomingCase | null = null) => {
@@ -958,6 +1254,28 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           </div>
         </motion.section>
 
+        {activeMaterial.quickFacts.length > 0 && (
+          <motion.section
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="bg-academy-primary rounded-[24px] p-5 mt-4 text-white shadow-[0_12px_36px_rgba(82,5,123,0.2)]"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles size={16} className="text-white/70" />
+              <h3 className="text-[15px] font-bold">Na ponta da língua</h3>
+            </div>
+            <div className="grid gap-2.5">
+              {activeMaterial.quickFacts.map(fact => (
+                <div key={fact.label} className="rounded-[16px] bg-white/10 border border-white/15 px-4 py-3">
+                  <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.1em]">{fact.label}</span>
+                  <p className="text-[13px] font-semibold mt-0.5 leading-snug">{fact.value}</p>
+                </div>
+              ))}
+            </div>
+          </motion.section>
+        )}
+
         <section className="space-y-4 mt-8">
           <h3 className="text-[16px] font-bold text-academy-text px-1">Roteiro de revisão</h3>
           {activeMaterial.modules.map((module, moduleIndex) => (
@@ -1027,6 +1345,40 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
             </div>
           </div>
 
+          {activeMaterial.selfTest.length > 0 && (
+            <div className="bg-white rounded-[24px] border border-academy-border/70 p-5">
+              <h3 className="text-[15px] font-bold text-academy-text">Teste-se antes do box</h3>
+              <p className="text-[12px] font-medium text-academy-muted mt-1 mb-4">
+                Responda de cabeça primeiro. Depois confira.
+              </p>
+              <div className="grid gap-3">
+                {activeMaterial.selfTest.map((qa, index) => {
+                  const revealed = revealedAnswers.has(index);
+                  return (
+                    <div key={qa.question} className="rounded-[18px] border border-academy-border/70 overflow-hidden">
+                      <p className="text-[14px] font-semibold text-academy-text leading-snug px-4 pt-3.5 pb-3">
+                        {qa.question}
+                      </p>
+                      {revealed ? (
+                        <div className="bg-academy-neutral px-4 py-3 border-t border-academy-border/60">
+                          <p className="text-[13px] text-academy-muted leading-relaxed">{qa.answer}</p>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => toggleAnswer(index)}
+                          className="w-full text-left px-4 py-3 bg-academy-neutral text-[13px] font-bold text-academy-primary border-t border-academy-border/60 hover:bg-academy-soft transition-colors"
+                        >
+                          Ver resposta
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="bg-white rounded-[24px] border border-academy-border/70 p-5">
             <h3 className="text-[15px] font-bold text-academy-text mb-4">Pontos de atenção</h3>
             <div className="grid gap-3">
@@ -1044,6 +1396,56 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
               <h3 className="text-[15px] font-bold">Como explicar ao paciente</h3>
             </div>
             <p className="text-[14px] leading-relaxed text-academy-muted">{activeMaterial.patientTalk}</p>
+          </div>
+
+          <div className="bg-white rounded-[24px] border border-academy-border/70 p-5">
+            <h3 className="text-[15px] font-bold text-academy-text">
+              Como você entraria nesse atendimento agora?
+            </h3>
+            <p className="text-[12px] font-medium text-academy-muted mt-1 mb-4">
+              Resposta honesta. Sem nota, sem ranking — só ajusta o que eu te mostro depois.
+            </p>
+            <div className="grid gap-2">
+              {CONFIDENCE_OPTIONS.map(option => {
+                const isSelected = selectedStudy ? confidenceMap[selectedStudy]?.level === option.level : false;
+                return (
+                  <button
+                    key={option.level}
+                    type="button"
+                    onClick={() => selectedStudy && setTopicConfidence(selectedStudy, option.level)}
+                    className={`flex items-center gap-3 rounded-[16px] border px-4 py-3 text-left transition-colors ${
+                      isSelected
+                        ? option.level === 'confident'
+                          ? 'bg-academy-success border-academy-success-text/20'
+                          : 'bg-academy-alert border-academy-alert-text/20'
+                        : 'bg-white border-academy-border hover:bg-academy-neutral'
+                    }`}
+                  >
+                    <span
+                      className={`w-[20px] h-[20px] rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                        isSelected
+                          ? option.level === 'confident'
+                            ? 'bg-academy-success-text border-academy-success-text text-white'
+                            : 'bg-academy-alert-text border-academy-alert-text text-white'
+                          : 'border-academy-border bg-white text-transparent'
+                      }`}
+                    >
+                      <Check size={11} />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-[14px] font-bold text-academy-text">
+                        {option.label}
+                      </span>
+                      {isSelected && (
+                        <span className="block text-[12px] font-medium text-academy-muted mt-0.5">
+                          {option.hint}
+                        </span>
+                      )}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {selectedCase && openPatientRecord && (
@@ -1158,6 +1560,16 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
                       <p className="text-[12px] font-semibold text-academy-muted mt-0.5">
                         Revisão de {nextCaseTopic.duration} · {nextCaseTopic.subtitle}
                       </p>
+                      {confidenceMap[nextCase.topicKey]?.level === 'review' && (
+                        <p className="text-[11px] font-bold text-academy-alert-text mt-1">
+                          Você marcou este tema para rever.
+                        </p>
+                      )}
+                      {confidenceMap[nextCase.topicKey]?.level === 'ask' && (
+                        <p className="text-[11px] font-bold text-academy-alert-text mt-1">
+                          Você ficou de levar uma dúvida deste tema ao professor.
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1319,6 +1731,46 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         </motion.section>
       )}
 
+      {reviewRequests.length > 0 && (
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-4"
+        >
+          <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Você marcou para voltar</h3>
+          <div className="rounded-[24px] overflow-hidden bg-white border border-academy-border/70 shadow-sm">
+            {reviewRequests.map((request, index) => {
+              const material = STUDY_LIBRARY[request.topic];
+              return (
+                <motion.button
+                  type="button"
+                  key={request.topic}
+                  whileTap={{ scale: 0.99 }}
+                  onClick={() => openStudy(request.topic)}
+                  className={`w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-academy-neutral/60 transition-colors ${
+                    index !== reviewRequests.length - 1 ? 'border-b border-academy-border/60' : ''
+                  }`}
+                >
+                  <div className={`w-11 h-11 rounded-[14px] flex items-center justify-center shrink-0 ${material.color}`}>
+                    <material.icon size={20} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-[15px] font-bold text-academy-text">{material.title}</h4>
+                    <p className="text-[12px] font-semibold text-academy-alert-text mt-0.5">
+                      {request.level === 'review'
+                        ? 'Você pediu para rever este tema'
+                        : 'Você ficou de tirar uma dúvida com o professor'} · {material.duration}
+                    </p>
+                  </div>
+                  <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
+                </motion.button>
+              );
+            })}
+          </div>
+        </motion.section>
+      )}
+
       <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1335,30 +1787,50 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           </p>
         </div>
 
-        <div className="rounded-[24px] overflow-hidden bg-white border border-academy-border/70 shadow-sm">
-          {allLibraryItems.map((cat, index) => (
-            <motion.button
-              type="button"
-              key={`lib-${cat.id}`}
-              whileTap={{ scale: 0.99 }}
-              onClick={() => openStudy(cat.id)}
-              className={`w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-academy-neutral/60 transition-colors ${
-                index !== allLibraryItems.length - 1 ? 'border-b border-academy-border/60' : ''
-              }`}
-            >
-              <div className={`w-11 h-11 rounded-[14px] flex items-center justify-center shrink-0 ${cat.color}`}>
-                <cat.icon size={20} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="text-[15px] font-bold text-academy-text">{cat.title}</h4>
-                <p className="text-[12px] font-semibold text-academy-muted mt-0.5 truncate">
-                  {cat.duration} · {cat.subtitle}
-                </p>
-              </div>
-              <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
-            </motion.button>
-          ))}
+        <div className="relative">
+          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-academy-muted/60 pointer-events-none" />
+          <input
+            type="text"
+            value={librarySearch}
+            onChange={event => setLibrarySearch(event.target.value)}
+            placeholder="Buscar tema ou procedimento (ex.: siso, canal, grampo)"
+            className="w-full bg-white border border-academy-border/70 rounded-[16px] pl-11 pr-4 py-3 text-[14px] font-medium text-academy-text placeholder:text-academy-muted/60 outline-none focus:ring-2 focus:ring-academy-primary/10 transition-all"
+          />
         </div>
+
+        {filteredLibraryItems.length > 0 ? (
+          <div className="rounded-[24px] overflow-hidden bg-white border border-academy-border/70 shadow-sm">
+            {filteredLibraryItems.map((cat, index) => (
+              <motion.button
+                type="button"
+                key={`lib-${cat.id}`}
+                whileTap={{ scale: 0.99 }}
+                onClick={() => openStudy(cat.id)}
+                className={`w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-academy-neutral/60 transition-colors ${
+                  index !== filteredLibraryItems.length - 1 ? 'border-b border-academy-border/60' : ''
+                }`}
+              >
+                <div className={`w-11 h-11 rounded-[14px] flex items-center justify-center shrink-0 ${cat.color}`}>
+                  <cat.icon size={20} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-[15px] font-bold text-academy-text">{cat.title}</h4>
+                  <p className="text-[12px] font-semibold text-academy-muted mt-0.5 truncate">
+                    {cat.duration} · {cat.subtitle}
+                  </p>
+                </div>
+                <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
+              </motion.button>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-[24px] bg-white border border-academy-border/70 px-5 py-6 text-center">
+            <p className="text-[14px] font-semibold text-academy-text">Nada com esse nome por aqui.</p>
+            <p className="text-[12px] text-academy-muted mt-1">
+              Tente o nome do procedimento — "extração", "canal", "raspagem".
+            </p>
+          </div>
+        )}
       </motion.section>
     </div>
   );

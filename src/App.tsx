@@ -62,6 +62,7 @@ import { PatientPortal } from './components/PatientPortal';
 import { PortalInbox } from './components/PortalInbox';
 import { MLInsights } from './components/MLInsights';
 import { SubscriptionManagement } from './components/SubscriptionManagement';
+import AdminEngagement from './components/AdminEngagement';
 import { SubscriptionCallback } from './components/SubscriptionCallback';
 import { Academy, AcademyPatients, AcademyAgenda, AcademyStudy, AcademyChecklist } from './components/Academy';
 import {
@@ -1534,7 +1535,7 @@ export default function App() {
 
   const fetchAdminUsers = async () => {
     try {
-      const query = adminProductFilter === 'all' ? '' : `?product=${adminProductFilter}`;
+      const query = `?product=${adminProductFilter}`;
       const res = await apiFetch(`/api/admin/users${query}`, { product: DEFAULT_PRODUCT });
       if (!res.ok) {
         const errorText = await res.text();
@@ -5194,8 +5195,13 @@ export default function App() {
                     <div className="max-w-screen-xl mx-auto space-y-8">
                       <div className="mb-8">
                         <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Admin geral</h2>
-                        <p className="text-sm text-slate-500">Aprovacao por produto, plano e papel de acesso</p>
+                        <p className="text-sm text-slate-500">Aprovacao por produto, plano, papel de acesso e engajamento</p>
                       </div>
+
+                      <div className="bg-white p-4 md:p-8 rounded-3xl border border-slate-100 shadow-sm">
+                        <AdminEngagement apiFetch={apiFetch} product={DEFAULT_PRODUCT} />
+                      </div>
+
                       {/* Painel de aprovação por produto */}
                       {adminUsers.filter(u => u.approval_status === 'pending').length > 0 && (
                         <div className="bg-amber-50 p-4 md:p-8 rounded-3xl border border-amber-100 shadow-sm">

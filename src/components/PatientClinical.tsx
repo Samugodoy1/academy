@@ -1684,6 +1684,12 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   );
 
   const primaryTreatment = treatmentInProgress[0] || null;
+  const anamnesisFilledCount = useMemo(
+    () => countFilledAnamnesisFields(patient?.anamnesis),
+    [patient?.anamnesis]
+  );
+  const anamnesisIncomplete = anamnesisFilledCount < 3;
+  const hasAllergy = hasRecordedAllergie(patient?.anamnesis?.allergies);
   const boxIntelContext = useMemo(
     () => generateBoxContext(patient, treatmentInProgress, patientAppointments),
     [patient, treatmentInProgress, patientAppointments]
@@ -2528,9 +2534,6 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
           {!isFocusMode && (
           <aside ref={infoPanelRef} className={`${iosCard} rounded-[26px] p-4 sm:p-5 h-fit xl:sticky xl:top-[112px] transition-shadow duration-500 hover:shadow-[0_12px_32px_rgba(15,23,42,0.07)]`}>
             {(() => {
-              const hasAllergy = hasRecordedAllergie(patient?.anamnesis?.allergies);
-              const anamnesisFilledCount = countFilledAnamnesisFields(patient?.anamnesis);
-              const anamnesisIncomplete = anamnesisFilledCount < 3;
               const pendingCount = (patientFinancial?.installments || []).filter((i: any) => i.status === 'PENDING' || i.status === 'OVERDUE').length;
               const fileCount = patientFiles.length;
 
@@ -2584,7 +2587,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Anamnese clínica</p>
                     {!isEditingAnamnese && (
                       <p className="text-[10px] text-slate-400 mt-0.5">
-                        {anamnesisFilledCount}/7 campos preenchidos
+                        {countFilledAnamnesisFields(patient?.anamnesis)}/7 campos preenchidos
                       </p>
                     )}
                   </div>

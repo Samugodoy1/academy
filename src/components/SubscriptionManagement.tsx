@@ -64,6 +64,12 @@ function formatDate(dateStr: string | null): string {
   return new Date(dateStr).toLocaleDateString('pt-BR');
 }
 
+function isRecentPendingCheckout(subscription: Subscription | null): boolean {
+  if (!subscription?.created_at) return true;
+  const ageMs = Date.now() - new Date(subscription.created_at).getTime();
+  return ageMs < 48 * 60 * 60 * 1000;
+}
+
 export function SubscriptionManagement({ apiFetch, product, currentPlan }: SubscriptionManagementProps) {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -191,12 +197,15 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
     );
   }
 
-  const isFree = currentPlan === 'free';
   const isProActive = subscription?.status === 'authorized' || subscription?.status === 'paused';
-  const isPending = subscription?.status === 'pending';
-  const hasSubscriptionCard = isProActive || isPending;
+  const isPendingCheckout = subscription?.status === 'pending'
+    && currentPlan === 'free'
+    && isRecentPendingCheckout(subscription);
+  const hasSubscriptionCard = isProActive || isPendingCheckout;
   const paidPlan = plans.find(p => p.plan !== 'free');
-  const statusInfo = subscription ? STATUS_MAP[subscription.status] || STATUS_MAP.pending : null;
+  const statusInfo = subscription && hasSubscriptionCard
+    ? STATUS_MAP[subscription.status] || STATUS_MAP.pending
+    : null;
   const subscribeCtaLabel = product === 'academy' ? `Assinar ${paidPlan?.name || 'agora'}` : 'Assinar OdontoHub Pro';
 
   return (
@@ -204,10 +213,10 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
       {/* Subscription Card */}
       <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
         {/* Header gradient */}
-        <div className={`px-6 py-4 ${isProActive ? 'bg-gradient-to-r from-primary/10 via-primary/5 to-transparent' : isPending ? 'bg-gradient-to-r from-amber-50/80 to-transparent' : 'bg-gradient-to-r from-slate-50 to-transparent'}`}>
+        <div className={`px-6 py-4 ${isProActive ? 'bg-gradient-to-r from-primary/10 via-primary/5 to-transparent' : isPendingCheckout ? 'bg-gradient-to-r from-amber-50/80 to-transparent' : 'bg-gradient-to-r from-slate-50 to-transparent'}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isProActive ? 'bg-primary/15 text-primary' : isPending ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'}`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isProActive ? 'bg-primary/15 text-primary' : isPendingCheckout ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'}`}>
                 <CreditCard size={20} />
               </div>
               <div>
@@ -274,7 +283,7 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
           )}
 
           {/* Pending — resume checkout CTA */}
-          {isPending && subscription && paidPlan && (
+          {isPendingCheckout && subscription && (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-slate-50 rounded-xl p-3">
@@ -310,7 +319,7 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
           )}
 
           {/* Free plan — upgrade CTA */}
-          {isFree && !isPending && !isProActive && paidPlan && (
+          {currentPlan === 'free' && !isPendingCheckout && !isProActive && paidPlan && (
             <div className="space-y-3">
               <div className="bg-slate-50 rounded-xl p-4">
                 <div className="flex items-center gap-3 mb-3">

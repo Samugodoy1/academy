@@ -3746,7 +3746,9 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
           <NovaEvolucao
             patientId={patient.id}
             patientName={patient.name}
+            patient={patient}
             appointment={evolutionAppointmentContext}
+            boxProcedure={selectedBoxProcedure}
             onSave={async (evolution) => {
               const updatedPatient = {
                 ...patient,

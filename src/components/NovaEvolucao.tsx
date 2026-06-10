@@ -1,8 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Check, Sparkles, Activity, MapPin, Zap, Info, FlaskConical, Lock, Palette, Calendar, User, FileText, ArrowRight } from '../icons';
 import { useNavigate } from 'react-router-dom';
 import { formatAppointmentDate, formatAppointmentTime } from '../utils/dateUtils';
+import { generateEvolutionDraft } from '../utils/evolutionDraft';
+import type { BoxGuideProcedure } from '../data/boxGuides';
 
 // ── Interpretation engine (kept from original) ─────────────────────────────
 
@@ -133,7 +135,9 @@ interface AppointmentContext {
 interface NovaEvolucaoProps {
   patientId?: number;
   patientName?: string;
+  patient?: any;
   appointment?: AppointmentContext | null;
+  boxProcedure?: BoxGuideProcedure | null;
   onSave?: (evolution: any) => Promise<void>;
   onClose?: () => void;
 }
@@ -141,17 +145,25 @@ interface NovaEvolucaoProps {
 export const NovaEvolucao: React.FC<NovaEvolucaoProps> = ({
   patientId,
   patientName,
+  patient,
   appointment,
+  boxProcedure,
   onSave,
   onClose,
 }) => {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const isClosingAppointment = Boolean(appointment?.id);
-  const automaticDraftText = isClosingAppointment
-    ? 'Ex: Acesso coronário no dente 47, odontometria realizada, instrumentação inicial com lima #15. Paciente sem intercorrências. Retorno em 7 dias para obturação.'
-    : '';
-  const [inputText, setInputText] = useState(automaticDraftText);
+  const automaticDraftText = useMemo(
+    () =>
+      generateEvolutionDraft({
+        patient,
+        appointment,
+        boxProcedure,
+      }),
+    [patient, appointment, boxProcedure]
+  );
+  const [inputText, setInputText] = useState('');
   const [interpretation, setInterpretation] = useState<Interpretation>({ teeth: [], procedures: [], materials: [], nextStep: null });
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -170,6 +182,10 @@ export const NovaEvolucao: React.FC<NovaEvolucaoProps> = ({
         return time === '--:--' ? null : time;
       })()
     : null;
+
+  useEffect(() => {
+    setInputText(automaticDraftText);
+  }, [automaticDraftText]);
 
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();

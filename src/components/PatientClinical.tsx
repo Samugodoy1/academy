@@ -57,6 +57,17 @@ import {
   type QuadrantId,
 } from '../utils/treatmentPlanScope';
 import { formatAppointmentDate, formatAppointmentTime, formatDate, getAppointmentTime } from '../utils/dateUtils';
+import {
+  anamnesisToForm,
+  buildAnamnesisAlert,
+  countFilledAnamnesisFields,
+  formatAllergieLabel,
+  formatMedicationLabel,
+  hasMeaningfulAnamnesisValue,
+  hasRecordedAllergie,
+  hasRecordedMedication,
+  type AnamnesisFormState,
+} from '../utils/anamnesisUtils';
 import { boxGuideProcedures, boxGuides, type BoxGuideProcedure } from '../data/boxGuides';
 import {
   generateBoxContext,
@@ -253,21 +264,7 @@ const inferBoxProcedure = (value?: string): BoxGuideProcedure | null => {
   return null;
 };
 
-const getAnamnesisAlert = (patient: any) => {
-  const anamnesis = patient?.anamnesis || {};
-  const candidates = [
-    anamnesis.allergies && `Alergia registrada: ${anamnesis.allergies}`,
-    anamnesis.medications && `Medicacao em uso: ${anamnesis.medications}`,
-    anamnesis.medical_history && String(anamnesis.medical_history),
-    anamnesis.chief_complaint && `Queixa: ${anamnesis.chief_complaint}`,
-  ].filter(Boolean);
-
-  const important = candidates.find((item: any) =>
-    /hipertens|diabet|alerg|anticoagul|card|asma|gest|grav|medica|press|sangr/i.test(String(item))
-  );
-
-  return String(important || candidates[0] || '').trim();
-};
+const getAnamnesisAlert = (patient: any) => buildAnamnesisAlert(patient?.anamnesis);
 
 export const PatientClinical: React.FC<PatientClinicalProps> = ({
   patient,
@@ -387,7 +384,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     return () => document.removeEventListener('keydown', handler);
   }, [showPaymentModal]);
   const [isEditingAnamnese, setIsEditingAnamnese] = useState(false);
-  const [anamneseForm, setAnamneseForm] = useState({ medical_history: '', allergies: '', medications: '' });
+  const [anamneseForm, setAnamneseForm] = useState<AnamnesisFormState>(anamnesisToForm());
   const [isSavingAnamnese, setIsSavingAnamnese] = useState(false);
   const [showAnamneseExtra, setShowAnamneseExtra] = useState(false);
   const [showDadosExtra, setShowDadosExtra] = useState(false);
@@ -1687,6 +1684,10 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   );
 
   const primaryTreatment = treatmentInProgress[0] || null;
+  const boxIntelContext = useMemo(
+    () => generateBoxContext(patient, treatmentInProgress, patientAppointments),
+    [patient, treatmentInProgress, patientAppointments]
+  );
   const primaryActionTitle = primaryTreatment
     ? `${primaryTreatment.procedure} • ${formatTreatmentAnchor(primaryTreatment)}`
     : upcomingAppointment
@@ -1715,13 +1716,15 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   const iosSubtleCard =
     'bg-slate-50/70 border border-slate-200/70';
   const selectedBoxGuide = boxGuides[selectedBoxProcedure];
-  const boxContextProcedure = primaryTreatment?.procedure || upcomingAppointment?.procedure || upcomingAppointment?.notes || '';
-  const boxContextTooth = primaryTreatment?.tooth_number ? `Dente ${primaryTreatment.tooth_number}` : '';
+  const boxContextProcedure =
+    primaryTreatment?.procedure || boxIntelContext.appointmentLabel || boxIntelContext.boxProcedureDetail || '';
+  const boxContextTooth = primaryTreatment?.tooth_number
+    ? `Dente ${primaryTreatment.tooth_number}`
+    : boxIntelContext.targetTooth
+      ? `Dente ${boxIntelContext.targetTooth}`
+      : '';
   const inferredBoxProcedure = inferBoxProcedure(boxContextProcedure);
 
-  const boxIntelContext = useMemo(() => 
-    generateBoxContext(patient, treatmentInProgress, upcomingAppointment),
-  [patient, treatmentInProgress, upcomingAppointment]);
   const boxNowItems = useMemo(() => generateBoxNowItems(boxIntelContext), [boxIntelContext]);
   const boxNowSteps = useMemo(() => generateBoxNowSteps(boxIntelContext), [boxIntelContext]);
   const smartChipContent = useMemo(() => generateSmartChipContent(boxIntelContext, selectedBoxProcedure), [boxIntelContext, selectedBoxProcedure]);
@@ -1943,7 +1946,9 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[16px] font-bold">Modo Box</p>
-                    <p className="text-[12px] text-white/75 font-medium mt-1">Cola clínica rápida</p>
+                    <p className="text-[12px] text-white/75 font-medium mt-1 line-clamp-2">
+                      {boxIntelContext.criticalCheckpoint || boxIntelContext.expectedTodaySummary || boxIntelContext.boxProcedureDetail || 'Cola clínica rápida'}
+                    </p>
                   </div>
                   <BookOpen size={20} className="shrink-0 text-white/90" />
                 </div>
@@ -2523,15 +2528,19 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
           {!isFocusMode && (
           <aside ref={infoPanelRef} className={`${iosCard} rounded-[26px] p-4 sm:p-5 h-fit xl:sticky xl:top-[112px] transition-shadow duration-500 hover:shadow-[0_12px_32px_rgba(15,23,42,0.07)]`}>
             {(() => {
-              const hasAllergy = (() => {
-                const val = patient?.anamnesis?.allergies;
-                return val && val.trim() && val.trim().toLowerCase() !== 'não informado' && val.trim().toLowerCase() !== 'nenhuma';
-              })();
+              const hasAllergy = hasRecordedAllergie(patient?.anamnesis?.allergies);
+              const anamnesisFilledCount = countFilledAnamnesisFields(patient?.anamnesis);
+              const anamnesisIncomplete = anamnesisFilledCount < 3;
               const pendingCount = (patientFinancial?.installments || []).filter((i: any) => i.status === 'PENDING' || i.status === 'OVERDUE').length;
               const fileCount = patientFiles.length;
 
               const tabs = [
-                { id: 'anamneses', label: 'Anamnese', dot: hasAllergy ? 'bg-rose-500' : null, count: null },
+                {
+                  id: 'anamneses',
+                  label: 'Anamnese',
+                  dot: hasAllergy ? 'bg-rose-500' : anamnesisIncomplete ? 'bg-amber-500' : null,
+                  count: null,
+                },
                 { id: 'dados', label: 'Dados', dot: null, count: null },
                 { id: 'imagens', label: 'Imagens', dot: null, count: fileCount > 0 ? fileCount : null },
                 ...(!isAcademyProduct
@@ -2571,15 +2580,18 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               <div className="space-y-3 text-sm">
                 {/* Header com botão editar/cancelar */}
                 <div className="flex items-center justify-between px-0.5">
-                  <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Anamnese clínica</p>
+                  <div>
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Anamnese clínica</p>
+                    {!isEditingAnamnese && (
+                      <p className="text-[10px] text-slate-400 mt-0.5">
+                        {anamnesisFilledCount}/7 campos preenchidos
+                      </p>
+                    )}
+                  </div>
                   {!isEditingAnamnese ? (
                     <button
                       onClick={() => {
-                        setAnamneseForm({
-                          medical_history: patient?.anamnesis?.medical_history || '',
-                          allergies: patient?.anamnesis?.allergies || '',
-                          medications: patient?.anamnesis?.medications || '',
-                        });
+                        setAnamneseForm(anamnesisToForm(patient?.anamnesis));
                         setIsEditingAnamnese(true);
                       }}
                       className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition-colors px-2 py-1 rounded-lg hover:bg-slate-100"
@@ -2598,39 +2610,98 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
 
                 {isEditingAnamnese ? (
                   <>
-                    {/* Histórico médico — editável */}
-                    <div className="p-3.5 rounded-[18px] bg-slate-50 border border-slate-200/70">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-400 mb-2">Histórico médico</p>
+                    <div className="p-3.5 rounded-[18px] bg-blue-50 border border-blue-200/70">
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-blue-600 mb-2">Queixa principal</p>
                       <textarea
-                        value={anamneseForm.medical_history}
-                        onChange={(e) => setAnamneseForm((f) => ({ ...f, medical_history: e.target.value }))}
-                        rows={3}
-                        placeholder="Ex: Hipertensão, diabetes, cirurgias anteriores..."
-                        className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none transition-colors leading-relaxed"
+                        value={anamneseForm.chief_complaint}
+                        onChange={(e) => setAnamneseForm((f) => ({ ...f, chief_complaint: e.target.value }))}
+                        rows={2}
+                        placeholder="Motivo da consulta, nas palavras do paciente..."
+                        className="w-full resize-none rounded-xl border border-blue-200 bg-white px-3 py-2.5 text-[13px] text-slate-800 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none transition-colors leading-relaxed"
                       />
                     </div>
 
-                    {/* Alergias — editável */}
                     <div className="p-3.5 rounded-[18px] bg-rose-50 border border-rose-200">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-rose-600 mb-2">Alergias</p>
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-rose-600">Alergias</p>
+                        <button
+                          type="button"
+                          onClick={() => setAnamneseForm((f) => ({ ...f, allergies: 'Nenhuma alergia referida' }))}
+                          className="text-[10px] font-semibold text-rose-500 hover:text-rose-700 px-2 py-0.5 rounded-md bg-white border border-rose-200"
+                        >
+                          Negou alergias
+                        </button>
+                      </div>
                       <textarea
                         value={anamneseForm.allergies}
                         onChange={(e) => setAnamneseForm((f) => ({ ...f, allergies: e.target.value }))}
                         rows={2}
-                        placeholder="Ex: Penicilina, látex, anestésico..."
+                        placeholder="Ex: Penicilina, látex, anestésico... ou negado"
                         className="w-full resize-none rounded-xl border border-rose-200 bg-white px-3 py-2.5 text-[13px] text-slate-800 placeholder:text-slate-400 focus:border-rose-400 focus:outline-none transition-colors leading-relaxed"
                       />
                     </div>
 
-                    {/* Medicações — editável */}
                     <div className="p-3.5 rounded-[18px] bg-amber-50 border border-amber-200">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-amber-600 mb-2">Medicações em uso</p>
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-amber-600">Medicações em uso</p>
+                        <button
+                          type="button"
+                          onClick={() => setAnamneseForm((f) => ({ ...f, medications: 'Nenhuma medicação em uso' }))}
+                          className="text-[10px] font-semibold text-amber-600 hover:text-amber-800 px-2 py-0.5 rounded-md bg-white border border-amber-200"
+                        >
+                          Não usa medicação
+                        </button>
+                      </div>
                       <textarea
                         value={anamneseForm.medications}
                         onChange={(e) => setAnamneseForm((f) => ({ ...f, medications: e.target.value }))}
                         rows={2}
                         placeholder="Ex: Losartana 50mg, Metformina..."
                         className="w-full resize-none rounded-xl border border-amber-200 bg-white px-3 py-2.5 text-[13px] text-slate-800 placeholder:text-slate-400 focus:border-amber-400 focus:outline-none transition-colors leading-relaxed"
+                      />
+                    </div>
+
+                    <div className="p-3.5 rounded-[18px] bg-slate-50 border border-slate-200/70">
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-400 mb-2">Histórico médico</p>
+                      <textarea
+                        value={anamneseForm.medical_history}
+                        onChange={(e) => setAnamneseForm((f) => ({ ...f, medical_history: e.target.value }))}
+                        rows={3}
+                        placeholder="Doenças, cirurgias, internações, condições sistêmicas..."
+                        className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none transition-colors leading-relaxed"
+                      />
+                    </div>
+
+                    <div className="p-3.5 rounded-[18px] bg-violet-50 border border-violet-200/70">
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-violet-600 mb-2">Hábitos</p>
+                      <textarea
+                        value={anamneseForm.habits}
+                        onChange={(e) => setAnamneseForm((f) => ({ ...f, habits: e.target.value }))}
+                        rows={2}
+                        placeholder="Tabagismo, bruxismo, higiene, consumo de açúcar..."
+                        className="w-full resize-none rounded-xl border border-violet-200 bg-white px-3 py-2.5 text-[13px] text-slate-800 placeholder:text-slate-400 focus:border-violet-400 focus:outline-none transition-colors leading-relaxed"
+                      />
+                    </div>
+
+                    <div className="p-3.5 rounded-[18px] bg-teal-50 border border-teal-200/70">
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-teal-600 mb-2">Histórico familiar</p>
+                      <textarea
+                        value={anamneseForm.family_history}
+                        onChange={(e) => setAnamneseForm((f) => ({ ...f, family_history: e.target.value }))}
+                        rows={2}
+                        placeholder="Diabetes, hipertensão, cardiopatias na família..."
+                        className="w-full resize-none rounded-xl border border-teal-200 bg-white px-3 py-2.5 text-[13px] text-slate-800 placeholder:text-slate-400 focus:border-teal-400 focus:outline-none transition-colors leading-relaxed"
+                      />
+                    </div>
+
+                    <div className="p-3.5 rounded-[18px] bg-indigo-50 border border-indigo-200/70">
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-indigo-600 mb-2">Sinais vitais / PA</p>
+                      <textarea
+                        value={anamneseForm.vital_signs}
+                        onChange={(e) => setAnamneseForm((f) => ({ ...f, vital_signs: e.target.value }))}
+                        rows={2}
+                        placeholder="Ex: PA 120x80 mmHg, FC 72 bpm..."
+                        className="w-full resize-none rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-[13px] text-slate-800 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none transition-colors leading-relaxed"
                       />
                     </div>
 
@@ -2648,80 +2719,84 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                   </>
                 ) : (
                   <>
-                    {/* Histórico médico — leitura */}
-                    <div className="p-3.5 rounded-[18px] bg-slate-50 border border-slate-200/70">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-400 mb-1.5">Histórico médico</p>
-                      <p className="text-slate-700 leading-relaxed">{patient?.anamnesis?.medical_history || 'Não informado'}</p>
+                    {hasMeaningfulAnamnesisValue(patient?.anamnesis?.chief_complaint) && (
+                      <div className="p-3.5 rounded-[18px] bg-blue-50 border border-blue-200/70">
+                        <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-blue-600 mb-1.5">Queixa principal</p>
+                        <p className="text-slate-800 leading-relaxed font-medium">{patient.anamnesis.chief_complaint}</p>
+                      </div>
+                    )}
+
+                    <div className={`p-3.5 rounded-[18px] border ${hasAllergy ? 'bg-rose-50 border-rose-200' : 'bg-slate-50 border-slate-200/70'}`}>
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        {hasAllergy && <div className="w-[7px] h-[7px] rounded-full bg-rose-500 shrink-0" />}
+                        <p className={`text-[10px] font-extrabold uppercase tracking-[0.1em] ${hasAllergy ? 'text-rose-600' : 'text-slate-400'}`}>Alergias</p>
+                      </div>
+                      <p className={`leading-relaxed ${hasAllergy ? 'text-rose-900 font-semibold' : 'text-slate-700'}`}>
+                        {formatAllergieLabel(patient?.anamnesis?.allergies)}
+                      </p>
                     </div>
 
-                    {/* Alergias — risk highlight */}
-                    {(() => {
-                      const val = patient?.anamnesis?.allergies;
-                      const hasContent = val && val.trim() && val.trim().toLowerCase() !== 'não informado' && val.trim().toLowerCase() !== 'nenhuma';
-                      return (
-                        <div className={`p-3.5 rounded-[18px] border ${hasContent ? 'bg-rose-50 border-rose-200' : 'bg-slate-50 border-slate-200/70'}`}>
-                          <div className="flex items-center gap-1.5 mb-1.5">
-                            {hasContent && <div className="w-[7px] h-[7px] rounded-full bg-rose-500 shrink-0" />}
-                            <p className={`text-[10px] font-extrabold uppercase tracking-[0.1em] ${hasContent ? 'text-rose-600' : 'text-slate-400'}`}>Alergias</p>
-                          </div>
-                          <p className={`leading-relaxed ${hasContent ? 'text-rose-900 font-semibold' : 'text-slate-700'}`}>{val || 'Não informado'}</p>
-                        </div>
-                      );
-                    })()}
+                    <div className={`p-3.5 rounded-[18px] border ${hasRecordedMedication(patient?.anamnesis?.medications) ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200/70'}`}>
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        {hasRecordedMedication(patient?.anamnesis?.medications) && (
+                          <div className="w-[7px] h-[7px] rounded-full bg-amber-500 shrink-0" />
+                        )}
+                        <p className={`text-[10px] font-extrabold uppercase tracking-[0.1em] ${hasRecordedMedication(patient?.anamnesis?.medications) ? 'text-amber-600' : 'text-slate-400'}`}>
+                          Medicações em uso
+                        </p>
+                      </div>
+                      <p className={`leading-relaxed ${hasRecordedMedication(patient?.anamnesis?.medications) ? 'text-amber-900 font-semibold' : 'text-slate-700'}`}>
+                        {formatMedicationLabel(patient?.anamnesis?.medications)}
+                      </p>
+                    </div>
 
-                    {/* Medicações — amber highlight */}
-                    {(() => {
-                      const val = patient?.anamnesis?.medications;
-                      const hasContent = val && val.trim() && val.trim().toLowerCase() !== 'não informado' && val.trim().toLowerCase() !== 'nenhuma';
-                      return (
-                        <div className={`p-3.5 rounded-[18px] border ${hasContent ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200/70'}`}>
-                          <div className="flex items-center gap-1.5 mb-1.5">
-                            {hasContent && <div className="w-[7px] h-[7px] rounded-full bg-amber-500 shrink-0" />}
-                            <p className={`text-[10px] font-extrabold uppercase tracking-[0.1em] ${hasContent ? 'text-amber-600' : 'text-slate-400'}`}>Medicações em uso</p>
-                          </div>
-                          <p className={`leading-relaxed ${hasContent ? 'text-amber-900 font-semibold' : 'text-slate-700'}`}>{val || 'Não informado'}</p>
-                        </div>
-                      );
-                    })()}
+                    <div className="p-3.5 rounded-[18px] bg-slate-50 border border-slate-200/70">
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-400 mb-1.5">Histórico médico</p>
+                      <p className="text-slate-700 leading-relaxed">
+                        {hasMeaningfulAnamnesisValue(patient?.anamnesis?.medical_history)
+                          ? patient.anamnesis.medical_history
+                          : 'Não informado'}
+                      </p>
+                    </div>
 
-                    {/* Ver mais — campos do pré-atendimento */}
+                    {[
+                      { label: 'Hábitos', value: patient?.anamnesis?.habits, color: 'bg-violet-50 border-violet-200/70', labelColor: 'text-violet-600' },
+                      { label: 'Histórico familiar', value: patient?.anamnesis?.family_history, color: 'bg-teal-50 border-teal-200/70', labelColor: 'text-teal-600' },
+                      { label: 'Sinais vitais / PA', value: patient?.anamnesis?.vital_signs, color: 'bg-indigo-50 border-indigo-200/70', labelColor: 'text-indigo-600' },
+                    ]
+                      .filter((field) => hasMeaningfulAnamnesisValue(field.value))
+                      .map((field) => (
+                        <div key={field.label} className={`p-3.5 rounded-[18px] border ${field.color}`}>
+                          <p className={`text-[10px] font-extrabold uppercase tracking-[0.1em] ${field.labelColor} mb-1.5`}>{field.label}</p>
+                          <p className="text-slate-700 leading-relaxed">{field.value}</p>
+                        </div>
+                      ))}
+
                     {(() => {
                       const extra = patient?.anamnesis;
-                      const hasExtra = extra && (
-                        extra.chief_complaint ||
-                        extra.systemic_diseases ||
-                        extra.clinical_notes ||
-                        extra.habits ||
-                        extra.family_history ||
-                        extra.vital_signs
-                      );
-                      if (!hasExtra) return null;
+                      const portalFields = [
+                        { label: 'Doenças sistêmicas', value: extra?.systemic_diseases, color: 'bg-teal-50 border-teal-200/70', labelColor: 'text-teal-600' },
+                        { label: 'Observações clínicas', value: extra?.clinical_notes, color: 'bg-indigo-50 border-indigo-200/70', labelColor: 'text-indigo-600' },
+                      ].filter((field) => hasMeaningfulAnamnesisValue(field.value));
 
-                      const extraFields = [
-                        { label: 'Queixa principal', value: extra.chief_complaint, color: 'bg-blue-50 border-blue-200/70', labelColor: 'text-blue-600' },
-                        { label: 'Doenças sistêmicas', value: extra.systemic_diseases || extra.family_history, color: 'bg-teal-50 border-teal-200/70', labelColor: 'text-teal-600' },
-                        { label: 'Observações clínicas importantes', value: extra.clinical_notes || extra.vital_signs, color: 'bg-indigo-50 border-indigo-200/70', labelColor: 'text-indigo-600' },
-                        { label: 'Hábitos relevantes', value: extra.habits, color: 'bg-academy-soft border-academy-border/70', labelColor: 'text-academy-primary' },
-                      ].filter(f => f.value && f.value.trim());
-
-                      if (extraFields.length === 0) return null;
+                      if (portalFields.length === 0) return null;
 
                       return (
                         <>
                           <button
                             type="button"
-                            onClick={() => setShowAnamneseExtra(v => !v)}
+                            onClick={() => setShowAnamneseExtra((v) => !v)}
                             className="w-full flex items-center justify-center gap-1.5 py-2 text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors"
                           >
-                            {showAnamneseExtra ? 'Ver menos' : `Ver mais (${extraFields.length})`}
+                            {showAnamneseExtra ? 'Ver menos' : `Pré-atendimento (${portalFields.length})`}
                             <ChevronDown size={13} className={`transition-transform ${showAnamneseExtra ? 'rotate-180' : ''}`} />
                           </button>
                           {showAnamneseExtra && (
                             <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                              {extraFields.map(f => (
-                                <div key={f.label} className={`p-3.5 rounded-[18px] border ${f.color}`}>
-                                  <p className={`text-[10px] font-extrabold uppercase tracking-[0.1em] ${f.labelColor} mb-1.5`}>{f.label}</p>
-                                  <p className="text-slate-700 leading-relaxed">{f.value}</p>
+                              {portalFields.map((field) => (
+                                <div key={field.label} className={`p-3.5 rounded-[18px] border ${field.color}`}>
+                                  <p className={`text-[10px] font-extrabold uppercase tracking-[0.1em] ${field.labelColor} mb-1.5`}>{field.label}</p>
+                                  <p className="text-slate-700 leading-relaxed">{field.value}</p>
                                 </div>
                               ))}
                               <p className="text-[10px] text-slate-300 text-center">Informações enviadas pelo paciente via pré-atendimento</p>

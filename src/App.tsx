@@ -84,6 +84,7 @@ import {
 } from './utils/dateUtils';
 import { CURRENT_PRODUCT, PRODUCT_LABEL, type ProductCode } from './config/product';
 import { deriveAcademyPatientState } from './utils/deriveAcademyPatientState';
+import { formatAllergieLabel, formatMedicationLabel, hasRecordedAllergie } from './utils/anamnesisUtils';
 
 // Types
 interface Patient {
@@ -8087,11 +8088,13 @@ function PrintDocument({ profile, patients, apiFetch, appointments, transactions
                       </div>
                       <div>
                         <p className="font-bold text-slate-500 text-[10px] uppercase">Alergias:</p>
-                        <p className="text-rose-600 font-bold">{patient?.anamnesis?.allergies || 'Nenhuma alergia informada.'}</p>
+                        <p className={hasRecordedAllergie(patient?.anamnesis?.allergies) ? 'text-rose-600 font-bold' : ''}>
+                          {formatAllergieLabel(patient?.anamnesis?.allergies)}
+                        </p>
                       </div>
                       <div>
                         <p className="font-bold text-slate-500 text-[10px] uppercase">Medicações em Uso:</p>
-                        <p>{patient?.anamnesis?.medications || 'Nenhuma medicação informada.'}</p>
+                        <p>{formatMedicationLabel(patient?.anamnesis?.medications)}</p>
                       </div>
                     </div>
                   </div>

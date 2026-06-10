@@ -8,7 +8,7 @@ import { formatAppointmentTime, getAppointmentTime, parseAppointmentDateTime } f
 import { buildParaFecharRows } from '../utils/deriveAcademyPatientState';
 import {
   buildTodayContext,
-  getBoxPrepItems,
+  getSmartBoxPrepItems,
   getClinicalObservation,
   getStudyRefreshSuggestion,
   getTodayHeadline,
@@ -597,7 +597,11 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   });
 
   const showBoxMode = shouldShowBoxMode(todayContext) && focus.kind !== 'evolution';
-  const boxPrepItems = getBoxPrepItems(todayContext.nextProcedure);
+  const boxPrepItems = getSmartBoxPrepItems(
+    todayContext.nextProcedure,
+    todayContext.nextAppointmentPatient,
+    todayContext.appointments
+  );
   const boxScheduleLabel = formatAppointmentChipTime(todayContext.nextAppointment?.start_time);
 
   const openStudyTopic = (topic: StudyKey) => {

@@ -9,6 +9,8 @@ import {
   mapSkillToStudyTopic,
 } from './clinicalProgression';
 import { mapProcedureToTopic, StudyKey, STUDY_TOPIC_LABELS } from './studyTopics';
+import { generateBoxContext } from '../data/boxIntelligence';
+import { hasRecordedAllergie } from './anamnesisUtils';
 
 export type ObservationAccent = 'violet' | 'rose' | 'amber' | 'sky' | 'emerald' | 'neutral';
 
@@ -338,6 +340,57 @@ export const getBoxPrepItems = (procedure: string | null | undefined): BoxPrepIt
     { label: 'Revisar sequência clínica', duration: '2 min', studyTopic: 'exame-clinico' },
     { label: 'Revisar conduta', duration: '1 min' },
   ];
+};
+
+export const getSmartBoxPrepItems = (
+  procedure: string | null | undefined,
+  patient?: any,
+  appointments: any[] = []
+): BoxPrepItem[] => {
+  const base = getBoxPrepItems(procedure);
+
+  if (!patient) return base;
+
+  const treatments = (patient.treatmentPlan || []).filter((item: any) =>
+    ['APROVADO', 'PENDENTE', 'PLANEJADO'].includes(String(item?.status || '').toUpperCase())
+  );
+  const patientAppointments = appointments.filter(
+    (app) => String(app.patient_id) === String(patient.id)
+  );
+  const boxContext = generateBoxContext(patient, treatments, patientAppointments);
+  const smart: BoxPrepItem[] = [];
+
+  if (boxContext.criticalCheckpoint) {
+    smart.push({ label: boxContext.criticalCheckpoint.replace(/^⚠️\s*/, '').slice(0, 72), duration: '1 min' });
+  }
+
+  if (boxContext.clinicalStage === 'endo_access' || boxContext.clinicalStage === 'endo_instrumentation') {
+    smart.push({ label: 'Revisar continuidade do canal (não refazer acesso)', duration: '2 min', studyTopic: 'endodontia' });
+  }
+
+  if (
+    boxContext.anamnesisAlert &&
+    (hasRecordedAllergie(patient?.anamnesis?.allergies) || /hipertens|anticoagul|diabet/i.test(boxContext.anamnesisAlert))
+  ) {
+    smart.push({ label: `Revisar alerta: ${boxContext.anamnesisAlert.slice(0, 50)}`, duration: '1 min', studyTopic: 'anestesia' });
+  }
+
+  if (boxContext.targetTooth) {
+    smart.push({
+      label: `Conferir dente ${boxContext.targetTooth} no odontograma e RX`,
+      duration: '1 min',
+      studyTopic: mapProcedureToTopic(procedure || '') || 'radiologia',
+    });
+  }
+
+  const merged = [...smart, ...base];
+  const seen = new Set<string>();
+  return merged.filter((item) => {
+    const key = item.label.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, 4);
 };
 
 export const shouldShowBoxMode = (context: TodayContext): boolean => {

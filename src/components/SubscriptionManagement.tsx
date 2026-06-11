@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CreditCard, CheckCircle2, AlertCircle, ChevronRight, Shield, Clock, X, Zap } from '../icons';
-import { API_URL } from '../config';
 
 interface SubscriptionPlan {
   id: number;
@@ -79,6 +78,7 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
   const [createLoading, setCreateLoading] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [plansError, setPlansError] = useState<string | null>(null);
 
   const fetchSubscription = useCallback(async () => {
     try {
@@ -95,25 +95,40 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
 
   const fetchPlans = useCallback(async () => {
     try {
-      const fullUrl = `${API_URL}/api/subscriptions/plans`;
-      const res = await fetch(fullUrl);
-      if (res.ok) {
-        const data = await res.json();
-        setPlans(data.filter((p: SubscriptionPlan) => p.product === product));
+      const res = await apiFetch('/api/subscriptions/plans', { product });
+      if (!res.ok) {
+        setPlans([]);
+        setPlansError('Não foi possível carregar os planos disponíveis.');
+        return;
       }
+
+      const data = await res.json();
+      if (!Array.isArray(data)) {
+        setPlans([]);
+        setPlansError('Resposta inválida ao carregar planos.');
+        return;
+      }
+
+      const productPlans = data.filter((p: SubscriptionPlan) => p.product === product);
+      setPlans(productPlans);
+      setPlansError(productPlans.length === 0 ? 'Nenhum plano disponível no momento.' : null);
     } catch (err) {
       console.error('Error fetching plans:', err);
+      setPlans([]);
+      setPlansError('Não foi possível carregar os planos disponíveis.');
     }
-  }, [product]);
+  }, [apiFetch, product]);
+
+  const reloadSubscriptionData = useCallback(async () => {
+    setLoading(true);
+    setPlansError(null);
+    await Promise.all([fetchSubscription(), fetchPlans()]);
+    setLoading(false);
+  }, [fetchSubscription, fetchPlans]);
 
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      await Promise.all([fetchSubscription(), fetchPlans()]);
-      setLoading(false);
-    };
-    load();
-  }, [fetchSubscription, fetchPlans]);
+    reloadSubscriptionData();
+  }, [reloadSubscriptionData]);
 
   const redirectToCheckout = (initPoint: string) => {
     window.location.href = initPoint;
@@ -197,16 +212,26 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
     );
   }
 
+  const isFree = currentPlan === 'free';
   const isProActive = subscription?.status === 'authorized' || subscription?.status === 'paused';
-  const isPendingCheckout = subscription?.status === 'pending'
-    && currentPlan === 'free'
-    && isRecentPendingCheckout(subscription);
-  const hasSubscriptionCard = isProActive || isPendingCheckout;
+  const isPending = subscription?.status === 'pending';
+  const isPendingCheckout = isPending && isFree && isRecentPendingCheckout(subscription);
+  const isStalePending = isPending && isFree && !isRecentPendingCheckout(subscription);
+  const hasSubscriptionCard = isProActive || isPending;
   const paidPlan = plans.find(p => p.plan !== 'free');
   const statusInfo = subscription && hasSubscriptionCard
     ? STATUS_MAP[subscription.status] || STATUS_MAP.pending
     : null;
   const subscribeCtaLabel = product === 'academy' ? `Assinar ${paidPlan?.name || 'agora'}` : 'Assinar OdontoHub Pro';
+  const showFreeUpgrade = isFree && !isPending && !isProActive && paidPlan;
+  const showCancelledExpired = subscription && ['cancelled', 'expired'].includes(subscription.status) && paidPlan;
+  const hasCardBody = Boolean(
+    (isProActive && subscription)
+    || (isPending && subscription)
+    || showFreeUpgrade
+    || showCancelledExpired
+    || payments.length > 0
+  );
 
   return (
     <div className="space-y-4">
@@ -283,7 +308,7 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
           )}
 
           {/* Pending — resume checkout CTA */}
-          {isPendingCheckout && subscription && (
+          {isPending && subscription && (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-slate-50 rounded-xl p-3">
@@ -299,7 +324,9 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
               <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 flex items-start gap-2">
                 <AlertCircle size={14} className="text-amber-500 mt-0.5 shrink-0" />
                 <p className="text-xs text-amber-700">
-                  A assinatura ainda não foi concluída. Você pode continuar de onde parou a qualquer momento.
+                  {isStalePending
+                    ? 'Esta assinatura ficou pendente há algum tempo. Você pode retomar o pagamento ou iniciar uma nova assinatura abaixo.'
+                    : 'A assinatura ainda não foi concluída. Você pode continuar de onde parou a qualquer momento.'}
                 </p>
               </div>
 
@@ -319,7 +346,7 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
           )}
 
           {/* Free plan — upgrade CTA */}
-          {currentPlan === 'free' && !isPendingCheckout && !isProActive && paidPlan && (
+          {showFreeUpgrade && (
             <div className="space-y-3">
               <div className="bg-slate-50 rounded-xl p-4">
                 <div className="flex items-center gap-3 mb-3">
@@ -350,7 +377,7 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
           )}
 
           {/* Cancelled / expired — resubscribe */}
-          {subscription && ['cancelled', 'expired'].includes(subscription.status) && paidPlan && (
+          {showCancelledExpired && (
             <div className="space-y-3">
               <div className="bg-slate-50 rounded-xl p-3 flex items-start gap-2">
                 <AlertCircle size={14} className="text-slate-400 mt-0.5 shrink-0" />
@@ -388,6 +415,37 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {!hasCardBody && (
+            <div className="space-y-3">
+              <div className="bg-slate-50 rounded-xl p-4 flex items-start gap-3">
+                <AlertCircle size={16} className="text-slate-400 mt-0.5 shrink-0" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-slate-700">
+                    {plansError
+                      ? 'Não foi possível carregar as opções de assinatura.'
+                      : isFree
+                        ? 'Você está no plano Free.'
+                        : 'Nenhuma informação de assinatura disponível.'}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {plansError
+                      ? plansError
+                      : isFree
+                        ? 'Quando os planos estiverem disponíveis, você poderá assinar o Academy Student aqui.'
+                        : 'Entre em contato com o suporte se precisar de ajuda com sua assinatura.'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={reloadSubscriptionData}
+                className="w-full py-3 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all"
+              >
+                Tentar novamente
+              </button>
             </div>
           )}
         </div>

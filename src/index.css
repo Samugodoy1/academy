@@ -45,6 +45,10 @@
 }
 
 @layer base {
+  html {
+    background-color: #F6F8FA;
+    color-scheme: light;
+  }
 
   html,
   body,
@@ -109,6 +113,10 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
   }
 }
 

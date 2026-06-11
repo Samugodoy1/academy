@@ -14,6 +14,7 @@ import {
   Circle,
   Clock3,
   CreditCard,
+  Download,
   FileText,
   GripVertical,
   Info,
@@ -77,6 +78,7 @@ import {
   generateBoxNowItems,
   generateBoxNowSteps
 } from '../data/boxIntelligence';
+import { exportClinicalCasePdf, type StudentProfileForPdf } from '../utils/exportClinicalCasePdf';
 
 interface PatientClinicalProps {
   patient: any;
@@ -89,6 +91,7 @@ interface PatientClinicalProps {
   navigate: any;
   product?: string;
   pendingEvolutionAppointment?: any;
+  studentProfile?: StudentProfileForPdf | null;
 }
 
 type InfoTab = 'anamneses' | 'dados' | 'imagens' | 'financeiro';
@@ -277,8 +280,10 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   navigate: appNavigate,
   product,
   pendingEvolutionAppointment,
+  studentProfile,
 }) => {
   const [isAddingEvolution, setIsAddingEvolution] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [evolutionAppointmentContext, setEvolutionAppointmentContext] = useState<any>(null);
   const [infoTab, setInfoTab] = useState<InfoTab>('anamneses');
 
@@ -1717,6 +1722,23 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     return 'Boa noite';
   })();
 
+  const handleExportClinicalCasePdf = async () => {
+    if (isExportingPdf) return;
+    setIsExportingPdf(true);
+    try {
+      await exportClinicalCasePdf({
+        patient,
+        appointments,
+        studentProfile,
+      });
+    } catch (error) {
+      console.error('Error exporting clinical case PDF:', error);
+      window.alert('Não foi possível gerar o PDF do caso clínico. Tente novamente.');
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
   const iosCard =
     'bg-white/92 border border-slate-200/70 shadow-[0_8px_24px_rgba(15,23,42,0.05)]';
   const iosSubtleCard =
@@ -1862,6 +1884,17 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                 >
                   <Camera size={15} />
                 </button>
+                {isAcademyProduct && (
+                  <button
+                    type="button"
+                    onClick={handleExportClinicalCasePdf}
+                    disabled={isExportingPdf}
+                    className="h-9 w-9 flex items-center justify-center rounded-full border border-primary/15 bg-primary/5 text-primary transition-all duration-200 hover:bg-primary/10 hover:border-primary/25 hover:shadow-sm ios-press disabled:opacity-60"
+                    title="Exportar caso em PDF"
+                  >
+                    {isExportingPdf ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -1973,6 +2006,26 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                 </div>
               </button>
             </div>
+            <button
+              type="button"
+              onClick={handleExportClinicalCasePdf}
+              disabled={isExportingPdf}
+              className="mt-3 w-full rounded-[22px] border border-primary/12 bg-academy-soft px-5 py-3.5 text-left transition-all duration-200 hover:border-primary/25 active:scale-[0.98] ios-press disabled:opacity-60"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[15px] font-bold text-academy-primary-dark">Exportar resumo do caso</p>
+                  <p className="text-[12px] text-academy-muted font-medium mt-1">
+                    PDF para revisão, estudo e apresentação acadêmica
+                  </p>
+                </div>
+                {isExportingPdf ? (
+                  <Loader2 size={18} className="shrink-0 text-primary animate-spin" />
+                ) : (
+                  <Download size={18} className="shrink-0 text-primary" />
+                )}
+              </div>
+            </button>
           </section>
         )}
 

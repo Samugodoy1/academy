@@ -377,7 +377,7 @@ const patientHasEvolutionForAppointment = (patient: any, appointment: any) => {
   return evolutions.some((evolution: any) => Number(evolution?.appointment_id) === appointmentId);
 };
 
-const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpdateAnamnesis, onAddEvolution, onAddTransaction, onOpenSidebar, apiFetch, setAppActiveTab, navigate, pendingEvolutionAppointment, onClearPendingEvolution, onPatientLoaded }: any) => {
+const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpdateAnamnesis, onAddEvolution, onAddTransaction, onOpenSidebar, apiFetch, setAppActiveTab, navigate, pendingEvolutionAppointment, onClearPendingEvolution, onPatientLoaded, profile }: any) => {
   const { id } = useParams();
   const [patient, setPatient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -450,6 +450,12 @@ const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpda
       navigate={navigate}
       product={DEFAULT_PRODUCT}
       pendingEvolutionAppointment={pendingEvolutionAlreadyClosed ? null : pendingEvolutionAppointment}
+      studentProfile={profile ? {
+        name: profile.name,
+        institution: profile.institution,
+        current_discipline: profile.current_discipline,
+        academic_period: profile.academic_period,
+      } : null}
     />
   );
 };
@@ -2985,6 +2991,7 @@ export default function App() {
                 onPatientLoaded={(loadedPatient: Patient) => {
                   setPatients(prev => prev.map(p => p.id === loadedPatient.id ? { ...p, ...loadedPatient } : p));
                 }}
+                profile={profile}
               />
             </main>
           </div>

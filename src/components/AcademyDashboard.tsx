@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { BookOpen, Calendar, CalendarPlus, CheckCircle2, ChevronRight, ClipboardList, Clock, Plus, Users } from '../icons';
-import { BoxModePrep } from './BoxModePrep';
+import { AcademyActivationCard, AcademyOnboarding } from './AcademyOnboarding';
 import { ClinicalObservation } from './ClinicalObservation';
 import { ClinicalProgressionCard } from './ClinicalProgressionCard';
 import { formatAppointmentTime, getAppointmentTime, parseAppointmentDateTime } from '../utils/dateUtils';
@@ -28,6 +28,8 @@ interface AcademyDashboardProps {
   setActiveTab: (tab: any) => void;
   setIsPatientModalOpen: (open: boolean) => void;
   openAppointmentModal: () => void;
+  onDismissOnboarding: () => void;
+  onDismissWelcome: () => void;
 }
 
 const ACTIVE_STATUSES = new Set(['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS']);
@@ -406,7 +408,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   openPatientEvolution,
   setActiveTab,
   setIsPatientModalOpen,
-  openAppointmentModal
+  openAppointmentModal,
+  onDismissOnboarding,
+  onDismissWelcome,
 }) => {
   const now = new Date();
 
@@ -665,8 +669,25 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   }, [focus.kind, showBoxMode, todayContext]);
 
   return (
+    <AcademyOnboarding
+      user={user}
+      patients={patients}
+      totalAppointmentsCount={usableAppointments.length}
+      openPatientRecord={openPatientRecord}
+      setIsPatientModalOpen={setIsPatientModalOpen}
+      openAppointmentModal={openAppointmentModal}
+      onDismissOnboarding={onDismissOnboarding}
+      onDismissWelcome={onDismissWelcome}
+    >
     <div className="max-w-2xl mx-auto px-5 sm:px-6 space-y-12 pt-8 pb-32">
       <section className="space-y-5">
+        <AcademyActivationCard
+          user={user}
+          patients={patients}
+          totalAppointmentsCount={usableAppointments.length}
+          onboardingDismissed={user?.onboarding_done ?? false}
+          openPatientRecord={openPatientRecord}
+        />
         <div className="pt-6">
           <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-academy-primary mb-2">
             Hoje
@@ -989,6 +1010,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         </section>
       )}
     </div>
+    </AcademyOnboarding>
   );
 };
 

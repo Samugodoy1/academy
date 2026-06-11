@@ -1036,15 +1036,15 @@ export default function App() {
   const [profilePassword, setProfilePassword] = useState('');
   const [isProfileEditing, setIsProfileEditing] = useState(false);
   const [showAcademyUpgradeModal, setShowAcademyUpgradeModal] = useState(false);
-  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error', celebration?: boolean, onUndo?: () => void } | null>(null);
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error', celebration?: boolean, onUndo?: () => void, actionLabel?: string, onAction?: () => void } | null>(null);
   const [confirmation, setConfirmation] = useState<{ message: string, onConfirm: () => void } | null>(null);
   const [guideDismissedUntil, setGuideDismissedUntil] = useState<string | null>(null);
   const notificationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const showNotification = (message: string, type: 'success' | 'error' = 'success', celebration = false, onUndo?: () => void) => {
+  const showNotification = (message: string, type: 'success' | 'error' = 'success', celebration = false, onUndo?: () => void, actionLabel?: string, onAction?: () => void) => {
     if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
-    setNotification({ message, type, celebration, onUndo });
-    notificationTimerRef.current = setTimeout(() => setNotification(null), onUndo ? 5000 : celebration ? 4500 : 3000);
+    setNotification({ message, type, celebration, onUndo, actionLabel, onAction });
+    notificationTimerRef.current = setTimeout(() => setNotification(null), onUndo || onAction ? 8000 : celebration ? 5500 : 3000);
   };
 
   // ─── Implicit Onboarding: milestone tracking ─────────────────────────
@@ -1074,10 +1074,12 @@ export default function App() {
     const recordOpened = user?.record_opened || hasMilestone('recordOpened');
     if (!recordOpened) {
       if (activeTab === 'prontuario') return null;
+      const firstId = patients[0]?.id;
       return {
-        message: 'Abra um caso clinico para registrar evolucoes e pendencias',
-        action: 'Ver Casos',
+        message: 'Último passo: abra o caso clínico — evoluções e odontograma ficam no prontuário',
+        action: firstId ? 'Abrir caso clínico' : 'Ver Casos',
         tab: 'pacientes',
+        onClick: firstId ? () => openPatientRecord(firstId) : undefined,
       };
     }
     return null;
@@ -1617,6 +1619,28 @@ export default function App() {
       });
       const data = await res.json();
       if (res.ok) {
+        const loginRes = await fetch(`${API_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: API_URL ? 'include' as const : 'same-origin' as const,
+          body: JSON.stringify({
+            email: registerData.email,
+            password: registerData.password,
+            rememberMe: true,
+            product: getCurrentProduct(),
+          }),
+        });
+        const loginData = await loginRes.json();
+        if (loginRes.ok) {
+          localStorage.setItem('token', loginData.token);
+          localStorage.setItem('user', JSON.stringify(loginData.user));
+          setUser(loginData.user);
+          setIsRegistering(false);
+          setRegisterMessage('');
+          fetchData();
+          fetchProfile();
+          return;
+        }
         setRegisterMessage(data.message);
         setIsRegistering(false);
       } else {
@@ -1791,15 +1815,15 @@ export default function App() {
     return response;
   };
 
-  const openAppointmentModal = () => {
+  const openAppointmentModal = (prefill?: { patientId: number; patientName: string }) => {
     const dentist_id = user?.id ? user.id.toString() : (localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '{}')?.id?.toString() : '');
 
     setAppointmentModalMode('schedule');
     setEditingAppointmentId(null);
     setSuggestedSlot(null);
     setNewAppointment({
-      patient_id: '',
-      patient_name: '',
+      patient_id: prefill ? String(prefill.patientId) : '',
+      patient_name: prefill?.patientName || '',
       dentist_id: dentist_id || '',
       date: formatDateInputValue(selectedDate),
       time: '',
@@ -2404,11 +2428,25 @@ export default function App() {
 
         setNewAppointment({ patient_id: '', patient_name: '', dentist_id: '', date: '', time: '', duration: '', notes: '' });
         const isFirstAppointment = appointments.length === 0 && !isReschedule;
-        showNotification(
-          isReschedule ? 'Reagendamento salvo com sucesso!' : isFirstAppointment ? 'Primeiro atendimento agendado. Sua rotina esta ativa.' : 'Atendimento agendado com sucesso!',
-          'success',
-          isFirstAppointment
-        );
+        if (isFirstAppointment) {
+          setActiveTab('dashboard');
+          navigate('/dashboard');
+          const firstPatientId = newAppointment.patient_id ? Number(newAppointment.patient_id) : patients[0]?.id;
+          showNotification(
+            '🎉 Primeiro atendimento agendado! Agora abra o caso clínico.',
+            'success',
+            true,
+            undefined,
+            firstPatientId ? 'Abrir caso clínico' : undefined,
+            firstPatientId ? () => openPatientRecord(firstPatientId) : undefined
+          );
+        } else {
+          showNotification(
+            isReschedule ? 'Reagendamento salvo com sucesso!' : 'Atendimento agendado com sucesso!',
+            'success',
+            false
+          );
+        }
       } else {
         if (data.upgrade_required) {
           setIsModalOpen(false);
@@ -2442,13 +2480,23 @@ export default function App() {
         setIsPatientModalOpen(false);
         fetchData();
 
+        const createdName = newPatient.name;
         setNewPatient({ name: '', cpf: '', birth_date: '', phone: '', email: '', address: '' });
         const isFirst = patients.length === 0;
-        showNotification(
-          isFirst ? 'Primeiro paciente cadastrado. Agora agende um atendimento.' : 'Paciente cadastrado com sucesso!',
-          'success',
-          isFirst
-        );
+        if (isFirst) {
+          setActiveTab('dashboard');
+          navigate('/dashboard');
+          showNotification(
+            '🎉 Primeiro caso cadastrado! Próximo passo: agendar atendimento.',
+            'success',
+            true,
+            undefined,
+            'Agendar atendimento',
+            () => openAppointmentModal({ patientId: data.id, patientName: createdName })
+          );
+        } else {
+          showNotification('Paciente cadastrado com sucesso!', 'success', false);
+        }
       } else {
         const data = await res.json();
         if (data.upgrade_required) {
@@ -2574,6 +2622,7 @@ export default function App() {
 
   const openPatientRecord = async (id: number) => {
     if (!user) return;
+    const wasFirstRecord = !(user.record_opened || hasMilestone('recordOpened'));
     try {
       const res = await apiFetch(`/api/patients/${id}`);
       const data = await res.json();
@@ -2592,6 +2641,16 @@ export default function App() {
         console.error('Error saving record opened state:', error);
       }
       navigate(`/prontuario/${id}`);
+      if (wasFirstRecord) {
+        showNotification(
+          '🎉 Caso clínico aberto! Explore o prontuário. Volte ao Início para concluir.',
+          'success',
+          true,
+          undefined,
+          'Ir para Início',
+          () => { setActiveTab('dashboard'); navigate('/dashboard'); }
+        );
+      }
     } catch (error) {
       console.error('Error fetching patient record:', error);
     }
@@ -2970,7 +3029,7 @@ export default function App() {
                 transition={{ delay: 0.05, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
               >
                 <h1 className="text-[26px] font-semibold text-[#0F1211] tracking-[-0.4px] leading-[1.2] mb-2.5">
-                  {isRegistering ? 'Solicite seu acesso' : (() => {
+                  {isRegistering ? 'Crie sua conta gratuita' : (() => {
                     const h = new Date().getHours();
                     if (h >= 5 && h < 12) return 'Bom dia. Vamos organizar sua rotina clinica?';
                     if (h >= 12 && h < 18) return 'Boa tarde. Pronto para mais um turno?';
@@ -3339,6 +3398,8 @@ export default function App() {
                       setActiveTab={setActiveTab}
                       setIsPatientModalOpen={setIsPatientModalOpen}
                       openAppointmentModal={openAppointmentModal}
+                      onDismissOnboarding={() => updateUserOnboarding('onboarding_done')}
+                      onDismissWelcome={() => updateUserOnboarding('welcome_seen')}
                     />
                   )}
 
@@ -7186,6 +7247,18 @@ export default function App() {
                         <CheckCircle size={22} className="text-primary" />
                       </div>
                       <span className="font-bold text-[15px] text-slate-800">{notification.message}</span>
+                      {notification.onAction && notification.actionLabel && (
+                        <button
+                          onClick={() => {
+                            notification.onAction?.();
+                            setNotification(null);
+                            if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
+                          }}
+                          className="shrink-0 ml-1 px-4 py-2 bg-primary text-white text-[13px] font-bold rounded-xl hover:opacity-90 transition-all"
+                        >
+                          {notification.actionLabel}
+                        </button>
+                      )}
                     </>
                   ) : (
                     <>

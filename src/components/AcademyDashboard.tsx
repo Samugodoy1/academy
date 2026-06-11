@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { BookOpen, Calendar, CalendarPlus, CheckCircle2, ChevronRight, ClipboardList, Clock, Plus, Users } from '../icons';
 import { AcademyActivationCard, AcademyOnboarding } from './AcademyOnboarding';
+import { BoxModePrep } from './BoxModePrep';
 import { ClinicalObservation } from './ClinicalObservation';
 import { ClinicalProgressionCard } from './ClinicalProgressionCard';
 import { formatAppointmentTime, getAppointmentTime, parseAppointmentDateTime } from '../utils/dateUtils';

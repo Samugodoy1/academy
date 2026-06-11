@@ -116,8 +116,6 @@ const sanitizeFileName = (value: string) =>
 
 type JsPDFConstructor = typeof import('jspdf').jsPDF;
 
-type CardTone = 'default' | 'attention';
-
 interface CardShellOptions {
   fill?: [number, number, number];
   accent?: [number, number, number];
@@ -128,7 +126,7 @@ class PdfBuilder {
   private doc: InstanceType<JsPDFConstructor>;
   private y = 0;
   private measuring = false;
-  private cardContext: { left: number; width: number } | null = null;
+  private textInset: { left: number; width: number } | null = null;
   private readonly margin = 16;
   private readonly pageWidth: number;
   private readonly contentWidth: number;
@@ -142,11 +140,19 @@ class PdfBuilder {
   }
 
   private get textLeft() {
-    return this.cardContext?.left ?? this.margin;
+    return this.textInset?.left ?? this.margin;
   }
 
   private get textWidth() {
-    return this.cardContext?.width ?? this.contentWidth;
+    return this.textInset?.width ?? this.contentWidth;
+  }
+
+  private get innerLeft() {
+    return this.margin + CARD.paddingLeft;
+  }
+
+  private get innerWidth() {
+    return this.contentWidth - CARD.paddingLeft - CARD.paddingRight;
   }
 
   private lineHeight(fontSize: number) {
@@ -154,20 +160,19 @@ class PdfBuilder {
   }
 
   private ensureSpace(height: number) {
+    if (this.measuring) return;
+
     const pageHeight = this.doc.internal.pageSize.getHeight();
     if (this.y + height > pageHeight - 18) {
-      if (!this.measuring) {
-        this.addFooter();
-        this.doc.addPage();
-        this.pageNumber += 1;
-        this.drawPageBackground();
-      }
+      this.addFooter();
+      this.doc.addPage();
+      this.pageNumber += 1;
+      this.drawPageBackground();
       this.y = this.margin;
     }
   }
 
   private drawPageBackground() {
-    if (this.measuring) return;
     this.doc.setFillColor(...ACADEMY.bg);
     this.doc.rect(0, 0, this.pageWidth, this.doc.internal.pageSize.getHeight(), 'F');
   }
@@ -199,44 +204,37 @@ class PdfBuilder {
     this.doc.roundedRect(this.margin, startY, CARD.accentWidth + 0.5, height, CARD.radius, 0, 'F');
   }
 
-  private measureBlock(content: () => void) {
+  /** Mede altura do conteúdo sem desenhar e sem simular quebra de página. */
+  private measureContentHeight(content: () => void) {
     const savedY = this.y;
-    const savedContext = this.cardContext;
+    const savedInset = this.textInset;
     this.measuring = true;
     content();
     const height = this.y - savedY;
     this.y = savedY;
-    this.cardContext = savedContext;
+    this.textInset = savedInset;
     this.measuring = false;
     return height;
   }
 
-  private runInCard(content: () => void, tone: CardTone = 'default') {
+  /** Painel compacto (estudante, identificação) — fundo desenhado antes do texto. */
+  private drawCompactPanel(content: () => void, options: CardShellOptions = {}) {
     const startY = this.y;
-    const innerLeft = this.margin + CARD.paddingLeft;
-    const innerWidth = this.contentWidth - CARD.paddingLeft - CARD.paddingRight;
-
-    this.cardContext = { left: innerLeft, width: innerWidth };
+    this.textInset = { left: this.innerLeft, width: this.innerWidth };
     this.y += CARD.paddingTop;
 
-    const contentHeight = this.measureBlock(content);
-    const cardHeight = contentHeight + CARD.paddingTop + CARD.paddingBottom;
+    const contentHeight = this.measureContentHeight(content);
+    const panelHeight = contentHeight + CARD.paddingTop + CARD.paddingBottom;
 
-    this.ensureSpace(cardHeight + CARD.gap);
+    this.ensureSpace(panelHeight + CARD.gap);
     this.y = startY;
+    this.drawCardShell(startY, panelHeight, options);
 
-    const shellOptions: CardShellOptions =
-      tone === 'attention'
-        ? { fill: ACADEMY.attentionBg, accent: ACADEMY.attentionText, border: ACADEMY.attentionText }
-        : {};
-
-    this.drawCardShell(startY, cardHeight, shellOptions);
-
-    this.cardContext = { left: innerLeft, width: innerWidth };
+    this.textInset = { left: this.innerLeft, width: this.innerWidth };
     this.y = startY + CARD.paddingTop;
     content();
-    this.cardContext = null;
-    this.y = startY + cardHeight + CARD.gap;
+    this.textInset = null;
+    this.y = startY + panelHeight + CARD.gap;
   }
 
   writeParagraph(text: string, fontSize = 10, color: [number, number, number] = ACADEMY.text) {
@@ -268,12 +266,24 @@ class PdfBuilder {
   drawSectionLabel(title: string, color: [number, number, number] = ACADEMY.primary) {
     this.ensureSpace(8);
     if (!this.measuring) {
+      this.doc.setFillColor(...color);
+      this.doc.roundedRect(this.textLeft, this.y - 3.2, 2, 5, 0.8, 0.8, 'F');
       this.doc.setFont('helvetica', 'bold');
       this.doc.setFontSize(8.5);
       this.doc.setTextColor(...color);
-      this.doc.text(title.toUpperCase(), this.textLeft, this.y);
+      this.doc.text(title.toUpperCase(), this.textLeft + 4, this.y);
     }
     this.y += 6;
+  }
+
+  drawSectionDivider() {
+    this.y += 2;
+    if (!this.measuring) {
+      this.doc.setDrawColor(...ACADEMY.border);
+      this.doc.setLineWidth(0.2);
+      this.doc.line(this.margin, this.y, this.pageWidth - this.margin, this.y);
+    }
+    this.y += CARD.gap;
   }
 
   drawBulletList(items: string[]) {
@@ -302,25 +312,11 @@ class PdfBuilder {
       this.doc.text(dateLabel, this.textLeft, this.y);
     }
     this.y += 4.5;
-
-    if (!this.measuring) {
-      this.doc.setFont('helvetica', 'bold');
-      this.doc.setFontSize(10);
-      this.doc.setTextColor(...ACADEMY.text);
-    }
     this.writeParagraph(title, 10, ACADEMY.text);
-
     if (notes?.trim()) {
       this.writeParagraph(notes.trim(), 9.5, ACADEMY.muted);
     }
-
-    this.y += 2;
-    if (!this.measuring) {
-      this.doc.setDrawColor(...ACADEMY.border);
-      this.doc.setLineWidth(0.15);
-      this.doc.line(this.textLeft, this.y, this.textLeft + this.textWidth, this.y);
-    }
-    this.y += 4;
+    this.y += 3;
   }
 
   drawHeader(studentProfile?: StudentProfileForPdf | null, patientName?: string) {
@@ -357,7 +353,7 @@ class PdfBuilder {
     this.y += 36;
 
     if (studentProfile?.name || studentProfile?.institution || studentProfile?.current_discipline) {
-      this.runInCard(() => {
+      this.drawCompactPanel(() => {
         this.drawSectionLabel('Estudante');
         const studentLines = [
           studentProfile?.name ? `Acadêmico(a): ${studentProfile.name}` : null,
@@ -370,7 +366,7 @@ class PdfBuilder {
     }
 
     if (patientName) {
-      this.runInCard(() => {
+      this.drawCompactPanel(() => {
         this.drawSectionLabel('Identificação do caso');
         this.ensureSpace(10);
         if (!this.measuring) {
@@ -384,23 +380,46 @@ class PdfBuilder {
     }
   }
 
-  drawCard(content: () => void) {
-    this.runInCard(content, 'default');
+  drawSection(title: string, content: () => void) {
+    this.y += 2;
+    this.textInset = { left: this.margin + 4, width: this.contentWidth - 8 };
+    this.drawSectionLabel(title);
+    content();
+    this.textInset = null;
+    this.drawSectionDivider();
   }
 
   drawAlert(title: string, body: string) {
-    this.runInCard(() => {
-      this.drawSectionLabel('Alertas clínicos', ACADEMY.attentionText);
-      this.ensureSpace(6);
-      if (!this.measuring) {
-        this.doc.setFont('helvetica', 'bold');
-        this.doc.setFontSize(10);
-        this.doc.setTextColor(...ACADEMY.attentionText);
-        this.doc.text(title, this.textLeft, this.y);
-      }
-      this.y += 5.5;
-      this.writeParagraph(body, 9.5, ACADEMY.attentionText);
-    }, 'attention');
+    const labelHeight = 6;
+    const titleHeight = 5.5;
+    const bodyLines = this.doc.splitTextToSize(body, this.innerWidth);
+    const bodyHeight = bodyLines.length * this.lineHeight(9.5) + 1.5;
+    const panelHeight = CARD.paddingTop + labelHeight + titleHeight + bodyHeight + CARD.paddingBottom;
+
+    this.ensureSpace(panelHeight + CARD.gap);
+    const startY = this.y;
+
+    this.drawCardShell(startY, panelHeight, {
+      fill: ACADEMY.attentionBg,
+      accent: ACADEMY.attentionText,
+      border: ACADEMY.attentionText,
+    });
+
+    this.textInset = { left: this.innerLeft, width: this.innerWidth };
+    this.y = startY + CARD.paddingTop;
+    this.drawSectionLabel('Alertas clínicos', ACADEMY.attentionText);
+
+    if (!this.measuring) {
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.setFontSize(10);
+      this.doc.setTextColor(...ACADEMY.attentionText);
+      this.doc.text(title, this.textLeft, this.y);
+    }
+    this.y += titleHeight;
+    this.writeParagraph(body, 9.5, ACADEMY.attentionText);
+
+    this.textInset = null;
+    this.y = startY + panelHeight + CARD.gap;
   }
 
   save(fileName: string) {
@@ -443,8 +462,7 @@ export async function exportClinicalCasePdf({
 
   builder.drawHeader(studentProfile, patient?.name || 'Caso clínico');
 
-  builder.drawCard(() => {
-    builder.drawSectionLabel('Visão geral');
+  builder.drawSection('Visão geral', () => {
     const overviewLines = [
       age !== null ? `Idade: ${age} anos` : 'Idade: não informada',
       patient?.phone ? `Contato: ${patient.phone}` : null,
@@ -473,8 +491,7 @@ export async function exportClinicalCasePdf({
     builder.drawAlert('Atenção antes do atendimento', alertLines.join('\n\n'));
   }
 
-  builder.drawCard(() => {
-    builder.drawSectionLabel('Anamnese');
+  builder.drawSection('Anamnese', () => {
     const filledFields = Object.entries(ANAMNESIS_LABELS).filter(([key]) =>
       hasMeaningfulAnamnesisValue(anamnesis[key as keyof typeof anamnesis]),
     );
@@ -487,8 +504,7 @@ export async function exportClinicalCasePdf({
     });
   });
 
-  builder.drawCard(() => {
-    builder.drawSectionLabel('Plano clínico');
+  builder.drawSection('Plano clínico', () => {
     if (treatmentPlan.length === 0) {
       builder.writeParagraph('Nenhum procedimento registrado no plano. Use o odontograma para mapear condições e definir condutas.', 9.5, ACADEMY.muted);
       return;
@@ -517,8 +533,7 @@ export async function exportClinicalCasePdf({
     })
     .filter(Boolean) as string[];
 
-  builder.drawCard(() => {
-    builder.drawSectionLabel('Mapa do odontograma');
+  builder.drawSection('Mapa do odontograma', () => {
     if (odontogramEntries.length === 0) {
       builder.writeParagraph('Nenhuma alteração registrada nos dentes. Ideal para casos novos ou avaliação inicial.', 9.5, ACADEMY.muted);
       return;
@@ -529,8 +544,7 @@ export async function exportClinicalCasePdf({
     }
   });
 
-  builder.drawCard(() => {
-    builder.drawSectionLabel('Linha do tempo clínica');
+  builder.drawSection('Linha do tempo clínica', () => {
     if (evolutions.length === 0) {
       builder.writeParagraph('Sem evoluções registradas. Após cada atendimento, documente conduta, materiais e orientações.', 9.5, ACADEMY.muted);
       return;
@@ -550,8 +564,7 @@ export async function exportClinicalCasePdf({
     }
   });
 
-  builder.drawCard(() => {
-    builder.drawSectionLabel('Atendimentos');
+  builder.drawSection('Atendimentos', () => {
     if (patientAppointments.length === 0) {
       builder.writeParagraph('Nenhum atendimento agendado ou realizado para este caso.', 9.5, ACADEMY.muted);
       return;
@@ -568,8 +581,7 @@ export async function exportClinicalCasePdf({
     });
   });
 
-  builder.drawCard(() => {
-    builder.drawSectionLabel('Guia rápido para o box');
+  builder.drawSection('Guia rápido para o box', () => {
     const studyItems = [
       boxContext.expectedTodaySummary,
       boxContext.criticalCheckpoint,

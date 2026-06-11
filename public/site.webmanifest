@@ -4,8 +4,8 @@
   "description": "Plataforma para estudantes de odontologia.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#2f8fa3",
+  "background_color": "#F6F8FA",
+  "theme_color": "#F6F8FA",
   "lang": "pt-BR",
   "icons": [
     {

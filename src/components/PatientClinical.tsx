@@ -92,6 +92,8 @@ interface PatientClinicalProps {
   product?: string;
   pendingEvolutionAppointment?: any;
   studentProfile?: StudentProfileForPdf | null;
+  canExportClinicalCasePdf?: boolean;
+  onRequestPdfUpgrade?: () => void;
 }
 
 type InfoTab = 'anamneses' | 'dados' | 'imagens' | 'financeiro';
@@ -281,6 +283,8 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   product,
   pendingEvolutionAppointment,
   studentProfile,
+  canExportClinicalCasePdf = false,
+  onRequestPdfUpgrade,
 }) => {
   const [isAddingEvolution, setIsAddingEvolution] = useState(false);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
@@ -1724,6 +1728,10 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
 
   const handleExportClinicalCasePdf = async () => {
     if (isExportingPdf) return;
+    if (!canExportClinicalCasePdf) {
+      onRequestPdfUpgrade?.();
+      return;
+    }
     setIsExportingPdf(true);
     try {
       await exportClinicalCasePdf({
@@ -1889,10 +1897,24 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     type="button"
                     onClick={handleExportClinicalCasePdf}
                     disabled={isExportingPdf}
-                    className="h-9 w-9 flex items-center justify-center rounded-full border border-primary/15 bg-primary/5 text-primary transition-all duration-200 hover:bg-primary/10 hover:border-primary/25 hover:shadow-sm ios-press disabled:opacity-60"
-                    title="Exportar caso em PDF"
+                    className={`h-9 w-9 flex items-center justify-center rounded-full border transition-all duration-200 ios-press disabled:opacity-60 ${
+                      canExportClinicalCasePdf
+                        ? 'border-primary/15 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/25 hover:shadow-sm'
+                        : 'border-slate-200/80 bg-slate-50 text-slate-400 hover:border-slate-300 hover:text-slate-600'
+                    }`}
+                    title={
+                      canExportClinicalCasePdf
+                        ? 'Exportar caso em PDF (Academy Student)'
+                        : 'Exportar PDF — exclusivo para assinantes Academy Student'
+                    }
                   >
-                    {isExportingPdf ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
+                    {isExportingPdf ? (
+                      <Loader2 size={15} className="animate-spin" />
+                    ) : canExportClinicalCasePdf ? (
+                      <Download size={15} />
+                    ) : (
+                      <Lock size={14} />
+                    )}
                   </button>
                 )}
               </div>
@@ -2010,19 +2032,45 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               type="button"
               onClick={handleExportClinicalCasePdf}
               disabled={isExportingPdf}
-              className="mt-3 w-full rounded-[22px] border border-primary/12 bg-academy-soft px-5 py-3.5 text-left transition-all duration-200 hover:border-primary/25 active:scale-[0.98] ios-press disabled:opacity-60"
+              className={`mt-3 w-full rounded-[22px] px-5 py-3.5 text-left transition-all duration-200 active:scale-[0.98] ios-press disabled:opacity-60 ${
+                canExportClinicalCasePdf
+                  ? 'border border-primary/12 bg-academy-soft hover:border-primary/25'
+                  : 'border border-slate-200/80 bg-slate-50/80 hover:border-slate-300'
+              }`}
             >
               <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-[15px] font-bold text-academy-primary-dark">Exportar resumo do caso</p>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className={`text-[15px] font-bold ${canExportClinicalCasePdf ? 'text-academy-primary-dark' : 'text-slate-700'}`}>
+                      Exportar resumo do caso
+                    </p>
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] ${
+                      canExportClinicalCasePdf
+                        ? 'bg-primary/10 text-primary'
+                        : 'bg-slate-200/80 text-slate-500'
+                    }`}>
+                      {canExportClinicalCasePdf ? (
+                        <>Academy Student</>
+                      ) : (
+                        <>
+                          <Lock size={10} />
+                          Student
+                        </>
+                      )}
+                    </span>
+                  </div>
                   <p className="text-[12px] text-academy-muted font-medium mt-1">
-                    PDF para revisão, estudo e apresentação acadêmica
+                    {canExportClinicalCasePdf
+                      ? 'PDF para revisão, estudo e apresentação acadêmica'
+                      : 'Recurso exclusivo do plano Academy Student. Toque para conhecer o plano.'}
                   </p>
                 </div>
                 {isExportingPdf ? (
                   <Loader2 size={18} className="shrink-0 text-primary animate-spin" />
-                ) : (
+                ) : canExportClinicalCasePdf ? (
                   <Download size={18} className="shrink-0 text-primary" />
+                ) : (
+                  <Lock size={18} className="shrink-0 text-slate-400" />
                 )}
               </div>
             </button>

@@ -134,6 +134,13 @@ const collectProcedureTexts = (patients: any[]): string[] => {
   return texts;
 };
 
+/** Restaurações já incluem isolamento absoluto na prática clínica. */
+const getEffectiveIsolamentoCount = (countMap: Map<ClinicalSkill, number>): number => {
+  const explicit = countMap.get('isolamento') || 0;
+  const fromRestorations = countMap.get('restauracao') || 0;
+  return Math.max(explicit, fromRestorations);
+};
+
 export const countClinicalSkills = (patients: any[]): SkillCount[] => {
   const counts = new Map<ClinicalSkill, number>();
 
@@ -141,6 +148,11 @@ export const countClinicalSkills = (patients: any[]): SkillCount[] => {
     const skill = classifyProcedure(text);
     if (!skill) continue;
     counts.set(skill, (counts.get(skill) || 0) + 1);
+  }
+
+  const effectiveIsolamento = getEffectiveIsolamentoCount(counts);
+  if (effectiveIsolamento > 0) {
+    counts.set('isolamento', effectiveIsolamento);
   }
 
   return DISPLAY_ORDER
@@ -206,7 +218,7 @@ export const suggestNextClinicalStep = (skillCounts: SkillCount[]): NextStepSugg
   const raspagens = countMap.get('raspagem') || 0;
   const exodontias = countMap.get('exodontia') || 0;
   const endodontias = countMap.get('endodontia') || 0;
-  const isolamentos = countMap.get('isolamento') || 0;
+  const isolamentos = getEffectiveIsolamentoCount(countMap);
   const cirurgias = countMap.get('cirurgia') || 0;
   const total = skillCounts.reduce((sum, item) => sum + item.count, 0);
 
@@ -285,7 +297,7 @@ export const detectClinicalGaps = (skillCounts: SkillCount[]): ClinicalGap[] => 
   const gaps: ClinicalGap[] = [];
   const restauracoes = countMap.get('restauracao') || 0;
   const exodontias = (countMap.get('exodontia') || 0) + (countMap.get('cirurgia') || 0);
-  const isolamentos = countMap.get('isolamento') || 0;
+  const isolamentos = getEffectiveIsolamentoCount(countMap);
   const endodontias = countMap.get('endodontia') || 0;
   const total = skillCounts.reduce((sum, item) => sum + item.count, 0);
 

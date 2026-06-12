@@ -377,7 +377,7 @@ const patientHasEvolutionForAppointment = (patient: any, appointment: any) => {
   return evolutions.some((evolution: any) => Number(evolution?.appointment_id) === appointmentId);
 };
 
-const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpdateAnamnesis, onAddEvolution, onAddTransaction, onOpenSidebar, apiFetch, setAppActiveTab, navigate, pendingEvolutionAppointment, onClearPendingEvolution, onPatientLoaded, profile }: any) => {
+const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpdateAnamnesis, onAddEvolution, onAddTransaction, onOpenSidebar, apiFetch, setAppActiveTab, navigate, pendingEvolutionAppointment, onClearPendingEvolution, onPatientLoaded, profile, canExportClinicalCasePdf, onRequestPdfUpgrade }: any) => {
   const { id } = useParams();
   const [patient, setPatient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -456,6 +456,8 @@ const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpda
         current_discipline: profile.current_discipline,
         academic_period: profile.academic_period,
       } : null}
+      canExportClinicalCasePdf={canExportClinicalCasePdf}
+      onRequestPdfUpgrade={onRequestPdfUpgrade}
     />
   );
 };
@@ -465,20 +467,28 @@ const LegacyClinicalRedirect = () => {
   return <Navigate to={id ? `/prontuario/${id}` : '/'} replace />;
 };
 const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
-  const isAppointmentLimit = data?.limit && data.limit > 3;
+  const isPdfFeature = data?.feature === 'pdf';
+  const isAppointmentLimit = !isPdfFeature && data?.limit && data.limit > 3;
   const limit = data?.limit || 3;
   const currentUsage = data?.currentUsage || limit;
   const progress = Math.min(100, Math.round((currentUsage / limit) * 100));
 
-  const headlineText = isAppointmentLimit
-    ? 'Você atingiu o limite de agendamentos deste mês.'
-    : 'Seu Academy já tem seus primeiros casos.';
+  const headlineText = isPdfFeature
+    ? 'Exportar caso em PDF é exclusivo do Academy Student.'
+    : isAppointmentLimit
+      ? 'Você atingiu o limite de agendamentos deste mês.'
+      : 'Seu Academy já tem seus primeiros casos.';
 
-  const descriptionText = isAppointmentLimit
-    ? `Você já agendou ${currentUsage} atendimentos neste mês. Para continuar agendando sem limite, mude para o Academy Student.`
-    : `Você já organizou ${currentUsage} casos. Para continuar acompanhando seus pacientes, evoluções e atendimentos da faculdade, mude para o Academy Student.`;
+  const descriptionText = isPdfFeature
+    ? 'Gere um resumo do caso para revisão, estudo e apresentação acadêmica. Esse recurso faz parte do plano pago do Academy.'
+    : isAppointmentLimit
+      ? `Você já agendou ${currentUsage} atendimentos neste mês. Para continuar agendando sem limite, mude para o Academy Student.`
+      : `Você já organizou ${currentUsage} casos. Para continuar acompanhando seus pacientes, evoluções e atendimentos da faculdade, mude para o Academy Student.`;
 
   const barLabel = isAppointmentLimit ? 'Agendamentos no mês' : 'Casos no Free';
+  const benefitItems = isPdfFeature
+    ? ['Exportar casos clínicos em PDF', 'Casos e agenda ilimitados', 'Modo box e evoluções completos']
+    : ['Casos ilimitados', 'Agenda acadêmica sem limite', 'Evoluções e modo box completos'];
 
   return (
     <AnimatePresence>
@@ -532,33 +542,31 @@ const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
                 </p>
               </div>
 
-              <div className="mt-6 rounded-[22px] border border-slate-100 bg-slate-50/80 p-4 sm:rounded-[24px]">
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-slate-700">
-                    {barLabel}
-                  </span>
+              {!isPdfFeature && (
+                <div className="mt-6 rounded-[22px] border border-slate-100 bg-slate-50/80 p-4 sm:rounded-[24px]">
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="text-sm font-semibold text-slate-700">
+                      {barLabel}
+                    </span>
 
-                  <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-slate-950 shadow-sm ring-1 ring-slate-100">
-                    {currentUsage}/{limit}
-                  </span>
+                    <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-slate-950 shadow-sm ring-1 ring-slate-100">
+                      {currentUsage}/{limit}
+                    </span>
+                  </div>
+
+                  <div className="h-2.5 overflow-hidden rounded-full bg-slate-200/70">
+                    <motion.div
+                      className="h-full rounded-full bg-slate-950"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progress}%` }}
+                      transition={{ duration: 0.45, ease: "easeOut" }}
+                    />
+                  </div>
                 </div>
+              )}
 
-                <div className="h-2.5 overflow-hidden rounded-full bg-slate-200/70">
-                  <motion.div
-                    className="h-full rounded-full bg-slate-950"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
-                    transition={{ duration: 0.45, ease: "easeOut" }}
-                  />
-                </div>
-              </div>
-
-              <div className="mt-4 grid gap-2">
-                {[
-                  'Casos ilimitados',
-                  'Agenda acadêmica sem limite',
-                  'Evoluções e modo box completos',
-                ].map((item) => (
+              <div className={`grid gap-2 ${isPdfFeature ? 'mt-6' : 'mt-4'}`}>
+                {benefitItems.map((item) => (
                   <div
                     key={item}
                     className="flex items-center gap-3 rounded-2xl bg-white px-3 py-2.5 text-[13px] text-slate-600 ring-1 ring-slate-100 sm:text-sm"
@@ -746,6 +754,7 @@ export default function App() {
     currentUsage: number;
     product: string;
     upgradePlan: string;
+    feature?: 'pdf' | 'cases' | 'appointments';
   }>({
     open: false,
     limit: 0,
@@ -2992,6 +3001,17 @@ export default function App() {
                   setPatients(prev => prev.map(p => p.id === loadedPatient.id ? { ...p, ...loadedPatient } : p));
                 }}
                 profile={profile}
+                canExportClinicalCasePdf={(getProductAccess(getCurrentProduct())?.plan || 'free') !== 'free'}
+                onRequestPdfUpgrade={() =>
+                  setUpgradeLimitModal({
+                    open: true,
+                    limit: 0,
+                    currentUsage: 0,
+                    product: 'academy',
+                    upgradePlan: 'student',
+                    feature: 'pdf',
+                  })
+                }
               />
             </main>
           </div>

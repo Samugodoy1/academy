@@ -28,12 +28,30 @@ describe('clinicalProgression', () => {
     expect(counts.find(item => item.skill === 'raspagem')?.count).toBe(1);
   });
 
-  it('suggests isolamento after several restaurations', () => {
+  it('does not suggest isolamento when restorations already imply isolation', () => {
     const skillCounts = [
       { skill: 'restauracao' as const, label: 'restaurações', count: 4 },
+      { skill: 'isolamento' as const, label: 'casos com isolamento', count: 4 },
     ];
     const next = suggestNextClinicalStep(skillCounts);
-    expect(next?.label).toContain('isolamento');
+    expect(next?.label).not.toContain('isolamento');
+  });
+
+  it('counts restorations as implicit isolamento experience', () => {
+    const patients = [
+      {
+        evolution: [
+          { procedure_performed: 'Restauração classe I', date: '2026-01-10' },
+          { procedure_performed: 'Restauração classe II', date: '2026-01-12' },
+        ],
+      },
+    ];
+
+    const counts = countClinicalSkills(patients);
+    expect(counts.find(item => item.skill === 'isolamento')?.count).toBe(2);
+
+    const gaps = detectClinicalGaps(counts);
+    expect(gaps.some(gap => gap.id === 'no-isolamento')).toBe(false);
   });
 
   it('detects restorative vs surgical gap', () => {

@@ -91,7 +91,7 @@ import type {
 } from './types/clinical';
 import { DEFAULT_PRODUCT, ACADEMY_DISABLED_TABS } from './app/constants';
 import { SidebarItem } from './features/shell/SidebarItem';
-import { BottomNavItem } from './features/shell/BottomNavItem';
+import { BottomNav } from './features/shell/BottomNav';
 import { ClinicalPageRoute } from './features/clinical/ClinicalPageRoute';
 import { LegacyClinicalRedirect } from './features/clinical/LegacyClinicalRedirect';
 import { UpgradeLimitModal } from './features/modals/UpgradeLimitModal';
@@ -2573,7 +2573,7 @@ export default function App() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 p-4 md:p-6 lg:p-8 w-full max-w-full print:p-0 pb-36 md:pb-8">
+            <main className="flex-1 p-4 md:p-6 lg:p-8 w-full max-w-full print:p-0 pb-24 md:pb-8">
               {/* ── Floating Guide Banner ── */}
               {(() => {
                 const guide = getGuideStep();
@@ -4080,16 +4080,18 @@ export default function App() {
 
             {/* Notifications */}
             {/* Primary Action & Mobile Bottom Navigation */}
-            <div className="fixed bottom-0 left-0 right-0 z-50 tablet-l:hidden no-print">
-              {/* Bottom Navigation */}
-              <nav className="liquid-glass-nav px-2 pt-2 pb-6 flex justify-around items-center">
-                <BottomNavItem id="dashboard" label="Rotina" icon={Home} activeTab={activeTab} setActiveTab={setActiveTab} navigate={navigate} />
-                <BottomNavItem id="agenda" label="Atend." icon={Calendar} activeTab={activeTab} setActiveTab={setActiveTab} navigate={navigate} />
-                <BottomNavItem id="pacientes" label="Casos" icon={Users} activeTab={activeTab} setActiveTab={setActiveTab} navigate={navigate} />
-                <BottomNavItem id="estudos" label="Estudos" icon={BookOpen} activeTab={activeTab} setActiveTab={setActiveTab} navigate={navigate} />
-                <BottomNavItem id="configuracoes" label="Mais" icon={Settings} activeTab={activeTab} setActiveTab={setActiveTab} navigate={navigate} />
-              </nav>
-            </div>
+            <BottomNav
+              tabs={[
+                { id: 'dashboard', label: 'Rotina', icon: Home },
+                { id: 'agenda', label: 'Atend.', icon: Calendar },
+                { id: 'pacientes', label: 'Casos', icon: Users },
+                { id: 'estudos', label: 'Estudos', icon: BookOpen },
+                { id: 'configuracoes', label: 'Mais', icon: Settings },
+              ]}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              navigate={navigate}
+            />
 
             <AnimatePresence>
               {notification && (

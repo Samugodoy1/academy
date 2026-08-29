@@ -1,26 +1,28 @@
 export const BottomNavItem = ({ id, icon: Icon, label, activeTab, setActiveTab, navigate }: any) => {
   const isActive = activeTab === id;
+
   return (
     <button
       onClick={() => {
         setActiveTab(id);
         navigate('/');
       }}
-      className={`relative flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition-all duration-200 ${
-        isActive ? 'text-primary' : 'text-academy-muted'
+      aria-current={isActive ? 'page' : undefined}
+      className={`relative flex flex-1 flex-col items-center justify-center gap-0.5 min-w-0 py-1.5 px-1 rounded-full transition-all duration-300 ease-out ${
+        isActive ? 'tab-bar-item-active text-primary' : 'text-academy-muted hover:text-academy-text/80'
       }`}
     >
-      {isActive && (
-        <span className="absolute -top-0.5 w-8 h-1 rounded-full bg-primary/80" />
-      )}
+      <span className="flex items-center justify-center w-9 h-7">
+        <Icon
+          size={isActive ? 23 : 22}
+          className={`transition-all duration-300 ${isActive ? 'stroke-[2.5px]' : 'stroke-[1.5px]'}`}
+        />
+      </span>
       <span
-        className={`flex items-center justify-center w-10 h-7 rounded-full transition-all duration-200 ${
-          isActive ? 'bg-primary/10' : ''
+        className={`text-[9px] font-semibold tracking-tight leading-none truncate max-w-full px-0.5 transition-all duration-300 ${
+          isActive ? 'opacity-100' : 'opacity-70'
         }`}
       >
-        <Icon size={22} className={isActive ? 'stroke-[2.5px]' : 'stroke-[1.5px]'} />
-      </span>
-      <span className={`text-[10px] font-semibold tracking-tight ${isActive ? 'opacity-100' : 'opacity-75'}`}>
         {label}
       </span>
     </button>

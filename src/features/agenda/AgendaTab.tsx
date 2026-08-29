@@ -9,7 +9,7 @@ import {
   ChevronLeft,
   MessageCircle,
   CheckCircle2,
-  Sparkles,
+  Clock,
   Activity,
   UserCircle,
   X,
@@ -151,19 +151,20 @@ function AgendaTabComponent({
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col gap-14 pb-32 pt-10 px-2 max-w-screen-xl mx-auto w-full">
-      {/* Clean Header */}
-      <div className="flex flex-col gap-4 mb-6 no-print">
+    <div className="flex flex-col gap-10 pb-28 pt-8 px-5 sm:px-6 max-w-2xl mx-auto w-full">
+      {/* Header */}
+      <div className="flex flex-col gap-5 mb-2 no-print">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex flex-col gap-0.5">
-            <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{agendaViewMode === 'week' && !agendaFocusMode ? 'Semana clínica' : 'Atendimentos'}</h2>
-            </div>
-            <p className="text-[13px] text-slate-500">{agendaSmartCopy}</p>
+          <div className="flex flex-col gap-1">
+            <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-academy-primary">Agenda</p>
+            <h2 className="text-[34px] sm:text-[38px] font-bold text-academy-text tracking-tight leading-[1.1]">
+              {agendaViewMode === 'week' && !agendaFocusMode ? 'Semana clínica' : 'Atendimentos'}
+            </h2>
+            <p className="text-[14px] text-academy-muted">{agendaSmartCopy}</p>
           </div>
           <button
             onClick={openAppointmentModal}
-            className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-slate-700 transition-colors rounded-full hover:bg-slate-100"
+            className="w-11 h-11 flex items-center justify-center text-academy-primary transition-colors rounded-full liquid-glass-card hover:scale-[0.97] active:scale-95"
             title="Novo atendimento"
             aria-label="Novo atendimento"
           >
@@ -171,35 +172,36 @@ function AgendaTabComponent({
           </button>
         </div>
 
-        {/* Date Navigation — Apple Calendar style */}
+        {/* Date Navigation */}
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 liquid-glass-segment rounded-full p-1">
             <button
               onClick={() => navigateDate('prev')}
-              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors text-slate-500"
+              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/60 transition-colors text-academy-muted"
               aria-label="Anterior"
             >
               <ChevronLeft size={18} />
             </button>
             <button
               onClick={() => navigateDate('today')}
-              className={`px-3 py-1.5 text-[13px] font-bold rounded-full transition-all min-h-[36px] ${selectedDate.toDateString() === new Date().toDateString()
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
+              className={`px-4 py-2 text-[13px] font-bold rounded-full transition-all min-h-[36px] ${
+                selectedDate.toDateString() === new Date().toDateString()
+                  ? 'liquid-glass-segment-active text-primary'
+                  : 'text-academy-muted hover:text-academy-text'
+              }`}
               aria-label="Ir para hoje (T)"
             >
               Hoje
             </button>
             <button
               onClick={() => navigateDate('next')}
-              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors text-slate-500"
+              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/60 transition-colors text-academy-muted"
               aria-label="Próximo"
             >
               <ChevronRight size={18} />
             </button>
           </div>
-          <span className="text-sm font-semibold text-slate-600">
+          <span className="text-sm font-semibold text-academy-muted text-right">
             {agendaViewMode === 'week' && !agendaFocusMode
               ? (() => {
                 const start = new Date(selectedDate);
@@ -217,24 +219,24 @@ function AgendaTabComponent({
 
         {/* View Mode Controls */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <div className="grid grid-cols-3 bg-slate-100 p-1 rounded-full">
+          <div className="grid grid-cols-3 liquid-glass-segment p-1 rounded-full w-full sm:w-auto">
             <button
               onClick={() => { setAgendaFocusMode(false); setAgendaViewMode('day'); }}
-              className={`px-5 py-2 text-[13px] font-bold rounded-full transition-all min-h-[40px] ${!agendaFocusMode && agendaViewMode === 'day' ? 'bg-white shadow-sm text-primary' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`px-5 py-2 text-[13px] font-bold rounded-full transition-all min-h-[40px] ${!agendaFocusMode && agendaViewMode === 'day' ? 'liquid-glass-segment-active text-primary' : 'text-academy-muted hover:text-academy-text'}`}
               aria-label="Visão diária"
             >
               Dia
             </button>
             <button
               onClick={() => { setAgendaFocusMode(false); setAgendaViewMode('week'); }}
-              className={`px-5 py-2 text-[13px] font-bold rounded-full transition-all min-h-[40px] ${!agendaFocusMode && agendaViewMode === 'week' ? 'bg-white shadow-sm text-primary' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`px-5 py-2 text-[13px] font-bold rounded-full transition-all min-h-[40px] ${!agendaFocusMode && agendaViewMode === 'week' ? 'liquid-glass-segment-active text-primary' : 'text-academy-muted hover:text-academy-text'}`}
               aria-label="Visão semanal"
             >
               Semana
             </button>
             <button
               onClick={() => { setAgendaFocusMode(false); setAgendaViewMode('month'); }}
-              className={`px-5 py-2 text-[13px] font-bold rounded-full transition-all min-h-[40px] ${!agendaFocusMode && agendaViewMode === 'month' ? 'bg-white shadow-sm text-primary' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`px-5 py-2 text-[13px] font-bold rounded-full transition-all min-h-[40px] ${!agendaFocusMode && agendaViewMode === 'month' ? 'liquid-glass-segment-active text-primary' : 'text-academy-muted hover:text-academy-text'}`}
               aria-label="Visão mensal"
             >
               Mês
@@ -245,8 +247,8 @@ function AgendaTabComponent({
 
       {/* Timeline */}
       {loading ? (
-        <div className="bg-white rounded-[32px] border border-slate-100 shadow-[0_8px_40px_rgba(0,0,0,0.02)] overflow-hidden">
-          <div className="divide-y divide-slate-100">
+        <div className="liquid-glass-card rounded-[28px] overflow-hidden">
+          <div className="divide-y divide-academy-border/40">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="flex items-start gap-4 p-5 animate-pulse">
                 <div className="flex flex-col items-center gap-1 pt-1">
@@ -271,8 +273,8 @@ function AgendaTabComponent({
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-[32px] border border-slate-100 shadow-[0_8px_40px_rgba(0,0,0,0.02)] overflow-hidden no-print">
-          <div className="divide-y divide-slate-100">
+        <div className="liquid-glass-card rounded-[28px] overflow-hidden no-print">
+          <div className="divide-y divide-academy-border/40">
             {(() => {
               const filtered = filteredAppointments;
 
@@ -288,7 +290,7 @@ function AgendaTabComponent({
                     </div>
                     <button
                       onClick={() => setActiveTab('pacientes')}
-                      className="bg-primary text-white px-6 py-3 rounded-[20px] font-bold shadow-[0_8px_24px_rgba(139,92,246,0.12)] hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2 mx-auto text-sm"
+                      className="bg-primary text-white px-6 py-3 rounded-[20px] font-bold shadow-[0_8px_24px_rgba(82,5,123,0.2)] hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2 mx-auto text-sm"
                     >
                       <UserPlus size={16} />
                       Cadastrar primeiro paciente
@@ -305,7 +307,7 @@ function AgendaTabComponent({
                     </div>
                     <button
                       onClick={openAppointmentModal}
-                      className="bg-primary text-white px-6 py-3 rounded-[20px] font-bold shadow-[0_8px_24px_rgba(139,92,246,0.12)] hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2 mx-auto"
+                      className="bg-primary text-white px-6 py-3 rounded-[20px] font-bold shadow-[0_8px_24px_rgba(82,5,123,0.2)] hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2 mx-auto"
                     >
                       <Plus size={16} />
                       Agendar atendimento
@@ -318,20 +320,20 @@ function AgendaTabComponent({
                 const isNext = isNextAppointment(app, filtered);
 
                 return (
-                  <div key={app.id} className={`p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:gap-6 hover:bg-slate-50 transition-all group relative ${isNext && !isFocusMode ? 'border-l-4 border-primary bg-primary/5' : 'border-l-4 border-transparent'}`}>
-                    {/* Time column - hidden on week/month view mobile */}
+                  <div key={app.id} className={`p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:gap-6 hover:bg-white/30 transition-all group relative ${isNext && !isFocusMode ? 'border-l-4 border-primary bg-primary/5' : 'border-l-4 border-transparent'}`}>
+                    {/* Time column */}
                     <div className={`${agendaViewMode === 'day' ? '' : 'hidden sm:flex'} w-12 sm:w-16 pt-1 flex flex-col items-center shrink-0`}>
-                      <p className={`text-[13px] sm:text-[15px] font-bold ${isNext && !isFocusMode ? 'text-primary' : 'text-slate-900'}`}>
+                      <p className={`text-[13px] sm:text-[15px] font-bold ${isNext && !isFocusMode ? 'text-primary' : 'text-academy-text'}`}>
                         {formatAppointmentTime(app.start_time)}
                       </p>
-                      <div className={`w-[1px] ${agendaViewMode === 'day' ? 'flex-1' : 'h-8'} bg-slate-100 my-2`} />
+                      <div className={`w-[1px] ${agendaViewMode === 'day' ? 'flex-1' : 'h-8'} bg-academy-border/60 my-2`} />
                     </div>
 
-                    <div className="flex-1 bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-sm group-hover:shadow-md transition-all flex flex-col gap-4">
+                    <div className="flex-1 liquid-glass-subtle rounded-2xl p-4 sm:p-5 group-hover:shadow-sm transition-all flex flex-col gap-4">
                       {/* Head: Patient info and status */}
                       <div className="flex items-start gap-3 justify-between">
                         <div className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer" onClick={() => openPatientRecord(app.patient_id)}>
-                          <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 shrink-0 overflow-hidden border border-slate-200">
+                          <div className="w-12 h-12 liquid-glass-subtle rounded-full flex items-center justify-center text-academy-muted shrink-0 overflow-hidden">
                             {(() => {
                               const patient = patientMap.get(app.patient_id);
                               return patient?.photo_url ? (
@@ -342,8 +344,8 @@ function AgendaTabComponent({
                             })()}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-base sm:text-lg font-bold text-slate-900 truncate">{app.patient_name}</p>
-                            <p className="text-xs sm:text-sm text-slate-500 truncate">{app.notes || 'Consulta'}</p>
+                            <p className="text-base sm:text-lg font-bold text-academy-text truncate">{app.patient_name}</p>
+                            <p className="text-xs sm:text-sm text-academy-muted truncate">{app.notes || 'Consulta'}</p>
                           </div>
                         </div>
 
@@ -401,7 +403,7 @@ function AgendaTabComponent({
                 return (
                   <div
                     key={`suggestion-${slot.start}-${slot.end}`}
-                    className="py-1 px-6 hover:bg-slate-50 transition-colors cursor-pointer group"
+                    className="py-1 px-6 hover:bg-white/30 transition-colors cursor-pointer group"
                     onClick={() => {
                       // Pre-fill new appointment form
                       setNewAppointment({
@@ -415,8 +417,8 @@ function AgendaTabComponent({
                       setIsModalOpen(true);
                     }}
                   >
-                    <span className="text-xs text-slate-500 flex items-center gap-1.5">
-                      <Sparkles size={12} className="text-amber-500" />
+                    <span className="text-xs text-academy-muted flex items-center gap-1.5">
+                      <Clock size={12} className="text-academy-alert-text" />
                       {slot.start} – {slot.end} • {suggestion}
                     </span>
                   </div>
@@ -633,7 +635,7 @@ function AgendaTabComponent({
                                   })}
                                   className="text-xs font-bold text-primary flex items-center gap-1 mx-auto hover:underline"
                                 >
-                                  <Sparkles size={12} className="inline text-amber-500 mr-1" />Ver horário disponível ({bestSlot.start}–{bestSlot.end})
+                                  <Clock size={12} className="inline text-academy-alert-text mr-1" />Ver horário disponível ({bestSlot.start}–{bestSlot.end})
                                 </button>
                               )}
                             </div>
@@ -644,7 +646,7 @@ function AgendaTabComponent({
                           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                             {bestSlot && (
                               <div className="px-4 py-2 bg-amber-50 border-b border-amber-100 flex items-center justify-between">
-                                <span className="text-xs text-amber-700 flex items-center gap-1"><Sparkles size={12} /> Horário livre: {bestSlot.start}–{bestSlot.end}</span>
+                                <span className="text-xs text-academy-alert-text flex items-center gap-1"><Clock size={12} /> Horário livre: {bestSlot.start}–{bestSlot.end}</span>
                                 <button
                                   type="button"
                                   onClick={() => setWeekSuggestionSheet({
@@ -742,7 +744,7 @@ function AgendaTabComponent({
                                       title="Ver sugestão de encaixe"
                                       aria-label="Ver sugestão de encaixe"
                                     >
-                                      <Sparkles size={12} />
+                                      <Clock size={12} />
                                     </button>
                                   )}
                                 </div>

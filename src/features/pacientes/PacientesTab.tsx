@@ -392,21 +392,22 @@ function PacientesTabComponent({
   })();
 
   return (
-    <div className="space-y-4 pt-10">
-      {/* ── Header ── */}
-      <div className="flex flex-col gap-7 mb-6">
+    <div className="space-y-4 pt-8 pb-28 px-5 sm:px-6 max-w-2xl mx-auto">
+      {/* Header */}
+      <div className="flex flex-col gap-6 mb-4">
         <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-0.5">
-            <h3 className="text-3xl font-bold tracking-tight text-slate-900">Casos</h3>
+          <div className="flex flex-col gap-1">
+            <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-academy-primary">Prontuário</p>
+            <h3 className="text-[34px] sm:text-[38px] font-bold tracking-tight text-academy-text leading-[1.1]">Casos</h3>
             {patientsSubView === 'list' && (
-              <p className="text-[14px] text-slate-500 mt-1">{casesSmartCopy}</p>
+              <p className="text-[14px] text-academy-muted mt-1">{casesSmartCopy}</p>
             )}
           </div>
           {portalPendingCount > 0 && patientsSubView === 'list' && (
             <button
               type="button"
               onClick={() => setPatientsSubView('portal')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors text-[12px] font-semibold shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full liquid-glass-card border border-rose-200/50 text-academy-attention-text hover:scale-[0.98] transition-all text-[12px] font-semibold shrink-0"
             >
               <ClipboardList size={13} />
               {portalPendingCount}{' '}
@@ -417,7 +418,7 @@ function PacientesTabComponent({
             <button
               type="button"
               onClick={() => setPatientsSubView('list')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors text-[12px] font-semibold shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full liquid-glass-segment text-academy-muted hover:text-academy-text transition-colors text-[12px] font-semibold shrink-0"
             >
               ← Lista
             </button>
@@ -425,21 +426,21 @@ function PacientesTabComponent({
         </div>
 
         {patientsSubView === 'list' && (
-          <div className="flex items-center gap-3 bg-slate-100 p-1.5 rounded-[22px]">
+          <div className="flex items-center gap-3 liquid-glass-segment p-1.5 rounded-[22px]">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-academy-muted" size={16} />
               <input
                 type="text"
                 placeholder="Buscar paciente, conduta ou pendência"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="w-full h-12 pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-[18px] focus:outline-none focus:ring-1 focus:ring-slate-300 focus:border-slate-300 transition-all text-base"
+                className="w-full h-12 pl-9 pr-3 py-2 liquid-glass-subtle rounded-[18px] focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all text-base text-academy-text placeholder:text-academy-muted/60"
               />
             </div>
             <button
               type="button"
               onClick={() => setIsPatientModalOpen(true)}
-              className="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-200/50"
+              className="p-2.5 text-academy-primary transition-colors rounded-full liquid-glass-card hover:scale-[0.97] active:scale-95"
               title="Novo caso clinico"
             >
               <Plus size={18} strokeWidth={2.5} />
@@ -467,7 +468,7 @@ function PacientesTabComponent({
           )}
 
           {/* ── Filter chips ── */}
-          <div className="flex flex-wrap gap-2 bg-slate-100 p-1.5 rounded-[22px] mt-2">
+          <div className="flex flex-wrap gap-2 liquid-glass-segment p-1.5 rounded-[22px] mt-2">
             {filterChips.map(chip => (
               <button
                 key={chip.key}
@@ -475,8 +476,8 @@ function PacientesTabComponent({
                 onClick={() => setPatientListFilter(chip.key)}
                 className={`px-4 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-1.5 ${
                   effectivePatientListFilter === chip.key
-                    ? 'bg-white shadow-sm text-primary'
-                    : 'text-slate-500 hover:text-slate-700'
+                    ? 'liquid-glass-segment-active text-primary'
+                    : 'text-academy-muted hover:text-academy-text'
                 }`}
               >
                 {chip.label}
@@ -578,7 +579,7 @@ function PacientesTabComponent({
                 return (
                   <div
                     key={patient.id}
-                    className={`flex items-stretch bg-white rounded-2xl border border-l-[3px] hover:shadow-md transition-all ${borderColor}`}
+                    className={`flex items-stretch liquid-glass-card rounded-2xl border-l-[3px] hover:shadow-md transition-all ${borderColor}`}
                   >
                     <div className="flex items-center gap-3.5 flex-1 min-w-0 px-4 py-3.5">
                       <button
@@ -603,7 +604,7 @@ function PacientesTabComponent({
                         className="min-w-0 flex-1 text-left"
                       >
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="text-[15px] font-semibold text-slate-900 truncate leading-tight">
+                          <p className="text-[15px] font-semibold text-academy-text truncate leading-tight">
                             {patient.name}
                           </p>
                           {meta.isLead && hasText('Novo') && (
@@ -629,13 +630,13 @@ function PacientesTabComponent({
                             </span>
                           )}
                           {hasText(`${moment} · ${appointmentLabel}`) && (
-                            <span className="text-[11px] text-slate-400 truncate">
+                            <span className="text-[11px] text-academy-muted truncate">
                               {moment} · {appointmentLabel}
                             </span>
                           )}
                         </div>
                         {hasText(conductLabel) && (
-                          <p className="text-[13px] text-slate-700 mt-1 truncate">{conductLabel}</p>
+                          <p className="text-[13px] text-academy-text/80 mt-1 truncate">{conductLabel}</p>
                         )}
                         {hasText(pendingLabel) && (
                           <p className="text-[12px] text-primary font-semibold mt-0.5 truncate">
@@ -644,7 +645,7 @@ function PacientesTabComponent({
                         )}
                       </button>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0 px-3 border-l border-slate-50">
+                    <div className="flex items-center gap-1 shrink-0 px-3 border-l border-academy-border/40">
                       {meta.isLead ? (
                         <button
                           type="button"
@@ -694,15 +695,15 @@ function PacientesTabComponent({
             )}
 
             {patientCards.length === 0 && patients.length === 0 && !searchTerm && (
-              <div className="col-span-full bg-white rounded-3xl border border-slate-100 shadow-sm p-8 sm:p-12 space-y-6">
+              <div className="col-span-full liquid-glass-card rounded-3xl p-8 sm:p-12 space-y-6">
                 <div className="text-center space-y-3">
                   <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
                     <UserPlus size={28} className="text-primary" />
                   </div>
-                  <p className="text-lg font-bold text-slate-800">
+                  <p className="text-lg font-bold text-academy-text">
                     Voce ainda nao cadastrou pacientes.
                   </p>
-                  <p className="text-sm text-slate-500 max-w-sm mx-auto leading-relaxed">
+                  <p className="text-sm text-academy-muted max-w-sm mx-auto leading-relaxed">
                     Quando houver casos clinicos reais, eles aparecerao aqui com historico, evolucoes
                     e anexos.
                   </p>
@@ -710,12 +711,12 @@ function PacientesTabComponent({
                 <div className="text-center">
                   <button
                     onClick={() => setIsPatientModalOpen(true)}
-                    className="bg-primary text-white px-7 py-3.5 rounded-[20px] font-bold shadow-[0_8px_24px_rgba(139,92,246,0.12)] hover:opacity-90 transition-all active:scale-95 inline-flex items-center gap-2 text-sm"
+                    className="bg-primary text-white px-7 py-3.5 rounded-[20px] font-bold shadow-[0_8px_24px_rgba(82,5,123,0.2)] hover:opacity-90 transition-all active:scale-95 inline-flex items-center gap-2 text-sm"
                   >
                     <Plus size={16} />
                     Cadastrar paciente
                   </button>
-                  <p className="text-[11px] text-slate-400 mt-3">
+                  <p className="text-[11px] text-academy-muted mt-3">
                     Use apenas dados reais do atendimento academico.
                   </p>
                 </div>
@@ -723,9 +724,9 @@ function PacientesTabComponent({
             )}
 
             {patientCards.length === 0 && (patients.length > 0 || !!searchTerm) && (
-              <div className="col-span-full bg-white rounded-2xl border border-slate-100 shadow-sm p-10 text-center">
-                <Users size={36} className="mx-auto text-slate-200 mb-3" />
-                <p className="text-slate-600 font-medium">Nenhum caso clinico neste filtro.</p>
+              <div className="col-span-full liquid-glass-card rounded-2xl p-10 text-center">
+                <Users size={36} className="mx-auto text-academy-border mb-3" />
+                <p className="text-academy-muted font-medium">Nenhum caso clinico neste filtro.</p>
               </div>
             )}
           </div>

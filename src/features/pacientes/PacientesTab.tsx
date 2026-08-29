@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Users,
   Calendar,
@@ -108,6 +108,55 @@ function PacientesTabComponent({
   setIsPatientModalOpen,
   setActiveTab,
 }: PacientesTabProps) {
+  const filterAutoAppliedRef = useRef(false);
+
+  useEffect(() => {
+    if (loading || filterAutoAppliedRef.current) return;
+
+    const unique = Array.from(
+      new Map(patients.map(patient => [patient.id, patient])).values(),
+    ) as Patient[];
+    const intelMap = new Map<number, PatientIntelligence>();
+    patientIntelligence.forEach(pi => intelMap.set(pi.patient_id, pi));
+
+    const getNextAppt = (patient: Patient) =>
+      appointments
+        .filter(
+          app =>
+            app.patient_id === patient.id &&
+            getAppointmentTime(app.start_time) >= now.getTime() &&
+            !['CANCELLED', 'NO_SHOW'].includes(String(app.status || '').toUpperCase()),
+        )
+        .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time))[0] ||
+      null;
+
+    const hasAnamnesis = (patient: Patient) => {
+      const anamnesis = patient.anamnesis || {};
+      return Object.values(anamnesis).some(value =>
+        typeof value === 'string' ? value.trim().length > 0 : Boolean(value),
+      );
+    };
+
+    const isPending = (patient: Patient) => {
+      const meta = getPatientCardMeta(patient, appointments, now);
+      const intel = intelMap.get(patient.id) || null;
+      const nextAppointment = getNextAppt(patient);
+      const state = deriveAcademyPatientState(patient, appointments, now);
+      if (state.finishedWithoutEvolution.length > 0) return true;
+      if (nextAppointment && !hasAnamnesis(patient)) return true;
+      if (meta.attentionStatus.key === 'overdue' || meta.attentionStatus.key === 'review' || meta.isLead) {
+        return true;
+      }
+      return intel?.priority === 'HIGH' || intel?.status === 'ABANDONO' || intel?.status === 'ATENCAO';
+    };
+
+    const totalPending = unique.filter(isPending).length;
+    const totalScheduled = unique.filter(patient => Boolean(getNextAppt(patient))).length;
+
+    setPatientListFilter(totalPending > 0 ? 'pending' : totalScheduled > 0 ? 'scheduled' : 'all');
+    filterAutoAppliedRef.current = true;
+  }, [loading, patients, patientIntelligence, appointments, now, setPatientListFilter]);
+
   if (loading) {
     return (
       <div className="pt-10 px-2 max-w-screen-xl mx-auto w-full">

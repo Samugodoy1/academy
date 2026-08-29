@@ -109,7 +109,6 @@ export interface AgendaTabProps {
   setAppointmentModalMode: (value: 'schedule' | 'reschedule') => void;
   setEditingAppointmentId: (value: number | null) => void;
   setSuggestedSlot: (value: SuggestedSlot | null) => void;
-  StatusBadge: typeof StatusBadge;
 }
 
 function AgendaTabComponent({

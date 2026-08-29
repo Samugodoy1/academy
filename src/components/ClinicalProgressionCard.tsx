@@ -21,7 +21,7 @@ export const ClinicalProgressionCard: React.FC<ClinicalProgressionCardProps> = (
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-      className="rounded-[24px] bg-white border border-academy-border/70 shadow-[0_8px_28px_rgba(15,23,42,0.05)] overflow-hidden"
+      className="liquid-glass-card rounded-[24px] overflow-hidden"
     >
       <div className="px-6 pt-6 pb-2">
         <div className="flex items-center gap-2.5 mb-4">
@@ -61,7 +61,7 @@ export const ClinicalProgressionCard: React.FC<ClinicalProgressionCardProps> = (
           <motion.button
             whileTap={{ scale: 0.96, opacity: 0.9 }}
             onClick={onReviewNextStep}
-            className="flex items-center gap-1.5 px-5 py-2.5 rounded-[14px] bg-academy-soft text-academy-primary text-[13px] font-bold transition-all"
+            className="flex items-center gap-1.5 px-5 py-2.5 rounded-[14px] liquid-glass-pill text-academy-primary text-[13px] font-bold transition-all"
           >
             Revisar
             <ChevronRight size={14} />

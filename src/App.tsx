@@ -45,7 +45,8 @@ import {
   Mail,
   Download,
   LinkIcon,
-  BookOpen
+  BookOpen,
+  Stethoscope
 } from './icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Odontogram } from './components/Odontogram';
@@ -2310,12 +2311,12 @@ export default function App() {
       } />
       <Route path="*" element={
         !user ? (
-          <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center px-6 font-sans antialiased">
+          <div className="min-h-screen academy-ambient-bg flex items-center justify-center px-6 font-sans antialiased">
             <motion.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full max-w-[372px]"
+              className="w-full max-w-[400px] liquid-glass-heavy rounded-[32px] p-8 sm:p-10"
             >
               {/* Heading */}
               <motion.div
@@ -2324,7 +2325,7 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.05, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
               >
-                <h1 className="text-[26px] font-semibold text-[#0F1211] tracking-[-0.4px] leading-[1.2] mb-2.5">
+                <h1 className="text-[26px] font-semibold text-academy-text tracking-[-0.4px] leading-[1.2] mb-2.5">
                   {isRegistering ? 'Crie sua conta gratuita' : (() => {
                     const h = new Date().getHours();
                     if (h >= 5 && h < 12) return 'Bom dia. Vamos organizar sua rotina clinica?';
@@ -2332,7 +2333,7 @@ export default function App() {
                     return 'Boa noite. Vamos revisar o dia de hoje?';
                   })()}
                 </h1>
-                <p className="text-[15px] text-[#8B918E] leading-relaxed">
+                <p className="text-[15px] text-academy-muted leading-relaxed">
                   {isRegistering ? 'Preencha os dados para enviar sua solicitacao' : 'Acesse sua rotina academica com seguranca'}
                 </p>
               </motion.div>
@@ -2340,20 +2341,20 @@ export default function App() {
               <form onSubmit={isRegistering ? handleRegister : handleLogin} className="space-y-5">
                 {isRegistering && (
                   <div>
-                    <label className="block text-[13px] font-medium text-[#4B5250] mb-2">Nome completo</label>
+                    <label className="block text-[13px] font-medium text-academy-muted mb-2">Nome completo</label>
                     <input
                       type="text"
                       required
                       placeholder="Nome completo"
                       value={registerData.name}
                       onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
-                      className="w-full h-[48px] px-4 bg-white border border-[#DFE3E1] rounded-[12px] text-base text-[#0F1211] placeholder-[#C0C7C3] outline-none transition-[border-color,box-shadow,background-color] duration-200 ease-out focus:border-[#2E6B53] focus:bg-[#FBFEFC] focus:shadow-[0_0_0_4px_rgba(46,107,83,0.08),0_1px_2px_rgba(0,0,0,0.04)]"
+                      className="ios-input w-full h-[48px]"
                     />
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-[13px] font-medium text-[#4B5250] mb-2">E-mail</label>
+                  <label className="block text-[13px] font-medium text-academy-muted mb-2">E-mail</label>
                   <input
                     type="email"
                     required
@@ -2363,17 +2364,17 @@ export default function App() {
                       ? setRegisterData({ ...registerData, email: e.target.value })
                       : setLoginData({ ...loginData, email: e.target.value })
                     }
-                    className="w-full h-[48px] px-4 bg-white border border-[#DFE3E1] rounded-[12px] text-base text-[#0F1211] placeholder-[#C0C7C3] outline-none transition-[border-color,box-shadow,background-color] duration-200 ease-out focus:border-[#2E6B53] focus:bg-[#FBFEFC] focus:shadow-[0_0_0_4px_rgba(46,107,83,0.08),0_1px_2px_rgba(0,0,0,0.04)]"
+                    className="ios-input w-full h-[48px]"
                   />
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-[13px] font-medium text-[#4B5250]">Senha</label>
+                    <label className="text-[13px] font-medium text-academy-muted">Senha</label>
                     {!isRegistering && (
                       <Link
                         to="/forgot-password"
-                        className="text-[12px] text-[#A3AAA7] hover:text-[#6B7270] transition-colors duration-200"
+                        className="text-[12px] text-academy-muted hover:text-academy-text transition-colors duration-200"
                       >
                         Esqueci a senha
                       </Link>
@@ -2388,7 +2389,7 @@ export default function App() {
                       ? setRegisterData({ ...registerData, password: e.target.value })
                       : setLoginData({ ...loginData, password: e.target.value })
                     }
-                    className="w-full h-[48px] px-4 bg-white border border-[#DFE3E1] rounded-[12px] text-base text-[#0F1211] placeholder-[#C0C7C3] outline-none transition-[border-color,box-shadow,background-color] duration-200 ease-out focus:border-[#2E6B53] focus:bg-[#FBFEFC] focus:shadow-[0_0_0_4px_rgba(46,107,83,0.08),0_1px_2px_rgba(0,0,0,0.04)]"
+                    className="ios-input w-full h-[48px]"
                   />
                 </div>
 
@@ -2408,7 +2409,7 @@ export default function App() {
                     initial={{ opacity: 0, y: -2 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2, ease: 'easeOut' }}
-                    className="text-[13px] text-[#2E6B53]"
+                    className="text-[13px] text-academy-success-text"
                   >
                     {registerMessage}
                   </motion.p>
@@ -2426,13 +2427,13 @@ export default function App() {
                           acceptedTerms: e.target.checked,
                           acceptedPrivacyPolicy: e.target.checked
                         })}
-                        className="mt-[3px] w-3.5 h-3.5 rounded-[4px] border-[#D1D5DB] text-[#2E6B53] focus:ring-0 cursor-pointer shrink-0"
+                        className="mt-[3px] w-3.5 h-3.5 rounded-[4px] border-academy-border text-primary focus:ring-0 cursor-pointer shrink-0"
                       />
-                      <span className="text-[13px] text-[#6B7270] leading-snug">
+                      <span className="text-[13px] text-academy-muted leading-snug">
                         Li e concordo com os{' '}
-                        <Link to="/termos" target="_blank" className="text-[#0F1211] underline underline-offset-2 decoration-[#D1D5DB] hover:decoration-[#0F1211] transition-[text-decoration-color] duration-200">Termos de Uso</Link>
+                        <Link to="/termos" target="_blank" className="text-academy-text underline underline-offset-2 decoration-academy-border hover:decoration-academy-text transition-[text-decoration-color] duration-200">Termos de Uso</Link>
                         {' '}e a{' '}
-                        <Link to="/privacidade" target="_blank" className="text-[#0F1211] underline underline-offset-2 decoration-[#D1D5DB] hover:decoration-[#0F1211] transition-[text-decoration-color] duration-200">Política de Privacidade</Link>.
+                        <Link to="/privacidade" target="_blank" className="text-academy-text underline underline-offset-2 decoration-academy-border hover:decoration-academy-text transition-[text-decoration-color] duration-200">Política de Privacidade</Link>.
                       </span>
                     </label>
                     <label className="flex items-start gap-2.5 cursor-pointer">
@@ -2441,9 +2442,9 @@ export default function App() {
                         required
                         checked={registerData.acceptedResponsibility}
                         onChange={(e) => setRegisterData({ ...registerData, acceptedResponsibility: e.target.checked })}
-                        className="mt-[3px] w-3.5 h-3.5 rounded-[4px] border-[#D1D5DB] text-[#2E6B53] focus:ring-0 cursor-pointer shrink-0"
+                        className="mt-[3px] w-3.5 h-3.5 rounded-[4px] border-academy-border text-primary focus:ring-0 cursor-pointer shrink-0"
                       />
-                      <span className="text-[13px] text-[#6B7270] leading-snug">
+                      <span className="text-[13px] text-academy-muted leading-snug">
                         Declaro que vou cadastrar apenas dados reais vinculados a minha rotina clinica academica.
                       </span>
                     </label>
@@ -2456,12 +2457,12 @@ export default function App() {
                     whileHover={{ scale: 1.005 }}
                     whileTap={{ scale: 0.98 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 25, mass: 0.8 }}
-                    className="w-full h-[48px] bg-academy-primary hover:bg-academy-primary text-white text-[15px] font-medium rounded-[12px] shadow-[0_1px_3px_rgba(139,92,246,0.1),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_3px_8px_rgba(139,92,246,0.14),0_1px_2px_rgba(0,0,0,0.04)] transition-[background-color,box-shadow] duration-[160ms] ease-in-out"
+                    className="w-full h-[48px] bg-academy-primary hover:bg-academy-primary-dark text-white text-[15px] font-medium rounded-[14px] shadow-[0_8px_24px_rgba(82,5,123,0.22)] transition-[background-color,box-shadow] duration-[160ms] ease-in-out"
                     style={{ willChange: 'transform' }}
                   >
                     {isRegistering ? 'Criar conta' : 'Continuar'}
                   </motion.button>
-                  <p className="text-center text-[11px] text-[#C0C7C3] mt-3.5">Ambiente seguro · Dados criptografados</p>
+                  <p className="text-center text-[11px] text-academy-muted/70 mt-3.5">Ambiente seguro · Dados criptografados</p>
                 </div>
               </form>
 
@@ -2476,23 +2477,23 @@ export default function App() {
                     }}
                     whileTap={{ scale: 0.97 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                    className="text-[13px] text-[#8B918E] hover:text-[#4B5250] transition-colors duration-200"
+                    className="text-[13px] text-academy-muted hover:text-academy-text transition-colors duration-200"
                   >
                     {isRegistering ? 'Já tem uma conta? Entrar' : 'Não tem conta? Cadastre-se'}
                   </motion.button>
                 </div>
 
-                <div className="flex justify-center items-center gap-3 text-[11px] text-[#C0C7C3]">
-                  <Link to="/termos" className="hover:text-[#8B918E] transition-colors duration-200">Termos</Link>
+                <div className="flex justify-center items-center gap-3 text-[11px] text-academy-muted/60">
+                  <Link to="/termos" className="hover:text-academy-muted transition-colors duration-200">Termos</Link>
                   <span>·</span>
-                  <Link to="/privacidade" className="hover:text-[#8B918E] transition-colors duration-200">Privacidade</Link>
+                  <Link to="/privacidade" className="hover:text-academy-muted transition-colors duration-200">Privacidade</Link>
                 </div>
               </div>
             </motion.div>
           </div>
         ) : (
           <AppProvider value={appContextValue}>
-          <div className="min-h-screen bg-[#F8FAFC] flex font-sans text-slate-900 relative overflow-x-hidden">
+          <div className="min-h-screen academy-ambient-bg flex font-sans text-academy-text relative overflow-x-hidden">
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
               {isSidebarOpen && (
@@ -2508,17 +2509,17 @@ export default function App() {
 
             {/* Sidebar */}
             <aside className={`
-        fixed inset-y-0 left-0 z-[110] bg-white border-r border-slate-200 p-4 md:p-6 flex flex-col transition-all duration-300 ease-in-out tablet-l:static tablet-l:translate-x-0 no-print
+        fixed inset-y-0 left-0 z-[110] liquid-glass-sidebar p-4 md:p-6 flex flex-col transition-all duration-300 ease-in-out tablet-l:static tablet-l:translate-x-0 no-print
         ${isSidebarOpen ? 'translate-x-0 w-72' : '-translate-x-full w-72 tablet-l:w-20 desktop:w-72'}
       `}>
               <div className="flex items-center justify-between mb-10 px-2">
                 <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-md shadow-primary/10 shrink-0">
-                    <Plus size={24} strokeWidth={3} />
+                  <div className="w-10 h-10 bg-primary rounded-[14px] flex items-center justify-center text-white shadow-[0_8px_20px_rgba(82,5,123,0.25)] shrink-0">
+                    <BookOpen size={22} strokeWidth={2.5} />
                   </div>
-                  <h1 className="text-xl font-bold tracking-tight text-slate-800 whitespace-nowrap tablet-l:hidden desktop:block">{PRODUCT_LABEL}</h1>
+                  <h1 className="text-xl font-bold tracking-tight text-academy-text whitespace-nowrap tablet-l:hidden desktop:block">{PRODUCT_LABEL}</h1>
                 </div>
-                <button onClick={() => setIsSidebarOpen(false)} className="tablet-l:hidden text-slate-400">
+                <button onClick={() => setIsSidebarOpen(false)} className="tablet-l:hidden text-academy-muted">
                   <Plus size={24} className="rotate-45" />
                 </button>
               </div>
@@ -2534,9 +2535,9 @@ export default function App() {
                 <SidebarItem id="configuracoes" icon={Settings} label="Configuracoes" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} navigate={navigate} />
               </nav>
 
-              <div className="pt-6 border-t border-slate-100">
+              <div className="pt-6 border-t border-academy-border/50">
                 <div className="flex items-center gap-3 px-2 mb-4 overflow-hidden">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 shrink-0 overflow-hidden border border-slate-200">
+                  <div className="w-10 h-10 rounded-full liquid-glass-subtle flex items-center justify-center text-academy-muted shrink-0 overflow-hidden">
                     {profile?.photo_url ? (
                       <img
                         src={profile.photo_url}
@@ -2549,21 +2550,21 @@ export default function App() {
                     )}
                   </div>
                   <div className="tablet-l:hidden desktop:block whitespace-nowrap">
-                    <p className="text-sm font-semibold text-slate-800 truncate">{user?.name}</p>
-                    <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">{user?.role}</p>
+                    <p className="text-sm font-semibold text-academy-text truncate">{user?.name}</p>
+                    <p className="text-xs text-academy-muted uppercase tracking-wider font-bold">{user?.role}</p>
                   </div>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-rose-600 transition-colors overflow-hidden"
+                  className="w-full flex items-center gap-3 px-4 py-2 text-academy-muted hover:text-academy-attention-text transition-colors overflow-hidden"
                 >
                   <LogOut size={18} className="shrink-0" />
                   <span className="text-sm font-medium tablet-l:hidden desktop:block whitespace-nowrap">Sair</span>
                 </button>
 
-                <div className="mt-6 pt-6 border-t border-slate-50 tablet-l:hidden desktop:block">
-                  <p className="text-[10px] text-slate-400 px-4 mb-2">© 2026 {PRODUCT_LABEL}</p>
-                  <div className="flex flex-col gap-1 px-4 text-[10px] font-bold text-slate-500">
+                <div className="mt-6 pt-6 border-t border-academy-border/40 tablet-l:hidden desktop:block">
+                  <p className="text-[10px] text-academy-muted px-4 mb-2">© 2026 {PRODUCT_LABEL}</p>
+                  <div className="flex flex-col gap-1 px-4 text-[10px] font-bold text-academy-muted">
                     <Link to="/termos" className="hover:text-primary transition-colors">Termos de Uso</Link>
                     <Link to="/privacidade" className="hover:text-primary transition-colors">Política de Privacidade</Link>
                   </div>
@@ -2586,11 +2587,11 @@ export default function App() {
                     transition={{ duration: 0.3 }}
                     className="max-w-screen-xl mx-auto px-0 md:px-4 mb-4 no-print"
                   >
-                    <div className="flex items-center gap-3 bg-primary/5 border border-primary/10 rounded-2xl px-5 py-3.5">
+                    <div className="flex items-center gap-3 liquid-glass-card border border-primary/10 rounded-2xl px-5 py-3.5">
                       <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
-                        <Sparkles size={16} className="text-primary" />
+                        <Stethoscope size={16} className="text-primary" />
                       </div>
-                      <p className="text-[13px] font-medium text-slate-700 flex-1">
+                      <p className="text-[13px] font-medium text-academy-text flex-1">
                         {guide.message}
                       </p>
                       <button
@@ -4081,7 +4082,7 @@ export default function App() {
             {/* Primary Action & Mobile Bottom Navigation */}
             <div className="fixed bottom-0 left-0 right-0 z-50 tablet-l:hidden no-print">
               {/* Bottom Navigation */}
-              <nav className="bg-white/80 backdrop-blur-xl border-t border-[#C6C6C8]/30 px-2 pt-2 pb-6 flex justify-around items-center">
+              <nav className="liquid-glass-nav px-2 pt-2 pb-6 flex justify-around items-center">
                 <BottomNavItem id="dashboard" label="Rotina" icon={Home} activeTab={activeTab} setActiveTab={setActiveTab} navigate={navigate} />
                 <BottomNavItem id="agenda" label="Atend." icon={Calendar} activeTab={activeTab} setActiveTab={setActiveTab} navigate={navigate} />
                 <BottomNavItem id="pacientes" label="Casos" icon={Users} activeTab={activeTab} setActiveTab={setActiveTab} navigate={navigate} />

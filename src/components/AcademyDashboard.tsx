@@ -722,11 +722,11 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         >
           <div
-            className="relative overflow-hidden rounded-[32px] bg-academy-primary shadow-[0_24px_80px_rgba(82,5,123,0.22)] flex flex-col"
+            className="relative overflow-hidden rounded-[32px] academy-hero-surface flex flex-col"
             style={{ minHeight: 'min(60svh, 520px)' }}
           >
-            <div className="absolute inset-x-0 top-0 h-1.5 bg-white/10" />
-            <div className="flex-1 px-8 pt-12 pb-6 flex flex-col gap-6">
+            <div className="absolute inset-x-0 top-0 h-px bg-white/20 z-10" />
+            <div className="relative z-10 flex-1 px-8 pt-12 pb-6 flex flex-col gap-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.14em]">
@@ -758,7 +758,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   
               <div className="flex items-center gap-2.5 flex-wrap">
                 {appointmentMetaLabel && (
-                  <span className="px-3 py-1.5 rounded-full text-[12px] font-bold bg-white/15 text-white">
+                  <span className="px-3 py-1.5 rounded-full text-[12px] font-bold liquid-glass-pill text-white">
                     {appointmentMetaLabel}
                   </span>
                 )}
@@ -797,7 +797,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
               </div>
             </div>
   
-            <div className="px-7 pb-8 pt-5 space-y-3">
+            <div className="relative z-10 px-7 pb-8 pt-5 space-y-3">
               <motion.button
                 whileTap={{ scale: 0.98, opacity: 0.92 }}
                 transition={{ duration: 0.18, ease: 'easeOut' }}
@@ -811,7 +811,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
                   whileTap={{ scale: 0.98, opacity: 0.9 }}
                   transition={{ duration: 0.18, ease: 'easeOut' }}
                   onClick={() => setActiveTab('pacientes')}
-                  className="flex items-center justify-center gap-2 px-5 py-[15px] rounded-[20px] bg-white/15 border border-white/20 text-[14px] font-bold text-white transition-all"
+                  className="flex items-center justify-center gap-2 px-5 py-[15px] rounded-[20px] liquid-glass-pill text-[14px] font-bold text-white transition-all"
                 >
                   <Users size={16} />
                   Casos
@@ -820,7 +820,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
                   whileTap={{ scale: 0.98, opacity: 0.9 }}
                   transition={{ duration: 0.18, ease: 'easeOut' }}
                   onClick={openAppointmentModal}
-                  className="flex items-center justify-center gap-2 py-[15px] rounded-[20px] bg-white/15 border border-white/20 text-[14px] font-bold text-white transition-all"
+                  className="flex items-center justify-center gap-2 py-[15px] rounded-[20px] liquid-glass-pill text-[14px] font-bold text-white transition-all"
                 >
                   <CalendarPlus size={16} />
                   Agendar
@@ -834,7 +834,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           <motion.button
             whileTap={{ scale: 0.96 }}
             onClick={() => setIsPatientModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-[12px] rounded-xl bg-academy-soft text-academy-primary border border-academy-primary/12 text-[13px] font-bold transition-all shadow-[0_6px_18px_rgba(82,5,123,0.06)]"
+            className="flex items-center gap-1.5 px-4 py-[12px] rounded-xl liquid-glass-card text-academy-primary text-[13px] font-bold transition-all"
           >
             <Plus size={14} strokeWidth={2.5} />
             Caso
@@ -879,7 +879,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="rounded-[24px] bg-white border border-academy-border/70 shadow-[0_8px_28px_rgba(15,23,42,0.05)] overflow-hidden">
+          <div className="liquid-glass-card rounded-[24px] overflow-hidden">
             <div className="px-6 pt-6 pb-2">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-8 h-8 rounded-[12px] bg-academy-neutral flex items-center justify-center">
@@ -920,7 +920,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
             </div>
             <span className="text-[12px] font-bold text-academy-attention-text">{pendingRows.length}</span>
           </div>
-          <div className="rounded-[20px] overflow-hidden bg-white border border-rose-100 shadow-[0_8px_28px_rgba(225,29,72,0.08)]">
+          <div className="rounded-[20px] overflow-hidden liquid-glass-card border border-rose-200/50">
             {pendingRows.map(row => (
               <React.Fragment key={row.id}>
                 <ListRow
@@ -955,7 +955,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
               Ver tudo
             </button>
           </div>
-          <div className="rounded-[20px] overflow-hidden bg-white border border-academy-border/80 shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
+          <div className="rounded-[20px] overflow-hidden liquid-glass-card">
             {otherAppointments.map((app, index) => {
               const dateTime = formatAgendaListDateTime(app.start_time);
               return (
@@ -994,7 +994,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           <motion.button
             whileTap={{ scale: 0.98, opacity: 0.9 }}
             onClick={() => openPatientRecord(pausedCase.id)}
-            className="w-full flex items-center gap-4 bg-academy-alert rounded-[20px] px-5 py-4 transition-all"
+            className="w-full flex items-center gap-4 liquid-glass-card rounded-[20px] px-5 py-4 transition-all"
           >
             <div className="w-10 h-10 bg-white rounded-[14px] flex items-center justify-center text-academy-alert-text shadow-sm shrink-0">
               <Clock size={20} />
@@ -1010,7 +1010,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
       {patients.length > 0 && pendingRows.length === 0 && otherAppointments.length === 0 && !pausedCase && (
         <section>
-          <div className="w-full flex items-center gap-4 bg-academy-success rounded-[20px] px-5 py-4">
+          <div className="w-full flex items-center gap-4 liquid-glass-card rounded-[20px] px-5 py-4 border border-emerald-200/40">
             <div className="w-10 h-10 bg-white rounded-[14px] flex items-center justify-center text-academy-success-text shadow-sm shrink-0">
               <CheckCircle2 size={20} />
             </div>
@@ -1027,7 +1027,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 };
 
 const HeroDetail = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-[18px] bg-white/10 border border-white/15 px-4 py-3">
+  <div className="rounded-[18px] liquid-glass-inset px-4 py-3">
     <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.12em]">{label}</span>
     <p className="text-[14px] font-semibold text-white mt-0.5 leading-snug line-clamp-2">{value}</p>
   </div>

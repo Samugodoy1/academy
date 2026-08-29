@@ -6,7 +6,6 @@ import {
   Calendar,
   Check,
   ClipboardList,
-  Sparkles,
   UserPlus,
   Users,
 } from '../icons';
@@ -82,7 +81,7 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
           transition={{ duration: 0.5 }}
           className="text-center space-y-4 pt-6"
         >
-          <div className="w-16 h-16 bg-primary rounded-[20px] flex items-center justify-center text-white shadow-lg shadow-primary/20 mx-auto">
+          <div className="w-16 h-16 bg-primary rounded-[22px] flex items-center justify-center text-white shadow-[0_12px_36px_rgba(82,5,123,0.25)] mx-auto">
             <BookOpen size={32} />
           </div>
           <div className="space-y-2">
@@ -104,7 +103,7 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
           <h2 className="text-[13px] font-bold text-academy-muted uppercase tracking-widest px-2">
             Como funciona
           </h2>
-          <div className="bg-white rounded-[24px] border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.03)] divide-y divide-slate-50">
+          <div className="liquid-glass-card rounded-[28px] divide-y divide-academy-border/40">
             {[
               {
                 icon: <UserPlus size={20} className="text-primary" />,
@@ -119,14 +118,14 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
                 desc: 'Agenda clínica para simular ou registrar sua rotina de box.',
               },
               {
-                icon: <ClipboardList size={20} className="text-sky-600" />,
-                bg: 'bg-sky-50',
+                icon: <ClipboardList size={20} className="text-academy-primary" />,
+                bg: 'bg-academy-soft',
                 title: 'Registre evoluções',
                 desc: 'Anamnese, odontograma e evolução clínica no prontuário.',
               },
               {
-                icon: <BookOpen size={20} className="text-violet-600" />,
-                bg: 'bg-violet-50',
+                icon: <BookOpen size={20} className="text-academy-primary" />,
+                bg: 'bg-academy-soft',
                 title: 'Estude no contexto',
                 desc: 'Materiais de estudo ligados ao que você está atendendo.',
               },
@@ -139,7 +138,7 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
                   <p className="text-[15px] font-semibold text-academy-text">{item.title}</p>
                   <p className="text-[13px] text-academy-muted mt-0.5">{item.desc}</p>
                 </div>
-                <div className="flex items-center justify-center w-6 h-6 bg-slate-50 rounded-full text-[11px] font-bold text-academy-muted shrink-0 mt-1">
+                <div className="flex items-center justify-center w-6 h-6 liquid-glass-subtle rounded-full text-[11px] font-bold text-academy-muted shrink-0 mt-1">
                   {i + 1}
                 </div>
               </div>
@@ -158,10 +157,10 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
           </h2>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { icon: <Users size={18} />, label: 'Casos', desc: 'Cadastro e prontuário', color: 'text-primary', bg: 'bg-primary/5 border-primary/10' },
-              { icon: <Calendar size={18} />, label: 'Atendimentos', desc: 'Agenda clínica', color: 'text-academy-primary', bg: 'bg-academy-soft/50 border-violet-100' },
-              { icon: <ClipboardList size={18} />, label: 'Prontuário', desc: 'Evolução e odontograma', color: 'text-sky-600', bg: 'bg-sky-50/50 border-sky-100' },
-              { icon: <BookOpen size={18} />, label: 'Estudos', desc: 'Materiais clínicos', color: 'text-violet-600', bg: 'bg-violet-50/50 border-violet-100' },
+              { icon: <Users size={18} />, label: 'Casos', desc: 'Cadastro e prontuário', color: 'text-primary', bg: 'liquid-glass-card border-primary/10' },
+              { icon: <Calendar size={18} />, label: 'Atendimentos', desc: 'Agenda clínica', color: 'text-academy-primary', bg: 'liquid-glass-card border-academy-primary/10' },
+              { icon: <ClipboardList size={18} />, label: 'Prontuário', desc: 'Evolução e odontograma', color: 'text-academy-primary', bg: 'liquid-glass-card border-academy-primary/10' },
+              { icon: <BookOpen size={18} />, label: 'Estudos', desc: 'Materiais clínicos', color: 'text-academy-primary', bg: 'liquid-glass-card border-academy-primary/10' },
             ].map((item, i) => (
               <motion.div
                 key={i}
@@ -190,7 +189,7 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
               setWelcomeSeen(true);
               onDismissWelcome();
             }}
-            className="w-full flex items-center justify-center gap-3 bg-primary text-white py-4 rounded-[20px] text-[16px] font-bold shadow-[0_12px_36px_rgba(139,92,246,0.15)] hover:opacity-90 transition-all"
+            className="w-full flex items-center justify-center gap-3 bg-primary text-white py-4 rounded-[20px] text-[16px] font-bold shadow-[0_12px_36px_rgba(82,5,123,0.22)] hover:opacity-90 transition-all"
           >
             Começar minha rotina clínica
             <ArrowRight size={18} />
@@ -227,7 +226,7 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
           transition={{ duration: 0.3 }}
           className="mx-2 flex items-center gap-3"
         >
-          <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+          <div className="flex-1 h-1.5 bg-academy-border/60 rounded-full overflow-hidden">
             <motion.div
               className="h-full bg-primary rounded-full"
               initial={{ width: '0%' }}
@@ -253,7 +252,7 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
             <span className="text-[11px] font-bold text-primary uppercase tracking-widest">Passo 1</span>
             {hasPatients && <span className="text-[11px] font-bold text-primary/60 ml-1">Concluído</span>}
           </div>
-          <div className={`bg-white rounded-[28px] border shadow-[0_4px_24px_rgba(0,0,0,0.03)] p-7 sm:p-8 space-y-5 ${hasPatients ? 'border-primary/20 opacity-55' : 'border-slate-100'}`}>
+          <div className={`liquid-glass-card rounded-[28px] p-7 sm:p-8 space-y-5 ${hasPatients ? 'border-primary/20 opacity-55' : ''}`}>
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 bg-primary/10 rounded-[18px] flex items-center justify-center shrink-0">
                 {hasPatients ? <Check size={22} className="text-primary" /> : <UserPlus size={22} className="text-primary" />}
@@ -271,7 +270,7 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
             </div>
             {!hasPatients && (
               <>
-                <div className="bg-[#F9FAFB] rounded-2xl p-4 space-y-2.5 border border-slate-100/50">
+                <div className="liquid-glass-subtle rounded-2xl p-4 space-y-2.5">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">M</div>
                     <div>
@@ -281,15 +280,15 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
                   </div>
                   <div className="flex gap-2 flex-wrap">
                     {['Anamnese', 'Odontograma', 'Evolução', 'Plano'].map(label => (
-                      <span key={label} className="px-2.5 py-1 bg-white rounded-lg text-[10px] font-bold text-slate-500 border border-slate-100">{label}</span>
+                      <span key={label} className="px-2.5 py-1 liquid-glass-subtle rounded-lg text-[10px] font-bold text-academy-muted">{label}</span>
                     ))}
                   </div>
                 </div>
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={() => setIsPatientModalOpen(true)}
-                  className="flex items-center gap-2.5 bg-primary text-white px-6 py-3.5 rounded-[18px] text-[14px] font-bold shadow-[0_8px_24px_rgba(139,92,246,0.15)] hover:opacity-90 transition-all"
-                >
+                  className="flex items-center gap-2.5 bg-primary text-white px-6 py-3.5 rounded-[18px] text-[14px] font-bold shadow-[0_8px_24px_rgba(82,5,123,0.2)] hover:opacity-90 transition-all"
+                  >
                   Cadastrar primeiro caso
                   <ArrowRight size={15} />
                 </motion.button>
@@ -302,21 +301,21 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
         <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-3">
           <div className="px-2 flex items-center gap-2">
             {hasAppointments ? (
-              <div className="w-5 h-5 bg-violet-500 rounded-full flex items-center justify-center">
+              <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center">
                 <Check size={12} className="text-white" strokeWidth={3} />
               </div>
             ) : (
-              <div className={`w-5 h-5 rounded-full border-2 ${hasPatients ? 'border-violet-500' : 'border-slate-200'}`} />
+              <div className={`w-5 h-5 rounded-full border-2 ${hasPatients ? 'border-primary' : 'border-academy-border'}`} />
             )}
-            <span className={`text-[11px] font-bold uppercase tracking-widest ${hasPatients ? 'text-violet-600' : 'text-slate-300'}`}>Passo 2</span>
-            {hasAppointments && <span className="text-[11px] font-bold text-violet-400 ml-1">Concluído</span>}
+            <span className={`text-[11px] font-bold uppercase tracking-widest ${hasPatients ? 'text-primary' : 'text-academy-muted/50'}`}>Passo 2</span>
+            {hasAppointments && <span className="text-[11px] font-bold text-primary/60 ml-1">Concluído</span>}
           </div>
-          <div className={`bg-white rounded-[28px] border shadow-[0_4px_24px_rgba(0,0,0,0.03)] p-7 sm:p-8 space-y-5 ${
-            hasAppointments ? 'border-violet-200 opacity-55' : hasPatients ? 'border-slate-100' : 'border-slate-50 opacity-45'
+          <div className={`liquid-glass-card rounded-[28px] p-7 sm:p-8 space-y-5 ${
+            hasAppointments ? 'border-primary/20 opacity-55' : hasPatients ? '' : 'opacity-45'
           }`}>
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-violet-50 rounded-[18px] flex items-center justify-center shrink-0">
-                {hasAppointments ? <Check size={22} className="text-violet-500" /> : <Calendar size={22} className="text-violet-500" />}
+              <div className="w-12 h-12 bg-academy-soft rounded-[18px] flex items-center justify-center shrink-0">
+                {hasAppointments ? <Check size={22} className="text-primary" /> : <Calendar size={22} className="text-primary" />}
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-[18px] sm:text-[20px] font-bold text-academy-text tracking-tight">
@@ -335,7 +334,7 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={openAppointmentModal}
-                className="flex items-center gap-2.5 bg-violet-600 text-white px-6 py-3.5 rounded-[18px] text-[14px] font-bold shadow-[0_8px_24px_rgba(109,40,217,0.15)] hover:bg-violet-700 transition-all"
+                className="flex items-center gap-2.5 bg-primary text-white px-6 py-3.5 rounded-[18px] text-[14px] font-bold shadow-[0_8px_24px_rgba(82,5,123,0.2)] hover:opacity-90 transition-all"
               >
                 Agendar primeiro atendimento
                 <ArrowRight size={15} />
@@ -348,21 +347,21 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
         <motion.section ref={step3Ref} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="space-y-3">
           <div className="px-2 flex items-center gap-2">
             {recordOpened ? (
-              <div className="w-5 h-5 bg-sky-500 rounded-full flex items-center justify-center">
+              <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center">
                 <Check size={12} className="text-white" strokeWidth={3} />
               </div>
             ) : (
-              <div className={`w-5 h-5 rounded-full border-2 ${step3Active ? 'border-sky-500' : 'border-slate-200'}`} />
+              <div className={`w-5 h-5 rounded-full border-2 ${step3Active ? 'border-primary' : 'border-academy-border'}`} />
             )}
-            <span className={`text-[11px] font-bold uppercase tracking-widest ${step3Active || recordOpened ? 'text-sky-600' : 'text-slate-300'}`}>Passo 3</span>
-            {recordOpened && <span className="text-[11px] font-bold text-sky-400 ml-1">Concluído</span>}
+            <span className={`text-[11px] font-bold uppercase tracking-widest ${step3Active || recordOpened ? 'text-primary' : 'text-academy-muted/50'}`}>Passo 3</span>
+            {recordOpened && <span className="text-[11px] font-bold text-primary/60 ml-1">Concluído</span>}
           </div>
-          <div className={`bg-white rounded-[28px] border shadow-[0_4px_24px_rgba(0,0,0,0.03)] p-7 sm:p-8 space-y-5 ${
-            recordOpened ? 'border-sky-200 opacity-55' : step3Active ? 'border-sky-100 ring-2 ring-sky-500/10' : 'border-slate-50'
+          <div className={`liquid-glass-card rounded-[28px] p-7 sm:p-8 space-y-5 ${
+            recordOpened ? 'border-primary/20 opacity-55' : step3Active ? 'ring-2 ring-primary/10' : ''
           }`}>
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-sky-50 rounded-[18px] flex items-center justify-center shrink-0">
-                {recordOpened ? <Check size={22} className="text-sky-500" /> : <ClipboardList size={22} className="text-sky-500" />}
+              <div className="w-12 h-12 bg-academy-soft rounded-[18px] flex items-center justify-center shrink-0">
+                {recordOpened ? <Check size={22} className="text-primary" /> : <ClipboardList size={22} className="text-primary" />}
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-[18px] sm:text-[20px] font-bold text-academy-text tracking-tight">
@@ -381,7 +380,7 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={() => openPatientRecord(firstPatient.id)}
-                className="flex items-center gap-2.5 bg-sky-600 text-white px-6 py-3.5 rounded-[18px] text-[14px] font-bold shadow-[0_8px_24px_rgba(2,132,199,0.2)] hover:bg-sky-700 transition-all"
+                className="flex items-center gap-2.5 bg-primary text-white px-6 py-3.5 rounded-[18px] text-[14px] font-bold shadow-[0_8px_24px_rgba(82,5,123,0.2)] hover:opacity-90 transition-all"
               >
                 Abrir caso de {firstPatient.name?.split(' ')[0] || 'paciente'}
                 <ArrowRight size={15} />
@@ -393,13 +392,13 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
         {/* Step 4: Finish */}
         <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="space-y-3">
           <div className="px-2 flex items-center gap-2">
-            <div className={`w-5 h-5 rounded-full border-2 ${step4Active ? 'border-amber-500' : 'border-slate-200'}`} />
-            <span className={`text-[11px] font-bold uppercase tracking-widest ${step4Active ? 'text-amber-600' : 'text-slate-300'}`}>Passo 4</span>
+            <div className={`w-5 h-5 rounded-full border-2 ${step4Active ? 'border-primary' : 'border-academy-border'}`} />
+            <span className={`text-[11px] font-bold uppercase tracking-widest ${step4Active ? 'text-primary' : 'text-academy-muted/50'}`}>Passo 4</span>
           </div>
-          <div className="bg-white rounded-[28px] border border-slate-50 shadow-[0_4px_24px_rgba(0,0,0,0.03)] p-7 sm:p-8 space-y-5">
+          <div className="liquid-glass-card rounded-[28px] p-7 sm:p-8 space-y-5">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-amber-50 rounded-[18px] flex items-center justify-center shrink-0">
-                <Sparkles size={22} className="text-amber-500" />
+              <div className="w-12 h-12 bg-academy-soft rounded-[18px] flex items-center justify-center shrink-0">
+                <BookOpen size={22} className="text-primary" />
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-[18px] sm:text-[20px] font-bold text-academy-text tracking-tight">Pronto! Explore seu painel</h3>
@@ -412,9 +411,9 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
             </div>
             {step4Active && (
               <>
-                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3 flex items-center gap-3">
-                  <Check size={18} className="text-emerald-600 shrink-0" />
-                  <p className="text-[13px] font-semibold text-emerald-700">Rotina clínica ativada! Você já pode usar o Academy normalmente.</p>
+                <div className="liquid-glass-card border border-emerald-200/50 rounded-2xl px-4 py-3 flex items-center gap-3">
+                  <Check size={18} className="text-academy-success-text shrink-0" />
+                  <p className="text-[13px] font-semibold text-academy-success-text">Rotina clínica ativada! Você já pode usar o Academy normalmente.</p>
                 </div>
                 <motion.button
                   whileTap={{ scale: 0.97 }}
@@ -422,7 +421,7 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
                     setOnboardingDismissed(true);
                     onDismissOnboarding();
                   }}
-                  className="flex items-center gap-2.5 bg-primary text-white px-6 py-3.5 rounded-[18px] text-[14px] font-bold shadow-[0_8px_24px_rgba(139,92,246,0.15)] hover:opacity-90 transition-all"
+                  className="flex items-center gap-2.5 bg-primary text-white px-6 py-3.5 rounded-[18px] text-[14px] font-bold shadow-[0_8px_24px_rgba(82,5,123,0.2)] hover:opacity-90 transition-all"
                 >
                   Ir para o painel principal
                   <ArrowRight size={15} />
@@ -456,11 +455,11 @@ export const AcademyActivationCard: React.FC<{
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-[24px] border border-sky-200 bg-gradient-to-br from-sky-50 to-white p-5 space-y-4 shadow-[0_4px_24px_rgba(2,132,199,0.08)]"
+      className="rounded-[24px] liquid-glass-card border border-primary/15 p-5 space-y-4"
     >
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 bg-sky-100 rounded-[14px] flex items-center justify-center shrink-0">
-          <ClipboardList size={20} className="text-sky-600" />
+        <div className="w-10 h-10 bg-academy-soft rounded-[14px] flex items-center justify-center shrink-0">
+          <ClipboardList size={20} className="text-primary" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-[15px] font-bold text-academy-text">Falta um passo para ativar sua rotina</p>
@@ -472,7 +471,7 @@ export const AcademyActivationCard: React.FC<{
       <button
         type="button"
         onClick={() => openPatientRecord(firstPatient.id)}
-        className="w-full flex items-center justify-center gap-2 bg-sky-600 text-white py-3.5 rounded-[16px] text-[14px] font-bold hover:bg-sky-700 transition-colors"
+        className="w-full flex items-center justify-center gap-2 bg-primary text-white py-3.5 rounded-[16px] text-[14px] font-bold hover:opacity-90 transition-colors"
       >
         Abrir caso clínico agora
         <ArrowRight size={15} />

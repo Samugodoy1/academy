@@ -294,37 +294,6 @@ export function deriveAcademyPatientState(
   const finishedWithoutEvolution = finishedApps.filter(
     a => !appointmentHasEvolution(a, patient),
   );
-  // ── Debug: detailed per-patient derivation audit ──────────────────────
-  if (typeof console !== 'undefined') {
-    const evolutions = getEvolutions(patient);
-    console.group(`[deriveState] patient=${patient.id} "${patient.name || ''}"`);
-    console.log('appointments (non-cancelled):', relevantAppointments.map(a => ({
-      id: a.id,
-      status: a.status,
-      start_time: a.start_time,
-      procedure: a.notes || a.procedure || '—',
-    })));
-    console.log('evolutions:', evolutions.map(e => ({
-      id: e.id,
-      appointment_id: e.appointment_id ?? null,
-      created_at: e.created_at || e.date,
-      procedure: e.procedure || e.procedure_performed || '—',
-    })));
-    for (const fa of finishedApps) {
-      const matched = appointmentHasEvolution(fa, patient);
-      console.log(
-        `  FINISHED apt=${fa.id} start=${fa.start_time} procedure="${fa.notes || fa.procedure || '—'}" → ${matched ? 'CLOSED (evolution matched)' : 'PENDING (no evolution match)'}`,
-      );
-    }
-    console.log(`summary: ${finishedApps.length} finished, ${finishedWithoutEvolution.length} pending`);
-    if (finishedWithoutEvolution.length > 0) {
-      console.log('reason for Para fechar:', finishedWithoutEvolution.map(a =>
-        `apt=${a.id} "${a.notes || a.procedure || '—'}" at ${a.start_time} has NO matching evolution`
-      ));
-    }
-    console.groupEnd();
-  }
-
   // Deduplicate: keep only the most recent FINISHED appointment per patient
   // (there is only one patient here, but multiple appointments can be pending).
   // We still keep all pending appointments, but deduplicate by appointment id.
@@ -388,55 +357,6 @@ export function deriveAcademyPatientState(
   ) {
     // Patient has history but no future appointment
     pendings.push({ kind: 'schedule_return', label: 'Retorno pendente' });
-  }
-
-  // ── Derive summary label ─────────────────────────────────────────────
-  if (typeof console !== 'undefined') {
-    const evolutions = getEvolutions(patient);
-    const finishedChecks = finishedApps.map(app => ({
-      appointment_id: app.id,
-      patient_id: app.patient_id,
-      status: app.status,
-      start_time: app.start_time,
-      ...getAppointmentEvolutionMatch(app, patient),
-    }));
-    const pendingEvolutionReasons = finishedChecks
-      .filter(check => !check.matched)
-      .map(check => ({
-        appointment_id: check.appointment_id,
-        reason: check.reason,
-      }));
-    const filledAnamnesisFields = getFilledAnamnesisFields(patient.anamnesis);
-    const shouldRequireAnamnesis = hasRelevantAppointments || hasTreatmentActivity(patient);
-    const anamnesisPending = pendings.some(p => p.kind === 'anamnesis');
-    const anamnesisReason = filledAnamnesisFields.length > 0
-      ? `anamnese preenchida nos campos: ${filledAnamnesisFields.join(', ')}`
-      : shouldRequireAnamnesis
-        ? 'nenhum campo de anamnesis usado pela Rotina tem valor preenchido'
-        : 'anamnese vazia, mas sem atendimento relevante ou atividade clinica para exigir pendencia';
-
-    console.groupCollapsed(`[deriveAcademyPatientState] patient_id=${patient.id} pending_appointments=${dedupedFinished.map(a => a.id).join(',') || 'none'}`);
-    console.log('patient_id:', patient.id);
-    console.log('appointment_id pendente:', dedupedFinished.map(a => a.id));
-    console.log('appointments recebidos:', relevantAppointments.map(a => ({
-      id: a.id,
-      patient_id: a.patient_id,
-      status: a.status,
-      start_time: a.start_time,
-      procedure: a.notes || a.procedure || null,
-    })));
-    console.log('evolutions recebidas:', evolutions.map(e => ({
-      id: e.id,
-      appointment_id: e.appointment_id ?? null,
-      date: e.date || null,
-      created_at: e.created_at || null,
-      procedure: e.procedure || e.procedure_performed || null,
-    })));
-    console.log('anamnese recebida:', patient.anamnesis || null);
-    console.log('motivo evolucao pendente:', pendingEvolutionReasons.length > 0 ? pendingEvolutionReasons : 'nenhuma evolucao pendente');
-    console.log('motivo anamnese nao registrada:', anamnesisPending ? anamnesisReason : `sem pendencia de anamnese: ${anamnesisReason}`);
-    console.log('resultado pendings:', pendings);
-    console.groupEnd();
   }
 
   const showInParaFechar = dedupedFinished.length > 0;
@@ -527,18 +447,6 @@ export function buildParaFecharRows(
     const tB = appB ? getAppointmentTime(appB.start_time) : 0;
     return tB - tA;
   });
-
-  if (typeof console !== 'undefined' && rows.length > 0) {
-    console.log('[buildParaFecharRows]', rows.map(r => {
-      const app = appointments.find(x => toNumberId(x.id) === r.appointmentId);
-      return {
-        patient: r.title,
-        appointmentId: r.appointmentId,
-        start_time: app?.start_time,
-        procedure: app?.notes || app?.procedure || '—',
-      };
-    }));
-  }
 
   return rows;
 }

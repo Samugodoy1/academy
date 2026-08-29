@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense, lazy } from 'react';
 import { Routes, Route, useParams, useLocation, Link, useNavigate, Navigate } from 'react-router-dom';
-import * as XLSX from 'xlsx';
 import { API_URL } from './config';
 import {
   Users,
@@ -50,21 +49,18 @@ import {
 } from './icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Odontogram } from './components/Odontogram';
-import { Documents } from './components/Documents';
 import { PatientClinical } from './components/PatientClinical';
 import { TermsPage, PrivacyPage } from './components/LegalPages';
 import { NovaEvolucao } from './components/NovaEvolucao';
 import { AcademyDashboard } from './components/AcademyDashboard';
-import { AcademyEstudos } from './components/AcademyEstudos';
-import { Finance } from './components/Finance';
+import { DataLoadingSkeleton } from './components/DataLoadingSkeleton';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { PreAtendimento } from './components/PreAtendimento';
 import { PatientPortal } from './components/PatientPortal';
 import { PortalInbox } from './components/PortalInbox';
-import { MLInsights } from './components/MLInsights';
 import { SubscriptionManagement } from './components/SubscriptionManagement';
 import AdminEngagement from './components/AdminEngagement';
 import { SubscriptionCallback } from './components/SubscriptionCallback';
-import { Academy, AcademyPatients, AcademyAgenda, AcademyStudy, AcademyChecklist } from './components/Academy';
 import {
   addMinutesToLocalDateTime,
   createLocalDateTime,
@@ -86,6 +82,10 @@ import {
 import { CURRENT_PRODUCT, PRODUCT_LABEL, type ProductCode } from './config/product';
 import { deriveAcademyPatientState } from './utils/deriveAcademyPatientState';
 import { formatAllergieLabel, formatMedicationLabel, hasRecordedAllergie } from './utils/anamnesisUtils';
+
+const AcademyEstudos = lazy(() =>
+  import('./components/AcademyEstudos').then(m => ({ default: m.AcademyEstudos }))
+);
 
 // Types
 interface Patient {
@@ -603,7 +603,7 @@ const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
 };
 export default function App() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'agenda' | 'pacientes' | 'financeiro' | 'documentos' | 'prontuario' | 'configuracoes' | 'admin' | 'portal' | 'inteligencia' | 'academy'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'agenda' | 'pacientes' | 'estudos' | 'financeiro' | 'documentos' | 'prontuario' | 'configuracoes' | 'admin' | 'portal' | 'inteligencia' | 'academy'>('dashboard');
   const [patients, setPatients] = useState<Patient[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -615,7 +615,7 @@ export default function App() {
     category: 'all',
   });
 
-  const exportPatients = () => {
+  const exportPatients = async () => {
     let filteredP = patients;
     if (exportFilters.patientId !== 'all') {
       filteredP = filteredP.filter(p => p.id.toString() === exportFilters.patientId);
@@ -640,6 +640,7 @@ export default function App() {
       'Dentista Responsável': profile?.name || user?.name
     }));
 
+    const XLSX = await import('xlsx');
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Pacientes");
@@ -647,7 +648,7 @@ export default function App() {
     setIsExportModalOpen(false);
   };
 
-  const exportFinance = () => {
+  const exportFinance = async () => {
     let filteredT = transactions;
     if (exportFilters.startDate) {
       filteredT = filteredT.filter(t => t.date >= exportFilters.startDate);
@@ -714,6 +715,7 @@ export default function App() {
 
     const combinedData = [...transactionData, ...installmentData];
 
+    const XLSX = await import('xlsx');
     const ws = XLSX.utils.json_to_sheet(combinedData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Financeiro");
@@ -787,7 +789,7 @@ export default function App() {
   const [weekSuggestionSheet, setWeekSuggestionSheet] = useState<{ date: Date; start: string; end: string; duration: number; procedure: string } | null>(null);
 
   useEffect(() => {
-    if (activeTab !== 'dashboard' && activeTab !== 'agenda') return;
+    if (activeTab !== 'dashboard' && activeTab !== 'agenda' && activeTab !== 'pacientes') return;
     const timer = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(timer);
   }, [activeTab]);
@@ -1300,8 +1302,11 @@ export default function App() {
     }
   };
 
+  const fetchDataInFlight = useRef(false);
   const fetchData = async (explicitToken?: string) => {
     if (!user && !explicitToken) return;
+    if (fetchDataInFlight.current) return;
+    fetchDataInFlight.current = true;
     try {
       const [pRes, aRes] = await Promise.all([
         apiFetch('/api/patients', { explicitToken }),
@@ -1313,12 +1318,14 @@ export default function App() {
 
       let hydratedPatients = Array.isArray(pData) ? pData : [];
       if (DEFAULT_PRODUCT === 'academy' && Array.isArray(pData) && Array.isArray(aData)) {
-        const relevantPatientIds = Array.from(new Set(
+        const finishedPatientIds = new Set(
           aData
-            .filter((appointment: any) => !['CANCELLED', 'NO_SHOW'].includes(String(appointment.status || '').toUpperCase()))
+            .filter((appointment: any) => String(appointment.status || '').toUpperCase() === 'FINISHED')
             .map((appointment: any) => Number(appointment.patient_id))
             .filter((patientId: number) => Number.isFinite(patientId))
-        ));
+        );
+
+        const relevantPatientIds = Array.from(finishedPatientIds);
 
         if (relevantPatientIds.length > 0) {
           const details = await Promise.all(
@@ -1343,11 +1350,6 @@ export default function App() {
             const detail = detailById.get(Number(patient.id));
             return detail ? { ...patient, ...detail } : patient;
           });
-
-          console.log('[fetchData] academy patient hydration:', {
-            requested: relevantPatientIds,
-            loaded: Array.from(detailById.keys()),
-          });
         }
       }
 
@@ -1363,6 +1365,7 @@ export default function App() {
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
+      fetchDataInFlight.current = false;
       setLoading(false);
     }
   };
@@ -2764,18 +2767,22 @@ export default function App() {
       observations: evolutionData.observations,
       appointment_id: Number.isFinite(appointmentId) ? appointmentId : undefined,
     };
-    console.log('[addEvolution] payload:', {
-      patient_id: patientId,
-      selected_patient_id: selectedPatient?.id,
-      appointment_id: payload.appointment_id,
-    });
+    if (import.meta.env.DEV) {
+      console.log('[addEvolution] payload:', {
+        patient_id: patientId,
+        selected_patient_id: selectedPatient?.id,
+        appointment_id: payload.appointment_id,
+      });
+    }
     try {
       const res = await apiFetch(`/api/patients/${patientId}/evolution`, {
         method: 'POST',
         body: JSON.stringify(payload)
       });
       const data = await res.json();
-      console.log('[addEvolution] response:', { ok: res.ok, data });
+      if (import.meta.env.DEV) {
+        console.log('[addEvolution] response:', { ok: res.ok, data });
+      }
       if (res.ok) {
         await fetchData();
         if (selectedPatient?.id === patientId) {
@@ -3420,6 +3427,8 @@ export default function App() {
                       user={user}
                       patients={patients}
                       appointments={appointments}
+                      now={now}
+                      loading={loading}
                       openPatientRecord={openPatientRecord}
                       openPatientEvolution={openPatientEvolution}
                       setActiveTab={setActiveTab}
@@ -3431,12 +3440,16 @@ export default function App() {
                   )}
 
                   {activeTab === 'estudos' && !searchTerm && (
-                    <AcademyEstudos
-                      patients={patients}
-                      appointments={appointments}
-                      setActiveTab={setActiveTab}
-                      openPatientRecord={openPatientRecord}
-                    />
+                    <ErrorBoundary fallbackTitle="Não foi possível carregar Estudos">
+                      <Suspense fallback={<DataLoadingSkeleton rows={6} className="mt-10" />}>
+                        <AcademyEstudos
+                          patients={patients}
+                          appointments={appointments}
+                          setActiveTab={setActiveTab}
+                          openPatientRecord={openPatientRecord}
+                        />
+                      </Suspense>
+                    </ErrorBoundary>
                   )}
 
                   {activeTab === 'agenda' && (
@@ -4726,6 +4739,11 @@ export default function App() {
                   )}
 
                   {activeTab === 'pacientes' && (
+                    loading ? (
+                      <div className="pt-10 px-2 max-w-screen-xl mx-auto w-full">
+                        <DataLoadingSkeleton rows={6} />
+                      </div>
+                    ) : (
                     <div className="space-y-4 pt-10">
                       {(() => {
                         // ---------- stats ----------
@@ -4766,8 +4784,16 @@ export default function App() {
                           const planned = patient.treatmentPlan?.find(plan => plan.status === 'PLANEJADO' || plan.status === 'APROVADO');
                           return nextAppointment?.notes || (nextAppointment as any)?.procedure || planned?.procedure || 'Avaliação';
                         };
+                        const patientStateCache = new Map<number, ReturnType<typeof deriveAcademyPatientState>>();
+                        const getCachedPatientState = (patient: Patient) => {
+                          if (!patientStateCache.has(patient.id)) {
+                            patientStateCache.set(patient.id, deriveAcademyPatientState(patient, appointments, now));
+                          }
+                          return patientStateCache.get(patient.id)!;
+                        };
+
                         const getPatientNextAction = (patient: Patient, meta: ReturnType<typeof getPatientCardMeta>, nextAppointment: Appointment | null) => {
-                          const state = deriveAcademyPatientState(patient, appointments, now);
+                          const state = getCachedPatientState(patient);
                           if (state.finishedWithoutEvolution.length > 0) return 'Fechar atendimento';
                           if (nextAppointment && !hasFilledAnamnesis(patient)) return 'Revisar anamnese';
                           if (nextAppointment && hasEvolution(patient)) return 'Revisar última evolução';
@@ -4777,7 +4803,7 @@ export default function App() {
                           return 'Acompanhar caso';
                         };
                         const getCasePendingLabel = (patient: Patient, meta: ReturnType<typeof getPatientCardMeta>, nextAppointment: Appointment | null) => {
-                          const state = deriveAcademyPatientState(patient, appointments, now);
+                          const state = getCachedPatientState(patient);
                           if (state.finishedWithoutEvolution.length > 0) return 'Fechar atendimento';
                           if (nextAppointment && !hasFilledAnamnesis(patient)) return 'Anamnese pendente';
                           if (nextAppointment && hasEvolution(patient)) return 'Revisar última evolução';
@@ -4797,7 +4823,7 @@ export default function App() {
                           return plans.length > 0 && plans.every(plan => ['CONCLUIDO', 'CONCLUÍDO', 'FINALIZADO'].includes(String(plan.status || '').toUpperCase()));
                         };
                         const isCasePending = (patient: Patient, meta: ReturnType<typeof getPatientCardMeta>, intel: any, nextAppointment: Appointment | null) => {
-                          const state = deriveAcademyPatientState(patient, appointments, now);
+                          const state = getCachedPatientState(patient);
                           if (state.finishedWithoutEvolution.length > 0) return true;
                           if (nextAppointment && !hasFilledAnamnesis(patient)) return true;
                           if (meta.attentionStatus.key === 'overdue' || meta.attentionStatus.key === 'review' || meta.isLead) return true;
@@ -4874,12 +4900,12 @@ export default function App() {
                             (nextAction || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
                             meta.attentionStatus.label.toLowerCase().includes((searchTerm || '').toLowerCase()) ||
                             (patient.cpf && patient.cpf.includes(searchTerm)) ||
-                            patient.phone.includes(searchTerm)
+                            (patient.phone && patient.phone.includes(searchTerm))
                           )
                           .filter(({ patient, meta, intel, nextAppointment }) => {
-                            if (patientListFilter === 'all') return true;
-                            if (patientListFilter === 'pending') return isCasePending(patient, meta, intel, nextAppointment);
-                            if (patientListFilter === 'scheduled') return Boolean(nextAppointment);
+                            if (effectivePatientListFilter === 'all') return true;
+                            if (effectivePatientListFilter === 'pending') return isCasePending(patient, meta, intel, nextAppointment);
+                            if (effectivePatientListFilter === 'scheduled') return Boolean(nextAppointment);
                             return true;
                           })
                           .sort((a, b) => {
@@ -4912,15 +4938,15 @@ export default function App() {
                           { key: 'scheduled', label: 'Com consulta', count: totalScheduledCases },
                         ].filter(chip => chip.count === null || chip.count > 0) as { key: string; label: string; count: number | null }[];
 
+                        const effectivePatientListFilter =
+                          patientListFilter !== 'all' && !filterChips.some(c => c.key === patientListFilter)
+                            ? 'all'
+                            : patientListFilter;
+
                         const handleScheduleFromCard = (patient: Patient) => {
                           setPatientActionsToday(prev => new Set([...prev, patient.id]));
                           openPatientAppointmentModal(patient);
                         };
-
-                        // Reset active filter if its chip was hidden (count dropped to 0)
-                        if (patientListFilter !== 'all' && !filterChips.some(c => c.key === patientListFilter)) {
-                          setPatientListFilter('all');
-                        }
 
                         const handleSummaryOverdueClick = () => {
                           setPatientListFilter('pending');
@@ -5047,7 +5073,7 @@ export default function App() {
                                       key={chip.key}
                                       type="button"
                                       onClick={() => setPatientListFilter(chip.key)}
-                                      className={`px-4 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-1.5 ${patientListFilter === chip.key
+                                      className={`px-4 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-1.5 ${effectivePatientListFilter === chip.key
                                           ? 'bg-white shadow-sm text-primary'
                                           : 'text-slate-500 hover:text-slate-700'
                                         }`}
@@ -5240,43 +5266,7 @@ export default function App() {
                         );
                       })()}
                     </div>
-                  )}
-
-                  {false && activeTab === 'financeiro' && (
-                    <Finance
-                      transactions={transactions}
-                      paymentPlans={paymentPlans}
-                      installments={installments}
-                      financialSummary={financialSummary}
-                      patients={patients}
-                      todayAppointmentsCount={todayAppointmentsTotalCount}
-                      apiFetch={apiFetch}
-                      onOpenTransactionModal={(type) => {
-                        setTransactionType(type);
-                        setIsTransactionModalOpen(true);
-                      }}
-                      onDeleteTransaction={handleDeleteTransaction}
-                      onGenerateReceipt={generateReceipt}
-                      onPrint={imprimirDocumento}
-                      onExport={() => {
-                        setExportType('finance');
-                        setIsExportModalOpen(true);
-                      }}
-                      onOpenPaymentPlanModal={() => setIsPaymentPlanModalOpen(true)}
-                      onReceiveInstallment={(inst) => {
-                        setSelectedInstallment(inst);
-                        setIsReceiveInstallmentModalOpen(true);
-                      }}
-                      onViewInstallments={(plan) => {
-                        setSelectedPlan(plan);
-                        setIsViewInstallmentsModalOpen(true);
-                      }}
-                      openPatientRecord={openPatientRecord}
-                      formatDate={formatDate}
-                      setActiveTab={setActiveTab}
-                      setIsModalOpen={setIsModalOpen}
-                      profile={profile}
-                    />
+                    )
                   )}
 
                   {(activeTab === 'admin' && user?.role?.toUpperCase() === 'ADMIN') && (
@@ -5517,40 +5507,6 @@ export default function App() {
                         </div>
                       </div>
                     </div>
-                  )}
-
-                  {false && activeTab === 'documentos' && (
-                    <div className="space-y-8">
-                      <div className="mb-8">
-                        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Documentos</h2>
-                        <p className="text-sm text-slate-500">Emissão de receitas, atestados e contratos</p>
-                      </div>
-                      <Documents patients={patients} profile={profile} apiFetch={apiFetch} imprimirDocumento={imprimirDocumento} />
-                    </div>
-                  )}
-
-                  {false && activeTab === 'inteligencia' && (
-                    <MLInsights openPatientRecord={openPatientRecord} product={getCurrentProduct()} />
-                  )}
-
-                  {false && activeTab === 'academy' && (
-                    <>
-                      {academyView === 'home' && (
-                        <Academy user={user} onNavigate={setAcademyView} />
-                      )}
-                      {academyView === 'pacientes' && (
-                        <AcademyPatients />
-                      )}
-                      {academyView === 'agenda' && (
-                        <AcademyAgenda />
-                      )}
-                      {academyView === 'estudos' && (
-                        <AcademyStudy />
-                      )}
-                      {academyView === 'checklist' && (
-                        <AcademyChecklist />
-                      )}
-                    </>
                   )}
 
                   {activeTab === 'configuracoes' && profile && (

@@ -17,6 +17,7 @@ import {
 } from '../utils/clinicalIntelligence';
 import { countClinicalSkills, suggestNextClinicalStep, getTopSkillHighlights } from '../utils/clinicalProgression';
 import { STUDY_TOPIC_LABELS, StudyKey } from '../utils/studyTopics';
+import { DataLoadingSkeleton } from './DataLoadingSkeleton';
 
 const STUDY_TOPIC_STORAGE_KEY = 'academy_study_topic';
 
@@ -24,6 +25,8 @@ interface AcademyDashboardProps {
   user?: any;
   patients: any[];
   appointments: any[];
+  now: Date;
+  loading?: boolean;
   openPatientRecord: (id: number) => void;
   openPatientEvolution?: (patientId: number, appointment: any) => void;
   setActiveTab: (tab: any) => void;
@@ -405,6 +408,8 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   user,
   patients,
   appointments,
+  now,
+  loading = false,
   openPatientRecord,
   openPatientEvolution,
   setActiveTab,
@@ -413,8 +418,6 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   onDismissOnboarding,
   onDismissWelcome,
 }) => {
-  const now = new Date();
-
   const usableAppointments = useMemo(() => {
     return appointments
       .filter(app => app.status !== 'CANCELLED')
@@ -423,7 +426,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
   const paraFecharRows = useMemo(() => {
     return buildParaFecharRows(patients, usableAppointments, now);
-  }, [patients, usableAppointments]);
+  }, [patients, usableAppointments, now]);
 
   const finishedWithoutEvolution = useMemo(() => {
     return paraFecharRows.map(row => usableAppointments.find(a => a.id === row.appointmentId)).filter(Boolean) as typeof usableAppointments;
@@ -437,24 +440,24 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       })
       .filter(app => ACTIVE_STATUSES.has(app.status))
       .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
-  }, [usableAppointments]);
+  }, [usableAppointments, now]);
 
   const nextTodayAppointment = useMemo(() => {
     return todayAppointments.find(app => getAppointmentTime(app.start_time) >= now.getTime()) || todayAppointments[0] || null;
-  }, [todayAppointments]);
+  }, [todayAppointments, now]);
 
   const nextAppointment = useMemo(() => {
     return usableAppointments.find(app =>
       getAppointmentTime(app.start_time) > now.getTime() &&
       ACTIVE_STATUSES.has(app.status)
     ) || null;
-  }, [usableAppointments]);
+  }, [usableAppointments, now]);
 
   const nextAppointments = useMemo(() => {
     return usableAppointments
       .filter(app => getAppointmentTime(app.start_time) > now.getTime() && ACTIVE_STATUSES.has(app.status))
       .slice(0, 4);
-  }, [usableAppointments]);
+  }, [usableAppointments, now]);
 
   const pausedCase = useMemo(() => {
     const scheduledIds = new Set(nextAppointments.map(app => app.patient_id));
@@ -469,7 +472,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       })
       .filter(item => item.days >= 30)
       .sort((a, b) => b.days - a.days)[0]?.patient || null;
-  }, [patients, nextAppointments]);
+  }, [patients, nextAppointments, now]);
 
   const clinicalPending = useMemo(() => getClinicalPending(patients, usableAppointments, now), [patients, usableAppointments, now]);
 
@@ -668,6 +671,14 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       duration: refresh.duration,
     };
   }, [focus.kind, showBoxMode, todayContext]);
+
+  if (loading) {
+    return (
+      <div className="pt-10 px-2 max-w-screen-xl mx-auto w-full">
+        <DataLoadingSkeleton rows={5} />
+      </div>
+    );
+  }
 
   return (
     <AcademyOnboarding

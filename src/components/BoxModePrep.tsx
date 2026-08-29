@@ -27,7 +27,7 @@ export const BoxModePrep: React.FC<BoxModePrepProps> = ({
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.14, ease: [0.16, 1, 0.3, 1] }}
-      className="rounded-[24px] bg-white border border-academy-border/70 shadow-[0_8px_28px_rgba(15,23,42,0.05)] overflow-hidden"
+      className="liquid-glass-card rounded-[24px] overflow-hidden"
     >
       <div className="px-6 pt-6 pb-2">
         <div className="flex items-center gap-2 mb-4">
@@ -57,7 +57,7 @@ export const BoxModePrep: React.FC<BoxModePrepProps> = ({
               key={`${item.label}-${index}`}
               whileTap={{ scale: 0.98, opacity: 0.92 }}
               onClick={() => onReviewItem?.(item)}
-              className="w-full flex items-center gap-3 rounded-[16px] bg-academy-bg/80 border border-academy-border/60 px-4 py-3.5 text-left transition-colors hover:bg-academy-neutral/60"
+              className="w-full flex items-center gap-3 rounded-[16px] liquid-glass-subtle px-4 py-3.5 text-left transition-colors hover:bg-white/70"
             >
               <CheckCircle2 size={16} className="text-academy-success-text shrink-0" />
               <span className="flex-1 text-[14px] font-semibold text-academy-text">{item.label}</span>

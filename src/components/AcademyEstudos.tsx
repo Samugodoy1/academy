@@ -1485,9 +1485,9 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.08 }}
-          className="flex items-start gap-3 rounded-2xl px-5 py-4 bg-academy-neutral/80 border border-academy-border/80"
+          className="flex items-start gap-3 rounded-2xl px-5 py-4 liquid-glass-card"
         >
-          <Sparkles size={20} className="mt-0.5 shrink-0 text-academy-primary" />
+          <Stethoscope size={18} className="mt-0.5 shrink-0 text-academy-primary" />
           <p className="text-[14px] font-medium text-[#3A3A3C] leading-snug">
             {preceptorMessage}
           </p>
@@ -1502,7 +1502,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           className="space-y-4"
         >
           <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Antes do próximo atendimento</h3>
-          <div className="bg-white rounded-[32px] p-7 shadow-[0_16px_54px_rgba(15,23,42,0.08)] border border-academy-border/80 relative overflow-hidden flex flex-col">
+          <div className="liquid-glass-card rounded-[32px] p-7 relative overflow-hidden flex flex-col">
             <div className="absolute -right-8 -bottom-8 opacity-[0.06] text-academy-primary pointer-events-none">
               <nextCaseTopic.icon size={200} />
             </div>
@@ -1629,7 +1629,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           className="space-y-4"
         >
           <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Casos seguintes</h3>
-          <div className="rounded-[24px] overflow-hidden bg-white border border-academy-border/70 shadow-sm">
+          <div className="rounded-[24px] overflow-hidden liquid-glass-card">
             {laterCases.map((caseInfo, index) => {
               const material = STUDY_LIBRARY[caseInfo.topicKey];
               return (
@@ -1739,7 +1739,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           className="space-y-4"
         >
           <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Você marcou para voltar</h3>
-          <div className="rounded-[24px] overflow-hidden bg-white border border-academy-border/70 shadow-sm">
+          <div className="rounded-[24px] overflow-hidden liquid-glass-card">
             {reviewRequests.map((request, index) => {
               const material = STUDY_LIBRARY[request.topic];
               return (
@@ -1794,12 +1794,12 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
             value={librarySearch}
             onChange={event => setLibrarySearch(event.target.value)}
             placeholder="Buscar tema ou procedimento (ex.: siso, canal, grampo)"
-            className="w-full bg-white border border-academy-border/70 rounded-[16px] pl-11 pr-4 py-3 text-[14px] font-medium text-academy-text placeholder:text-academy-muted/60 outline-none focus:ring-2 focus:ring-academy-primary/10 transition-all"
+            className="w-full liquid-glass-card border border-academy-border/70 rounded-[16px] pl-11 pr-4 py-3 text-[14px] font-medium text-academy-text placeholder:text-academy-muted/60 outline-none focus:ring-2 focus:ring-academy-primary/10 transition-all"
           />
         </div>
 
         {filteredLibraryItems.length > 0 ? (
-          <div className="rounded-[24px] overflow-hidden bg-white border border-academy-border/70 shadow-sm">
+          <div className="rounded-[24px] overflow-hidden liquid-glass-card">
             {filteredLibraryItems.map((cat, index) => (
               <motion.button
                 type="button"

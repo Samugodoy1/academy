@@ -356,8 +356,8 @@ const getFirstVisitAnamnesisMessage = (patient: any, appointments: any[], now: D
 
   if (!nextFirstAppointment) return null;
   return sameDay(nextFirstAppointment.parsedStart, now)
-    ? 'Primeira consulta: comece pela anamnese.'
-    : 'Primeira consulta: revise a anamnese antes do box.';
+    ? 'É a primeira vez com esse paciente. Comece ouvindo com calma o que trouxe ele até você.'
+    : 'É a primeira consulta. Vale ler a ficha antes de entrar no box.';
 };
 
 const getClinicalPending = (patients: any[], appointments: any[], now: Date) => {
@@ -380,13 +380,13 @@ const getShortClinicalMoment = (focus: any) => {
 };
 
 const getClinicalActionCopy = (moment: string) => {
-  if (moment === 'restaurar') return 'Confira isolamento e material.';
-  if (moment === 'endodontia') return 'Confira radiografia e conduta.';
-  if (moment === 'cirurgia') return 'Confira anamnese e medicação.';
-  if (moment === 'profilaxia') return 'Confira periodonto e orientação.';
-  if (moment === 'clareamento') return 'Confira protocolo e sensibilidade.';
-  if (moment === 'avaliar') return 'Comece pela queixa principal.';
-  return 'Revise a conduta.';
+  if (moment === 'restaurar') return 'Confere se todo o material já está separado.';
+  if (moment === 'endodontia') return 'Dá uma última olhada na radiografia antes do box.';
+  if (moment === 'cirurgia') return 'Relê a ficha e confere a medicação antes de começar.';
+  if (moment === 'profilaxia') return 'Relembra o que você quer observar e explicar ao paciente.';
+  if (moment === 'clareamento') return 'Confere o passo a passo e pergunta sobre sensibilidade.';
+  if (moment === 'avaliar') return 'Começa ouvindo o que mais incomoda o paciente.';
+  return 'Dá uma olhada no que ficou combinado para hoje.';
 };
 
 const getClinicalAlertCopy = (patient: any, appointment: any, appointments: any[], now: Date) => {
@@ -394,30 +394,13 @@ const getClinicalAlertCopy = (patient: any, appointment: any, appointments: any[
   if (firstVisitMessage) return firstVisitMessage;
 
   const alert = getClinicalAlert(patient, appointments, now, { includeFirstVisitGuidance: true });
-  if (alert?.toLowerCase().includes('anamnese')) return 'Anamnese pendente: revise antes do box.';
-  if (alert?.toLowerCase().includes('odontograma')) return 'Odontograma pendente: complete antes do box.';
+  if (alert?.toLowerCase().includes('anamnese')) return 'A ficha ainda está incompleta. Vale conferir antes do box.';
+  if (alert?.toLowerCase().includes('odontograma')) return 'O desenho dos dentes ainda está em branco. Complete quando puder.';
 
   const clinicalMoment = getShortClinicalMoment({ appointment, patient });
   if (clinicalMoment) return getClinicalActionCopy(clinicalMoment);
 
-  return 'Confira plano e última evolução.';
-};
-
-const getAppointmentActionCopy = (patient: any, appointment: any, appointments: any[], now: Date) => {
-  const alert = getClinicalAlert(patient, appointments, now, { includeFirstVisitGuidance: true });
-  if (alert?.toLowerCase().includes('anamnese')) return 'Revisar anamnese';
-  if (alert?.toLowerCase().includes('odontograma')) return 'Revisar odontograma';
-
-  const clinicalMoment = getShortClinicalMoment({ appointment, patient });
-  if (clinicalMoment === 'restaurar') return 'Separar material';
-  if (clinicalMoment === 'endodontia') return 'Revisar radiografia';
-  if (clinicalMoment === 'cirurgia') return 'Revisar anamnese';
-  if (clinicalMoment === 'profilaxia') return 'Revisar periodonto';
-  if (clinicalMoment === 'clareamento') return 'Conferir protocolo';
-  if (clinicalMoment === 'avaliar') return 'Revisar queixa';
-  if (getEvolutionSummary(patient)) return 'Revisar última evolução';
-
-  return 'Abrir preparo do caso';
+  return 'Relê a última anotação pra lembrar exatamente onde vocês pararam.';
 };
 
 export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
@@ -501,12 +484,12 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       const dateLabel = pendingRow?.appointmentLabel || '';
       return {
         kind: 'evolution',
-        eyebrow: 'Atendimento concluído',
-        title: `${firstName(patient?.name || pendingApp.patient_name)} já foi atendido.`,
+        eyebrow: 'Antes de esquecer',
+        title: `Como foi o atendimento de ${firstName(patient?.name || pendingApp.patient_name)}?`,
         subtitle: dateLabel
-          ? `Fechar atendimento de ${procedureLabel} · ${dateLabel}`
-          : 'Falta registrar a evolução para fechar o atendimento.',
-        actionLabel: `Fechar atendimento${procedureLabel !== 'Atendimento' ? ` de ${procedureLabel}` : ''}`,
+          ? `${procedureLabel} · ${dateLabel}. Anota agora enquanto ainda está fresco.`
+          : 'Anota em poucas palavras o que você fez e como o paciente saiu.',
+        actionLabel: 'Anotar como foi',
         patient,
         appointment: pendingApp,
         pendingProcedure: procedureLabel,
@@ -521,10 +504,10 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       const patient = getPatient(patients, nextTodayAppointment.patient_id);
       return {
         kind: 'today',
-        eyebrow: 'A seguir',
-        title: getAppointmentActionCopy(patient, nextTodayAppointment, usableAppointments, now),
+        eyebrow: 'Seu próximo box',
+        title: `${firstName(patient?.name || nextTodayAppointment.patient_name)} é o próximo.`,
         subtitle: getClinicalAlertCopy(patient, nextTodayAppointment, usableAppointments, now),
-        actionLabel: 'Abrir caso',
+        actionLabel: 'Ver antes do box',
         patient,
         appointment: nextTodayAppointment,
         action: () => openPatientRecord(nextTodayAppointment.patient_id)
@@ -535,10 +518,10 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       const patient = getPatient(patients, nextAppointment.patient_id);
       return {
         kind: 'next',
-        eyebrow: 'Próximo',
-        title: getAppointmentActionCopy(patient, nextAppointment, usableAppointments, now),
+        eyebrow: 'Vem aí',
+        title: `Vale lembrar do caso de ${firstName(patient?.name || nextAppointment.patient_name)}.`,
         subtitle: getClinicalAlertCopy(patient, nextAppointment, usableAppointments, now),
-        actionLabel: 'Revisar caso',
+        actionLabel: 'Relembrar o caso',
         patient,
         appointment: nextAppointment,
         action: () => openPatientRecord(nextAppointment.patient_id)
@@ -548,10 +531,10 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
     if (pausedCase) {
       return {
         kind: 'paused',
-        eyebrow: 'Retorno',
-        title: 'Caso sem próximo passo.',
-        subtitle: 'Revise a última evolução e defina o retorno.',
-        actionLabel: 'Revisar caso',
+        eyebrow: 'Ficou sem data',
+        title: `Você já sabe quando ${firstName(pausedCase.name)} volta?`,
+        subtitle: 'Veja onde vocês pararam e, se fizer sentido, combine o próximo encontro.',
+        actionLabel: 'Ver esse caso',
         patient: pausedCase,
         appointment: null,
         action: () => openPatientRecord(pausedCase.id)
@@ -561,10 +544,10 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
     if (clinicalPending) {
       return {
         kind: 'pending',
-        eyebrow: 'Prontuário',
-        title: 'Dado clínico pendente.',
-        subtitle: getClinicalAlert(clinicalPending, usableAppointments, now) || 'Complete o prontuário antes do próximo atendimento.',
-        actionLabel: 'Abrir prontuário',
+        eyebrow: 'Ficou faltando',
+        title: `A ficha de ${firstName(clinicalPending.name)} ainda tem coisa em aberto.`,
+        subtitle: 'Complete o que lembrar agora. No próximo box, você vai agradecer.',
+        actionLabel: 'Ver o que falta',
         patient: clinicalPending,
         appointment: null,
         action: () => openPatientRecord(clinicalPending.id)
@@ -574,10 +557,10 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
     if (patients.length === 0) {
       return {
         kind: 'start',
-        eyebrow: 'Primeiro passo',
-        title: 'Cadastre o primeiro paciente.',
-        subtitle: 'A rotina começa pelo caso clínico, não pela agenda.',
-        actionLabel: 'Cadastrar paciente',
+        eyebrow: 'Vamos começar?',
+        title: 'Quem é a primeira pessoa que você atende?',
+        subtitle: 'Coloque só o nome agora. O restante da ficha pode vir aos poucos.',
+        actionLabel: 'Adicionar paciente',
         patient: null,
         appointment: null,
         action: () => setIsPatientModalOpen(true)
@@ -586,10 +569,10 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
     return {
       kind: 'calm',
-      eyebrow: 'Sem box hoje',
-      title: 'Organize retornos.',
-      subtitle: 'Bom momento para revisar evoluções e pendências.',
-      actionLabel: 'Ver pacientes',
+      eyebrow: 'Hoje está tranquilo',
+      title: 'Ninguém marcado por enquanto.',
+      subtitle: 'Se quiser adiantar, dá uma olhada em quem ainda precisa marcar retorno.',
+      actionLabel: 'Ver meus pacientes',
       patient: null,
       appointment: null,
       action: () => setActiveTab('pacientes')
@@ -639,7 +622,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   const isFinishedFocus = focus.appointment?.status === 'FINISHED';
   const pendingDateLabel = (focus as any).pendingDateLabel || '';
   const statusLabel = isFinishedFocus && focus.kind === 'evolution'
-    ? `Evolução pendente${pendingDateLabel ? ` · ${pendingDateLabel}` : ''}`
+    ? `Falta contar como foi${pendingDateLabel ? ` · ${pendingDateLabel}` : ''}`
     : getStatusLabel(focus.appointment?.status);
   const scheduleLabel = formatAppointmentChipTime(focus.appointment?.start_time);
   const appointmentMetaLabel = [
@@ -667,7 +650,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         patientId: clinicalPending.id,
         appointmentId: 0,
         title: clinicalPending.name,
-        meta: getClinicalAlert(clinicalPending, usableAppointments, now) || 'Complete o prontuário.',
+        meta: getClinicalAlert(clinicalPending, usableAppointments, now) || 'Tem coisa faltando na ficha.',
         tone: 'coral' as const
       }]
       : [])
@@ -788,7 +771,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
                 <ComicDetail label="Antes do box" value={clinicalAlert} />
               )}
               {clinicalAlert && isFinishedFocus && (
-                <ComicDetail label="Pendente no prontuário" value={clinicalAlert.replace('pendente.', 'não registrada.')} />
+                <ComicDetail label="Ficou faltando" value={clinicalAlert.replace('pendente.', 'ainda não foi anotada.')} />
               )}
               {isFinishedFocus && (
                 <ComicDetail
@@ -995,7 +978,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
             </div>
             <div className="flex-1 min-w-0 text-left">
               <p className="text-[15px] font-semibold text-academy-text">Sem paciente marcado hoje.</p>
-              <p className="text-[12px] text-academy-muted">Revise retornos e prontuários abertos.</p>
+              <p className="text-[12px] text-academy-muted">Dá uma olhada em quem ainda precisa marcar retorno.</p>
             </div>
           </div>
         </section>

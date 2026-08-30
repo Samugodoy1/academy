@@ -1467,20 +1467,20 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
 
   // ── List view ────────────────────────────────────────────────────────
   const preceptorMessage = nextCase
-    ? `Preparei a revisão pelo caso de ${firstName(nextCase.patient?.name || nextCase.app?.patient_name)}, não por catálogo.`
+    ? `Como você vai atender ${firstName(nextCase.patient?.name || nextCase.app?.patient_name)}, separei uma revisão curta pro que vem aí.`
     : clinicalGaps.length > 0
-      ? 'Sem atendimento próximo na agenda. Sugeri revisões pelas lacunas do seu histórico clínico.'
-      : 'Nada urgente para estudar agora. Quando um caso entrar na agenda, a revisão certa aparece aqui primeiro.';
+      ? 'Não tem box chegando, então escolhi temas que você ainda praticou pouco.'
+      : 'Nada urgente agora. Quando você marcar um atendimento, eu separo o que vale rever antes.';
 
   return (
     <div className="page-shell space-y-8 tablet-l:space-y-10">
       <section className="space-y-4">
         <SisoLine mood="study" size={128}>
           <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-primary mb-1">
-            Estudos
+            Revisão rápida
           </p>
           <p className="text-[20px] sm:text-[22px] leading-snug">
-            {nextCase ? 'O que revisar agora' : 'Sua revisão clínica'}
+            {nextCase ? 'O que vale ver antes do box?' : 'O que você quer relembrar?'}
           </p>
           <p className="mt-2 text-[14px] font-bold leading-snug text-[#3B0459]/75">
             {preceptorMessage}
@@ -1498,7 +1498,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
           className="space-y-4"
         >
-          <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Antes do próximo atendimento</h3>
+          <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Pro seu próximo paciente</h3>
           <div className="comic-card rounded-[32px] p-7 relative overflow-hidden flex flex-col">
             <div className="absolute -right-8 -bottom-8 opacity-[0.06] text-academy-primary pointer-events-none">
               <nextCaseTopic.icon size={200} />
@@ -1506,7 +1506,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
 
             <div className="relative z-10 flex flex-col">
               <span className="text-academy-primary text-[12px] font-bold uppercase tracking-widest">
-                Foco do atendimento
+                Vale olhar agora
               </span>
               <h2 className="text-[26px] sm:text-[30px] font-bold text-academy-text leading-[1.15] mt-2">
                 {getDayPhrase(nextCase.date)} {firstName(nextCase.app.patient_name || nextCase.patient?.name)}.
@@ -1573,7 +1573,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                   <DuoButton onClick={() => openStudy(nextCase.topicKey, nextCase)}>
-                    Revisar para este caso
+                    Começar revisão
                   </DuoButton>
                   <DuoButton variant="secondary" onClick={() => openPatientRecord?.(nextCase.patient.id)}>
                     Abrir caso
@@ -1592,9 +1592,9 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         >
           <EmptySiso
             mood="proud"
-            title="Nenhum caso exigindo revisão agora."
-            body="Agenda tranquila. Use o tempo numa lacuna ou na biblioteca — ou vai pro box vazio, que eu não recomendo."
-            actionLabel="Ver agenda"
+            title="Nada urgente pra rever agora."
+            body="Quando você marcar o próximo paciente, eu separo uma revisão curta pro que você vai fazer."
+            actionLabel="Olhar meus horários"
             onAction={() => setActiveTab?.('agenda')}
           />
         </motion.section>

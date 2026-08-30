@@ -159,10 +159,10 @@ function AgendaTabComponent({
         <div className="flex items-end justify-between gap-3">
           <SisoLine mood="box" size={112}>
             <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-primary mb-1">
-              Agenda
+              Seus horários
             </p>
             <p className="text-[20px] sm:text-[22px] leading-snug">
-              {agendaViewMode === 'week' && !agendaFocusMode ? 'Semana clínica' : 'Atendimentos'}
+              {agendaViewMode === 'week' && !agendaFocusMode ? 'Como está sua semana?' : 'Quem você atende hoje?'}
             </p>
             <p className="mt-1.5 text-[14px] font-bold leading-snug text-[#3B0459]/75">
               {agendaSmartCopy}
@@ -288,17 +288,17 @@ function AgendaTabComponent({
                 return patients.length === 0 ? (
                   <EmptySiso
                     mood="think"
-                    title="Box vazio. Cadastre o primeiro caso."
-                    body="Sem paciente real não tem atendimento. A rotina começa pelo caso, não pela agenda."
-                    actionLabel="Cadastrar primeiro caso"
+                    title="Primeiro, me conta quem você atende."
+                    body="Cadastre o nome do paciente e depois volte aqui pra escolher o dia do box."
+                    actionLabel="Adicionar paciente"
                     onAction={() => setActiveTab('pacientes')}
                   />
                 ) : (
                   <EmptySiso
                     mood="idle"
-                    title="Nenhum atendimento hoje."
-                    body="Cadeira livre. Marca um box ou aproveita pra fechar evolução."
-                    actionLabel="Agendar atendimento"
+                    title="Hoje a cadeira está livre."
+                    body="Se já souber o próximo dia de clínica, deixa marcado agora."
+                    actionLabel="Marcar atendimento"
                     onAction={openAppointmentModal}
                   />
                 );

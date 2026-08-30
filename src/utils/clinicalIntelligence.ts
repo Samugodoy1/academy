@@ -134,9 +134,9 @@ export const getTodayHeadline = (
 
   if (operationalFocus?.kind === 'evolution') {
     return pickDailyVariant([
-      'Falta registrar a evolução para fechar o atendimento.',
-      'Atendimento concluído. Registre a evolução para fechar.',
-      'Feche o atendimento antes de seguir.',
+      'Antes de sair: conta como foi o último atendimento?',
+      'Falta só anotar o que aconteceu no último box.',
+      'Anota agora, enquanto você ainda lembra dos detalhes.',
     ], `${daySeed}|evolution`);
   }
 
@@ -144,55 +144,55 @@ export const getTodayHeadline = (
     const proc = context.nextProcedure?.toLowerCase() || '';
     if (proc.includes('anestes') || proc.includes('extra') || proc.includes('cirurg')) {
       return pickDailyVariant([
-        `Você tem clínica amanhã. Vale revisar anestesia infiltrativa.`,
-        `Amanhã tem box. Separei algo para revisar antes.`,
-        `Clínica amanhã com ${patientName}. Vale uma revisão rápida.`,
+        'Amanhã tem box. Quer relembrar a anestesia sem abrir um PDF gigante?',
+        'Seu box é amanhã. Separei só o que vale olhar antes.',
+        `Amanhã é dia de atender ${patientName}. Vamos dar uma olhada antes?`,
       ], `${daySeed}|tomorrow-anestesia`);
     }
     return pickDailyVariant([
-      `Você tem clínica amanhã. Vale revisar a sequência.`,
-      `Amanhã começa com ${patientName}.`,
-      `Separei algo que pode ajudar antes da clínica.`,
+      'Amanhã tem box. Quer relembrar o passo a passo?',
+      `Amanhã você atende ${patientName}.`,
+      'Separei uma revisão curtinha pro seu box de amanhã.',
     ], `${daySeed}|tomorrow`);
   }
 
   if (context.hasClinicalToday && patientName) {
     return pickDailyVariant([
-      `Hoje começa com ${patientName}.`,
-      `Seu próximo paciente pode exigir atenção na conduta.`,
-      `Hoje a clínica pede foco.`,
+      `Hoje você começa com ${patientName}.`,
+      `${patientName} é o próximo. Já deu uma olhada na ficha?`,
+      'Tem box hoje. Vamos deixar tudo pronto?',
     ], `${daySeed}|today`);
   }
 
   if (context.lastSkill && context.daysSinceLastEvolution !== null && context.daysSinceLastEvolution >= 5) {
     return pickDailyVariant([
-      'Faz alguns dias desde sua última evolução clínica.',
-      'Faz um tempo desde seu último registro clínico.',
-      'Vale retomar a evolução clínica.',
+      'Faz alguns dias que você não anota um atendimento por aqui.',
+      'Seu último box ficou lá atrás. Quer lembrar onde parou?',
+      'Que tal abrir o último caso e ver se ficou algo pra anotar?',
     ], `${daySeed}|stale-evolution`);
   }
 
   if (context.lastSkill && context.skillHighlights.length > 0) {
     const top = context.skillHighlights[0];
     return pickDailyVariant([
-      `Seu último caso envolveu ${top.label}. Separei algo para o próximo.`,
-      'Isso é o que faz mais sentido para você agora.',
-      'Hoje eu começaria por aqui.',
+      `Você viu bastante ${top.label} nos últimos casos. Quer revisar rapidinho?`,
+      'Se eu fosse você, começava por aqui hoje.',
+      'Separei algo que combina com o que você vem atendendo.',
     ], `${daySeed}|last-skill`);
   }
 
   if (context.patients.length === 0) {
     return pickDailyVariant([
-      'Comece pelo primeiro caso clínico.',
-      'A evolução começa com o primeiro registro.',
-      'Monte sua base clínica.',
+      'Quem é a primeira pessoa que você atende?',
+      'Vamos colocar seu primeiro paciente aqui?',
+      'Começa pelo nome do paciente. O resto vem depois.',
     ], `${daySeed}|start`);
   }
 
   return pickDailyVariant([
-    'Isso é o que faz mais sentido para você agora.',
-    'Organize retornos e revise casos abertos.',
-    'Bom momento para consolidar sua evolução clínica.',
+    'Está tudo tranquilo. Quer ver quem ainda precisa de retorno?',
+    'Sem correria hoje. Dá pra adiantar alguma ficha.',
+    'Nada pegando fogo. Um ótimo momento pra organizar os próximos boxes.',
   ], `${daySeed}|default`);
 };
 
@@ -210,8 +210,8 @@ export const getClinicalObservation = (
   if (hasEvolutionPending) {
     return {
       text: evolutionCount > 1
-        ? `${evolutionCount} atendimentos aguardam evolução para fechar.`
-        : 'Registre a evolução para fechar o atendimento.',
+        ? `Você terminou ${evolutionCount} atendimentos e ainda não contou como foram.`
+        : 'Você já terminou o atendimento. Falta só contar como foi.',
       accent: 'rose',
     };
   }
@@ -221,26 +221,26 @@ export const getClinicalObservation = (
     if (topic) {
       const label = STUDY_TOPIC_LABELS[topic];
       return {
-        text: `Você realizará ${label.toLowerCase()} amanhã. Quer revisar a sequência?`,
+        text: `Amanhã tem ${label.toLowerCase()}. Quer relembrar o passo a passo?`,
         accent: 'violet',
       };
     }
     return {
-      text: 'Separei algo que pode ajudar antes da clínica.',
+      text: 'Separei uma revisão curtinha pra você chegar mais seguro amanhã.',
       accent: 'violet',
     };
   }
 
   if (context.hasClinicalToday && context.nextProcedure) {
     return {
-      text: 'Existe um procedimento que vale revisar antes do próximo atendimento.',
+      text: 'Ainda dá tempo de relembrar o passo a passo antes do próximo paciente.',
       accent: 'sky',
     };
   }
 
   if (context.daysSinceLastEvolution !== null && context.daysSinceLastEvolution >= 7) {
     return {
-      text: 'Faz algum tempo desde sua última prática clínica registrada.',
+      text: 'Faz um tempo que você não anota um atendimento aqui. Ficou algum pra trás?',
       accent: 'amber',
     };
   }
@@ -254,14 +254,14 @@ export const getClinicalObservation = (
 
   if (context.nextStep && context.patients.length > 0) {
     return {
-      text: `Você está pronto para avançar: ${context.nextStep.label.toLowerCase()}.`,
+      text: `Pelos seus últimos casos, talvez seja uma boa hora de praticar ${context.nextStep.label.toLowerCase()}.`,
       accent: 'emerald',
     };
   }
 
   if (hasClinicalPending) {
     return {
-      text: 'Antes da clínica, vale revisar pendências no prontuário.',
+      text: 'Tem ficha incompleta por aqui. Melhor olhar agora do que lembrar na frente do professor.',
       accent: 'amber',
     };
   }
@@ -269,9 +269,9 @@ export const getClinicalObservation = (
   if (isCalm) {
     return {
       text: pickDailyVariant([
-        'Está tudo em ordem por aqui.',
-        'Bom trabalho. Continue assim.',
-        'Nada urgente agora. Bom momento para revisar casos.',
+        'Tudo certo por aqui. Respira.',
+        'Você colocou a casa em ordem. Boa!',
+        'Nada urgente agora. Se quiser, dá uma olhada nos próximos pacientes.',
       ], context.now.toISOString().slice(0, 10)),
       accent: 'neutral',
     };
@@ -417,7 +417,7 @@ export const getStudyRefreshSuggestion = (
       const patientName = firstName(context.nextAppointment?.patient_name || context.nextAppointmentPatient?.name);
       return {
         topic,
-        reason: patientName ? `Para o caso de ${patientName}.` : 'Para o próximo atendimento.',
+        reason: patientName ? `Pra você chegar mais seguro no atendimento de ${patientName}.` : 'Pra chegar mais seguro no próximo box.',
         duration: '5 min',
       };
     }
@@ -428,7 +428,7 @@ export const getStudyRefreshSuggestion = (
     if (topic) {
       return {
         topic,
-        reason: 'Para consolidar o que você já pratica.',
+        reason: 'Uma revisão curta do que você já vem fazendo no box.',
         duration: '5 min',
       };
     }

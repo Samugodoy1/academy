@@ -394,7 +394,7 @@ export default function App() {
       })
       .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time));
 
-    if (weekAppointments.length === 0) return 'Semana tranquila por enquanto.';
+    if (weekAppointments.length === 0) return 'Nenhum box marcado nesta semana. Quer deixar um agendado?';
 
     const repeatedPatient = (Array.from(
       weekAppointments.reduce((map, app) => {
@@ -419,9 +419,9 @@ export default function App() {
       const time = formatAppointmentTime(firstAppointment.start_time);
       const firstRole = getPatientWeekRole(firstAppointment, weekAppointments);
       const firstAction = firstRole === 'Primeira consulta'
-        ? 'Anamnese primeiro.'
-        : 'Revise a evolução.';
-      return `${firstName}: ${ordered.length} atendimentos. ${days}, ${time}. ${firstAction}`;
+        ? 'Como é a primeira vez, vale ler a ficha antes.'
+        : 'Dá uma olhada em onde vocês pararam.';
+      return `Você vai ver ${firstName} ${ordered.length} vezes: ${days}, a partir das ${time}. ${firstAction}`;
     }
 
     const hasPreviousCare = (app: Appointment) => {
@@ -441,19 +441,19 @@ export default function App() {
     const firstConsultation = weekAppointments.find(app => !hasPreviousCare(app));
     if (firstConsultation) {
       const firstName = (firstConsultation.patient_name || 'Paciente').split(' ')[0];
-      return `${firstName} faz primeira consulta. Anamnese antes do box.`;
+      return `É sua primeira vez com ${firstName}. Vale ler a ficha antes do box.`;
     }
 
     const returnAppointment = weekAppointments.find(app => hasPreviousCare(app));
-    if (returnAppointment) return 'Retorno marcado. Revise a última evolução.';
+    if (returnAppointment) return 'Tem retorno marcado. Dá uma olhada em onde vocês pararam.';
 
     const todayAppointment = weekAppointments.find(app => isSameAppointmentDay(app.start_time, now));
-    if (todayAppointment) return 'Hoje tem clínica.';
+    if (todayAppointment) return 'Hoje tem box. Já separou tudo?';
 
     const nextAppointment = weekAppointments.find(app => getAppointmentTime(app.start_time) >= now.getTime()) || weekAppointments[0];
     const day = formatAppointmentDate(nextAppointment.start_time, { weekday: 'long' })
       .replace('-feira', '');
-    return `Seu próximo atendimento é ${day} com ${nextAppointment.patient_name}.`;
+    return `Seu próximo box é ${day}, com ${nextAppointment.patient_name}.`;
   }, [appointments, getPatientWeekRole, now, patientMap, selectedDate]);
 
   const [agendaFocusMode, setAgendaFocusMode] = useState(false);
@@ -1619,23 +1619,23 @@ export default function App() {
 
     // Inline validation — no alert()
     if (!newAppointment.patient_id || newAppointment.patient_id === '') {
-      setAppointmentFormError('Selecione um paciente da lista.');
+      setAppointmentFormError('Escolha um paciente na lista que aparece enquanto você digita.');
       return;
     }
     if (!fallbackDentistId) {
-      setAppointmentFormError('Aluno nao identificado. Recarregue a pagina.');
+      setAppointmentFormError('Não consegui identificar sua conta. Recarregue a página e tente de novo.');
       return;
     }
     if (!newAppointment.date || newAppointment.date === '') {
-      setAppointmentFormError('Selecione a data do atendimento.');
+      setAppointmentFormError('Qual é o dia do atendimento?');
       return;
     }
     if (!newAppointment.time || newAppointment.time === '') {
-      setAppointmentFormError('Selecione o horário.');
+      setAppointmentFormError('Falta escolher o horário.');
       return;
     }
     if (!newAppointment.duration || newAppointment.duration === '') {
-      setAppointmentFormError('Informe a duração em minutos.');
+      setAppointmentFormError('Quanto tempo você reservou para esse atendimento?');
       return;
     }
     const durationMinutes = parseInt(newAppointment.duration, 10);
@@ -1649,7 +1649,7 @@ export default function App() {
     const startTime = parseAppointmentDateTime(startTimeValue);
     const endTime = parseAppointmentDateTime(endTimeValue);
     if (!startTime || !endTime) {
-      setAppointmentFormError('Data ou horÃ¡rio invÃ¡lido.');
+      setAppointmentFormError('Esse dia ou horário não parece certo. Confira e tente de novo.');
       return;
     }
 
@@ -2921,7 +2921,14 @@ export default function App() {
                     {/* Minimal Header */}
                     <div className="px-5 pt-5 pb-3 border-b border-slate-100/50">
                       <div className="flex justify-between items-center gap-4">
-                        <h2 className="text-lg font-semibold text-slate-900">{appointmentModalMode === 'reschedule' ? 'Reagendar atendimento' : 'Agendar atendimento'}</h2>
+                        <div>
+                          <h2 className="font-display text-lg font-extrabold text-slate-900">
+                            {appointmentModalMode === 'reschedule' ? 'Mudar dia ou horário' : 'Marcar atendimento'}
+                          </h2>
+                          <p className="mt-0.5 text-[12px] font-medium text-slate-500">
+                            Quem você atende e quando?
+                          </p>
+                        </div>
                         <button
                           onClick={() => {
                             setIsModalOpen(false);
@@ -2961,7 +2968,7 @@ export default function App() {
 
                       <div className="space-y-2">
                         <div className="flex items-center justify-between px-0.5">
-                          <span className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">Atalhos</span>
+                          <span className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">O que vai fazer?</span>
                           <span className="text-[11px] text-slate-400 font-medium">opcional</span>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
@@ -2997,7 +3004,7 @@ export default function App() {
                           type="text"
                           value={newAppointment.notes || ''}
                           onChange={(e) => { setAppointmentFormError(null); setNewAppointment({ ...newAppointment, notes: e.target.value }); }}
-                          placeholder="Procedimento..."
+                          placeholder="Ex.: restauração, avaliação..."
                           maxLength={60}
                           aria-label="Procedimento"
                           className="w-full px-3.5 py-2.5 bg-slate-50/50 backdrop-blur-sm border border-slate-200/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-base font-medium text-slate-900 placeholder:text-slate-400 transition-all"
@@ -3008,9 +3015,8 @@ export default function App() {
                       <div>
                         <div className="relative">
                           <input
-                            required
                             type="text"
-                            placeholder="Paciente..."
+                            placeholder="Digite o nome do paciente..."
                             aria-label="Paciente"
                             value={newAppointment.patient_name || ''}
                             onChange={(e) => {
@@ -3044,7 +3050,9 @@ export default function App() {
                                 </button>
                               ))
                             ) : (
-                              <div className="px-3.5 py-2.5 text-xs text-slate-400">Nenhum paciente encontrado</div>
+                              <div className="px-3.5 py-2.5 text-xs text-slate-400">
+                                Não encontrei esse nome. Confira a escrita ou cadastre o paciente primeiro.
+                              </div>
                             )}
                           </div>
                         )}
@@ -3055,7 +3063,6 @@ export default function App() {
                         <div>
                           <label className="text-[11px] text-slate-500 font-semibold mb-1 block uppercase tracking-wider">Data</label>
                           <input
-                            required
                             type="date"
                             value={newAppointment.date}
                             onChange={(e) => { setAppointmentFormError(null); setAppointmentConflict(null); setNewAppointment({ ...newAppointment, date: e.target.value }); }}
@@ -3067,7 +3074,6 @@ export default function App() {
                           <div>
                             <label className="text-[11px] text-slate-500 font-semibold mb-1 block uppercase tracking-wider">Horário</label>
                             <input
-                              required
                               type="time"
                               value={newAppointment.time}
                               onChange={(e) => { setAppointmentFormError(null); setAppointmentConflict(null); setNewAppointment({ ...newAppointment, time: e.target.value }); }}
@@ -3078,7 +3084,6 @@ export default function App() {
                           <div>
                             <label className="text-[11px] text-slate-500 font-semibold mb-1 block uppercase tracking-wider">Duração</label>
                             <input
-                              required
                               type="number"
                               min="1"
                               value={newAppointment.duration}
@@ -3092,6 +3097,9 @@ export default function App() {
                       </div>
 
                       {/* Buttons */}
+                      <p className="text-[12px] font-medium leading-snug text-slate-500">
+                        Preencha paciente, dia e horário. Se faltar alguma coisa, eu te aviso.
+                      </p>
                       <div className="flex gap-2 pt-2">
                         <button
                           type="button"
@@ -3109,10 +3117,9 @@ export default function App() {
                         </button>
                         <button
                           type="submit"
-                          disabled={!newAppointment.patient_id || !newAppointment.date || !newAppointment.time}
-                          className="flex-1 py-2.5 px-4 bg-primary/90 hover:bg-primary text-white font-medium rounded-xl active:scale-95 transition-all text-sm shadow-lg shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed backdrop-blur-sm min-h-[44px]"
+                          className="duo-btn duo-btn-active flex-1 py-2.5 px-4 font-display font-extrabold rounded-xl text-sm min-h-[44px]"
                         >
-                          {appointmentModalMode === 'reschedule' ? 'Confirmar reagendamento' : 'Agendar atendimento'}
+                          {appointmentModalMode === 'reschedule' ? 'Salvar novo horário' : 'Marcar atendimento'}
                         </button>
                       </div>
                     </form>

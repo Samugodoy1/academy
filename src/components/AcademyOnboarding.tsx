@@ -78,11 +78,10 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
           </div>
           <div className="mt-5 w-full">
             <SpeechBubble>
-              <p className="text-[22px] leading-snug">Oi, {firstName}.</p>
+              <p className="text-[22px] leading-snug">Oi, {firstName}! Eu sou o Siso.</p>
               <p className="mt-2 text-[15px] font-bold leading-snug text-[#3B0459]/80">
-                Eu sou o Siso — o dente que a faculdade não arrancou. Daqui pra frente o box é
-                seu: casos reais, atendimento, prontuário. Sem aula genérica. Sem checklist de
-                startup.
+                Vou te ajudar a lembrar quem você atende, o que precisa separar antes do box e o
+                que ficou pra anotar depois. Do jeito que a faculdade realmente acontece.
               </p>
             </SpeechBubble>
           </div>
@@ -93,10 +92,10 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
               onDismissWelcome();
             }}
           >
-            Bora, Siso
+            Vamos começar
           </DuoButton>
           <p className="mt-3 text-center text-[12px] font-bold text-[#8E8E93]">
-            Você escolhe o ritmo. Eu só não deixo o box vazio.
+            Leva só um minutinho pra deixar tudo no jeito.
           </p>
         </div>
       </section>
@@ -105,20 +104,20 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
 
   if (showOnboarding) {
     const bubble = !hasPatients
-      ? 'Primeiro caso. Sem nome na ficha o box é só cadeira vazia.'
+      ? 'Vamos colocar aqui a primeira pessoa que você atende na faculdade?'
       : !hasAppointments
-        ? 'Tem caso. Falta marcar o atendimento — senão é só cadastro bonito.'
+        ? `Boa! Agora, quando você vai atender ${(firstPatient?.name || 'essa pessoa').split(' ')[0]}?`
         : !recordOpened
-          ? `Abre o prontuário de ${(firstPatient?.name || 'seu caso').split(' ')[0]}. Anamnese, odontograma, o que o professor cobra.`
-          : 'Trilha fechada. A rotina assume daqui. Eu fico de olho no siso — no seu, não no meu.';
+          ? `Antes do box, dá uma olhada na ficha de ${(firstPatient?.name || 'seu paciente').split(' ')[0]}. Assim você já chega sabendo o que falta.`
+          : 'Pronto! Da próxima vez que você entrar, eu te mostro de onde continuar.';
 
     const coach = !hasPatients
-      ? 'Toque no primeiro nó. Cadastre o caso que você realmente atende.'
+      ? 'Comece pelo nome. O restante você pode completar aos poucos.'
       : !hasAppointments
-        ? 'Agora o segundo nó. Data, hora, o que vai fazer na cadeira.'
+        ? 'Escolha o paciente, o dia e o horário do atendimento.'
         : !recordOpened
-          ? 'Terceiro nó: entra no prontuário. Sem isso o caso é só um nome.'
-          : 'Último nó. Liga a rotina e parte pro painel.';
+          ? 'Abra a ficha e veja com calma o que já está preenchido.'
+          : 'Toque no último passo para ver sua rotina.';
 
     return (
       <section className="page-shell siso-stage">
@@ -138,8 +137,8 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
               done={n1Done}
               active={n1Active}
               glyph="tooth"
-              label="Primeiro caso"
-              onClick={() => !n1Done && setIsPatientModalOpen(true)}
+              label="Adicionar paciente"
+              onClick={n1Done ? undefined : () => setIsPatientModalOpen(true)}
             />
             <PathStem dimmed={n2Locked} />
             <PathNode
@@ -147,8 +146,14 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
               active={n2Active}
               locked={n2Locked}
               glyph="chair"
-              label="Primeiro box"
-              onClick={() => n2Active && openAppointmentModal()}
+              label="Marcar atendimento"
+              onClick={() => {
+                if (n2Locked) {
+                  setIsPatientModalOpen(true);
+                  return;
+                }
+                openAppointmentModal();
+              }}
             />
             <PathStem dimmed={n3Locked} />
             <div id="siso-path-prontuario">
@@ -157,8 +162,18 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
                 active={n3Active}
                 locked={n3Locked}
                 glyph="chart"
-                label="Prontuário"
-                onClick={() => n3Active && firstPatient && openPatientRecord(firstPatient.id)}
+                label="Conhecer a ficha"
+                onClick={() => {
+                  if (!hasPatients) {
+                    setIsPatientModalOpen(true);
+                    return;
+                  }
+                  if (!hasAppointments) {
+                    openAppointmentModal();
+                    return;
+                  }
+                  if (firstPatient) openPatientRecord(firstPatient.id);
+                }}
               />
             </div>
             <PathStem dimmed={n4Locked} />
@@ -166,12 +181,13 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
               active={n4Active}
               locked={n4Locked}
               glyph="check"
-              label="Rotina ligada"
-              onClick={() => {
-                if (!n4Active) return;
-                setOnboardingDismissed(true);
-                onDismissOnboarding();
-              }}
+              label="Tudo pronto"
+              onClick={n4Active
+                ? () => {
+                    setOnboardingDismissed(true);
+                    onDismissOnboarding();
+                  }
+                : undefined}
             />
           </div>
 
@@ -187,7 +203,7 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
                 onDismissOnboarding();
               }}
             >
-              Ir para a rotina
+              Ver minha rotina
             </DuoButton>
           )}
         </div>
@@ -220,16 +236,16 @@ export const AcademyActivationCard: React.FC<{
         <div className="min-w-0 flex-1 pb-3">
           <SpeechBubble>
             <p className="text-[17px] leading-snug">
-              Tem prontuário de {nick} que ainda não foi aberto.
+              Você ainda não abriu a ficha de {nick}.
             </p>
             <p className="mt-1.5 text-[14px] font-bold text-[#3B0459]/75">
-              Sem anamnese o caso é só um nome na lista.
+              Dá uma olhada agora pra ver o que já está preenchido e o que falta.
             </p>
           </SpeechBubble>
         </div>
       </div>
       <DuoButton className="mt-4" onClick={() => openPatientRecord(firstPatient.id)}>
-        Abrir prontuário
+        Ver ficha de {nick}
       </DuoButton>
     </div>
   );

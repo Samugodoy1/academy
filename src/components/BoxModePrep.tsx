@@ -35,7 +35,7 @@ export const BoxModePrep: React.FC<BoxModePrepProps> = ({
         <div className="flex items-center gap-2 mb-4">
           <ChairGlyph size={28} />
           <span className="font-display text-[12px] font-extrabold uppercase tracking-[0.12em] text-primary">
-            Modo box
+            Antes de sentar na cadeira
           </span>
         </div>
 
@@ -48,7 +48,7 @@ export const BoxModePrep: React.FC<BoxModePrepProps> = ({
         )}
 
         <p className="text-[13px] text-academy-muted mt-4 leading-relaxed">
-          Antes de começar — refrescar, não reaprender.
+          Só o que vale relembrar agora. Nada de estudar a matéria inteira.
         </p>
 
         <div className="mt-4 space-y-2">

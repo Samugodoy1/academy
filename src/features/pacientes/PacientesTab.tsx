@@ -376,21 +376,25 @@ function PacientesTabComponent({
 
   const casesSmartCopy = (() => {
     if (totalPendingCases > 0) {
-      return `${totalPendingCases} ${totalPendingCases === 1 ? 'caso pede' : 'casos pedem'} sua atenção.`;
+      return totalPendingCases === 1
+        ? 'Tem uma ficha esperando você terminar.'
+        : `Tem ${totalPendingCases} fichas esperando você terminar.`;
     }
     if (totalScheduledCases > 0) {
-      return `${totalScheduledCases} ${totalScheduledCases === 1 ? 'caso tem' : 'casos têm'} consulta marcada.`;
+      return totalScheduledCases === 1
+        ? 'Um dos seus pacientes já tem dia marcado.'
+        : `${totalScheduledCases} dos seus pacientes já têm dia marcado.`;
     }
-    if (!featuredCase) return 'Tudo em ordem por enquanto.';
+    if (!featuredCase) return 'Tudo tranquilo por aqui.';
     const firstName = (featuredCase.patient.name || 'Paciente').split(' ')[0];
     const action = getPatientNextAction(
       featuredCase.patient,
       featuredCase.meta,
       featuredCase.nextAppointment,
     );
-    const actionCopy = action === 'Revisar anamnese' ? 'Comece pela anamnese.' : `${action}.`;
-    if (featuredCase.nextAppointment) return `${firstName} tem consulta marcada. ${actionCopy}`;
-    return `${firstName} precisa de atenção. ${actionCopy}`;
+    const actionCopy = action === 'Revisar anamnese' ? 'Vale ler a ficha antes.' : `${action}.`;
+    if (featuredCase.nextAppointment) return `${firstName} já tem dia marcado. ${actionCopy}`;
+    return `Dá uma olhada no caso de ${firstName}. ${actionCopy}`;
   })();
 
   return (
@@ -400,9 +404,9 @@ function PacientesTabComponent({
         <div className="flex items-end justify-between gap-3">
           <SisoLine mood="idle" size={112}>
             <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-primary mb-1">
-              Prontuário
+              Seus pacientes
             </p>
-            <p className="text-[20px] sm:text-[22px] leading-snug">Casos</p>
+            <p className="text-[20px] sm:text-[22px] leading-snug">De quem vamos cuidar?</p>
             {patientsSubView === 'list' && (
               <p className="mt-1.5 text-[14px] font-bold leading-snug text-[#3B0459]/75">
                 {casesSmartCopy}
@@ -704,9 +708,9 @@ function PacientesTabComponent({
               <div className="col-span-full comic-card">
                 <EmptySiso
                   mood="wave"
-                  title="Ainda não tem caso no box."
-                  body="Quando entrar o primeiro paciente real, o prontuário, a evolução e o odontograma ficam aqui. Não cadastre fictício pra encher lista."
-                  actionLabel="Cadastrar caso"
+                  title="Quem é a primeira pessoa que você atende?"
+                  body="Comece pelo nome. Depois você adiciona a história, os dentes e as anotações de cada encontro."
+                  actionLabel="Adicionar paciente"
                   onAction={() => setIsPatientModalOpen(true)}
                 />
               </div>
@@ -716,8 +720,8 @@ function PacientesTabComponent({
               <div className="col-span-full comic-card">
                 <EmptySiso
                   mood="think"
-                  title="Nenhum caso neste filtro."
-                  body="Solta o filtro ou busca de outro jeito. O siso não some — só está escondido."
+                  title="Não achei ninguém com esse filtro."
+                  body="Tente outro nome ou volte para a lista completa."
                 />
               </div>
             )}

@@ -22,7 +22,7 @@ export function PathNode({
   icon,
   glyph = 'tooth',
 }: PathNodeProps) {
-  const clickable = Boolean(onClick) && !locked;
+  const clickable = Boolean(onClick);
 
   return (
     <div className="flex flex-col items-center text-center max-w-[150px]">
@@ -33,7 +33,7 @@ export function PathNode({
         className={`relative w-[88px] h-[88px] rounded-full flex items-center justify-center transition-transform
           ${done || (active && !done) ? 'duo-btn duo-btn-active text-white' : ''}
           ${active && !done ? 'siso-pulse' : ''}
-          ${locked ? 'bg-[#E5E5EA] border-4 border-[#D1D1D6] cursor-not-allowed' : ''}
+          ${locked ? 'bg-[#E5E5EA] border-4 border-[#D1D1D6]' : ''}
           ${!done && !active && !locked ? 'duo-btn text-primary' : ''}
         `}
         aria-label={label}

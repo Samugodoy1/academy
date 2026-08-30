@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { API_URL } from '../../config';
+import { AcademyMark } from '../../components/AcademyMark';
 
 export function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -47,6 +48,13 @@ export function ForgotPassword() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         >
+          <div className="flex items-center gap-3 mb-6">
+            <AcademyMark size={48} />
+            <div>
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-primary leading-none">Academy</p>
+              <p className="text-[15px] font-extrabold text-academy-text tracking-tight mt-1">Box do aluno</p>
+            </div>
+          </div>
           <h1 className="text-[26px] font-semibold text-academy-text tracking-[-0.4px] leading-[1.2] mb-2.5">
             Redefinir sua senha
           </h1>

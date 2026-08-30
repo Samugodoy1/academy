@@ -53,6 +53,7 @@ import { Odontogram } from './components/Odontogram';
 import { TermsPage, PrivacyPage } from './components/LegalPages';
 import { NovaEvolucao } from './components/NovaEvolucao';
 import { AcademyDashboard } from './components/AcademyDashboard';
+import { AcademyMark } from './components/AcademyMark';
 import { DataLoadingSkeleton } from './components/DataLoadingSkeleton';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { PreAtendimento } from './components/PreAtendimento';
@@ -90,8 +91,9 @@ import type {
   Installment,
 } from './types/clinical';
 import { DEFAULT_PRODUCT, ACADEMY_DISABLED_TABS } from './app/constants';
-import { SidebarItem } from './features/shell/SidebarItem';
+import { AcademySidebar } from './features/shell/AcademySidebar';
 import { BottomNav } from './features/shell/BottomNav';
+import { ACADEMY_NAV } from './features/shell/nav';
 import { ClinicalPageRoute } from './features/clinical/ClinicalPageRoute';
 import { LegacyClinicalRedirect } from './features/clinical/LegacyClinicalRedirect';
 import { UpgradeLimitModal } from './features/modals/UpgradeLimitModal';
@@ -2224,35 +2226,17 @@ export default function App() {
               )}
             </AnimatePresence>
 
-            <aside className={`
-              fixed inset-y-0 left-0 z-[110] bg-white border-r border-slate-200 p-4 md:p-6 flex flex-col transition-all duration-300 ease-in-out tablet-l:static tablet-l:translate-x-0 no-print
-              ${isSidebarOpen ? 'translate-x-0 w-72' : '-translate-x-full w-72 tablet-l:w-20 desktop:w-72'}
-            `}>
-              <div className="flex items-center justify-between mb-10 px-2">
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20 shrink-0">
-                    <Plus size={24} strokeWidth={3} />
-                  </div>
-                  <div className="tablet-l:hidden desktop:block">
-                    <h1 className="text-xl font-bold tracking-tight text-slate-800 whitespace-nowrap">{PRODUCT_LABEL}</h1>
-                    {getProductAccess(getCurrentProduct())?.plan && getProductAccess(getCurrentProduct())?.plan !== 'free' && (
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                        {getProductAccess(getCurrentProduct())?.plan}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <button onClick={() => setIsSidebarOpen(false)} className="tablet-l:hidden text-slate-400">
-                  <Plus size={24} className="rotate-45" />
-                </button>
-              </div>
-              <nav className="space-y-2 flex-1">
-                <SidebarItem id="dashboard" icon={Home} label="Rotina" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} navigate={navigate} />
-                <SidebarItem id="agenda" icon={Calendar} label="Atendimentos" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} navigate={navigate} />
-                <SidebarItem id="pacientes" icon={Users} label="Casos clinicos" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} navigate={navigate} />
-                <SidebarItem id="configuracoes" icon={Settings} label="Configuracoes" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} navigate={navigate} />
-              </nav>
-            </aside>
+            <AcademySidebar
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              setIsSidebarOpen={setIsSidebarOpen}
+              navigate={navigate}
+              isSidebarOpen={isSidebarOpen}
+              user={user}
+              profile={profile}
+              productLabel={PRODUCT_LABEL}
+              onLogout={handleLogout}
+            />
             <main className="flex-1 min-w-0 overflow-x-hidden flex flex-col pt-4 md:pt-6 lg:pt-8">
               <ClinicalPageRoute
                 transactions={transactions}
@@ -2325,6 +2309,13 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.05, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
               >
+                <div className="flex items-center gap-3 mb-6">
+                  <AcademyMark size={48} />
+                  <div>
+                    <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-primary leading-none">Academy</p>
+                    <p className="text-[15px] font-extrabold text-academy-text tracking-tight mt-1">Box do aluno</p>
+                  </div>
+                </div>
                 <h1 className="text-[26px] font-semibold text-academy-text tracking-[-0.4px] leading-[1.2] mb-2.5">
                   {isRegistering ? 'Crie sua conta gratuita' : (() => {
                     const h = new Date().getHours();
@@ -2508,69 +2499,18 @@ export default function App() {
             </AnimatePresence>
 
             {/* Sidebar */}
-            <aside className={`
-        fixed inset-y-0 left-0 z-[110] liquid-glass-sidebar p-4 tablet-l:p-3 desktop:p-6 flex flex-col transition-all duration-300 ease-in-out tablet-l:static tablet-l:translate-x-0 no-print
-        ${isSidebarOpen ? 'translate-x-0 w-72' : '-translate-x-full w-72 tablet-l:w-20 desktop:w-72'}
-      `}>
-              <div className="flex items-center justify-between mb-10 px-2">
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="w-10 h-10 bg-primary rounded-[14px] flex items-center justify-center text-white shadow-[0_8px_20px_rgba(82,5,123,0.25)] shrink-0">
-                    <BookOpen size={22} strokeWidth={2.5} />
-                  </div>
-                  <h1 className="text-xl font-bold tracking-tight text-academy-text whitespace-nowrap tablet-l:hidden desktop:block">{PRODUCT_LABEL}</h1>
-                </div>
-                <button onClick={() => setIsSidebarOpen(false)} className="tablet-l:hidden text-academy-muted">
-                  <Plus size={24} className="rotate-45" />
-                </button>
-              </div>
-
-              <nav className="space-y-2 flex-1">
-                <SidebarItem id="dashboard" icon={Home} label="Rotina" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} navigate={navigate} />
-                <SidebarItem id="agenda" icon={Calendar} label="Atendimentos" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} navigate={navigate} />
-                <SidebarItem id="pacientes" icon={Users} label="Casos clinicos" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} navigate={navigate} />
-                <SidebarItem id="estudos" icon={BookOpen} label="Estudos" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} navigate={navigate} />
-                {user?.role?.toUpperCase() === 'ADMIN' && (
-                  <SidebarItem id="admin" icon={UserCog} label="Aprovacoes" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} navigate={navigate} />
-                )}
-                <SidebarItem id="configuracoes" icon={Settings} label="Configuracoes" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} navigate={navigate} />
-              </nav>
-
-              <div className="pt-6 border-t border-academy-border/50">
-                <div className="flex items-center gap-3 px-2 mb-4 overflow-hidden">
-                  <div className="w-10 h-10 rounded-full liquid-glass-subtle flex items-center justify-center text-academy-muted shrink-0 overflow-hidden">
-                    {profile?.photo_url ? (
-                      <img
-                        src={profile.photo_url}
-                        alt={profile.name}
-                        className="w-full h-full object-cover"
-                        referrerPolicy="no-referrer"
-                      />
-                    ) : (
-                      <UserCircle size={24} />
-                    )}
-                  </div>
-                  <div className="tablet-l:hidden desktop:block whitespace-nowrap">
-                    <p className="text-sm font-semibold text-academy-text truncate">{user?.name}</p>
-                    <p className="text-xs text-academy-muted uppercase tracking-wider font-bold">{user?.role}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-academy-muted hover:text-academy-attention-text transition-colors overflow-hidden"
-                >
-                  <LogOut size={18} className="shrink-0" />
-                  <span className="text-sm font-medium tablet-l:hidden desktop:block whitespace-nowrap">Sair</span>
-                </button>
-
-                <div className="mt-6 pt-6 border-t border-academy-border/40 tablet-l:hidden desktop:block">
-                  <p className="text-[10px] text-academy-muted px-4 mb-2">© 2026 {PRODUCT_LABEL}</p>
-                  <div className="flex flex-col gap-1 px-4 text-[10px] font-bold text-academy-muted">
-                    <Link to="/termos" className="hover:text-primary transition-colors">Termos de Uso</Link>
-                    <Link to="/privacidade" className="hover:text-primary transition-colors">Política de Privacidade</Link>
-                  </div>
-                </div>
-              </div>
-            </aside>
+            <AcademySidebar
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              setIsSidebarOpen={setIsSidebarOpen}
+              navigate={navigate}
+              isSidebarOpen={isSidebarOpen}
+              user={user}
+              profile={profile}
+              productLabel={PRODUCT_LABEL}
+              onLogout={handleLogout}
+              showAdmin={user?.role?.toUpperCase() === 'ADMIN'}
+            />
 
             {/* Main Content */}
             <main className="flex-1 min-w-0 w-full print:p-0">
@@ -4081,13 +4021,11 @@ export default function App() {
             {/* Notifications */}
             {/* Primary Action & Mobile Bottom Navigation */}
             <BottomNav
-              tabs={[
-                { id: 'dashboard', label: 'Rotina', icon: Home },
-                { id: 'agenda', label: 'Atend.', icon: Calendar },
-                { id: 'pacientes', label: 'Casos', icon: Users },
-                { id: 'estudos', label: 'Estudos', icon: BookOpen },
-                { id: 'configuracoes', label: 'Mais', icon: Settings },
-              ]}
+              tabs={ACADEMY_NAV.map(tab => ({
+                id: tab.id,
+                label: tab.short,
+                icon: tab.icon,
+              }))}
               activeTab={activeTab}
               setActiveTab={setActiveTab}
               navigate={navigate}

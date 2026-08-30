@@ -1,5 +1,6 @@
 export const SidebarItem = ({ id, icon: Icon, label, activeTab, setActiveTab, setIsSidebarOpen, navigate }: any) => {
   const isActive = activeTab === id;
+
   return (
     <button
       onClick={() => {
@@ -8,14 +9,21 @@ export const SidebarItem = ({ id, icon: Icon, label, activeTab, setActiveTab, se
         navigate('/');
       }}
       title={label}
-      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl transition-all duration-200 tablet-l:justify-center tablet-l:px-2 desktop:justify-start desktop:px-4 ${
-        isActive
-          ? 'bg-[#F2F2F7] text-primary'
-          : 'text-academy-muted hover:text-academy-text hover:bg-[#F2F2F7]/70'
+      aria-current={isActive ? 'page' : undefined}
+      className={`duo-btn w-full flex items-center gap-3 rounded-[16px] px-3 py-3 tablet-l:justify-center tablet-l:px-0 tablet-l:py-3 desktop:justify-start desktop:px-3 ${
+        isActive ? 'duo-btn-active' : ''
       }`}
     >
-      <Icon size={20} className="shrink-0" />
-      <span className="font-medium tablet-l:hidden desktop:block whitespace-nowrap">{label}</span>
+      <span
+        className={`flex items-center justify-center w-9 h-9 rounded-[12px] shrink-0 ${
+          isActive ? 'bg-white/15 text-white' : 'bg-primary/10 text-primary'
+        }`}
+      >
+        <Icon size={22} />
+      </span>
+      <span className="font-extrabold uppercase tracking-[0.12em] text-[13px] tablet-l:hidden desktop:block whitespace-nowrap">
+        {label}
+      </span>
     </button>
   );
 };

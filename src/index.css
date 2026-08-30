@@ -366,6 +366,41 @@
     @apply w-full mx-auto max-w-[1400px] px-5 sm:px-6 tablet-l:px-8 desktop:px-10 pt-6 tablet-l:pt-8 pb-[calc(6rem+env(safe-area-inset-bottom))] tablet-l:pb-10;
   }
 
+  /* Duolingo-style pressable tiles */
+  .duo-btn {
+    border: 2px solid #E5E5EA;
+    border-bottom-width: 4px;
+    background: #FFFFFF;
+    color: #52057B;
+    transition: transform 70ms ease, border-width 70ms ease, background-color 70ms ease, border-color 70ms ease;
+  }
+
+  .duo-btn:hover {
+    background: #FAF6FC;
+    border-color: #D9C6E6;
+  }
+
+  .duo-btn:active {
+    border-bottom-width: 2px;
+    transform: translateY(2px);
+  }
+
+  .duo-btn-active {
+    background: #52057B;
+    border-color: #3B0459;
+    color: #FFFFFF;
+  }
+
+  .duo-btn-active:hover {
+    background: #5A0688;
+    border-color: #3B0459;
+  }
+
+  .duo-btn-active:active {
+    border-bottom-width: 2px;
+    transform: translateY(2px);
+  }
+
   /* Smooth spring-like interaction */
   .ios-press {
     @apply transition-transform duration-150 ease-out active:scale-[0.96];

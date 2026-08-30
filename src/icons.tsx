@@ -14,6 +14,7 @@ import {
   ArrowRight     as PhArrowRight,
   ArrowUpRight   as PhArrowUpRight,
   Bell           as PhBell,
+  BookOpen       as PhBookOpen,
   Buildings      as PhBuildings,
   Calculator     as PhCalculator,
   Calendar       as PhCalendar,
@@ -134,7 +135,7 @@ export const CalendarDays  = fill(PhCalendar);      // alias
 export const CalendarPlus  = fill(PhCalendarPlus);
 export const CalendarIcon  = fill(PhCalendar);      // alias (Documents.tsx)
 export const ClipboardList = fill(PhClipboardText);
-export const BookOpen      = fill(PhClipboardText);
+export const BookOpen      = fill(PhBookOpen);
 export const DollarSign    = fill(PhCurrencyDollar);
 export const Search        = fill(PhMagnifyingGlass);
 export const MessageCircle = fill(PhChatCircle);

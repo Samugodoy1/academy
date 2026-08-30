@@ -48,7 +48,7 @@ export function AdminTab({
   updateUserProductAccess,
 }: AdminTabProps) {
   return (
-    <div className="max-w-screen-xl mx-auto space-y-8">
+    <div className="page-shell space-y-8">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Admin geral</h2>
         <p className="text-sm text-slate-500">Aprovacao por produto, plano, papel de acesso e engajamento</p>

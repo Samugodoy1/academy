@@ -74,7 +74,7 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
 
   if (!welcomeSeen && !hasPatients && !hasAppointments && !onboardingDismissed) {
     return (
-      <div className="flex flex-col gap-10 pb-32 pt-8 px-2 max-w-2xl mx-auto">
+      <div className="page-shell flex flex-col gap-10">
         <motion.header
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -155,7 +155,7 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
           <h2 className="text-[13px] font-bold text-academy-muted uppercase tracking-widest px-2">
             Onde encontrar cada coisa
           </h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 tablet-l:grid-cols-4 gap-3">
             {[
               { icon: <Users size={18} />, label: 'Casos', desc: 'Cadastro e prontuário', color: 'text-primary', bg: 'liquid-glass-card border-primary/10' },
               { icon: <Calendar size={18} />, label: 'Atendimentos', desc: 'Agenda clínica', color: 'text-academy-primary', bg: 'liquid-glass-card border-academy-primary/10' },
@@ -211,7 +211,7 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
     };
 
     return (
-      <div className="flex flex-col gap-8 pb-32 pt-10 px-2 max-w-2xl mx-auto">
+      <div className="page-shell flex flex-col gap-8">
         <header className="space-y-1.5 px-2">
           <h1 className="text-[28px] font-bold tracking-tight text-academy-text">
             {timeGreeting.text}{greetingName ? `, ${greetingName}` : ''}{' '}

@@ -1160,7 +1160,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
     const checkedCount = activeMaterial.checklist.filter(item => checkedItems.has(item)).length;
 
     return (
-      <div className="max-w-2xl mx-auto px-5 sm:px-6 pt-6 pb-32">
+      <div className="page-shell pt-6 tablet-l:pt-8">
         <motion.button
           type="button"
           onClick={closeStudy}
@@ -1470,7 +1470,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
       : 'Nada urgente para estudar agora. Quando um caso entrar na agenda, a revisão certa aparece aqui primeiro.';
 
   return (
-    <div className="max-w-2xl mx-auto px-5 sm:px-6 space-y-10 pt-8 pb-32">
+    <div className="page-shell space-y-8 tablet-l:space-y-10">
       <section className="space-y-6">
         <div className="pt-6">
           <p className="text-[16px] font-medium text-academy-muted mb-2">
@@ -1493,6 +1493,9 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           </p>
         </motion.div>
       </section>
+
+      <div className="tablet-l:grid tablet-l:grid-cols-12 tablet-l:gap-8 tablet-l:items-start space-y-8 tablet-l:space-y-0">
+      <div className="tablet-l:col-span-7 space-y-8">
 
       {nextCase && nextCaseTopic ? (
         <motion.section
@@ -1771,6 +1774,9 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         </motion.section>
       )}
 
+      </div>
+      <div className="tablet-l:col-span-5 tablet-l:sticky tablet-l:top-8">
+
       <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1832,6 +1838,8 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           </div>
         )}
       </motion.section>
+      </div>
+      </div>
     </div>
   );
 };

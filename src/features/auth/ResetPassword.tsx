@@ -46,7 +46,7 @@ export function ResetPassword() {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <div className="bg-white p-8 rounded-3xl shadow-xl text-center max-w-md">
           <AlertTriangle className="mx-auto text-rose-500 mb-4" size={48} />
           <h1 className="text-2xl font-bold mb-2">Link Inválido</h1>
@@ -60,7 +60,7 @@ export function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4 font-sans">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

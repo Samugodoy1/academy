@@ -84,7 +84,7 @@ export function ConfigTab({
   const currentPlan = (getProductAccess(currentProduct)?.plan || 'free') as ProductPlan;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="page-shell space-y-6 tablet-l:max-w-3xl">
 
       {/* ── PROFILE HEADER ── */}
       <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">

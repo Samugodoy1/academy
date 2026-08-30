@@ -2311,7 +2311,7 @@ export default function App() {
       } />
       <Route path="*" element={
         !user ? (
-          <div className="min-h-screen academy-ambient-bg flex items-center justify-center px-6 font-sans antialiased">
+          <div className="min-h-screen bg-white flex items-center justify-center px-6 font-sans antialiased">
             <motion.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2493,7 +2493,7 @@ export default function App() {
           </div>
         ) : (
           <AppProvider value={appContextValue}>
-          <div className="min-h-screen academy-ambient-bg flex font-sans text-academy-text relative overflow-x-hidden">
+          <div className="min-h-screen bg-white flex font-sans text-academy-text relative overflow-x-hidden">
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
               {isSidebarOpen && (
@@ -2509,7 +2509,7 @@ export default function App() {
 
             {/* Sidebar */}
             <aside className={`
-        fixed inset-y-0 left-0 z-[110] liquid-glass-sidebar p-4 md:p-6 flex flex-col transition-all duration-300 ease-in-out tablet-l:static tablet-l:translate-x-0 no-print
+        fixed inset-y-0 left-0 z-[110] liquid-glass-sidebar p-4 tablet-l:p-3 desktop:p-6 flex flex-col transition-all duration-300 ease-in-out tablet-l:static tablet-l:translate-x-0 no-print
         ${isSidebarOpen ? 'translate-x-0 w-72' : '-translate-x-full w-72 tablet-l:w-20 desktop:w-72'}
       `}>
               <div className="flex items-center justify-between mb-10 px-2">
@@ -2573,7 +2573,7 @@ export default function App() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 p-4 md:p-6 lg:p-8 w-full max-w-full print:p-0 pb-24 md:pb-8">
+            <main className="flex-1 min-w-0 w-full print:p-0">
               {/* ── Floating Guide Banner ── */}
               {(() => {
                 const guide = getGuideStep();
@@ -2585,7 +2585,7 @@ export default function App() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ duration: 0.3 }}
-                    className="max-w-screen-xl mx-auto px-0 md:px-4 mb-4 no-print"
+                    className="max-w-[1400px] mx-auto px-5 sm:px-6 tablet-l:px-8 desktop:px-10 mb-4 no-print"
                   >
                     <div className="flex items-center gap-3 liquid-glass-card border border-primary/10 rounded-2xl px-5 py-3.5">
                       <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
@@ -2625,7 +2625,7 @@ export default function App() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="w-full max-w-screen-xl mx-auto px-0 md:px-4"
+                  className="w-full"
                 >
                   {searchTerm && activeTab !== 'pacientes' && (
                     <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm mb-8">
@@ -2814,7 +2814,7 @@ export default function App() {
                   {activeTab === 'configuracoes' && (
                     <ErrorBoundary fallbackTitle="Não foi possível carregar Configurações">
                       {!profile || !user ? (
-                        <div className="pt-10 px-2 max-w-screen-xl mx-auto w-full">
+                        <div className="page-shell">
                           <DataLoadingSkeleton rows={5} />
                         </div>
                       ) : (

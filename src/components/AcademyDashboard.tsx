@@ -674,7 +674,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
   if (loading) {
     return (
-      <div className="pt-10 px-2 max-w-screen-xl mx-auto w-full">
+      <div className="page-shell">
         <DataLoadingSkeleton rows={5} />
       </div>
     );
@@ -691,7 +691,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       onDismissOnboarding={onDismissOnboarding}
       onDismissWelcome={onDismissWelcome}
     >
-    <div className="max-w-2xl mx-auto px-5 sm:px-6 space-y-12 pt-8 pb-32">
+    <div className="page-shell space-y-8 tablet-l:space-y-10">
       <section className="space-y-5">
         <AcademyActivationCard
           user={user}
@@ -715,18 +715,18 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         <ClinicalObservation observation={clinicalObservation} />
       </section>
 
-      <div className="space-y-4">
+      <div className="flex flex-col gap-8 tablet-l:grid tablet-l:grid-cols-12 tablet-l:gap-8 tablet-l:items-start">
+      <div className="space-y-5 tablet-l:col-span-7">
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         >
           <div
-            className="relative overflow-hidden rounded-[32px] academy-hero-surface flex flex-col"
-            style={{ minHeight: 'min(60svh, 520px)' }}
+            className="relative overflow-hidden rounded-[28px] tablet-l:rounded-[32px] academy-hero-surface flex flex-col min-h-[min(52svh,460px)] tablet-l:min-h-[440px]"
           >
             <div className="absolute inset-x-0 top-0 h-px bg-white/20 z-10" />
-            <div className="relative z-10 flex-1 px-8 pt-12 pb-6 flex flex-col gap-6">
+            <div className="relative z-10 flex-1 px-6 tablet-l:px-8 pt-10 tablet-l:pt-12 pb-6 flex flex-col gap-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.14em]">
@@ -848,7 +848,6 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
             Atendimento
           </motion.button>
         </div>
-      </div>
 
       {showBoxMode && todayContext.nextAppointment && todayContext.nextProcedure && (
         <BoxModePrep
@@ -872,6 +871,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           }
         />
       )}
+      </div>
+
+      <div className="space-y-6 tablet-l:col-span-5 tablet-l:sticky tablet-l:top-8">
 
       {studySuggestion && (
         <motion.section
@@ -1021,6 +1023,8 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           </div>
         </section>
       )}
+      </div>
+      </div>
     </div>
     </AcademyOnboarding>
   );

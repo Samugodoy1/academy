@@ -159,7 +159,7 @@ function PacientesTabComponent({
 
   if (loading) {
     return (
-      <div className="pt-10 px-2 max-w-screen-xl mx-auto w-full">
+      <div className="page-shell">
         <DataLoadingSkeleton rows={6} />
       </div>
     );
@@ -392,7 +392,7 @@ function PacientesTabComponent({
   })();
 
   return (
-    <div className="space-y-4 pt-8 pb-28 px-5 sm:px-6 max-w-2xl mx-auto">
+    <div className="page-shell space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-6 mb-4">
         <div className="flex items-center justify-between">
@@ -499,7 +499,7 @@ function PacientesTabComponent({
           </div>
 
           {/* ── Card grid ── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
+          <div className="grid grid-cols-1 tablet-l:grid-cols-2 desktop:grid-cols-3 gap-3 mt-6">
             {patientCards.map(
               ({
                 patient,

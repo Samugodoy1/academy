@@ -34,7 +34,7 @@ export function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen academy-ambient-bg flex items-center justify-center px-6 font-sans antialiased">
+    <div className="min-h-screen bg-white flex items-center justify-center px-6 font-sans antialiased">
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}

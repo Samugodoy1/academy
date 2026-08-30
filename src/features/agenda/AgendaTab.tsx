@@ -151,7 +151,7 @@ function AgendaTabComponent({
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col gap-10 pb-28 pt-8 px-5 sm:px-6 max-w-2xl mx-auto w-full">
+    <div className="page-shell flex flex-col gap-8 tablet-l:gap-10">
       {/* Header */}
       <div className="flex flex-col gap-5 mb-2 no-print">
         <div className="flex items-center justify-between gap-3">

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, ChevronRight } from '../icons';
+import { CheckMolarGlyph } from '../illustrations/glyphs';
 import type { NextStepSuggestion, SkillCount } from '../utils/clinicalProgression';
 
 interface ClinicalProgressionCardProps {
@@ -21,12 +22,12 @@ export const ClinicalProgressionCard: React.FC<ClinicalProgressionCardProps> = (
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-      className="liquid-glass-card rounded-[24px] overflow-hidden"
+      className="comic-card overflow-hidden"
     >
       <div className="px-6 pt-6 pb-2">
         <div className="flex items-center gap-2.5 mb-4">
-          <div className="w-1 h-5 bg-academy-primary rounded-full" />
-          <span className="text-[12px] font-bold uppercase tracking-[0.08em] text-academy-muted">
+          <CheckMolarGlyph size={28} />
+          <span className="font-display text-[12px] font-extrabold uppercase tracking-[0.12em] text-primary">
             Progressão clínica
           </span>
         </div>
@@ -61,7 +62,7 @@ export const ClinicalProgressionCard: React.FC<ClinicalProgressionCardProps> = (
           <motion.button
             whileTap={{ scale: 0.96, opacity: 0.9 }}
             onClick={onReviewNextStep}
-            className="flex items-center gap-1.5 px-5 py-2.5 rounded-[14px] liquid-glass-pill text-academy-primary text-[13px] font-bold transition-all"
+            className="flex items-center gap-1.5 px-5 py-2.5 rounded-[14px] duo-btn duo-btn-active font-display text-[13px] font-extrabold uppercase tracking-[0.1em]"
           >
             Revisar
             <ChevronRight size={14} />

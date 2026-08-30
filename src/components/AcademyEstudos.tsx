@@ -17,7 +17,6 @@ import {
   Pill,
   Search,
   Shield,
-  Sparkles,
   Stethoscope,
   Syringe,
   Target,
@@ -27,6 +26,10 @@ import {
 import { getAppointmentTime, parseAppointmentDateTime } from '../utils/dateUtils';
 import { mapProcedureToTopic, StudyKey } from '../utils/studyTopics';
 import { generateBoxContext, BoxIntelligenceContext } from '../data/boxIntelligence';
+import { SisoLine } from '../illustrations/SisoLine';
+import { EmptySiso } from '../illustrations/EmptySiso';
+import { DuoButton } from './DuoButton';
+import { BookGlyph } from '../illustrations/glyphs';
 import {
   countClinicalSkills,
   detectClinicalGaps,
@@ -1262,7 +1265,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
             className="bg-academy-primary rounded-[24px] p-5 mt-4 text-white shadow-[0_12px_36px_rgba(82,5,123,0.2)]"
           >
             <div className="flex items-center gap-2 mb-4">
-              <Sparkles size={16} className="text-white/70" />
+              <BookGlyph size={18} />
               <h3 className="text-[15px] font-bold">Na ponta da língua</h3>
             </div>
             <div className="grid gap-2.5">
@@ -1471,27 +1474,18 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
 
   return (
     <div className="page-shell space-y-8 tablet-l:space-y-10">
-      <section className="space-y-6">
-        <div className="pt-6">
-          <p className="text-[16px] font-medium text-academy-muted mb-2">
+      <section className="space-y-4">
+        <SisoLine mood="study" size={128}>
+          <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-primary mb-1">
             Estudos
           </p>
-          <h2 className="text-[34px] sm:text-[38px] font-bold text-academy-text leading-[1.1] tracking-tight mt-1">
+          <p className="text-[20px] sm:text-[22px] leading-snug">
             {nextCase ? 'O que revisar agora' : 'Sua revisão clínica'}
-          </h2>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.08 }}
-          className="flex items-start gap-3 rounded-2xl px-5 py-4 liquid-glass-card"
-        >
-          <Stethoscope size={18} className="mt-0.5 shrink-0 text-academy-primary" />
-          <p className="text-[14px] font-medium text-[#3A3A3C] leading-snug">
+          </p>
+          <p className="mt-2 text-[14px] font-bold leading-snug text-[#3B0459]/75">
             {preceptorMessage}
           </p>
-        </motion.div>
+        </SisoLine>
       </section>
 
       <div className="tablet-l:grid tablet-l:grid-cols-12 tablet-l:gap-8 tablet-l:items-start space-y-8 tablet-l:space-y-0">
@@ -1505,7 +1499,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           className="space-y-4"
         >
           <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Antes do próximo atendimento</h3>
-          <div className="liquid-glass-card rounded-[32px] p-7 relative overflow-hidden flex flex-col">
+          <div className="comic-card rounded-[32px] p-7 relative overflow-hidden flex flex-col">
             <div className="absolute -right-8 -bottom-8 opacity-[0.06] text-academy-primary pointer-events-none">
               <nextCaseTopic.icon size={200} />
             </div>
@@ -1578,20 +1572,12 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => openStudy(nextCase.topicKey, nextCase)}
-                    className="w-full bg-academy-primary text-white font-bold text-[15px] py-[16px] rounded-[20px] shadow-lg hover:scale-[0.98] transition-transform active:scale-95"
-                  >
+                  <DuoButton onClick={() => openStudy(nextCase.topicKey, nextCase)}>
                     Revisar para este caso
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => openPatientRecord?.(nextCase.patient.id)}
-                    className="w-full bg-white text-academy-muted border border-academy-border font-bold text-[15px] py-[16px] rounded-[20px] hover:bg-academy-neutral transition-colors active:scale-95"
-                  >
+                  </DuoButton>
+                  <DuoButton variant="secondary" onClick={() => openPatientRecord?.(nextCase.patient.id)}>
                     Abrir caso
-                  </button>
+                  </DuoButton>
                 </div>
               </div>
             </div>
@@ -1602,25 +1588,15 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          className="bg-white rounded-[32px] border border-academy-border shadow-sm p-8 flex items-start gap-4"
+          className="comic-card"
         >
-          <div className="w-12 h-12 bg-academy-success rounded-full flex items-center justify-center shrink-0">
-            <CheckCircle2 size={24} className="text-academy-success-text" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-[17px] font-bold text-academy-text">Nenhum caso exigindo revisão</h3>
-            <p className="text-[14px] text-academy-muted mt-1 leading-relaxed">
-              Sua agenda próxima está tranquila. Se quiser, use o tempo para uma lacuna ou para a biblioteca abaixo.
-            </p>
-            <button
-              type="button"
-              onClick={() => setActiveTab?.('agenda')}
-              className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-bold text-academy-primary"
-            >
-              <Calendar size={15} />
-              Ver agenda
-            </button>
-          </div>
+          <EmptySiso
+            mood="proud"
+            title="Nenhum caso exigindo revisão agora."
+            body="Agenda tranquila. Use o tempo numa lacuna ou na biblioteca — ou vai pro box vazio, que eu não recomendo."
+            actionLabel="Ver agenda"
+            onAction={() => setActiveTab?.('agenda')}
+          />
         </motion.section>
       )}
 

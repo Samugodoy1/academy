@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { API_URL } from '../../config';
 import { AcademyMark } from '../../components/AcademyMark';
+import { Siso } from '../../illustrations/Siso';
+import { SpeechBubble } from '../../illustrations/SpeechBubble';
+import { DuoButton } from '../../components/DuoButton';
 
 export function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -35,32 +38,34 @@ export function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-6 font-sans antialiased">
+    <div className="min-h-screen bg-white flex items-center justify-center px-6 font-sans antialiased siso-stage">
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-[400px] liquid-glass-heavy rounded-[32px] p-8 sm:p-10"
+        className="w-full max-w-[400px] comic-card p-8 sm:p-10"
       >
         <motion.div
-          className="mb-11"
+          className="mb-8 flex flex-col items-center"
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="flex items-center gap-3 mb-6">
-            <AcademyMark size={48} />
-            <div>
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-primary leading-none">Academy</p>
-              <p className="text-[15px] font-extrabold text-academy-text tracking-tight mt-1">Box do aluno</p>
-            </div>
+          <Siso mood="think" size={120} />
+          <div className="mt-3 flex items-center gap-2">
+            <AcademyMark size={28} />
+            <p className="font-display text-[13px] font-extrabold uppercase tracking-[0.16em] text-primary">
+              Academy · Box do aluno
+            </p>
           </div>
-          <h1 className="text-[26px] font-semibold text-academy-text tracking-[-0.4px] leading-[1.2] mb-2.5">
-            Redefinir sua senha
-          </h1>
-          <p className="text-[15px] text-academy-muted leading-relaxed">
-            Informe seu e-mail para receber as instruções de acesso.
-          </p>
+          <div className="mt-4 w-full">
+            <SpeechBubble>
+              <p className="text-[18px] leading-snug">Esqueceu a senha. Acontece — até em periodontia.</p>
+              <p className="mt-1.5 text-[14px] font-bold text-[#3B0459]/75">
+                Manda o e-mail da faculdade. Eu não julgo.
+              </p>
+            </SpeechBubble>
+          </div>
         </motion.div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -99,18 +104,10 @@ export function ForgotPassword() {
           )}
 
           <div className="pt-3">
-            <motion.button
-              type="submit"
-              disabled={loading}
-              whileHover={{ scale: loading ? 1 : 1.005 }}
-              whileTap={{ scale: loading ? 1 : 0.98 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25, mass: 0.8 }}
-              className="w-full h-[48px] bg-academy-primary hover:bg-academy-primary-dark disabled:hover:bg-academy-primary text-white text-[15px] font-medium rounded-[14px] shadow-[0_8px_24px_rgba(82,5,123,0.22)] disabled:opacity-50 disabled:cursor-not-allowed transition-[background-color,box-shadow,opacity] duration-[160ms] ease-in-out"
-              style={{ willChange: 'transform' }}
-            >
+            <DuoButton type="submit" disabled={loading}>
               {loading ? 'Enviando...' : 'Enviar instruções'}
-            </motion.button>
-            <p className="text-center text-[11px] text-academy-muted/70 mt-3.5">Ambiente seguro · Dados criptografados</p>
+            </DuoButton>
+            <p className="text-center text-[11px] font-bold text-academy-muted/70 mt-3.5">Ambiente da clínica-escola</p>
           </div>
         </form>
 

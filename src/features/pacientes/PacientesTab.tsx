@@ -13,6 +13,8 @@ import {
 } from '../../icons';
 import { DataLoadingSkeleton } from '../../components/DataLoadingSkeleton';
 import { PortalInbox } from '../../components/PortalInbox';
+import { SisoLine } from '../../illustrations/SisoLine';
+import { EmptySiso } from '../../illustrations/EmptySiso';
 import {
   getPatientCardMeta,
   formatProcedure,
@@ -395,14 +397,18 @@ function PacientesTabComponent({
     <div className="page-shell space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-6 mb-4">
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-1">
-            <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-academy-primary">Prontuário</p>
-            <h3 className="text-[34px] sm:text-[38px] font-bold tracking-tight text-academy-text leading-[1.1]">Casos</h3>
+        <div className="flex items-end justify-between gap-3">
+          <SisoLine mood="idle" size={112}>
+            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-primary mb-1">
+              Prontuário
+            </p>
+            <p className="text-[20px] sm:text-[22px] leading-snug">Casos</p>
             {patientsSubView === 'list' && (
-              <p className="text-[14px] text-academy-muted mt-1">{casesSmartCopy}</p>
+              <p className="mt-1.5 text-[14px] font-bold leading-snug text-[#3B0459]/75">
+                {casesSmartCopy}
+              </p>
             )}
-          </div>
+          </SisoLine>
           {portalPendingCount > 0 && patientsSubView === 'list' && (
             <button
               type="button"
@@ -695,38 +701,24 @@ function PacientesTabComponent({
             )}
 
             {patientCards.length === 0 && patients.length === 0 && !searchTerm && (
-              <div className="col-span-full liquid-glass-card rounded-3xl p-8 sm:p-12 space-y-6">
-                <div className="text-center space-y-3">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                    <UserPlus size={28} className="text-primary" />
-                  </div>
-                  <p className="text-lg font-bold text-academy-text">
-                    Voce ainda nao cadastrou pacientes.
-                  </p>
-                  <p className="text-sm text-academy-muted max-w-sm mx-auto leading-relaxed">
-                    Quando houver casos clinicos reais, eles aparecerao aqui com historico, evolucoes
-                    e anexos.
-                  </p>
-                </div>
-                <div className="text-center">
-                  <button
-                    onClick={() => setIsPatientModalOpen(true)}
-                    className="bg-primary text-white px-7 py-3.5 rounded-[20px] font-bold shadow-[0_8px_24px_rgba(82,5,123,0.2)] hover:opacity-90 transition-all active:scale-95 inline-flex items-center gap-2 text-sm"
-                  >
-                    <Plus size={16} />
-                    Cadastrar paciente
-                  </button>
-                  <p className="text-[11px] text-academy-muted mt-3">
-                    Use apenas dados reais do atendimento academico.
-                  </p>
-                </div>
+              <div className="col-span-full comic-card">
+                <EmptySiso
+                  mood="wave"
+                  title="Ainda não tem caso no box."
+                  body="Quando entrar o primeiro paciente real, o prontuário, a evolução e o odontograma ficam aqui. Não cadastre fictício pra encher lista."
+                  actionLabel="Cadastrar caso"
+                  onAction={() => setIsPatientModalOpen(true)}
+                />
               </div>
             )}
 
             {patientCards.length === 0 && (patients.length > 0 || !!searchTerm) && (
-              <div className="col-span-full liquid-glass-card rounded-2xl p-10 text-center">
-                <Users size={36} className="mx-auto text-academy-border mb-3" />
-                <p className="text-academy-muted font-medium">Nenhum caso clinico neste filtro.</p>
+              <div className="col-span-full comic-card">
+                <EmptySiso
+                  mood="think"
+                  title="Nenhum caso neste filtro."
+                  body="Solta o filtro ou busca de outro jeito. O siso não some — só está escondido."
+                />
               </div>
             )}
           </div>

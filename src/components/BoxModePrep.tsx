@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Clock, Stethoscope } from '../icons';
+import { CheckCircle2, Clock } from '../icons';
+import { ChairGlyph } from '../illustrations/glyphs';
+import { DuoButton } from './DuoButton';
 import type { BoxPrepItem } from '../utils/clinicalIntelligence';
 
 interface BoxModePrepProps {
@@ -27,15 +29,13 @@ export const BoxModePrep: React.FC<BoxModePrepProps> = ({
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.14, ease: [0.16, 1, 0.3, 1] }}
-      className="liquid-glass-card rounded-[24px] overflow-hidden"
+      className="comic-card overflow-hidden"
     >
       <div className="px-6 pt-6 pb-2">
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-[12px] bg-academy-soft flex items-center justify-center">
-            <Stethoscope size={16} className="text-academy-primary" />
-          </div>
-          <span className="text-[12px] font-bold uppercase tracking-[0.08em] text-academy-muted">
-            Modo clínica
+          <ChairGlyph size={28} />
+          <span className="font-display text-[12px] font-extrabold uppercase tracking-[0.12em] text-primary">
+            Modo box
           </span>
         </div>
 
@@ -72,13 +72,7 @@ export const BoxModePrep: React.FC<BoxModePrepProps> = ({
 
       {onOpenCase && (
         <div className="px-6 pb-5 pt-3">
-          <motion.button
-            whileTap={{ scale: 0.98, opacity: 0.92 }}
-            onClick={onOpenCase}
-            className="w-full py-3 rounded-[16px] bg-academy-primary text-white text-[14px] font-bold transition-all"
-          >
-            Abrir caso
-          </motion.button>
+          <DuoButton onClick={onOpenCase}>Abrir caso</DuoButton>
         </div>
       )}
     </motion.section>

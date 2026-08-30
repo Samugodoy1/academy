@@ -1,7 +1,12 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Calendar, CalendarPlus, CheckCircle2, ChevronRight, ClipboardList, Clock, Plus, Users } from '../icons';
+import { CheckCircle2, ChevronRight, Clock } from '../icons';
 import { AcademyActivationCard, AcademyOnboarding } from './AcademyOnboarding';
+import { Siso, type SisoMood } from '../illustrations/Siso';
+import { SisoLine } from '../illustrations/SisoLine';
+import { PathNode } from '../illustrations/PathNode';
+import { DuoButton } from './DuoButton';
+import type { GlyphName } from '../illustrations/glyphs';
 import { BoxModePrep } from './BoxModePrep';
 import { ClinicalObservation } from './ClinicalObservation';
 import { ClinicalProgressionCard } from './ClinicalProgressionCard';
@@ -59,11 +64,22 @@ const getTimeGreeting = () => {
   return 'Boa noite';
 };
 
-const getGreetingEmoji = () => {
-  const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) return '☀️';
-  if (hour >= 12 && hour < 18) return '👋';
-  return '🌙';
+const focusMood = (kind: string): SisoMood => {
+  if (kind === 'evolution') return 'think';
+  if (kind === 'today') return 'box';
+  if (kind === 'next') return 'idle';
+  if (kind === 'paused' || kind === 'pending') return 'think';
+  if (kind === 'start') return 'wave';
+  if (kind === 'calm') return 'proud';
+  return 'idle';
+};
+
+const focusGlyph = (kind: string): GlyphName => {
+  if (kind === 'evolution') return 'chart';
+  if (kind === 'today' || kind === 'next') return 'chair';
+  if (kind === 'paused' || kind === 'pending') return 'chart';
+  if (kind === 'start') return 'tooth';
+  return 'check';
 };
 
 const formatTime = (value?: string) => {
@@ -700,17 +716,12 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           onboardingDismissed={user?.onboarding_done ?? false}
           openPatientRecord={openPatientRecord}
         />
-        <div className="pt-6">
-          <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-academy-primary mb-2">
-            Hoje
+        <SisoLine mood={focusMood(focus.kind)} size={148}>
+          <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-primary mb-1">
+            {getTimeGreeting()}{greetingName ? `, ${greetingName}` : ''}
           </p>
-          <p className="text-[16px] font-medium text-academy-muted mb-2">
-            {getTimeGreeting()}{greetingName ? `, ${greetingName}` : ''} {getGreetingEmoji()}
-          </p>
-          <h2 className="text-[34px] sm:text-[38px] font-bold text-academy-text leading-[1.1] tracking-tight mt-1">
-            {smartMessage}
-          </h2>
-        </div>
+          <p className="text-[20px] sm:text-[22px] leading-snug">{smartMessage}</p>
+        </SisoLine>
 
         <ClinicalObservation observation={clinicalObservation} />
       </section>
@@ -718,135 +729,106 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       <div className="flex flex-col gap-8 tablet-l:grid tablet-l:grid-cols-12 tablet-l:gap-8 tablet-l:items-start">
       <div className="space-y-5 tablet-l:col-span-7">
         <motion.section
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="comic-card px-5 py-7 tablet-l:px-8 tablet-l:py-9"
         >
-          <div
-            className="relative overflow-hidden rounded-[28px] tablet-l:rounded-[32px] academy-hero-surface flex flex-col min-h-[min(52svh,460px)] tablet-l:min-h-[440px]"
-          >
-            <div className="absolute inset-x-0 top-0 h-px bg-white/20 z-10" />
-            <div className="relative z-10 flex-1 px-6 tablet-l:px-8 pt-10 tablet-l:pt-12 pb-6 flex flex-col gap-6">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.14em]">
-                    {focus.eyebrow}
-                  </span>
-                  <h2 className="text-[34px] sm:text-[40px] font-bold text-white leading-[1.1] tracking-[-0.025em] mt-1.5 break-words">
-                    {focusPatientName || focus.title}
-                  </h2>
-                </div>
-                {focusPatientName ? (
-                  focusPhoto ? (
-                    <img
-                      src={focusPhoto}
-                      alt={focusPatientName}
-                      referrerPolicy="no-referrer"
-                      className="w-16 h-16 rounded-[22px] object-cover border-2 border-white/20 shrink-0 mt-1 shadow-lg"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-[22px] bg-white/15 border border-white/20 flex items-center justify-center shrink-0 mt-1 font-bold text-[26px] text-white shadow-inner">
-                      {focusInitial}
-                    </div>
-                  )
+          <div className="flex flex-col items-center text-center">
+            <p className="font-display text-[12px] font-extrabold uppercase tracking-[0.16em] text-primary">
+              {focus.eyebrow}
+            </p>
+            <div className="mt-4 flex items-center gap-3">
+              {focusPatientName && (
+                focusPhoto ? (
+                  <img
+                    src={focusPhoto}
+                    alt={focusPatientName}
+                    referrerPolicy="no-referrer"
+                    className="w-12 h-12 rounded-full object-cover border-[3px] border-[#3B0459]"
+                  />
                 ) : (
-                  <div className="w-16 h-16 rounded-[22px] bg-white/15 border border-white/20 flex items-center justify-center shrink-0 mt-1 text-white shadow-inner">
-                    {focus.kind === 'calm' ? <CheckCircle2 size={28} /> : focus.kind === 'start' ? <Plus size={28} /> : <ClipboardList size={28} />}
+                  <div className="w-12 h-12 rounded-full bg-[#FFF6EC] border-[3px] border-[#3B0459] flex items-center justify-center font-display font-black text-[20px] text-primary">
+                    {focusInitial}
                   </div>
-                )}
-              </div>
-  
-              <div className="flex items-center gap-2.5 flex-wrap">
-                {appointmentMetaLabel && (
-                  <span className="px-3 py-1.5 rounded-full text-[12px] font-bold liquid-glass-pill text-white">
-                    {appointmentMetaLabel}
-                  </span>
-                )}
-              </div>
-  
-              <div className="mt-auto pt-4 space-y-5">
-                <div>
-                  <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.12em]">Próxima ação</span>
-                  <p className="text-[22px] sm:text-[26px] font-bold text-white mt-1 leading-snug">
-                    {focus.title}
-                  </p>
-                </div>
-  
-                <div className="grid gap-3">
-                  {procedureHint && (
-                    <HeroDetail label="Conduta" value={procedureHint} />
-                  )}
-                  {lastEvolution && (
-                    <HeroDetail label="Última evolução" value={lastEvolution} />
-                  )}
-                  {clinicalAlert && !isFinishedFocus && (
-                    <HeroDetail label="Antes do box" value={clinicalAlert} />
-                  )}
-                  {clinicalAlert && isFinishedFocus && (
-                    <HeroDetail label="Pendente no prontuário" value={clinicalAlert.replace('pendente.', 'não registrada.')} />
-                  )}
-                  {isFinishedFocus && (
-                    <HeroDetail
-                      label="Para fechar"
-                      value={pendingDateLabel
-                        ? `Registre o que foi feito neste atendimento.`
-                        : 'Registre a evolução clínica.'}
-                    />
-                  )}
-                </div>
-              </div>
+                )
+              )}
+              <h2 className="font-display text-[28px] sm:text-[34px] font-black text-academy-text leading-[1.1] tracking-tight">
+                {focusPatientName || focus.title}
+              </h2>
             </div>
-  
-            <div className="relative z-10 px-7 pb-8 pt-5 space-y-3">
-              <motion.button
-                whileTap={{ scale: 0.98, opacity: 0.92 }}
-                transition={{ duration: 0.18, ease: 'easeOut' }}
+            {appointmentMetaLabel && (
+              <p className="mt-2 text-[13px] font-extrabold uppercase tracking-[0.1em] text-academy-muted">
+                {appointmentMetaLabel}
+              </p>
+            )}
+
+            <div className="mt-7">
+              <PathNode
+                active
+                glyph={focusGlyph(focus.kind)}
+                label={focus.kind === 'calm' ? 'Rotina' : 'Começar'}
                 onClick={focus.action}
-                className="w-full py-[20px] rounded-[26px] text-[18px] font-bold bg-white shadow-[0_12px_30px_rgba(0,0,0,0.18)] transition-all text-academy-primary"
-              >
-                {focus.actionLabel}
-              </motion.button>
-              <div className="grid grid-cols-2 gap-3">
-                <motion.button
-                  whileTap={{ scale: 0.98, opacity: 0.9 }}
-                  transition={{ duration: 0.18, ease: 'easeOut' }}
-                  onClick={() => setActiveTab('pacientes')}
-                  className="flex items-center justify-center gap-2 px-5 py-[15px] rounded-[20px] liquid-glass-pill text-[14px] font-bold text-white transition-all"
-                >
-                  <Users size={16} />
-                  Casos
-                </motion.button>
-                <motion.button
-                  whileTap={{ scale: 0.98, opacity: 0.9 }}
-                  transition={{ duration: 0.18, ease: 'easeOut' }}
-                  onClick={openAppointmentModal}
-                  className="flex items-center justify-center gap-2 py-[15px] rounded-[20px] liquid-glass-pill text-[14px] font-bold text-white transition-all"
-                >
-                  <CalendarPlus size={16} />
-                  Agendar
-                </motion.button>
-              </div>
+              />
+            </div>
+
+            <p className="mt-5 max-w-md font-display text-[20px] font-extrabold leading-snug text-[#3B0459]">
+              {focus.title}
+            </p>
+            <p className="mt-1.5 max-w-md text-[14px] font-semibold text-academy-muted leading-snug">
+              {focus.subtitle}
+            </p>
+          </div>
+
+          {(procedureHint || lastEvolution || clinicalAlert || isFinishedFocus) && (
+            <div className="mt-6 grid gap-2.5">
+              {procedureHint && <ComicDetail label="Conduta" value={procedureHint} />}
+              {lastEvolution && <ComicDetail label="Última evolução" value={lastEvolution} />}
+              {clinicalAlert && !isFinishedFocus && (
+                <ComicDetail label="Antes do box" value={clinicalAlert} />
+              )}
+              {clinicalAlert && isFinishedFocus && (
+                <ComicDetail label="Pendente no prontuário" value={clinicalAlert.replace('pendente.', 'não registrada.')} />
+              )}
+              {isFinishedFocus && (
+                <ComicDetail
+                  label="Para fechar"
+                  value={pendingDateLabel
+                    ? 'Registre o que foi feito neste atendimento.'
+                    : 'Registre a evolução clínica.'}
+                />
+              )}
+            </div>
+          )}
+
+          <div className="mt-6 space-y-3">
+            <DuoButton onClick={focus.action}>{focus.actionLabel}</DuoButton>
+            <div className="grid grid-cols-2 gap-3">
+              <DuoButton variant="secondary" onClick={() => setActiveTab('pacientes')}>
+                Casos
+              </DuoButton>
+              <DuoButton variant="secondary" onClick={openAppointmentModal}>
+                Agendar
+              </DuoButton>
             </div>
           </div>
         </motion.section>
 
         <div className="flex items-center justify-end gap-2">
-          <motion.button
-            whileTap={{ scale: 0.96 }}
+          <button
+            type="button"
             onClick={() => setIsPatientModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-[12px] rounded-xl liquid-glass-card text-academy-primary text-[13px] font-bold transition-all"
+            className="duo-btn rounded-[14px] px-4 py-[10px] font-display text-[12px] font-extrabold uppercase tracking-[0.12em] text-primary"
           >
-            <Plus size={14} strokeWidth={2.5} />
-            Caso
-          </motion.button>
-          <motion.button
-            whileTap={{ scale: 0.96 }}
+            + Caso
+          </button>
+          <button
+            type="button"
             onClick={openAppointmentModal}
-            className="flex items-center gap-1.5 px-4 py-[12px] rounded-xl bg-academy-primary text-white text-[13px] font-bold transition-all shadow-sm"
+            className="duo-btn duo-btn-active rounded-[14px] px-4 py-[10px] font-display text-[12px] font-extrabold uppercase tracking-[0.12em]"
           >
-            <CalendarPlus size={14} strokeWidth={2.5} />
-            Atendimento
-          </motion.button>
+            + Box
+          </button>
         </div>
 
       {showBoxMode && todayContext.nextAppointment && todayContext.nextProcedure && (
@@ -881,33 +863,28 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="liquid-glass-card rounded-[24px] overflow-hidden">
-            <div className="px-6 pt-6 pb-2">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-[12px] bg-academy-neutral flex items-center justify-center">
-                  <BookOpen size={16} className="text-academy-muted" />
-                </div>
-                <span className="text-[12px] font-bold uppercase tracking-[0.08em] text-academy-muted">Antes do box</span>
+          <div className="comic-card overflow-hidden">
+            <div className="px-5 pt-5 pb-2 flex items-end gap-3">
+              <Siso mood="study" size={88} className="shrink-0" />
+              <div className="min-w-0 flex-1 pb-2">
+                <span className="font-display text-[11px] font-extrabold uppercase tracking-[0.14em] text-primary">
+                  Antes do box
+                </span>
+                <h3 className="font-display text-[20px] font-black text-academy-text leading-snug mt-1">
+                  {studySuggestion.topic}
+                </h3>
+                <p className="text-[13px] font-semibold text-academy-muted mt-1.5 leading-relaxed">
+                  {studySuggestion.reason}
+                </p>
               </div>
-              <h3 className="text-[20px] font-bold text-academy-text leading-snug">
-                {studySuggestion.topic}
-              </h3>
-              <p className="text-[13px] text-academy-muted mt-1.5 leading-relaxed">
-                {studySuggestion.reason}
-              </p>
             </div>
-            <div className="px-6 pb-5 pt-4 flex items-center justify-between">
-              <span className="text-[12px] font-semibold text-academy-muted/70 flex items-center gap-1.5">
-                <Clock size={12} />
+            <div className="px-5 pb-5 pt-3 flex items-center justify-between gap-3">
+              <span className="text-[12px] font-extrabold uppercase tracking-[0.08em] text-academy-muted">
                 {studySuggestion.duration}
               </span>
-              <motion.button
-                whileTap={{ scale: 0.96, opacity: 0.9 }}
-                onClick={() => openStudyTopic(studySuggestion.topicKey)}
-                className="px-5 py-2.5 rounded-[14px] bg-academy-primary text-white text-[13px] font-bold transition-all shadow-sm"
-              >
+              <DuoButton wide={false} className="!w-auto px-5" onClick={() => openStudyTopic(studySuggestion.topicKey)}>
                 Revisar
-              </motion.button>
+              </DuoButton>
             </div>
           </div>
         </motion.section>
@@ -1030,10 +1007,10 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   );
 };
 
-const HeroDetail = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-[18px] liquid-glass-inset px-4 py-3">
-    <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.12em]">{label}</span>
-    <p className="text-[14px] font-semibold text-white mt-0.5 leading-snug line-clamp-2">{value}</p>
+const ComicDetail = ({ label, value }: { label: string; value: string }) => (
+  <div className="rounded-[16px] border-[3px] border-[#3B0459] bg-[#FFF6EC] px-4 py-3 text-left">
+    <span className="font-display text-[11px] font-extrabold uppercase tracking-[0.12em] text-primary">{label}</span>
+    <p className="text-[14px] font-bold text-academy-text mt-0.5 leading-snug line-clamp-2">{value}</p>
   </div>
 );
 

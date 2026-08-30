@@ -1407,7 +1407,7 @@ function AgendaTabComponent({
                   {pastFinishedAppointments.length > 0 && (
                     <div className="py-4">
                       <div className="px-6 py-2 flex items-center gap-2">
-                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Consultas Anteriores Realizadas</span>
+                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Atendimentos concluídos</span>
                       </div>
                       <div className="space-y-2">
                         {pastFinishedAppointments.map(app => renderAppointment(app))}

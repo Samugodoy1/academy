@@ -192,7 +192,7 @@ export const getTodayHeadline = (
   return pickDailyVariant([
     'Está tudo tranquilo. Quer ver quem ainda precisa de retorno?',
     'Sem correria hoje. Dá pra adiantar alguma ficha.',
-    'Nada pegando fogo. Um ótimo momento pra organizar os próximos boxes.',
+    'Nada urgente agora. Dá pra organizar os próximos boxes com calma.',
   ], `${daySeed}|default`);
 };
 

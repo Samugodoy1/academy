@@ -546,7 +546,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         kind: 'pending',
         eyebrow: 'Ficou faltando',
         title: `A ficha de ${firstName(clinicalPending.name)} ainda tem coisa em aberto.`,
-        subtitle: 'Complete o que lembrar agora. No próximo box, você vai agradecer.',
+        subtitle: 'Complete o que lembrar agora, pra isso não ficar pendente pro próximo box.',
         actionLabel: 'Ver o que falta',
         patient: clinicalPending,
         appointment: null,

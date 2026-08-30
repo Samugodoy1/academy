@@ -1406,7 +1406,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
               Como você entraria nesse atendimento agora?
             </h3>
             <p className="text-[12px] font-medium text-academy-muted mt-1 mb-4">
-              Resposta honesta. Sem nota, sem ranking — só ajusta o que eu te mostro depois.
+              Responda como você se sente agora. Isso me ajuda a escolher o que mostrar depois.
             </p>
             <div className="grid gap-2">
               {CONFIDENCE_OPTIONS.map(option => {
@@ -1652,7 +1652,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           transition={{ duration: 0.45, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
           className="space-y-4"
         >
-          <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Lacunas no seu histórico</h3>
+          <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">O que você ainda praticou pouco</h3>
           <div className="grid gap-3">
             {clinicalGaps.map(gap => {
               const material = gap.studyTopic ? STUDY_LIBRARY[gap.studyTopic] : null;

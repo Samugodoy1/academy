@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -29,6 +29,7 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Nunito", "Inter", ui-sans-serif, system-ui, sans-serif;
   --breakpoint-tablet-l: 64rem;
   --breakpoint-desktop: 80rem;
 
@@ -361,6 +362,76 @@
     background: rgba(82, 5, 123, 0.1);
     box-shadow: inset 0 0 0 0.5px rgba(82, 5, 123, 0.08);
   }
+
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .siso-bubble {
+    background: #FFFFFF;
+    border: 3px solid #3B0459;
+    border-radius: 22px;
+    padding: 16px 18px 18px;
+    box-shadow: 0 6px 0 #3B0459;
+  }
+
+  .comic-card {
+    background: #FFFFFF;
+    border: 3px solid #3B0459;
+    border-radius: 28px;
+    box-shadow: 0 8px 0 #3B0459;
+  }
+
+  .siso-stage {
+    position: relative;
+  }
+
+  .siso-stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.07;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'><path d='M36 10c10 0 16 8 16 16 0 5-1.4 10-2.8 15-1.4 5-2.2 9-2.2 11 0 4-3 7-7 7-2.2 0-4-1.2-5-3-1 1.8-2.8 3-5 3-4 0-7-3-7-7 0-2 .8-6 2.2-11C27.4 36 26 31 26 26 26 18 30 10 36 10Z' fill='%2352057B'/></svg>");
+    background-size: 72px 72px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .siso-bounce, .siso-idle, .siso-wiggle, .siso-pulse, .siso-wave-arm {
+      animation: none;
+    }
+  }
+
+  @keyframes sisoBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  @keyframes sisoIdle {
+    0%, 100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-4px) rotate(1.4deg); }
+  }
+
+  @keyframes sisoWiggle {
+    0%, 100% { transform: rotate(-3deg); }
+    50% { transform: rotate(3deg); }
+  }
+
+  @keyframes sisoWave {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(-22deg); }
+  }
+
+  @keyframes sisoPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+
+  .siso-bounce { animation: sisoBounce 1.4s ease-in-out infinite; }
+  .siso-idle { animation: sisoIdle 3.2s ease-in-out infinite; }
+  .siso-wiggle { animation: sisoWiggle 1.6s ease-in-out infinite; }
+  .siso-pulse { animation: sisoPulse 1.5s ease-in-out infinite; }
+  .siso-wave-arm { animation: sisoWave 0.7s ease-in-out infinite; }
 
   .page-shell {
     @apply w-full mx-auto max-w-[1400px] px-5 sm:px-6 tablet-l:px-8 desktop:px-10 pt-6 tablet-l:pt-8 pb-[calc(6rem+env(safe-area-inset-bottom))] tablet-l:pb-10;

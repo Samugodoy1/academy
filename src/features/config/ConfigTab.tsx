@@ -17,6 +17,7 @@ import {
   LogOut,
 } from '../../icons';
 import { SubscriptionManagement } from '../../components/SubscriptionManagement';
+import { Siso } from '../../illustrations/Siso';
 import type { CurrentUser, Dentist, Product, ProductAccess, ProductPlan } from '../../types/clinical';
 
 type AppTabId =
@@ -86,20 +87,23 @@ export function ConfigTab({
   return (
     <div className="page-shell space-y-6 tablet-l:max-w-3xl">
 
-      {/* ── PROFILE HEADER ── */}
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="h-24 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent" />
-        <div className="px-8 pb-8 -mt-14">
+      <div className="comic-card overflow-hidden">
+        <div className="h-20 bg-[#FFF6EC] border-b-[3px] border-[#3B0459] relative">
+          <div className="absolute right-4 -bottom-2">
+            <Siso mood="proud" size={88} />
+          </div>
+        </div>
+        <div className="px-6 pb-7 -mt-10">
           <div className="flex items-end gap-5">
             <div className="relative group shrink-0">
-              <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg bg-slate-100 flex items-center justify-center text-slate-400">
+              <div className="w-24 h-24 rounded-[28px] overflow-hidden border-[3px] border-[#3B0459] bg-[#FFF6EC] flex items-center justify-center text-primary shadow-[0_6px_0_#3B0459]">
                 {profile.photo_url ? (
                   <img src={profile.photo_url} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 ) : (
                   <UserCircle size={64} />
                 )}
               </div>
-              <label className="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full shadow-lg cursor-pointer hover:opacity-90 transition-all">
+              <label className="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full shadow-lg cursor-pointer hover:opacity-90 transition-all border-2 border-[#3B0459]">
                 <Camera size={14} />
                 <input type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} />
               </label>

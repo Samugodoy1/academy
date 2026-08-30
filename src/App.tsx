@@ -33,7 +33,6 @@ import {
   Building2,
   Shield,
   Home,
-  Sparkles,
   Activity,
   UserCog,
   UserCircle,
@@ -54,6 +53,9 @@ import { TermsPage, PrivacyPage } from './components/LegalPages';
 import { NovaEvolucao } from './components/NovaEvolucao';
 import { AcademyDashboard } from './components/AcademyDashboard';
 import { AcademyMark } from './components/AcademyMark';
+import { DuoButton } from './components/DuoButton';
+import { Siso } from './illustrations/Siso';
+import { SpeechBubble } from './illustrations/SpeechBubble';
 import { DataLoadingSkeleton } from './components/DataLoadingSkeleton';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { PreAtendimento } from './components/PreAtendimento';
@@ -2295,38 +2297,44 @@ export default function App() {
       } />
       <Route path="*" element={
         !user ? (
-          <div className="min-h-screen bg-white flex items-center justify-center px-6 font-sans antialiased">
+          <div className="min-h-screen bg-white flex items-center justify-center px-5 font-sans antialiased siso-stage">
             <motion.div
-              initial={{ opacity: 0, y: 6 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full max-w-[400px] liquid-glass-heavy rounded-[32px] p-8 sm:p-10"
+              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              className="w-full max-w-[420px] comic-card p-6 sm:p-8"
             >
-              {/* Heading */}
               <motion.div
-                className="mb-11"
+                className="mb-8 flex flex-col items-center"
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.05, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
               >
-                <div className="flex items-center gap-3 mb-6">
-                  <AcademyMark size={48} />
-                  <div>
-                    <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-primary leading-none">Academy</p>
-                    <p className="text-[15px] font-extrabold text-academy-text tracking-tight mt-1">Box do aluno</p>
-                  </div>
+                <Siso mood={isRegistering ? 'wave' : 'idle'} size={132} />
+                <div className="mt-3 flex items-center gap-2">
+                  <AcademyMark size={28} />
+                  <p className="font-display text-[13px] font-extrabold uppercase tracking-[0.16em] text-primary">
+                    Academy · Box do aluno
+                  </p>
                 </div>
-                <h1 className="text-[26px] font-semibold text-academy-text tracking-[-0.4px] leading-[1.2] mb-2.5">
-                  {isRegistering ? 'Crie sua conta gratuita' : (() => {
-                    const h = new Date().getHours();
-                    if (h >= 5 && h < 12) return 'Bom dia. Vamos organizar sua rotina clinica?';
-                    if (h >= 12 && h < 18) return 'Boa tarde. Pronto para mais um turno?';
-                    return 'Boa noite. Vamos revisar o dia de hoje?';
-                  })()}
-                </h1>
-                <p className="text-[15px] text-academy-muted leading-relaxed">
-                  {isRegistering ? 'Preencha os dados para enviar sua solicitacao' : 'Acesse sua rotina academica com seguranca'}
-                </p>
+                <div className="mt-4 w-full">
+                  <SpeechBubble>
+                    {isRegistering ? (
+                      <p className="text-[18px] leading-snug">
+                        Cria a conta. Eu cuido pra o box não virar pasta do Drive.
+                      </p>
+                    ) : (
+                      <p className="text-[18px] leading-snug">
+                        {(() => {
+                          const h = new Date().getHours();
+                          if (h >= 5 && h < 12) return 'Bom dia. Entra. O siso já tá no jaleco.';
+                          if (h >= 12 && h < 18) return 'Boa tarde. Bora pro turno.';
+                          return 'Boa noite. Fecha a evolução antes de dormir.';
+                        })()}
+                      </p>
+                    )}
+                  </SpeechBubble>
+                </div>
               </motion.div>
 
               <form onSubmit={isRegistering ? handleRegister : handleLogin} className="space-y-5">
@@ -2443,17 +2451,10 @@ export default function App() {
                 )}
 
                 <div className="pt-3">
-                  <motion.button
-                    type="submit"
-                    whileHover={{ scale: 1.005 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 25, mass: 0.8 }}
-                    className="w-full h-[48px] bg-academy-primary hover:bg-academy-primary-dark text-white text-[15px] font-medium rounded-[14px] shadow-[0_8px_24px_rgba(82,5,123,0.22)] transition-[background-color,box-shadow] duration-[160ms] ease-in-out"
-                    style={{ willChange: 'transform' }}
-                  >
-                    {isRegistering ? 'Criar conta' : 'Continuar'}
-                  </motion.button>
-                  <p className="text-center text-[11px] text-academy-muted/70 mt-3.5">Ambiente seguro · Dados criptografados</p>
+                  <DuoButton type="submit">
+                    {isRegistering ? 'Criar conta' : 'Entrar no box'}
+                  </DuoButton>
+                  <p className="text-center text-[11px] font-bold text-academy-muted/70 mt-3.5">Ambiente da clínica-escola · dados reais</p>
                 </div>
               </form>
 
@@ -4096,16 +4097,18 @@ export default function App() {
                     initial={{ opacity: 0, scale: 0.96, y: 8 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.96, y: 8 }}
-                    className="bg-white border border-primary/10 rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden"
+                    className="comic-card w-full max-w-md overflow-hidden bg-white"
                   >
                     <div className="p-6">
-                      <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4">
-                        <Sparkles size={22} />
+                      <div className="flex justify-center mb-2">
+                        <Siso mood="proud" size={108} />
                       </div>
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-primary mb-2">Academy Free</p>
-                      <h3 className="text-xl font-bold text-slate-900 mb-2">Seu Academy já tem seus primeiros casos.</h3>
-                      <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                        Você já organizou 3 casos. Para continuar acompanhando seus pacientes, evoluções e atendimentos da faculdade, mude para o Academy Student.
+                      <p className="font-display text-[11px] font-extrabold uppercase tracking-[0.14em] text-primary mb-2 text-center">Academy Free</p>
+                      <h3 className="font-display text-[22px] font-black text-academy-text mb-2 text-center leading-snug">
+                        O box já tem os primeiros casos.
+                      </h3>
+                      <p className="text-sm font-semibold text-academy-muted leading-relaxed mb-4 text-center">
+                        Você organizou 3 casos. No Student o siso não corta evolução, agenda nem prontuário no meio do semestre.
                       </p>
                       <div className="space-y-2">
                         {['Casos ilimitados', 'Agenda acadêmica sem limite', 'Evoluções e modo box completos'].map((item) => (
@@ -4120,7 +4123,7 @@ export default function App() {
                       <button
                         type="button"
                         onClick={() => setShowAcademyUpgradeModal(false)}
-                        className="px-5 py-2.5 rounded-full bg-slate-100 text-slate-500 text-sm font-bold hover:bg-slate-200 transition-all"
+                        className="duo-btn rounded-[14px] px-5 py-2.5 font-display text-[13px] font-extrabold uppercase tracking-[0.1em]"
                       >
                         Continuar no Free
                       </button>
@@ -4131,7 +4134,7 @@ export default function App() {
                           setActiveTab('configuracoes');
                           navigate('/');
                         }}
-                        className="px-5 py-2.5 rounded-full bg-primary text-white text-sm font-bold hover:opacity-90 transition-all"
+                        className="duo-btn duo-btn-active rounded-[14px] px-5 py-2.5 font-display text-[13px] font-extrabold uppercase tracking-[0.1em]"
                       >
                         Mudar para Student
                       </button>

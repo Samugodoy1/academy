@@ -30,6 +30,8 @@ import {
 import type { Appointment, CurrentUser, Patient } from '../../types/clinical';
 import { StatusBadge } from './StatusBadge';
 import type { AgendaViewMode } from './useAgendaState';
+import { SisoLine } from '../../illustrations/SisoLine';
+import { EmptySiso } from '../../illustrations/EmptySiso';
 
 type AppTabId =
   | 'dashboard'
@@ -154,17 +156,21 @@ function AgendaTabComponent({
     <div className="page-shell flex flex-col gap-8 tablet-l:gap-10">
       {/* Header */}
       <div className="flex flex-col gap-5 mb-2 no-print">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex flex-col gap-1">
-            <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-academy-primary">Agenda</p>
-            <h2 className="text-[34px] sm:text-[38px] font-bold text-academy-text tracking-tight leading-[1.1]">
+        <div className="flex items-end justify-between gap-3">
+          <SisoLine mood="box" size={112}>
+            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-primary mb-1">
+              Agenda
+            </p>
+            <p className="text-[20px] sm:text-[22px] leading-snug">
               {agendaViewMode === 'week' && !agendaFocusMode ? 'Semana clínica' : 'Atendimentos'}
-            </h2>
-            <p className="text-[14px] text-academy-muted">{agendaSmartCopy}</p>
-          </div>
+            </p>
+            <p className="mt-1.5 text-[14px] font-bold leading-snug text-[#3B0459]/75">
+              {agendaSmartCopy}
+            </p>
+          </SisoLine>
           <button
             onClick={openAppointmentModal}
-            className="w-11 h-11 flex items-center justify-center text-academy-primary transition-colors rounded-full liquid-glass-card hover:scale-[0.97] active:scale-95"
+            className="duo-btn duo-btn-active mb-8 w-12 h-12 flex items-center justify-center rounded-full shrink-0"
             title="Novo atendimento"
             aria-label="Novo atendimento"
           >
@@ -280,39 +286,21 @@ function AgendaTabComponent({
 
               if (filtered.length === 0 && agendaViewMode === 'day') {
                 return patients.length === 0 ? (
-                  <div className="py-12 sm:py-20 text-center space-y-6 max-w-md mx-auto">
-                    <div className="w-16 h-16 bg-academy-soft rounded-full flex items-center justify-center mx-auto">
-                      <Calendar className="text-violet-400" size={28} />
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-lg font-bold text-slate-800">Voce ainda nao cadastrou pacientes.</p>
-                      <p className="text-sm text-slate-500 leading-relaxed">Cadastre um paciente real para criar atendimentos da rotina clinica.</p>
-                    </div>
-                    <button
-                      onClick={() => setActiveTab('pacientes')}
-                      className="bg-primary text-white px-6 py-3 rounded-[20px] font-bold shadow-[0_8px_24px_rgba(82,5,123,0.2)] hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2 mx-auto text-sm"
-                    >
-                      <UserPlus size={16} />
-                      Cadastrar primeiro paciente
-                    </button>
-                  </div>
+                  <EmptySiso
+                    mood="think"
+                    title="Box vazio. Cadastre o primeiro caso."
+                    body="Sem paciente real não tem atendimento. A rotina começa pelo caso, não pela agenda."
+                    actionLabel="Cadastrar primeiro caso"
+                    onAction={() => setActiveTab('pacientes')}
+                  />
                 ) : (
-                  <div className="py-12 sm:py-16 text-center space-y-5 max-w-md mx-auto">
-                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto">
-                      <Calendar className="text-slate-300" size={28} />
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-lg font-bold text-slate-800">Nenhum atendimento hoje.</p>
-                      <p className="text-sm text-slate-500">Quando houver atendimentos, eles aparecerao aqui.</p>
-                    </div>
-                    <button
-                      onClick={openAppointmentModal}
-                      className="bg-primary text-white px-6 py-3 rounded-[20px] font-bold shadow-[0_8px_24px_rgba(82,5,123,0.2)] hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2 mx-auto"
-                    >
-                      <Plus size={16} />
-                      Agendar atendimento
-                    </button>
-                  </div>
+                  <EmptySiso
+                    mood="idle"
+                    title="Nenhum atendimento hoje."
+                    body="Cadeira livre. Marca um box ou aproveita pra fechar evolução."
+                    actionLabel="Agendar atendimento"
+                    onAction={openAppointmentModal}
+                  />
                 );
               }
 

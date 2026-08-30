@@ -2311,17 +2311,11 @@ export default function App() {
                 transition={{ delay: 0.05, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
               >
                 <Siso mood={isRegistering ? 'wave' : 'idle'} size={132} />
-                <div className="mt-3 flex items-center gap-2">
-                  <AcademyMark size={28} />
-                  <p className="font-display text-[13px] font-extrabold uppercase tracking-[0.16em] text-primary">
-                    Academy · Box do aluno
-                  </p>
-                </div>
-                <div className="mt-4 w-full">
+                <div className="mt-2 w-full">
                   <SpeechBubble>
                     {isRegistering ? (
                       <p className="text-[18px] leading-snug">
-                        Cria a conta. Eu cuido pra o box não virar pasta do Drive.
+                        Cria a conta. Eu cuido pro box não virar pasta do Drive.
                       </p>
                     ) : (
                       <p className="text-[18px] leading-snug">
@@ -2334,6 +2328,12 @@ export default function App() {
                       </p>
                     )}
                   </SpeechBubble>
+                </div>
+                <div className="mt-6 flex items-center gap-2">
+                  <AcademyMark size={28} />
+                  <p className="font-display text-[13px] font-extrabold uppercase tracking-[0.16em] text-primary">
+                    Academy · Box do aluno
+                  </p>
                 </div>
               </motion.div>
 

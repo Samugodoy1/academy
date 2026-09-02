@@ -14,16 +14,28 @@
   --apple-link: #2997ff;
   --apple-green: #30d158;
   --apple-red: #ff3b30;
-  --academy-accent: #bf5af2;
+
+  --sys-bg: #000000;
+  --sys-elevated: #1d1d1f;
+  --sys-inset: #000000;
+  --sys-text: #f5f5f7;
+  --sys-muted: #86868b;
+  --sys-input: #2c2c2e;
+  --sys-input-text: #f5f5f7;
+  --sys-secondary: #2c2c2e;
+  --sys-secondary-hover: #3a3a3c;
+  --sys-tabbar: rgba(22, 22, 23, 0.8);
+  --sys-sidebar: #000000;
+  --sys-hairline: rgba(255, 255, 255, 0.08);
 
   --academy-primary: #0071e3;
   --academy-primary-dark: #1d1d1f;
   --academy-primary-light: #0077ed;
   --academy-soft: #f5f5f7;
-  --academy-bg: #000000;
-  --academy-card: #1d1d1f;
-  --academy-text: #f5f5f7;
-  --academy-muted: #86868b;
+  --academy-bg: var(--sys-bg);
+  --academy-card: var(--sys-elevated);
+  --academy-text: var(--sys-text);
+  --academy-muted: var(--sys-muted);
   --academy-border: #d2d2d7;
   --academy-neutral: #f5f5f7;
   --academy-study: #f5f5f7;
@@ -41,6 +53,27 @@
   --glass-shadow-sm: none;
 }
 
+html[data-theme="light"] {
+  --sys-bg: #f5f5f7;
+  --sys-elevated: #ffffff;
+  --sys-inset: #e8e8ed;
+  --sys-text: #1d1d1f;
+  --sys-muted: #6e6e73;
+  --sys-input: #ffffff;
+  --sys-input-text: #1d1d1f;
+  --sys-secondary: #e8e8ed;
+  --sys-secondary-hover: #d2d2d7;
+  --sys-tabbar: rgba(255, 255, 255, 0.72);
+  --sys-sidebar: #f5f5f7;
+  --sys-hairline: rgba(0, 0, 0, 0.08);
+  --academy-soft: #e8e8ed;
+  --color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 @theme {
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
@@ -51,10 +84,19 @@
   --color-academy-primary: var(--apple-blue);
   --color-academy-primary-dark: var(--apple-ink);
   --color-academy-soft: var(--apple-surface);
-  --color-academy-bg: #000000;
-  --color-academy-card: #1d1d1f;
-  --color-academy-text: #f5f5f7;
-  --color-academy-muted: var(--apple-gray);
+  --color-academy-bg: var(--sys-bg);
+  --color-academy-card: var(--sys-elevated);
+  --color-academy-text: var(--sys-text);
+  --color-academy-muted: var(--sys-muted);
+  --color-sys-bg: var(--sys-bg);
+  --color-sys-elevated: var(--sys-elevated);
+  --color-sys-inset: var(--sys-inset);
+  --color-sys-text: var(--sys-text);
+  --color-sys-muted: var(--sys-muted);
+  --color-sys-input: var(--sys-input);
+  --color-sys-hairline: var(--sys-hairline);
+  --color-sys-secondary: var(--sys-secondary);
+  --color-sys-sidebar: var(--sys-sidebar);
   --color-academy-border: var(--apple-line);
   --color-academy-neutral: var(--apple-surface);
   --color-academy-study: var(--apple-surface);
@@ -78,13 +120,16 @@
   --color-apple-link: #2997ff;
   --color-apple-green: #30d158;
   --color-apple-red: #ff3b30;
-  --color-academy-accent: var(--academy-accent);
 }
 
 @layer base {
   html {
-    background-color: #000000;
+    background-color: var(--sys-bg);
     color-scheme: dark;
+  }
+
+  html[data-theme="light"] {
+    color-scheme: light;
   }
 
   html,
@@ -94,7 +139,9 @@
   }
 
   body {
-    @apply bg-black text-[#f5f5f7] antialiased selection:bg-apple-blue/20 selection:text-white;
+    @apply antialiased selection:bg-apple-blue/20 selection:text-white;
+    background-color: var(--sys-bg);
+    color: var(--sys-text);
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
     font-feature-settings: "ss01", "cv11", "calt";
     font-weight: 400;
@@ -108,7 +155,7 @@
 
 @layer utilities {
   .ios-card {
-    background: #1d1d1f;
+    background: var(--sys-elevated);
     border: none;
     border-radius: 28px;
     box-shadow: none;
@@ -164,20 +211,20 @@
   }
 
   .ios-input {
-    background: #2c2c2e;
+    background: var(--sys-input);
     border: none;
     border-radius: 14px;
     padding: 14px 16px;
     font-size: 17px;
     font-weight: 400;
     letter-spacing: -0.022em;
-    color: #f5f5f7;
+    color: var(--sys-input-text);
     outline: none;
     transition: box-shadow 0.2s ease;
   }
 
   .ios-input::placeholder {
-    color: #86868b;
+    color: var(--sys-muted);
   }
 
   .ios-input:focus {
@@ -209,7 +256,7 @@
     font-weight: 600;
     letter-spacing: -0.025em;
     line-height: 1.05;
-    color: #f5f5f7;
+    color: var(--sys-text);
   }
 
   .ios-subtitle {
@@ -217,14 +264,14 @@
     font-weight: 600;
     letter-spacing: -0.025em;
     line-height: 1.05;
-    color: #f5f5f7;
+    color: var(--sys-text);
   }
 
   .ios-text-secondary {
     font-size: 17px;
     font-weight: 400;
     letter-spacing: -0.011em;
-    color: #86868b;
+    color: var(--sys-muted);
   }
 
   .ios-number-highlight {
@@ -232,7 +279,7 @@
     font-weight: 600;
     letter-spacing: -0.025em;
     line-height: 1.05;
-    color: #f5f5f7;
+    color: var(--sys-text);
   }
 
   .no-scrollbar::-webkit-scrollbar {
@@ -349,8 +396,8 @@
   }
 
   .liquid-glass-sidebar {
-    background: #000000;
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--sys-sidebar);
+    border-right: 1px solid var(--sys-hairline);
   }
 
   .liquid-glass-inset,
@@ -366,7 +413,7 @@
 
   .academy-hero-surface {
     position: relative;
-    background: #000000;
+    background: var(--sys-bg);
     box-shadow: none;
   }
 
@@ -391,11 +438,11 @@
 
   .tab-bar-float {
     min-height: 49px;
-    background: rgba(22, 22, 23, 0.8);
+    background: var(--sys-tabbar);
     -webkit-backdrop-filter: saturate(150%) blur(20px);
     backdrop-filter: saturate(150%) blur(20px);
     border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--sys-hairline);
     border-radius: 0;
     box-shadow: none;
   }
@@ -403,7 +450,7 @@
   .tab-bar-item-active {
     background: transparent;
     box-shadow: none;
-    color: #1d1d1f;
+    color: var(--sys-text);
   }
 
   .font-display {
@@ -417,7 +464,7 @@
     font-weight: 600;
     letter-spacing: -0.025em;
     line-height: 1.05;
-    color: #f5f5f7;
+    color: var(--sys-text);
   }
 
   .apple-display-ink {
@@ -431,7 +478,7 @@
     font-weight: 400;
     letter-spacing: -0.016em;
     line-height: 1.333;
-    color: #86868b;
+    color: var(--sys-muted);
   }
 
   .apple-link {
@@ -474,8 +521,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #2c2c2e;
-    color: #f5f5f7;
+    background: var(--sys-secondary);
+    color: var(--sys-text);
     border-radius: 980px;
     padding: 12px 22px;
     font-size: 17px;
@@ -486,7 +533,7 @@
   }
 
   .apple-btn-light:hover {
-    background: #3a3a3c;
+    background: var(--sys-secondary-hover);
   }
 
   .apple-btn-light:active {
@@ -500,13 +547,13 @@
 
   .apple-input {
     width: 100%;
-    background: #2c2c2e;
+    background: var(--sys-input);
     border: none;
     border-radius: 14px;
     padding: 14px 16px;
     font-size: 17px;
     font-weight: 400;
-    color: #f5f5f7;
+    color: var(--sys-input-text);
     outline: none;
   }
 
@@ -523,21 +570,21 @@
   }
 
   .comic-card {
-    background: #1d1d1f;
+    background: var(--sys-elevated);
     border: none;
     border-radius: 28px;
     box-shadow: none;
   }
 
   .oh-device {
-    background: #1d1d1f;
+    background: var(--sys-elevated);
     border-radius: 28px;
     box-shadow: none;
     border: none;
   }
 
   .oh-device-inset {
-    background: #000000;
+    background: var(--sys-inset);
     border-radius: 22px;
   }
 
@@ -597,14 +644,14 @@
 
   .duo-btn {
     border: none;
-    background: #2c2c2e;
-    color: #f5f5f7;
+    background: var(--sys-secondary);
+    color: var(--sys-text);
     border-radius: 980px;
     transition: background 0.2s ease, transform 0.15s ease;
   }
 
   .duo-btn:hover {
-    background: #3a3a3c;
+    background: var(--sys-secondary-hover);
   }
 
   .duo-btn:active {

@@ -11,11 +11,11 @@ interface QuietEmptyProps {
 export function QuietEmpty({ title, body, actionLabel, onAction }: QuietEmptyProps) {
   return (
     <div className="flex flex-col items-center text-center py-12 px-6">
-      <p className="text-[28px] font-semibold text-white tracking-[-0.025em] leading-[1.05] max-w-md">
+      <p className="text-[28px] font-semibold text-sys-text tracking-[-0.025em] leading-[1.05] max-w-md">
         {title}
       </p>
       {body && (
-        <p className="mt-3 max-w-sm text-[17px] font-normal leading-snug text-[#86868b] tracking-[-0.011em]">
+        <p className="mt-3 max-w-sm text-[17px] font-normal leading-snug text-sys-muted tracking-[-0.011em]">
           {body}
         </p>
       )}

@@ -16,10 +16,10 @@ export const ClinicalObservation: React.FC<ClinicalObservationProps> = ({ observ
       transition={{ duration: 0.35, delay: 0.08 }}
       className="oh-device px-5 py-4"
     >
-      <p className="text-[13px] font-normal text-[#86868b] mb-1 tracking-[-0.011em]">
+      <p className="text-[13px] font-normal text-sys-muted mb-1 tracking-[-0.011em]">
         Recado
       </p>
-      <p className="text-[17px] font-normal text-white leading-snug tracking-[-0.011em]">
+      <p className="text-[17px] font-normal text-sys-text leading-snug tracking-[-0.011em]">
         {observation.text}
       </p>
     </motion.div>

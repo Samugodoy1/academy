@@ -2,7 +2,6 @@ import React from 'react';
 
 export function AcademyWordmark({
   size = 'md',
-  invert = false,
 }: {
   size?: 'sm' | 'md' | 'lg';
   invert?: boolean;
@@ -15,11 +14,9 @@ export function AcademyWordmark({
         : 'text-[17px]';
 
   return (
-    <p className={`${scale} font-semibold tracking-[-0.025em] leading-[1.05] ${invert ? 'text-white' : 'text-apple-ink'}`}>
+    <p className={`${scale} font-semibold tracking-[-0.025em] leading-[1.05] text-sys-text`}>
       OdontoHub
-      <span className="ml-1.5 font-normal" style={{ color: 'var(--academy-accent)' }}>
-        Academy
-      </span>
+      <span className="ml-1.5 font-normal">Academy</span>
     </p>
   );
 }

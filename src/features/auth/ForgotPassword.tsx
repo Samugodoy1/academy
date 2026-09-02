@@ -36,24 +36,24 @@ export function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-6 font-sans antialiased">
+    <div className="min-h-screen bg-sys-bg flex items-center justify-center px-6 font-sans antialiased">
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="w-full max-w-[400px] oh-device p-8 sm:p-10"
       >
-        <AcademyWordmark invert />
-        <h1 className="mt-8 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] text-white">
+        <AcademyWordmark />
+        <h1 className="mt-8 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] text-sys-text">
           Esqueceu a senha.
         </h1>
-        <p className="mt-3 text-[17px] text-[#86868b] tracking-[-0.011em]">
+        <p className="mt-3 text-[17px] text-sys-muted tracking-[-0.011em]">
           Envie o e-mail da faculdade.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <div>
-            <label className="block text-[13px] font-normal text-[#86868b] mb-2">E-mail</label>
+            <label className="block text-[13px] font-normal text-sys-muted mb-2">E-mail</label>
             <input
               type="email"
               required
@@ -69,7 +69,7 @@ export function ForgotPassword() {
           )}
 
           {message && (
-            <p className="text-[15px] text-white">{message}</p>
+            <p className="text-[15px] text-sys-text">{message}</p>
           )}
 
           <div className="pt-3">

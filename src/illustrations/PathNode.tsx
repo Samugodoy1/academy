@@ -50,7 +50,7 @@ export function PathNode({
       </button>
       <p
         className={`mt-2.5 text-[13px] font-normal tracking-[-0.011em] ${
-          locked ? 'text-[#86868b]/50' : 'text-white'
+          locked ? 'text-sys-muted/50' : 'text-sys-text'
         }`}
       >
         {label}

@@ -64,11 +64,11 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
     return (
       <section className="page-shell">
         <div className="mx-auto flex max-w-[440px] flex-col pt-10 pb-4">
-          <p className="text-[15px] text-[#86868b]">Oi, {firstName}.</p>
-          <h1 className="mt-3 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] text-white">
+          <p className="text-[15px] text-sys-muted">Oi, {firstName}.</p>
+          <h1 className="mt-3 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] text-sys-text">
             O box é seu.
           </h1>
-          <p className="mt-4 text-[17px] font-normal leading-snug text-[#86868b] tracking-[-0.011em]">
+          <p className="mt-4 text-[17px] font-normal leading-snug text-sys-muted tracking-[-0.011em]">
             Casos reais, atendimento, prontuário.
           </p>
           <DuoButton
@@ -105,10 +105,10 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
     return (
       <section className="page-shell">
         <div className="mx-auto flex max-w-[440px] flex-col">
-          <h1 className="text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] text-white">
+          <h1 className="text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] text-sys-text">
             {title}
           </h1>
-          <p className="mt-3 text-[17px] text-[#86868b] tracking-[-0.011em]">{coach}</p>
+          <p className="mt-3 text-[17px] text-sys-muted tracking-[-0.011em]">{coach}</p>
 
           <div className="mt-10 flex w-full flex-col items-center">
             <PathNode
@@ -188,10 +188,10 @@ export const AcademyActivationCard: React.FC<{
 
   return (
     <div className="oh-device p-6">
-      <p className="text-[17px] text-white leading-snug tracking-[-0.011em]">
+      <p className="text-[17px] text-sys-text leading-snug tracking-[-0.011em]">
         Tem prontuário de {nick} que ainda não foi aberto.
       </p>
-      <p className="mt-2 text-[15px] text-[#86868b]">
+      <p className="mt-2 text-[15px] text-sys-muted">
         Sem anamnese o caso é só um nome na lista.
       </p>
       <DuoButton className="mt-5" onClick={() => openPatientRecord(firstPatient.id)}>

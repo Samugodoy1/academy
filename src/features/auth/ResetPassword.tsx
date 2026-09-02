@@ -46,11 +46,11 @@ export function ResetPassword() {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <div className="min-h-screen bg-sys-bg flex items-center justify-center p-4">
         <div className="oh-device p-8 text-center max-w-md">
           <AlertTriangle className="mx-auto text-apple-red mb-4" size={40} />
-          <h1 className="text-[28px] font-semibold tracking-[-0.025em] leading-[1.05] mb-2 text-white">Link inválido</h1>
-          <p className="text-[#86868b] mb-6 text-[17px]">Este link de recuperação expirou ou não é válido.</p>
+          <h1 className="text-[28px] font-semibold tracking-[-0.025em] leading-[1.05] mb-2 text-sys-text">Link inválido</h1>
+          <p className="text-sys-muted mb-6 text-[17px]">Este link de recuperação expirou ou não é válido.</p>
           <Link to="/" className="apple-btn inline-block">
             Voltar para o login
           </Link>
@@ -60,7 +60,7 @@ export function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4 font-sans">
+    <div className="min-h-screen bg-sys-bg flex items-center justify-center p-4 font-sans">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -73,7 +73,7 @@ export function ResetPassword() {
             </div>
           </div>
           <div className="text-center mb-10">
-            <h1 className="text-[34px] font-semibold text-white tracking-[-0.025em] leading-[1.05] mb-2">Nova senha</h1>
+            <h1 className="text-[34px] font-semibold text-sys-text tracking-[-0.025em] leading-[1.05] mb-2">Nova senha</h1>
             <p className="text-apple-gray text-[17px]">Crie uma senha para a conta.</p>
           </div>
 

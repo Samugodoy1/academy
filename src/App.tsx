@@ -2212,7 +2212,7 @@ export default function App() {
       <Route path="/pre-atendimento/:token" element={<PreAtendimento />} />
       <Route path="/prontuario/:id" element={
         user ? (
-          <div className="min-h-screen bg-black flex font-sans text-[#f5f5f7] relative overflow-x-hidden">
+          <div className="min-h-screen bg-sys-bg flex font-sans text-sys-text relative overflow-x-hidden">
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
               {isSidebarOpen && (
@@ -2295,7 +2295,7 @@ export default function App() {
       } />
       <Route path="*" element={
         !user ? (
-          <div className="min-h-screen bg-black flex items-center justify-center px-5 font-sans antialiased">
+          <div className="min-h-screen bg-sys-bg flex items-center justify-center px-5 font-sans antialiased">
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2308,8 +2308,8 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.05, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
               >
-                <AcademyWordmark invert size="lg" />
-                <h1 className="mt-8 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] text-white">
+                <AcademyWordmark size="lg" />
+                <h1 className="mt-8 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] text-sys-text">
                   {isRegistering
                     ? 'Crie a conta.'
                     : (() => {
@@ -2319,7 +2319,7 @@ export default function App() {
                         return 'Boa noite.';
                       })()}
                 </h1>
-                <p className="mt-3 text-[17px] text-[#86868b] tracking-[-0.011em]">
+                <p className="mt-3 text-[17px] text-sys-muted tracking-[-0.011em]">
                   {isRegistering ? 'O box fica no mesmo lugar.' : 'Entre para continuar.'}
                 </p>
               </motion.div>
@@ -2472,7 +2472,7 @@ export default function App() {
           </div>
         ) : (
           <AppProvider value={appContextValue}>
-          <div className="min-h-screen bg-black flex font-sans text-[#f5f5f7] relative overflow-x-hidden">
+          <div className="min-h-screen bg-sys-bg flex font-sans text-sys-text relative overflow-x-hidden">
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
               {isSidebarOpen && (
@@ -4085,14 +4085,14 @@ export default function App() {
                     initial={{ opacity: 0, scale: 0.96, y: 8 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.96, y: 8 }}
-                    className="comic-card w-full max-w-md overflow-hidden bg-white"
+                    className="comic-card w-full max-w-md overflow-hidden"
                   >
                     <div className="p-6">
-                      <p className="text-[13px] font-normal text-[#86868b] mb-2 text-center">Academy Free</p>
-                      <h3 className="text-[22px] font-semibold text-white mb-2 text-center leading-[1.05] tracking-[-0.025em]">
+                      <p className="text-[13px] font-normal text-sys-muted mb-2 text-center">Academy Free</p>
+                      <h3 className="text-[22px] font-semibold text-sys-text mb-2 text-center leading-[1.05] tracking-[-0.025em]">
                         O box já tem os primeiros casos.
                       </h3>
-                      <p className="text-[15px] font-normal text-[#86868b] leading-relaxed mb-4 text-center">
+                      <p className="text-[15px] font-normal text-sys-muted leading-relaxed mb-4 text-center">
                         Você organizou 3 casos. No Student a evolução, a agenda e o prontuário seguem no semestre.
                       </p>
                       <div className="space-y-2">

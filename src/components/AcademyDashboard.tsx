@@ -703,11 +703,11 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="oh-device px-6 py-8 tablet-l:px-9 tablet-l:py-10"
         >
-          <p className="text-[15px] font-normal text-[#86868b] tracking-[-0.011em]">
+          <p className="text-[15px] font-normal text-sys-muted tracking-[-0.011em]">
             {getTimeGreeting()}{greetingName ? `, ${greetingName}` : ''}
             {academicPeriod ? ` · ${academicPeriod}` : ''}
           </p>
-          <h1 className="mt-3 text-[34px] sm:text-[40px] font-semibold text-white leading-[1.05] tracking-[-0.025em]">
+          <h1 className="mt-3 text-[34px] sm:text-[40px] font-semibold text-sys-text leading-[1.05] tracking-[-0.025em]">
             {smartMessage}
           </h1>
 
@@ -718,21 +718,21 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
               className="oh-device-inset mt-8 w-full px-5 py-5 text-left"
             >
               {appointmentMetaLabel && (
-                <p className="text-[12px] font-normal text-[#86868b] tracking-[0.08em] uppercase">
+                <p className="text-[12px] font-normal text-sys-muted tracking-[0.08em] uppercase">
                   {appointmentMetaLabel}
                 </p>
               )}
-              <p className="mt-1.5 text-[28px] font-semibold text-white leading-[1.05] tracking-[-0.025em]">
+              <p className="mt-1.5 text-[28px] font-semibold text-sys-text leading-[1.05] tracking-[-0.025em]">
                 {focusPatientName}
               </p>
-              <p className="mt-1 text-[15px] text-[#86868b] tracking-[-0.011em]">
+              <p className="mt-1 text-[15px] text-sys-muted tracking-[-0.011em]">
                 {procedureHint || focus.subtitle}
               </p>
             </button>
           )}
 
           {!focusPatientName && (
-            <p className="mt-5 text-[17px] text-[#86868b] leading-snug tracking-[-0.011em]">
+            <p className="mt-5 text-[17px] text-sys-muted leading-snug tracking-[-0.011em]">
               {focus.subtitle}
             </p>
           )}
@@ -740,8 +740,8 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           {showBoxMode && boxPrepItems[0] && (
             <div className="mt-6 flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-[13px] text-[#86868b]">Checklist</p>
-                <p className="text-[17px] text-white truncate">{boxPrepItems[0].label}</p>
+                <p className="text-[13px] text-sys-muted">Checklist</p>
+                <p className="text-[17px] text-sys-text truncate">{boxPrepItems[0].label}</p>
               </div>
               <span className="text-[15px] text-[#30d158] shrink-0">Pronto</span>
             </div>
@@ -812,13 +812,13 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           <div className="oh-device overflow-hidden">
             <div className="px-5 pt-5 pb-2">
               <div className="min-w-0">
-                <span className="text-[13px] font-normal text-[#86868b]">
+                <span className="text-[13px] font-normal text-sys-muted">
                   Antes do box
                 </span>
-                <h3 className="text-[22px] font-semibold text-white leading-[1.05] tracking-[-0.025em] mt-1">
+                <h3 className="text-[22px] font-semibold text-sys-text leading-[1.05] tracking-[-0.025em] mt-1">
                   {studySuggestion.topic}
                 </h3>
-                <p className="text-[15px] font-normal text-[#86868b] mt-1.5 leading-relaxed">
+                <p className="text-[15px] font-normal text-sys-muted mt-1.5 leading-relaxed">
                   {studySuggestion.reason}
                 </p>
               </div>
@@ -839,11 +839,11 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <h3 className="text-[17px] font-semibold text-white tracking-[-0.016em]">Para fechar</h3>
+              <h3 className="text-[17px] font-semibold text-sys-text tracking-[-0.016em]">Para fechar</h3>
             </div>
             <span className="text-[13px] font-normal text-apple-gray">{pendingRows.length}</span>
           </div>
-          <div className="rounded-[28px] overflow-hidden bg-[#1d1d1f]">
+          <div className="rounded-[28px] overflow-hidden bg-sys-elevated">
             {pendingRows.map(row => (
               <React.Fragment key={row.id}>
                 <ListRow
@@ -871,13 +871,13 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <h3 className="text-[17px] font-semibold text-white tracking-[-0.016em]">Próximos boxes</h3>
+              <h3 className="text-[17px] font-semibold text-sys-text tracking-[-0.016em]">Próximos boxes</h3>
             </div>
             <button onClick={() => setActiveTab('agenda')} className="apple-link !text-[15px]">
               Ver tudo ›
             </button>
           </div>
-          <div className="rounded-[28px] overflow-hidden bg-[#1d1d1f]">
+          <div className="rounded-[28px] overflow-hidden bg-sys-elevated">
             {otherAppointments.map((app, index) => {
               const dateTime = formatAgendaListDateTime(app.start_time);
               return (
@@ -916,7 +916,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           <motion.button
             whileTap={{ scale: 0.98, opacity: 0.9 }}
             onClick={() => openPatientRecord(pausedCase.id)}
-            className="w-full flex items-center gap-4 bg-[#1d1d1f] rounded-[28px] px-5 py-4 transition-all"
+            className="w-full flex items-center gap-4 bg-sys-elevated rounded-[28px] px-5 py-4 transition-all"
           >
             <div className="w-10 h-10 bg-white rounded-[14px] flex items-center justify-center text-academy-alert-text shadow-sm shrink-0">
               <Clock size={20} />
@@ -932,12 +932,12 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
       {patients.length > 0 && pendingRows.length === 0 && otherAppointments.length === 0 && !pausedCase && (
         <section>
-          <div className="w-full flex items-center gap-4 bg-[#1d1d1f] rounded-[28px] px-5 py-4">
-            <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-[#30d158] shrink-0">
+          <div className="w-full flex items-center gap-4 bg-sys-elevated rounded-[28px] px-5 py-4">
+            <div className="w-10 h-10 bg-sys-inset rounded-full flex items-center justify-center text-[#30d158] shrink-0">
               <CheckCircle2 size={20} />
             </div>
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-[15px] font-semibold text-white">Sem paciente marcado hoje.</p>
+              <p className="text-[15px] font-semibold text-sys-text">Sem paciente marcado hoje.</p>
               <p className="text-[12px] text-academy-muted">Revise retornos e prontuários abertos.</p>
             </div>
           </div>

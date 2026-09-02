@@ -1,6 +1,6 @@
 import React from 'react';
 
-/** App icon: Siso's face on the brand tile. */
+/** Quiet product mark: ink tile, no mascot chrome. */
 export function AcademyMark({ size = 48 }: { size?: number }) {
   return (
     <svg
@@ -11,20 +11,11 @@ export function AcademyMark({ size = 48 }: { size?: number }) {
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden
     >
-      <rect width="48" height="48" rx="16" fill="#52057B" />
+      <rect width="48" height="48" rx="12" fill="#1d1d1f" />
       <path
-        d="M24 8c8.8 0 15 6.2 15 14.2 0 3.6-1.1 7.2-2.2 10.6-1.2 3.8-1.8 7.2-1.8 9.4 0 3.6-2.6 6.4-6.2 6.4-2.2 0-3.8-1.2-4.8-2.8-.6 1.2-1.8 2.2-3.2 2.6-2.4.8-4.6-.8-4.6-3.4 0-1.8.6-4.4 1.2-7.2.6-2.8 1-5.4 1-7.6C18.4 14.2 19.8 8 24 8Z"
-        fill="#FFF6EC"
-        stroke="#3B0459"
-        strokeWidth="1.6"
+        d="M24 10c7.2 0 12 5 12 11.4 0 2.9-.9 5.8-1.8 8.5-1 3-1.5 5.8-1.5 7.5 0 2.8-2.1 5.1-5 5.1-1.7 0-3-.9-3.8-2.2-.5 1-1.5 1.8-2.6 2.1-1.9.6-3.7-.6-3.7-2.7 0-1.4.5-3.5 1-5.8.5-2.2.8-4.3.8-6.1C19.4 15 20.6 10 24 10Z"
+        fill="#f5f5f7"
       />
-      <ellipse cx="19.2" cy="23" rx="2.4" ry="1.5" fill="#F5A7C0" />
-      <ellipse cx="28.8" cy="23" rx="2.4" ry="1.5" fill="#F5A7C0" />
-      <circle cx="19.6" cy="21.2" r="1.7" fill="#3B0459" />
-      <circle cx="28.4" cy="21.2" r="1.7" fill="#3B0459" />
-      <circle cx="20.1" cy="20.6" r=".5" fill="#FFF6EC" />
-      <circle cx="28.9" cy="20.6" r=".5" fill="#FFF6EC" />
-      <path d="M20.6 26.2c1.6 2.4 5.2 2.4 6.8 0" stroke="#3B0459" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
 }

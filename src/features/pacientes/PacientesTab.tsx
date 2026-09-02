@@ -399,12 +399,12 @@ function PacientesTabComponent({
       <div className="flex flex-col gap-6 mb-4">
         <div className="flex items-end justify-between gap-3">
           <SisoLine mood="idle" size={112}>
-            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-primary mb-1">
+            <p className="text-[13px] font-normal text-apple-gray mb-1 tracking-[-0.011em]">
               Prontuário
             </p>
-            <p className="text-[20px] sm:text-[22px] leading-snug">Casos</p>
+            <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em]">Casos</p>
             {patientsSubView === 'list' && (
-              <p className="mt-1.5 text-[14px] font-bold leading-snug text-[#3B0459]/75">
+              <p className="mt-1.5 text-[15px] font-normal leading-snug text-apple-gray">
                 {casesSmartCopy}
               </p>
             )}
@@ -614,7 +614,7 @@ function PacientesTabComponent({
                             {patient.name}
                           </p>
                           {meta.isLead && hasText('Novo') && (
-                            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide bg-academy-primary text-white ring-1 ring-violet-200 shrink-0">
+                            <span className="px-2 py-0.5 rounded-full text-[12px] font-normal bg-apple-surface text-apple-gray shrink-0">
                               Novo
                             </span>
                           )}

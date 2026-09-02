@@ -29,49 +29,47 @@ export const BoxModePrep: React.FC<BoxModePrepProps> = ({
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.14, ease: [0.16, 1, 0.3, 1] }}
-      className="comic-card overflow-hidden"
+      className="comic-card overflow-hidden px-6 py-7"
     >
-      <div className="px-6 pt-6 pb-2">
-        <div className="flex items-center gap-2 mb-4">
-          <ChairGlyph size={28} />
-          <span className="font-display text-[12px] font-extrabold uppercase tracking-[0.12em] text-primary">
-            Modo box
-          </span>
-        </div>
+      <div className="flex items-center gap-2 mb-4">
+        <ChairGlyph size={24} />
+        <span className="text-[13px] font-normal text-apple-gray tracking-[-0.011em]">
+          Modo box
+        </span>
+      </div>
 
-        <h3 className="text-[20px] font-bold text-academy-text leading-snug">
-          {firstName(patientName)}
-        </h3>
-        <p className="text-[14px] text-academy-muted mt-1">{procedure}</p>
-        {scheduleLabel && (
-          <p className="text-[12px] font-semibold text-academy-primary mt-2">{scheduleLabel}</p>
-        )}
+      <h3 className="text-[28px] font-semibold text-apple-ink leading-[1.05] tracking-[-0.025em]">
+        {firstName(patientName)}
+      </h3>
+      <p className="text-[17px] text-apple-gray mt-2 tracking-[-0.011em]">{procedure}</p>
+      {scheduleLabel && (
+        <p className="text-[13px] text-apple-blue mt-2">{scheduleLabel}</p>
+      )}
 
-        <p className="text-[13px] text-academy-muted mt-4 leading-relaxed">
-          Antes de começar — refrescar, não reaprender.
-        </p>
+      <p className="text-[15px] text-apple-gray mt-5 leading-relaxed">
+        Antes de começar — refrescar, não reaprender.
+      </p>
 
-        <div className="mt-4 space-y-2">
-          {items.map((item, index) => (
-            <motion.button
-              key={`${item.label}-${index}`}
-              whileTap={{ scale: 0.98, opacity: 0.92 }}
-              onClick={() => onReviewItem?.(item)}
-              className="w-full flex items-center gap-3 rounded-[16px] liquid-glass-subtle px-4 py-3.5 text-left transition-colors hover:bg-white/70"
-            >
-              <CheckCircle2 size={16} className="text-academy-success-text shrink-0" />
-              <span className="flex-1 text-[14px] font-semibold text-academy-text">{item.label}</span>
-              <span className="text-[12px] font-semibold text-academy-muted flex items-center gap-1 shrink-0">
-                <Clock size={11} />
-                {item.duration}
-              </span>
-            </motion.button>
-          ))}
-        </div>
+      <div className="mt-5 space-y-1">
+        {items.map((item, index) => (
+          <motion.button
+            key={`${item.label}-${index}`}
+            whileTap={{ scale: 0.98, opacity: 0.92 }}
+            onClick={() => onReviewItem?.(item)}
+            className="w-full flex items-center gap-3 rounded-[16px] bg-apple-surface px-4 py-3.5 text-left"
+          >
+            <CheckCircle2 size={16} className="text-apple-green shrink-0" />
+            <span className="flex-1 text-[17px] text-apple-ink">{item.label}</span>
+            <span className="text-[13px] text-apple-gray flex items-center gap-1 shrink-0">
+              <Clock size={11} />
+              {item.duration}
+            </span>
+          </motion.button>
+        ))}
       </div>
 
       {onOpenCase && (
-        <div className="px-6 pb-5 pt-3">
+        <div className="pt-5">
           <DuoButton onClick={onOpenCase}>Abrir caso</DuoButton>
         </div>
       )}

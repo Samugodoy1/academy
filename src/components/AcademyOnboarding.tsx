@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Siso } from '../illustrations/Siso';
 import { SpeechBubble } from '../illustrations/SpeechBubble';
 import { PathNode, PathStem } from '../illustrations/PathNode';
-import { MolarStamp } from '../illustrations/glyphs';
 import { DuoButton } from './DuoButton';
 
 interface AcademyOnboardingProps {
@@ -65,38 +64,28 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
 
   if (!welcomeSeen && !hasPatients && !hasAppointments && !onboardingDismissed) {
     return (
-      <section className="page-shell siso-stage">
-        <div className="mx-auto flex max-w-[440px] flex-col items-center pt-2 pb-4">
-          <div className="relative">
-            <span className="absolute -left-8 top-2 siso-idle">
-              <MolarStamp size={18} rotate={-18} />
-            </span>
-            <span className="absolute -right-6 top-10 siso-bounce">
-              <MolarStamp size={16} rotate={22} />
-            </span>
-            <Siso mood="wave" size={176} />
-          </div>
-          <div className="mt-5 w-full">
+      <section className="page-shell">
+        <div className="mx-auto flex max-w-[440px] flex-col items-center pt-8 pb-4">
+          <Siso mood="wave" size={160} />
+          <div className="mt-8 w-full">
             <SpeechBubble>
-              <p className="text-[22px] leading-snug">Oi, {firstName}.</p>
-              <p className="mt-2 text-[15px] font-bold leading-snug text-[#3B0459]/80">
-                Eu sou o Siso — o dente que a faculdade não arrancou. Daqui pra frente o box é
-                seu: casos reais, atendimento, prontuário. Sem aula genérica. Sem checklist de
-                startup.
+              <p className="text-[28px] font-semibold leading-[1.05] tracking-[-0.025em]">Oi, {firstName}.</p>
+              <p className="mt-3 text-[17px] font-normal leading-snug text-apple-gray tracking-[-0.011em]">
+                Eu sou o Siso. Daqui pra frente o box é seu: casos reais, atendimento, prontuário.
               </p>
             </SpeechBubble>
           </div>
           <DuoButton
-            className="mt-7"
+            className="mt-8"
             onClick={() => {
               setWelcomeSeen(true);
               onDismissWelcome();
             }}
           >
-            Bora, Siso
+            Começar
           </DuoButton>
-          <p className="mt-3 text-center text-[12px] font-bold text-[#8E8E93]">
-            Você escolhe o ritmo. Eu só não deixo o box vazio.
+          <p className="mt-4 text-center text-[13px] text-apple-gray">
+            Você escolhe o ritmo.
           </p>
         </div>
       </section>
@@ -107,33 +96,33 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
     const bubble = !hasPatients
       ? 'Primeiro caso. Sem nome na ficha o box é só cadeira vazia.'
       : !hasAppointments
-        ? 'Tem caso. Falta marcar o atendimento — senão é só cadastro bonito.'
+        ? 'Tem caso. Falta marcar o atendimento.'
         : !recordOpened
-          ? `Abre o prontuário de ${(firstPatient?.name || 'seu caso').split(' ')[0]}. Anamnese, odontograma, o que o professor cobra.`
-          : 'Trilha fechada. A rotina assume daqui. Eu fico de olho no siso — no seu, não no meu.';
+          ? `Abra o prontuário de ${(firstPatient?.name || 'seu caso').split(' ')[0]}.`
+          : 'Trilha fechada. A rotina assume daqui.';
 
     const coach = !hasPatients
-      ? 'Toque no primeiro nó. Cadastre o caso que você realmente atende.'
+      ? 'Toque no primeiro passo. Cadastre o caso que você atende.'
       : !hasAppointments
-        ? 'Agora o segundo nó. Data, hora, o que vai fazer na cadeira.'
+        ? 'Agora o segundo. Data, hora, o que vai fazer na cadeira.'
         : !recordOpened
-          ? 'Terceiro nó: entra no prontuário. Sem isso o caso é só um nome.'
-          : 'Último nó. Liga a rotina e parte pro painel.';
+          ? 'Terceiro: entra no prontuário.'
+          : 'Último. Liga a rotina.';
 
     return (
-      <section className="page-shell siso-stage">
+      <section className="page-shell">
         <div className="mx-auto flex max-w-[440px] flex-col items-center">
           <Siso
             mood={activationComplete ? 'celebrate' : hasPatients ? 'proud' : 'think'}
-            size={136}
+            size={128}
           />
-          <div className="mt-4 w-full">
+          <div className="mt-6 w-full">
             <SpeechBubble>
-              <p className="text-[20px] leading-snug">{bubble}</p>
+              <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em]">{bubble}</p>
             </SpeechBubble>
           </div>
 
-          <div className="mt-8 flex w-full flex-col items-center">
+          <div className="mt-10 flex w-full flex-col items-center">
             <PathNode
               done={n1Done}
               active={n1Active}
@@ -175,13 +164,13 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
             />
           </div>
 
-          <p className="mt-8 max-w-[300px] text-center text-[13px] font-bold leading-snug text-[#8E8E93]">
+          <p className="mt-8 max-w-[300px] text-center text-[15px] leading-snug text-apple-gray">
             {coach}
           </p>
 
           {n4Active && (
             <DuoButton
-              className="mt-5"
+              className="mt-6"
               onClick={() => {
                 setOnboardingDismissed(true);
                 onDismissOnboarding();
@@ -214,21 +203,21 @@ export const AcademyActivationCard: React.FC<{
   const nick = firstPatient.name?.split(' ')[0] || 'seu caso';
 
   return (
-    <div className="comic-card p-5">
-      <div className="flex items-end gap-3">
-        <Siso mood="think" size={92} className="shrink-0" />
-        <div className="min-w-0 flex-1 pb-3">
+    <div className="comic-card p-6">
+      <div className="flex items-end gap-4">
+        <Siso mood="think" size={80} className="shrink-0" />
+        <div className="min-w-0 flex-1 pb-2">
           <SpeechBubble>
             <p className="text-[17px] leading-snug">
               Tem prontuário de {nick} que ainda não foi aberto.
             </p>
-            <p className="mt-1.5 text-[14px] font-bold text-[#3B0459]/75">
+            <p className="mt-1.5 text-[15px] text-apple-gray">
               Sem anamnese o caso é só um nome na lista.
             </p>
           </SpeechBubble>
         </div>
       </div>
-      <DuoButton className="mt-4" onClick={() => openPatientRecord(firstPatient.id)}>
+      <DuoButton className="mt-5" onClick={() => openPatientRecord(firstPatient.id)}>
         Abrir prontuário
       </DuoButton>
     </div>

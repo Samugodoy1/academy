@@ -20,15 +20,15 @@ export function DuoButton({
 }: DuoButtonProps) {
   const tone =
     variant === 'primary'
-      ? 'duo-btn-active text-white'
+      ? 'apple-btn'
       : variant === 'danger'
-        ? 'bg-[#E11D48] border-[#9F1239] text-white'
-        : 'duo-btn text-primary';
+        ? 'bg-[#ff3b30] hover:bg-[#ff453a] text-white rounded-[980px] px-[22px] py-3 text-[17px] font-normal tracking-[-0.022em]'
+        : 'apple-btn-light';
 
   return (
     <button
       type={type}
-      className={`duo-btn ${tone} rounded-[16px] px-6 py-3.5 font-display font-extrabold uppercase tracking-[0.12em] text-[15px] disabled:opacity-50 disabled:pointer-events-none ${
+      className={`${tone} disabled:opacity-50 disabled:pointer-events-none ${
         wide ? 'w-full' : ''
       } ${className}`}
       {...props}

@@ -21,9 +21,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   navigate,
 }) => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 tablet-l:hidden no-print pointer-events-none pb-[max(10px,env(safe-area-inset-bottom))] px-3">
+    <div className="fixed bottom-0 left-0 right-0 z-50 tablet-l:hidden no-print">
       <nav
-        className="tab-bar-float pointer-events-auto mx-auto max-w-[420px] flex items-stretch justify-between gap-0.5 px-1.5 py-1.5"
+        className="tab-bar-float pointer-events-auto flex items-stretch justify-between px-2 pb-[env(safe-area-inset-bottom)]"
         aria-label="Navegação principal"
       >
         {tabs.map(tab => (

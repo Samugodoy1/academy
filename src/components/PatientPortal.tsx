@@ -413,7 +413,7 @@ export function PatientPortal() {
   if (loading) return (
     <div className="min-h-screen bg-academy-bg flex items-center justify-center">
       <div className="flex flex-col items-center gap-5">
-        <div className="w-10 h-10 border-[3px] border-[#C6C6C8] border-t-[#0C9B72] rounded-full animate-spin" />
+        <div className="w-10 h-10 border-[3px] border-[#d2d2d7] border-t-[#0071e3] rounded-full animate-spin" />
         <p role="status" aria-live="polite" className="text-academy-muted text-[15px] font-medium tracking-tight">Carregando...</p>
       </div>
     </div>
@@ -717,7 +717,7 @@ export function PatientPortal() {
   };
 
   return (
-    <div className="min-h-screen bg-white pb-10">
+    <div className="min-h-screen bg-apple-surface pb-10">
       {/* Accessible announcer for screen readers */}
       <div id="a11y-announcer" aria-live="polite" className="sr-only">
         {error || (scheduleSuccess ? (scheduleMode === 'reschedule' ? 'Pedido de reagendamento enviado' : 'Solicitação de agendamento enviada') : '') || (paymentInformed ? 'Pagamento informado' : '') || (pixCopied ? 'Chave PIX copiada' : '')}
@@ -728,18 +728,18 @@ export function PatientPortal() {
         {data?.clinic?.photo_url ? (
           <img src={data.clinic.photo_url} alt="Dentista" className="w-10 h-10 rounded-[10px] object-cover shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-slate-100/50" />
         ) : (
-          <div className="w-10 h-10 bg-[#52057B] rounded-[10px] flex items-center justify-center text-white font-bold text-lg tracking-tight">
+          <div className="w-10 h-10 bg-[#1d1d1f] rounded-[10px] flex items-center justify-center text-white font-semibold text-lg tracking-[-0.025em]">
             {data?.clinic?.name ? data.clinic.name.charAt(0).toUpperCase() : 'OH'}
           </div>
         )}
-        <p className="text-[#52057B] text-[13px] font-bold tracking-[0.1em]">PORTAL DO PACIENTE</p>
+        <p className="text-apple-gray text-[13px] font-normal tracking-[-0.011em]">Portal do paciente</p>
       </div>
 
       {/* ─── Content ─── */}
       <div className="px-6 pt-8 max-w-lg mx-auto">
         {/* Saudação */}
         <div className="mb-10">
-          <h1 className="text-[32px] font-bold text-[#0F172A] leading-tight tracking-tight">
+          <h1 className="text-[34px] font-semibold text-apple-ink leading-[1.05] tracking-[-0.025em]">
             Olá, {patient.name.split(' ')[0]} {patient.name.split(' ')[1] ? patient.name.split(' ')[1].slice(0, 3) + '.' : ''}
           </h1>
           {futureAppointments.length > 0 ? (
@@ -765,13 +765,13 @@ export function PatientPortal() {
               const timeLabel = nextTime.endsWith(':00') ? nextTime.replace(':00', 'h') : nextTime.replace(':', 'h');
 
               return (
-                <p className="text-[#52057B] text-[17px] font-semibold mt-2">
+                <p className="text-apple-gray text-[17px] font-normal mt-2 tracking-[-0.011em]">
                   Sua próxima visita é {dayLabel} às {timeLabel}.
                 </p>
               );
             })()
           ) : (
-            <p className="text-[#52057B] text-[17px] font-semibold mt-2">
+            <p className="text-apple-gray text-[17px] font-normal mt-2 tracking-[-0.011em]">
               Nenhuma visita agendada.
             </p>
           )}
@@ -782,7 +782,7 @@ export function PatientPortal() {
           <button
             onClick={() => futureAppointments.length > 0 ? handleConfirmAppointment(futureAppointments[0].id) : null}
             disabled={futureAppointments.length > 0 && appointmentSubmittingId === futureAppointments[0].id}
-            className="w-full h-[64px] bg-[#52057B] rounded-2xl flex items-center justify-center gap-3 text-white font-bold text-[17px] shadow-[0_8px_24px_rgba(82,5,123,0.25)] active:scale-[0.98] transition-transform disabled:opacity-70"
+            className="w-full h-[52px] bg-[#0071e3] hover:bg-[#0077ed] rounded-[980px] flex items-center justify-center gap-3 text-white font-normal text-[17px] tracking-[-0.022em] active:scale-[0.98] transition-all disabled:opacity-70"
           >
             {appointmentSubmittingId === futureAppointments[0]?.id ? (
               <div className="w-5 h-5 border-[2px] border-white/25 border-t-white rounded-full animate-spin" />
@@ -796,31 +796,31 @@ export function PatientPortal() {
             )}
           </button>
 
-          <button onClick={() => setShowPreOpModal(true)} className="w-full h-[64px] bg-white border border-[#E2E8F0] rounded-2xl flex items-center px-5 gap-4 active:bg-slate-50 transition-colors shadow-sm">
-            <ClipboardList size={24} className="text-[#1E293B]" />
-            <span className="text-[#0F172A] font-bold text-[16px]">Orientações da cirurgia</span>
+          <button onClick={() => setShowPreOpModal(true)} className="w-full h-[52px] bg-apple-surface rounded-[980px] flex items-center px-5 gap-4 active:bg-[#e8e8ed] transition-colors">
+            <ClipboardList size={22} className="text-apple-ink" />
+            <span className="text-apple-ink font-normal text-[17px]">Orientações da cirurgia</span>
           </button>
 
-          <button onClick={openAnamnesisModal} className="w-full h-[64px] bg-white border border-[#E2E8F0] rounded-2xl flex items-center px-5 gap-4 active:bg-slate-50 transition-colors shadow-sm">
-            <User size={24} className="text-[#1E293B]" />
-            <span className="text-[#0F172A] font-bold text-[16px]">Atualizar ficha médica</span>
+          <button onClick={openAnamnesisModal} className="w-full h-[52px] bg-apple-surface rounded-[980px] flex items-center px-5 gap-4 active:bg-[#e8e8ed] transition-colors">
+            <User size={22} className="text-apple-ink" />
+            <span className="text-apple-ink font-normal text-[17px]">Atualizar ficha médica</span>
           </button>
 
-          <button onClick={() => setShowPostOpModal(true)} className="w-full h-[64px] bg-white border border-[#E2E8F0] rounded-2xl flex items-center px-5 gap-4 active:bg-slate-50 transition-colors shadow-sm">
-            <MessageCircle size={24} className="text-[#1E293B]" />
-            <span className="text-[#0F172A] font-bold text-[16px]">Dúvidas pós-atendimento</span>
+          <button onClick={() => setShowPostOpModal(true)} className="w-full h-[52px] bg-apple-surface rounded-[980px] flex items-center px-5 gap-4 active:bg-[#e8e8ed] transition-colors">
+            <MessageCircle size={22} className="text-apple-ink" />
+            <span className="text-apple-ink font-normal text-[17px]">Dúvidas pós-atendimento</span>
           </button>
         </div>
 
         {/* Dica de Hoje */}
-        <div className="w-full bg-[#FCF8FF] border border-[#F3E8FF] rounded-[24px] p-6">
-          <h3 className="text-[#7C3AED] text-[11px] font-extrabold tracking-widest uppercase mb-3">DICA DE HOJE</h3>
+        <div className="w-full bg-white rounded-[28px] p-6">
+          <h3 className="text-apple-gray text-[13px] font-normal mb-3">Hoje</h3>
           <p className="text-[#64748B] text-[15px] font-medium leading-relaxed">
             {(() => {
               if (futureAppointments.length > 0) {
                 const nextDate = new Date(futureAppointments[0].start_time);
                 const daysUntil = Math.ceil((nextDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-                if (daysUntil === 1) return "Sua consulta é amanhã! Lembre-se de ter uma boa noite de sono e evite alimentos pesados.";
+                if (daysUntil === 1) return "Sua consulta é amanhã. Durma bem e evite alimentos pesados.";
                 if (daysUntil <= 3) return "Faltam poucos dias para sua consulta. Mantenha a higiene bucal em dia e anote qualquer dúvida para perguntar ao dentista.";
               }
               if (recentProcedures.length > 0 && detectCategory(recentProcedures[0].procedure)) {
@@ -831,7 +831,7 @@ export function PatientPortal() {
                 "Beba água! A hidratação ajuda a manter a produção de saliva saudável.",
                 "Evite alimentos muito ácidos para proteger o esmalte dos seus dentes.",
                 "Uma escova de cerdas macias é a melhor amiga do seu sorriso.",
-                "Sorria! Cuidar dos dentes é cuidar de todo o corpo."
+                "Cuidar dos dentes é cuidar de todo o corpo."
               ];
               return generalTips[(patient.id || 0) % generalTips.length] || generalTips[0];
             })()}
@@ -934,7 +934,7 @@ export function PatientPortal() {
                     value={anamnesisForm.allergies}
                     onChange={e => setAnamnesisForm({ ...anamnesisForm, allergies: e.target.value })}
                     rows={2}
-                    className="w-full px-4 py-3 bg-[#F2F2F7] border border-[#E5E5EA] rounded-xl text-[#1C1C1E] text-[15px] outline-none focus:border-[#52057B]/40 transition-colors resize-none placeholder:text-[#8E8E93]"
+                    className="ios-input w-full resize-none"
                   />
                 </div>
                 <div>
@@ -944,7 +944,7 @@ export function PatientPortal() {
                     value={anamnesisForm.medications}
                     onChange={e => setAnamnesisForm({ ...anamnesisForm, medications: e.target.value })}
                     rows={2}
-                    className="w-full px-4 py-3 bg-[#F2F2F7] border border-[#E5E5EA] rounded-xl text-[#1C1C1E] text-[15px] outline-none focus:border-[#52057B]/40 transition-colors resize-none placeholder:text-[#8E8E93]"
+                    className="ios-input w-full resize-none"
                   />
                 </div>
                 <div>
@@ -954,13 +954,13 @@ export function PatientPortal() {
                     value={anamnesisForm.medical_history}
                     onChange={e => setAnamnesisForm({ ...anamnesisForm, medical_history: e.target.value })}
                     rows={2}
-                    className="w-full px-4 py-3 bg-[#F2F2F7] border border-[#E5E5EA] rounded-xl text-[#1C1C1E] text-[15px] outline-none focus:border-[#52057B]/40 transition-colors resize-none placeholder:text-[#8E8E93]"
+                    className="ios-input w-full resize-none"
                   />
                 </div>
                 <button
                   onClick={handleAnamnesisSubmit}
                   disabled={anamnesisSubmitting}
-                  className="w-full h-14 mt-2 bg-[#52057B] text-white rounded-xl font-bold text-[16px] active:scale-[0.98] transition-all flex items-center justify-center"
+                  className="apple-btn w-full h-12 mt-2"
                 >
                   {anamnesisSubmitting ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -1030,7 +1030,7 @@ function PortalQuickAction({ icon: Icon, label, onClick }: {
       className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-white shadow-[0_1px_6px_rgba(0,0,0,0.05)] active:scale-95 transition-transform"
     >
       <div className="w-10 h-10 bg-academy-bg rounded-full flex items-center justify-center">
-        <Icon size={18} className="text-[#0C9B72]" />
+        <Icon size={18} className="text-apple-ink" />
       </div>
       <span className="text-academy-muted text-[11px] font-medium">{label}</span>
     </button>

@@ -38,7 +38,7 @@ export function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-6 font-sans antialiased siso-stage">
+    <div className="min-h-screen bg-apple-surface flex items-center justify-center px-6 font-sans antialiased">
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -51,18 +51,18 @@ export function ForgotPassword() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         >
-          <Siso mood="think" size={120} />
-          <div className="mt-3 flex items-center gap-2">
-            <AcademyMark size={28} />
-            <p className="font-display text-[13px] font-extrabold uppercase tracking-[0.16em] text-primary">
-              Academy · Box do aluno
+          <Siso mood="think" size={112} />
+          <div className="mt-4 flex items-center gap-2">
+            <AcademyMark size={24} />
+            <p className="text-[13px] font-normal text-apple-gray tracking-[-0.011em]">
+              Academy
             </p>
           </div>
-          <div className="mt-4 w-full">
+          <div className="mt-5 w-full">
             <SpeechBubble>
-              <p className="text-[18px] leading-snug">Esqueceu a senha. Acontece — até em periodontia.</p>
-              <p className="mt-1.5 text-[14px] font-bold text-[#3B0459]/75">
-                Manda o e-mail da faculdade. Eu não julgo.
+              <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em]">Esqueceu a senha.</p>
+              <p className="mt-2 text-[15px] text-apple-gray">
+                Envie o e-mail da faculdade.
               </p>
             </SpeechBubble>
           </div>
@@ -70,7 +70,7 @@ export function ForgotPassword() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-[13px] font-medium text-academy-muted mb-2">E-mail</label>
+            <label className="block text-[13px] font-normal text-apple-gray mb-2">E-mail</label>
             <input
               type="email"
               required
@@ -86,7 +86,7 @@ export function ForgotPassword() {
               initial={{ opacity: 0, y: -2 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="text-[13px] text-red-400"
+              className="text-[15px] text-apple-red"
             >
               {error}
             </motion.p>
@@ -97,7 +97,7 @@ export function ForgotPassword() {
               initial={{ opacity: 0, y: -2 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="text-[13px] text-academy-success-text"
+              className="text-[15px] text-apple-ink"
             >
               {message}
             </motion.p>
@@ -107,21 +107,20 @@ export function ForgotPassword() {
             <DuoButton type="submit" disabled={loading}>
               {loading ? 'Enviando...' : 'Enviar instruções'}
             </DuoButton>
-            <p className="text-center text-[11px] font-bold text-academy-muted/70 mt-3.5">Ambiente da clínica-escola</p>
           </div>
         </form>
 
-        <div className="mt-14 space-y-6">
+        <div className="mt-12 space-y-6">
           <div className="text-center">
-            <Link to="/" className="text-[13px] text-academy-muted hover:text-academy-text transition-colors duration-200">
-              Voltar para o login
+            <Link to="/" className="apple-link">
+              Voltar para o login ›
             </Link>
           </div>
 
-          <div className="flex justify-center items-center gap-3 text-[11px] text-academy-muted/60">
-            <Link to="/termos" className="hover:text-academy-muted transition-colors duration-200">Termos</Link>
+          <div className="flex justify-center items-center gap-3 text-[13px] text-apple-gray">
+            <Link to="/termos" className="hover:text-apple-ink transition-colors duration-200">Termos</Link>
             <span>·</span>
-            <Link to="/privacidade" className="hover:text-academy-muted transition-colors duration-200">Privacidade</Link>
+            <Link to="/privacidade" className="hover:text-apple-ink transition-colors duration-200">Privacidade</Link>
           </div>
         </div>
       </motion.div>

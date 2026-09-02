@@ -1178,7 +1178,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           <motion.section
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 rounded-[28px] bg-academy-primary text-white p-6 shadow-[0_16px_44px_rgba(82,5,123,0.25)] overflow-hidden relative"
+            className="mb-4 rounded-[28px] bg-apple-ink text-white p-6 overflow-hidden relative"
           >
             <span className="text-white/60 text-[11px] font-bold uppercase tracking-[0.12em]">
               Revisão para um caso real
@@ -1262,7 +1262,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
-            className="bg-academy-primary rounded-[24px] p-5 mt-4 text-white shadow-[0_12px_36px_rgba(82,5,123,0.2)]"
+            className="bg-apple-ink rounded-[28px] p-5 mt-4 text-white"
           >
             <div className="flex items-center gap-2 mb-4">
               <BookGlyph size={18} />
@@ -1455,7 +1455,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
             <button
               type="button"
               onClick={() => openPatientRecord(selectedCase.patient.id)}
-              className="w-full bg-academy-primary text-white font-bold text-[15px] py-[16px] rounded-[20px] shadow-lg active:scale-95 transition-transform"
+              className="apple-btn w-full"
             >
               Revisei. Abrir caso de {firstName(selectedCase.patient?.name || selectedCase.app?.patient_name)}
             </button>
@@ -1476,13 +1476,13 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
     <div className="page-shell space-y-8 tablet-l:space-y-10">
       <section className="space-y-4">
         <SisoLine mood="study" size={128}>
-          <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-primary mb-1">
+          <p className="text-[13px] font-normal text-apple-gray mb-1 tracking-[-0.011em]">
             Estudos
           </p>
-          <p className="text-[20px] sm:text-[22px] leading-snug">
+          <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em]">
             {nextCase ? 'O que revisar agora' : 'Sua revisão clínica'}
           </p>
-          <p className="mt-2 text-[14px] font-bold leading-snug text-[#3B0459]/75">
+          <p className="mt-2 text-[15px] font-normal leading-snug text-apple-gray">
             {preceptorMessage}
           </p>
         </SisoLine>
@@ -1505,10 +1505,10 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
             </div>
 
             <div className="relative z-10 flex flex-col">
-              <span className="text-academy-primary text-[12px] font-bold uppercase tracking-widest">
+              <span className="text-apple-gray text-[13px] font-normal">
                 Foco do atendimento
               </span>
-              <h2 className="text-[26px] sm:text-[30px] font-bold text-academy-text leading-[1.15] mt-2">
+              <h2 className="text-[28px] sm:text-[34px] font-semibold text-apple-ink leading-[1.05] tracking-[-0.025em] mt-2">
                 {getDayPhrase(nextCase.date)} {firstName(nextCase.app.patient_name || nextCase.patient?.name)}.
               </h2>
 

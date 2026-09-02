@@ -717,10 +717,10 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           openPatientRecord={openPatientRecord}
         />
         <SisoLine mood={focusMood(focus.kind)} size={148}>
-          <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-primary mb-1">
+          <p className="text-[13px] font-normal text-apple-gray mb-1 tracking-[-0.011em]">
             {getTimeGreeting()}{greetingName ? `, ${greetingName}` : ''}
           </p>
-          <p className="text-[20px] sm:text-[22px] leading-snug">{smartMessage}</p>
+          <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em]">{smartMessage}</p>
         </SisoLine>
 
         <ClinicalObservation observation={clinicalObservation} />
@@ -735,7 +735,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           className="comic-card px-5 py-7 tablet-l:px-8 tablet-l:py-9"
         >
           <div className="flex flex-col items-center text-center">
-            <p className="font-display text-[12px] font-extrabold uppercase tracking-[0.16em] text-primary">
+            <p className="text-[13px] font-normal text-apple-gray tracking-[-0.011em]">
               {focus.eyebrow}
             </p>
             <div className="mt-4 flex items-center gap-3">
@@ -745,20 +745,20 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
                     src={focusPhoto}
                     alt={focusPatientName}
                     referrerPolicy="no-referrer"
-                    className="w-12 h-12 rounded-full object-cover border-[3px] border-[#3B0459]"
+                    className="w-12 h-12 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-12 h-12 rounded-full bg-[#FFF6EC] border-[3px] border-[#3B0459] flex items-center justify-center font-display font-black text-[20px] text-primary">
+                  <div className="w-12 h-12 rounded-full bg-apple-surface flex items-center justify-center text-[20px] font-semibold text-apple-ink tracking-[-0.025em]">
                     {focusInitial}
                   </div>
                 )
               )}
-              <h2 className="font-display text-[28px] sm:text-[34px] font-black text-academy-text leading-[1.1] tracking-tight">
+              <h2 className="text-[34px] font-semibold text-apple-ink leading-[1.05] tracking-[-0.025em]">
                 {focusPatientName || focus.title}
               </h2>
             </div>
             {appointmentMetaLabel && (
-              <p className="mt-2 text-[13px] font-extrabold uppercase tracking-[0.1em] text-academy-muted">
+              <p className="mt-2 text-[13px] font-normal text-apple-gray">
                 {appointmentMetaLabel}
               </p>
             )}
@@ -772,10 +772,10 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
               />
             </div>
 
-            <p className="mt-5 max-w-md font-display text-[20px] font-extrabold leading-snug text-[#3B0459]">
+            <p className="mt-5 max-w-md text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-apple-ink">
               {focus.title}
             </p>
-            <p className="mt-1.5 max-w-md text-[14px] font-semibold text-academy-muted leading-snug">
+            <p className="mt-2 max-w-md text-[17px] font-normal text-apple-gray leading-snug tracking-[-0.011em]">
               {focus.subtitle}
             </p>
           </div>
@@ -818,16 +818,16 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           <button
             type="button"
             onClick={() => setIsPatientModalOpen(true)}
-            className="duo-btn rounded-[14px] px-4 py-[10px] font-display text-[12px] font-extrabold uppercase tracking-[0.12em] text-primary"
+            className="apple-btn-light !px-4 !py-2 !text-[15px]"
           >
-            + Caso
+            Caso
           </button>
           <button
             type="button"
             onClick={openAppointmentModal}
-            className="duo-btn duo-btn-active rounded-[14px] px-4 py-[10px] font-display text-[12px] font-extrabold uppercase tracking-[0.12em]"
+            className="apple-btn !px-4 !py-2 !text-[15px]"
           >
-            + Box
+            Agendar
           </button>
         </div>
 
@@ -867,19 +867,19 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
             <div className="px-5 pt-5 pb-2 flex items-end gap-3">
               <Siso mood="study" size={88} className="shrink-0" />
               <div className="min-w-0 flex-1 pb-2">
-                <span className="font-display text-[11px] font-extrabold uppercase tracking-[0.14em] text-primary">
+                <span className="text-[13px] font-normal text-apple-gray">
                   Antes do box
                 </span>
-                <h3 className="font-display text-[20px] font-black text-academy-text leading-snug mt-1">
+                <h3 className="text-[22px] font-semibold text-apple-ink leading-[1.05] tracking-[-0.025em] mt-1">
                   {studySuggestion.topic}
                 </h3>
-                <p className="text-[13px] font-semibold text-academy-muted mt-1.5 leading-relaxed">
+                <p className="text-[15px] font-normal text-apple-gray mt-1.5 leading-relaxed">
                   {studySuggestion.reason}
                 </p>
               </div>
             </div>
             <div className="px-5 pb-5 pt-3 flex items-center justify-between gap-3">
-              <span className="text-[12px] font-extrabold uppercase tracking-[0.08em] text-academy-muted">
+              <span className="text-[13px] font-normal text-apple-gray">
                 {studySuggestion.duration}
               </span>
               <DuoButton wide={false} className="!w-auto px-5" onClick={() => openStudyTopic(studySuggestion.topicKey)}>
@@ -894,12 +894,11 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-1 h-5 bg-academy-attention-text rounded-full" />
-              <h3 className="text-[15px] font-bold text-academy-text tracking-tight">Para fechar</h3>
+              <h3 className="text-[17px] font-semibold text-apple-ink tracking-[-0.016em]">Para fechar</h3>
             </div>
-            <span className="text-[12px] font-bold text-academy-attention-text">{pendingRows.length}</span>
+            <span className="text-[13px] font-normal text-apple-gray">{pendingRows.length}</span>
           </div>
-          <div className="rounded-[20px] overflow-hidden liquid-glass-card border border-rose-200/50">
+          <div className="rounded-[28px] overflow-hidden bg-white">
             {pendingRows.map(row => (
               <React.Fragment key={row.id}>
                 <ListRow
@@ -927,14 +926,13 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-1 h-5 bg-academy-primary rounded-full" />
-              <h3 className="text-[15px] font-bold text-academy-text tracking-tight">Próximos boxes</h3>
+              <h3 className="text-[17px] font-semibold text-apple-ink tracking-[-0.016em]">Próximos boxes</h3>
             </div>
-            <button onClick={() => setActiveTab('agenda')} className="text-[13px] font-semibold text-academy-primary">
-              Ver tudo
+            <button onClick={() => setActiveTab('agenda')} className="apple-link !text-[15px]">
+              Ver tudo ›
             </button>
           </div>
-          <div className="rounded-[20px] overflow-hidden liquid-glass-card">
+          <div className="rounded-[28px] overflow-hidden bg-white">
             {otherAppointments.map((app, index) => {
               const dateTime = formatAgendaListDateTime(app.start_time);
               return (
@@ -973,7 +971,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           <motion.button
             whileTap={{ scale: 0.98, opacity: 0.9 }}
             onClick={() => openPatientRecord(pausedCase.id)}
-            className="w-full flex items-center gap-4 liquid-glass-card rounded-[20px] px-5 py-4 transition-all"
+            className="w-full flex items-center gap-4 bg-white rounded-[28px] px-5 py-4 transition-all"
           >
             <div className="w-10 h-10 bg-white rounded-[14px] flex items-center justify-center text-academy-alert-text shadow-sm shrink-0">
               <Clock size={20} />
@@ -989,8 +987,8 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
       {patients.length > 0 && pendingRows.length === 0 && otherAppointments.length === 0 && !pausedCase && (
         <section>
-          <div className="w-full flex items-center gap-4 liquid-glass-card rounded-[20px] px-5 py-4 border border-emerald-200/40">
-            <div className="w-10 h-10 bg-white rounded-[14px] flex items-center justify-center text-academy-success-text shadow-sm shrink-0">
+          <div className="w-full flex items-center gap-4 bg-white rounded-[28px] px-5 py-4">
+            <div className="w-10 h-10 bg-apple-surface rounded-full flex items-center justify-center text-apple-green shrink-0">
               <CheckCircle2 size={20} />
             </div>
             <div className="flex-1 min-w-0 text-left">
@@ -1008,9 +1006,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 };
 
 const ComicDetail = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-[16px] border-[3px] border-[#3B0459] bg-[#FFF6EC] px-4 py-3 text-left">
-    <span className="font-display text-[11px] font-extrabold uppercase tracking-[0.12em] text-primary">{label}</span>
-    <p className="text-[14px] font-bold text-academy-text mt-0.5 leading-snug line-clamp-2">{value}</p>
+  <div className="rounded-[16px] bg-apple-surface px-4 py-3 text-left">
+    <span className="text-[13px] font-normal text-apple-gray">{label}</span>
+    <p className="text-[15px] font-normal text-apple-ink mt-0.5 leading-snug line-clamp-2">{value}</p>
   </div>
 );
 

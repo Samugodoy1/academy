@@ -2360,7 +2360,7 @@ export default function App() {
                     {!isRegistering && (
                       <Link
                         to="/forgot-password"
-                        className="text-[12px] text-academy-muted hover:text-academy-text transition-colors duration-200"
+                        className="apple-link !text-[13px]"
                       >
                         Esqueci a senha
                       </Link>

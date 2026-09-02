@@ -26,8 +26,8 @@ import {
 import { getAppointmentTime, parseAppointmentDateTime } from '../utils/dateUtils';
 import { mapProcedureToTopic, StudyKey } from '../utils/studyTopics';
 import { generateBoxContext, BoxIntelligenceContext } from '../data/boxIntelligence';
-import { SisoLine } from '../illustrations/SisoLine';
-import { EmptySiso } from '../illustrations/EmptySiso';
+import { PageIntro } from './PageIntro';
+import { QuietEmpty } from './QuietEmpty';
 import { DuoButton } from './DuoButton';
 import { BookGlyph } from '../illustrations/glyphs';
 import {
@@ -1475,17 +1475,11 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
   return (
     <div className="page-shell space-y-8 tablet-l:space-y-10">
       <section className="space-y-4">
-        <SisoLine mood="study" size={128}>
-          <p className="text-[13px] font-normal text-apple-gray mb-1 tracking-[-0.011em]">
-            Estudos
-          </p>
-          <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em]">
-            {nextCase ? 'O que revisar agora' : 'Sua revisão clínica'}
-          </p>
-          <p className="mt-2 text-[15px] font-normal leading-snug text-apple-gray">
-            {preceptorMessage}
-          </p>
-        </SisoLine>
+        <PageIntro
+          kicker="Estudos"
+          title={nextCase ? 'O que revisar agora' : 'Sua revisão clínica'}
+          subtitle={preceptorMessage}
+        />
       </section>
 
       <div className="tablet-l:grid tablet-l:grid-cols-12 tablet-l:gap-8 tablet-l:items-start space-y-8 tablet-l:space-y-0">
@@ -1590,10 +1584,9 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
           className="comic-card"
         >
-          <EmptySiso
-            mood="proud"
+          <QuietEmpty
             title="Nenhum caso exigindo revisão agora."
-            body="Agenda tranquila. Use o tempo numa lacuna ou na biblioteca — ou vai pro box vazio, que eu não recomendo."
+            body="Agenda tranquila. Use o tempo numa lacuna ou na biblioteca."
             actionLabel="Ver agenda"
             onAction={() => setActiveTab?.('agenda')}
           />

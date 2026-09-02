@@ -1,5 +1,5 @@
 import React from 'react';
-import { AcademyMark } from '../../components/AcademyMark';
+import { AcademyWordmark } from '../../components/AcademyWordmark';
 import { LogOut, UserCog } from '../../icons';
 import { ACADEMY_NAV } from './nav';
 import { SidebarItem } from './SidebarItem';
@@ -34,20 +34,15 @@ export function AcademySidebar({
   return (
     <aside
       className={`
-        fixed inset-y-0 left-0 z-[110] bg-white border-r border-apple-line p-3 tablet-l:p-2.5 desktop:p-4 flex flex-col transition-all duration-300 ease-in-out tablet-l:static tablet-l:translate-x-0 no-print
+        fixed inset-y-0 left-0 z-[110] bg-black border-r border-white/10 p-3 tablet-l:p-2.5 desktop:p-4 flex flex-col transition-all duration-300 ease-in-out tablet-l:static tablet-l:translate-x-0 no-print
         ${isSidebarOpen ? 'translate-x-0 w-[272px]' : '-translate-x-full w-[272px] tablet-l:w-[88px] desktop:w-[272px]'}
       `}
     >
       <div className="flex items-center gap-3 px-1 desktop:px-2 mb-8 tablet-l:justify-center desktop:justify-start">
-        <AcademyMark size={36} />
-        <div className="min-w-0 tablet-l:hidden desktop:block">
-          <p className="text-[12px] font-normal tracking-[-0.011em] text-apple-gray leading-none">
-            Academy
-          </p>
-          <p className="text-[17px] font-semibold text-apple-ink tracking-[-0.025em] leading-[1.05] mt-1 truncate">
-            OdontoHub
-          </p>
+        <div className="tablet-l:hidden desktop:block">
+          <AcademyWordmark invert />
         </div>
+        <div className="hidden tablet-l:block desktop:hidden w-8 h-8 rounded-full bg-[#1d1d1f]" style={{ boxShadow: 'inset 0 0 0 2px var(--academy-accent)' }} />
       </div>
 
       <nav className="flex flex-col gap-1 flex-1">
@@ -78,7 +73,7 @@ export function AcademySidebar({
 
       <div className="mt-4 pt-3 space-y-2">
         <div className="flex items-center gap-3 px-1 desktop:px-2 tablet-l:justify-center desktop:justify-start overflow-hidden">
-          <div className="w-9 h-9 rounded-full overflow-hidden bg-apple-surface flex items-center justify-center text-apple-ink text-[15px] font-semibold shrink-0">
+          <div className="w-9 h-9 rounded-full overflow-hidden bg-[#1d1d1f] flex items-center justify-center text-white text-[15px] font-semibold shrink-0">
             {profile?.photo_url ? (
               <img
                 src={profile.photo_url}
@@ -91,17 +86,17 @@ export function AcademySidebar({
             )}
           </div>
           <div className="min-w-0 tablet-l:hidden desktop:block">
-            <p className="text-[15px] font-semibold text-apple-ink truncate leading-tight tracking-[-0.016em]">
+            <p className="text-[15px] font-semibold text-white truncate leading-tight tracking-[-0.016em]">
               {firstName || 'Aluno'}
             </p>
-            <p className="text-[12px] font-normal text-apple-gray truncate">Na clínica</p>
+            <p className="text-[12px] font-normal text-[#86868b] truncate">Na clínica</p>
           </div>
         </div>
 
         <button
           onClick={onLogout}
           title="Sair"
-          className="w-full flex items-center gap-3 rounded-[980px] px-3 py-2.5 text-apple-gray hover:bg-apple-surface tablet-l:justify-center desktop:justify-start"
+          className="w-full flex items-center gap-3 rounded-[980px] px-3 py-2.5 text-[#86868b] hover:bg-[#1d1d1f] tablet-l:justify-center desktop:justify-start"
         >
           <LogOut size={18} className="shrink-0" />
           <span className="text-[15px] tablet-l:hidden desktop:block">
@@ -109,7 +104,7 @@ export function AcademySidebar({
           </span>
         </button>
 
-        <p className="hidden desktop:block text-[11px] text-apple-gray/80 px-2 pt-1">
+        <p className="hidden desktop:block text-[11px] text-[#86868b]/80 px-2 pt-1">
           {productLabel}
         </p>
       </div>

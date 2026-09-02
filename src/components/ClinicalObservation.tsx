@@ -14,12 +14,12 @@ export const ClinicalObservation: React.FC<ClinicalObservationProps> = ({ observ
       initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: 0.08 }}
-      className="siso-bubble"
+      className="oh-device px-5 py-4"
     >
-      <p className="text-[13px] font-normal text-apple-gray mb-1 tracking-[-0.011em]">
+      <p className="text-[13px] font-normal text-[#86868b] mb-1 tracking-[-0.011em]">
         Recado
       </p>
-      <p className="text-[17px] font-normal text-apple-ink leading-snug tracking-[-0.011em]">
+      <p className="text-[17px] font-normal text-white leading-snug tracking-[-0.011em]">
         {observation.text}
       </p>
     </motion.div>

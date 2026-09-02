@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { API_URL } from '../../config';
-import { AcademyMark } from '../../components/AcademyMark';
-import { Siso } from '../../illustrations/Siso';
-import { SpeechBubble } from '../../illustrations/SpeechBubble';
+import { AcademyWordmark } from '../../components/AcademyWordmark';
 import { DuoButton } from '../../components/DuoButton';
 
 export function ForgotPassword() {
@@ -38,39 +36,24 @@ export function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-apple-surface flex items-center justify-center px-6 font-sans antialiased">
+    <div className="min-h-screen bg-black flex items-center justify-center px-6 font-sans antialiased">
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-[400px] comic-card p-8 sm:p-10"
+        className="w-full max-w-[400px] oh-device p-8 sm:p-10"
       >
-        <motion.div
-          className="mb-8 flex flex-col items-center"
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <Siso mood="think" size={112} />
-          <div className="mt-4 flex items-center gap-2">
-            <AcademyMark size={24} />
-            <p className="text-[13px] font-normal text-apple-gray tracking-[-0.011em]">
-              Academy
-            </p>
-          </div>
-          <div className="mt-5 w-full">
-            <SpeechBubble>
-              <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em]">Esqueceu a senha.</p>
-              <p className="mt-2 text-[15px] text-apple-gray">
-                Envie o e-mail da faculdade.
-              </p>
-            </SpeechBubble>
-          </div>
-        </motion.div>
+        <AcademyWordmark invert />
+        <h1 className="mt-8 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] text-white">
+          Esqueceu a senha.
+        </h1>
+        <p className="mt-3 text-[17px] text-[#86868b] tracking-[-0.011em]">
+          Envie o e-mail da faculdade.
+        </p>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <div>
-            <label className="block text-[13px] font-normal text-apple-gray mb-2">E-mail</label>
+            <label className="block text-[13px] font-normal text-[#86868b] mb-2">E-mail</label>
             <input
               type="email"
               required
@@ -82,25 +65,11 @@ export function ForgotPassword() {
           </div>
 
           {error && (
-            <motion.p
-              initial={{ opacity: 0, y: -2 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="text-[15px] text-apple-red"
-            >
-              {error}
-            </motion.p>
+            <p className="text-[15px] text-[#ff3b30]">{error}</p>
           )}
 
           {message && (
-            <motion.p
-              initial={{ opacity: 0, y: -2 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="text-[15px] text-apple-ink"
-            >
-              {message}
-            </motion.p>
+            <p className="text-[15px] text-white">{message}</p>
           )}
 
           <div className="pt-3">
@@ -110,18 +79,10 @@ export function ForgotPassword() {
           </div>
         </form>
 
-        <div className="mt-12 space-y-6">
-          <div className="text-center">
-            <Link to="/" className="apple-link">
-              Voltar para o login ›
-            </Link>
-          </div>
-
-          <div className="flex justify-center items-center gap-3 text-[13px] text-apple-gray">
-            <Link to="/termos" className="hover:text-apple-ink transition-colors duration-200">Termos</Link>
-            <span>·</span>
-            <Link to="/privacidade" className="hover:text-apple-ink transition-colors duration-200">Privacidade</Link>
-          </div>
+        <div className="mt-12 text-center">
+          <Link to="/" className="apple-link">
+            Voltar para o login ›
+          </Link>
         </div>
       </motion.div>
     </div>

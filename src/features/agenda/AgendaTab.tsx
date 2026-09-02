@@ -30,8 +30,8 @@ import {
 import type { Appointment, CurrentUser, Patient } from '../../types/clinical';
 import { StatusBadge } from './StatusBadge';
 import type { AgendaViewMode } from './useAgendaState';
-import { SisoLine } from '../../illustrations/SisoLine';
-import { EmptySiso } from '../../illustrations/EmptySiso';
+import { PageIntro } from '../../components/PageIntro';
+import { QuietEmpty } from '../../components/QuietEmpty';
 
 type AppTabId =
   | 'dashboard'
@@ -157,17 +157,11 @@ function AgendaTabComponent({
       {/* Header */}
       <div className="flex flex-col gap-5 mb-2 no-print">
         <div className="flex items-end justify-between gap-3">
-          <SisoLine mood="box" size={112}>
-            <p className="text-[13px] font-normal text-apple-gray mb-1 tracking-[-0.011em]">
-              Agenda
-            </p>
-            <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em]">
-              {agendaViewMode === 'week' && !agendaFocusMode ? 'Semana clínica' : 'Atendimentos'}
-            </p>
-            <p className="mt-1.5 text-[15px] font-normal leading-snug text-apple-gray">
-              {agendaSmartCopy}
-            </p>
-          </SisoLine>
+          <PageIntro
+            kicker="Agenda"
+            title={agendaViewMode === 'week' && !agendaFocusMode ? 'Semana clínica' : 'Atendimentos'}
+            subtitle={agendaSmartCopy}
+          />
           <button
             onClick={openAppointmentModal}
             className="duo-btn duo-btn-active mb-8 w-12 h-12 flex items-center justify-center rounded-full shrink-0"
@@ -286,18 +280,16 @@ function AgendaTabComponent({
 
               if (filtered.length === 0 && agendaViewMode === 'day') {
                 return patients.length === 0 ? (
-                  <EmptySiso
-                    mood="think"
+                  <QuietEmpty
                     title="Box vazio. Cadastre o primeiro caso."
                     body="Sem paciente real não tem atendimento. A rotina começa pelo caso, não pela agenda."
                     actionLabel="Cadastrar primeiro caso"
                     onAction={() => setActiveTab('pacientes')}
                   />
                 ) : (
-                  <EmptySiso
-                    mood="idle"
+                  <QuietEmpty
                     title="Nenhum atendimento hoje."
-                    body="Cadeira livre. Marca um box ou aproveita pra fechar evolução."
+                    body="Cadeira livre. Marque um box ou feche uma evolução."
                     actionLabel="Agendar atendimento"
                     onAction={openAppointmentModal}
                   />

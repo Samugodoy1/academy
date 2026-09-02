@@ -52,10 +52,8 @@ import { Odontogram } from './components/Odontogram';
 import { TermsPage, PrivacyPage } from './components/LegalPages';
 import { NovaEvolucao } from './components/NovaEvolucao';
 import { AcademyDashboard } from './components/AcademyDashboard';
-import { AcademyMark } from './components/AcademyMark';
+import { AcademyWordmark } from './components/AcademyWordmark';
 import { DuoButton } from './components/DuoButton';
-import { Siso } from './illustrations/Siso';
-import { SpeechBubble } from './illustrations/SpeechBubble';
 import { DataLoadingSkeleton } from './components/DataLoadingSkeleton';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { PreAtendimento } from './components/PreAtendimento';
@@ -2214,7 +2212,7 @@ export default function App() {
       <Route path="/pre-atendimento/:token" element={<PreAtendimento />} />
       <Route path="/prontuario/:id" element={
         user ? (
-          <div className="min-h-screen bg-apple-surface flex font-sans text-apple-ink relative overflow-x-hidden">
+          <div className="min-h-screen bg-black flex font-sans text-[#f5f5f7] relative overflow-x-hidden">
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
               {isSidebarOpen && (
@@ -2297,44 +2295,33 @@ export default function App() {
       } />
       <Route path="*" element={
         !user ? (
-          <div className="min-h-screen bg-apple-surface flex items-center justify-center px-5 font-sans antialiased">
+          <div className="min-h-screen bg-black flex items-center justify-center px-5 font-sans antialiased">
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full max-w-[420px] comic-card p-6 sm:p-8"
+              className="w-full max-w-[420px] oh-device p-7 sm:p-10"
             >
               <motion.div
-                className="mb-8 flex flex-col items-center"
+                className="mb-10"
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.05, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
               >
-                <Siso mood={isRegistering ? 'wave' : 'idle'} size={132} />
-                <div className="mt-2 w-full">
-                  <SpeechBubble>
-                    {isRegistering ? (
-                      <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em]">
-                        Crie a conta. O box fica no mesmo lugar.
-                      </p>
-                    ) : (
-                      <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em]">
-                        {(() => {
-                          const h = new Date().getHours();
-                          if (h >= 5 && h < 12) return 'Bom dia.';
-                          if (h >= 12 && h < 18) return 'Boa tarde.';
-                          return 'Boa noite.';
-                        })()}
-                      </p>
-                    )}
-                  </SpeechBubble>
-                </div>
-                <div className="mt-6 flex items-center gap-2">
-                  <AcademyMark size={28} />
-                  <p className="text-[13px] font-normal text-apple-gray tracking-[-0.011em]">
-                    Academy
-                  </p>
-                </div>
+                <AcademyWordmark invert size="lg" />
+                <h1 className="mt-8 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] text-white">
+                  {isRegistering
+                    ? 'Crie a conta.'
+                    : (() => {
+                        const h = new Date().getHours();
+                        if (h >= 5 && h < 12) return 'Bom dia.';
+                        if (h >= 12 && h < 18) return 'Boa tarde.';
+                        return 'Boa noite.';
+                      })()}
+                </h1>
+                <p className="mt-3 text-[17px] text-[#86868b] tracking-[-0.011em]">
+                  {isRegistering ? 'O box fica no mesmo lugar.' : 'Entre para continuar.'}
+                </p>
               </motion.div>
 
               <form onSubmit={isRegistering ? handleRegister : handleLogin} className="space-y-5">
@@ -2485,7 +2472,7 @@ export default function App() {
           </div>
         ) : (
           <AppProvider value={appContextValue}>
-          <div className="min-h-screen bg-apple-surface flex font-sans text-apple-ink relative overflow-x-hidden">
+          <div className="min-h-screen bg-black flex font-sans text-[#f5f5f7] relative overflow-x-hidden">
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
               {isSidebarOpen && (
@@ -2641,6 +2628,7 @@ export default function App() {
                       openAppointmentModal={openAppointmentModal}
                       onDismissOnboarding={() => updateUserOnboarding('onboarding_done')}
                       onDismissWelcome={() => updateUserOnboarding('welcome_seen')}
+                      academicPeriod={profile?.academic_period}
                     />
                   )}
 
@@ -4100,15 +4088,12 @@ export default function App() {
                     className="comic-card w-full max-w-md overflow-hidden bg-white"
                   >
                     <div className="p-6">
-                      <div className="flex justify-center mb-2">
-                        <Siso mood="proud" size={108} />
-                      </div>
-                      <p className="text-[13px] font-normal text-apple-gray mb-2 text-center">Academy Free</p>
-                      <h3 className="text-[22px] font-semibold text-apple-ink mb-2 text-center leading-[1.05] tracking-[-0.025em]">
+                      <p className="text-[13px] font-normal text-[#86868b] mb-2 text-center">Academy Free</p>
+                      <h3 className="text-[22px] font-semibold text-white mb-2 text-center leading-[1.05] tracking-[-0.025em]">
                         O box já tem os primeiros casos.
                       </h3>
-                      <p className="text-sm font-semibold text-academy-muted leading-relaxed mb-4 text-center">
-                        Você organizou 3 casos. No Student o siso não corta evolução, agenda nem prontuário no meio do semestre.
+                      <p className="text-[15px] font-normal text-[#86868b] leading-relaxed mb-4 text-center">
+                        Você organizou 3 casos. No Student a evolução, a agenda e o prontuário seguem no semestre.
                       </p>
                       <div className="space-y-2">
                         {['Casos ilimitados', 'Agenda acadêmica sem limite', 'Evoluções e modo box completos'].map((item) => (

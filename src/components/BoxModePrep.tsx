@@ -38,7 +38,7 @@ export const BoxModePrep: React.FC<BoxModePrepProps> = ({
         </span>
       </div>
 
-      <h3 className="text-[28px] font-semibold text-apple-ink leading-[1.05] tracking-[-0.025em]">
+      <h3 className="text-[28px] font-semibold text-white leading-[1.05] tracking-[-0.025em]">
         {firstName(patientName)}
       </h3>
       <p className="text-[17px] text-apple-gray mt-2 tracking-[-0.011em]">{procedure}</p>
@@ -56,10 +56,10 @@ export const BoxModePrep: React.FC<BoxModePrepProps> = ({
             key={`${item.label}-${index}`}
             whileTap={{ scale: 0.98, opacity: 0.92 }}
             onClick={() => onReviewItem?.(item)}
-            className="w-full flex items-center gap-3 rounded-[16px] bg-apple-surface px-4 py-3.5 text-left"
+              className="w-full flex items-center gap-3 rounded-[16px] bg-black px-4 py-3.5 text-left"
           >
             <CheckCircle2 size={16} className="text-apple-green shrink-0" />
-            <span className="flex-1 text-[17px] text-apple-ink">{item.label}</span>
+              <span className="flex-1 text-[17px] text-white">{item.label}</span>
             <span className="text-[13px] text-apple-gray flex items-center gap-1 shrink-0">
               <Clock size={11} />
               {item.duration}

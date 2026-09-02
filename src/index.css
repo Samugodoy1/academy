@@ -14,14 +14,15 @@
   --apple-link: #2997ff;
   --apple-green: #30d158;
   --apple-red: #ff3b30;
+  --academy-accent: #bf5af2;
 
   --academy-primary: #0071e3;
   --academy-primary-dark: #1d1d1f;
   --academy-primary-light: #0077ed;
   --academy-soft: #f5f5f7;
-  --academy-bg: #f5f5f7;
-  --academy-card: #ffffff;
-  --academy-text: #1d1d1f;
+  --academy-bg: #000000;
+  --academy-card: #1d1d1f;
+  --academy-text: #f5f5f7;
   --academy-muted: #86868b;
   --academy-border: #d2d2d7;
   --academy-neutral: #f5f5f7;
@@ -50,9 +51,9 @@
   --color-academy-primary: var(--apple-blue);
   --color-academy-primary-dark: var(--apple-ink);
   --color-academy-soft: var(--apple-surface);
-  --color-academy-bg: var(--apple-surface);
-  --color-academy-card: var(--apple-elevated);
-  --color-academy-text: var(--apple-ink);
+  --color-academy-bg: #000000;
+  --color-academy-card: #1d1d1f;
+  --color-academy-text: #f5f5f7;
   --color-academy-muted: var(--apple-gray);
   --color-academy-border: var(--apple-line);
   --color-academy-neutral: var(--apple-surface);
@@ -77,12 +78,13 @@
   --color-apple-link: #2997ff;
   --color-apple-green: #30d158;
   --color-apple-red: #ff3b30;
+  --color-academy-accent: var(--academy-accent);
 }
 
 @layer base {
   html {
-    background-color: #f5f5f7;
-    color-scheme: light;
+    background-color: #000000;
+    color-scheme: dark;
   }
 
   html,
@@ -92,7 +94,7 @@
   }
 
   body {
-    @apply bg-apple-surface text-apple-ink antialiased selection:bg-apple-blue/10 selection:text-apple-ink;
+    @apply bg-black text-[#f5f5f7] antialiased selection:bg-apple-blue/20 selection:text-white;
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
     font-feature-settings: "ss01", "cv11", "calt";
     font-weight: 400;
@@ -106,7 +108,7 @@
 
 @layer utilities {
   .ios-card {
-    background: #ffffff;
+    background: #1d1d1f;
     border: none;
     border-radius: 28px;
     box-shadow: none;
@@ -162,14 +164,14 @@
   }
 
   .ios-input {
-    background: #f5f5f7;
+    background: #2c2c2e;
     border: none;
     border-radius: 14px;
     padding: 14px 16px;
     font-size: 17px;
     font-weight: 400;
     letter-spacing: -0.022em;
-    color: #1d1d1f;
+    color: #f5f5f7;
     outline: none;
     transition: box-shadow 0.2s ease;
   }
@@ -207,7 +209,7 @@
     font-weight: 600;
     letter-spacing: -0.025em;
     line-height: 1.05;
-    color: #1d1d1f;
+    color: #f5f5f7;
   }
 
   .ios-subtitle {
@@ -215,7 +217,7 @@
     font-weight: 600;
     letter-spacing: -0.025em;
     line-height: 1.05;
-    color: #1d1d1f;
+    color: #f5f5f7;
   }
 
   .ios-text-secondary {
@@ -230,7 +232,7 @@
     font-weight: 600;
     letter-spacing: -0.025em;
     line-height: 1.05;
-    color: #1d1d1f;
+    color: #f5f5f7;
   }
 
   .no-scrollbar::-webkit-scrollbar {
@@ -347,8 +349,8 @@
   }
 
   .liquid-glass-sidebar {
-    background: #ffffff;
-    border-right: 1px solid #d2d2d7;
+    background: #000000;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .liquid-glass-inset,
@@ -389,11 +391,11 @@
 
   .tab-bar-float {
     min-height: 49px;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(22, 22, 23, 0.8);
     -webkit-backdrop-filter: saturate(150%) blur(20px);
     backdrop-filter: saturate(150%) blur(20px);
     border: none;
-    border-top: 1px solid #d2d2d7;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 0;
     box-shadow: none;
   }
@@ -472,8 +474,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #f5f5f7;
-    color: #1d1d1f;
+    background: #2c2c2e;
+    color: #f5f5f7;
     border-radius: 980px;
     padding: 12px 22px;
     font-size: 17px;
@@ -484,7 +486,7 @@
   }
 
   .apple-btn-light:hover {
-    background: #e8e8ed;
+    background: #3a3a3c;
   }
 
   .apple-btn-light:active {
@@ -498,13 +500,13 @@
 
   .apple-input {
     width: 100%;
-    background: #f5f5f7;
+    background: #2c2c2e;
     border: none;
     border-radius: 14px;
     padding: 14px 16px;
     font-size: 17px;
     font-weight: 400;
-    color: #1d1d1f;
+    color: #f5f5f7;
     outline: none;
   }
 
@@ -521,10 +523,22 @@
   }
 
   .comic-card {
-    background: #ffffff;
+    background: #1d1d1f;
     border: none;
     border-radius: 28px;
     box-shadow: none;
+  }
+
+  .oh-device {
+    background: #1d1d1f;
+    border-radius: 28px;
+    box-shadow: none;
+    border: none;
+  }
+
+  .oh-device-inset {
+    background: #000000;
+    border-radius: 22px;
   }
 
   .siso-stage {
@@ -583,14 +597,14 @@
 
   .duo-btn {
     border: none;
-    background: #f5f5f7;
-    color: #1d1d1f;
+    background: #2c2c2e;
+    color: #f5f5f7;
     border-radius: 980px;
     transition: background 0.2s ease, transform 0.15s ease;
   }
 
   .duo-btn:hover {
-    background: #e8e8ed;
+    background: #3a3a3c;
   }
 
   .duo-btn:active {

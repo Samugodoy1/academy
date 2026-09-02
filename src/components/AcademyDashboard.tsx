@@ -2,11 +2,7 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, ChevronRight, Clock } from '../icons';
 import { AcademyActivationCard, AcademyOnboarding } from './AcademyOnboarding';
-import { Siso, type SisoMood } from '../illustrations/Siso';
-import { SisoLine } from '../illustrations/SisoLine';
-import { PathNode } from '../illustrations/PathNode';
 import { DuoButton } from './DuoButton';
-import type { GlyphName } from '../illustrations/glyphs';
 import { BoxModePrep } from './BoxModePrep';
 import { ClinicalObservation } from './ClinicalObservation';
 import { ClinicalProgressionCard } from './ClinicalProgressionCard';
@@ -39,6 +35,7 @@ interface AcademyDashboardProps {
   openAppointmentModal: () => void;
   onDismissOnboarding: () => void;
   onDismissWelcome: () => void;
+  academicPeriod?: string;
 }
 
 const ACTIVE_STATUSES = new Set(['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS']);
@@ -62,24 +59,6 @@ const getTimeGreeting = () => {
   if (hour < 12) return 'Bom dia';
   if (hour < 18) return 'Boa tarde';
   return 'Boa noite';
-};
-
-const focusMood = (kind: string): SisoMood => {
-  if (kind === 'evolution') return 'think';
-  if (kind === 'today') return 'box';
-  if (kind === 'next') return 'idle';
-  if (kind === 'paused' || kind === 'pending') return 'think';
-  if (kind === 'start') return 'wave';
-  if (kind === 'calm') return 'proud';
-  return 'idle';
-};
-
-const focusGlyph = (kind: string): GlyphName => {
-  if (kind === 'evolution') return 'chart';
-  if (kind === 'today' || kind === 'next') return 'chair';
-  if (kind === 'paused' || kind === 'pending') return 'chart';
-  if (kind === 'start') return 'tooth';
-  return 'check';
 };
 
 const formatTime = (value?: string) => {
@@ -433,6 +412,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   openAppointmentModal,
   onDismissOnboarding,
   onDismissWelcome,
+  academicPeriod,
 }) => {
   const usableAppointments = useMemo(() => {
     return appointments
@@ -634,8 +614,6 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   };
 
   const focusPatientName = focus.patient?.name || focus.appointment?.patient_name || null;
-  const focusPhoto = focus.patient?.photo_url || focus.appointment?.photo_url || null;
-  const focusInitial = (focusPatientName || '?').charAt(0).toUpperCase();
   const isFinishedFocus = focus.appointment?.status === 'FINISHED';
   const pendingDateLabel = (focus as any).pendingDateLabel || '';
   const statusLabel = isFinishedFocus && focus.kind === 'evolution'
@@ -647,8 +625,6 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
     !isFinishedFocus ? scheduleLabel : null
   ].filter(Boolean).join(' · ');
   const procedureHint = getProcedureHint(focus.appointment, focus.patient);
-  const lastEvolution = getEvolutionSummary(focus.patient);
-  const clinicalAlert = getClinicalAlert(focus.patient, usableAppointments, now, { includeFirstVisitGuidance: true });
   const otherAppointments = nextAppointments
     .filter(app => app.id !== focus.appointment?.id)
     .slice(0, 3);
@@ -716,13 +692,6 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           onboardingDismissed={user?.onboarding_done ?? false}
           openPatientRecord={openPatientRecord}
         />
-        <SisoLine mood={focusMood(focus.kind)} size={148}>
-          <p className="text-[13px] font-normal text-apple-gray mb-1 tracking-[-0.011em]">
-            {getTimeGreeting()}{greetingName ? `, ${greetingName}` : ''}
-          </p>
-          <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em]">{smartMessage}</p>
-        </SisoLine>
-
         <ClinicalObservation observation={clinicalObservation} />
       </section>
 
@@ -732,76 +701,53 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="comic-card px-5 py-7 tablet-l:px-8 tablet-l:py-9"
+          className="oh-device px-6 py-8 tablet-l:px-9 tablet-l:py-10"
         >
-          <div className="flex flex-col items-center text-center">
-            <p className="text-[13px] font-normal text-apple-gray tracking-[-0.011em]">
-              {focus.eyebrow}
-            </p>
-            <div className="mt-4 flex items-center gap-3">
-              {focusPatientName && (
-                focusPhoto ? (
-                  <img
-                    src={focusPhoto}
-                    alt={focusPatientName}
-                    referrerPolicy="no-referrer"
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-apple-surface flex items-center justify-center text-[20px] font-semibold text-apple-ink tracking-[-0.025em]">
-                    {focusInitial}
-                  </div>
-                )
+          <p className="text-[15px] font-normal text-[#86868b] tracking-[-0.011em]">
+            {getTimeGreeting()}{greetingName ? `, ${greetingName}` : ''}
+            {academicPeriod ? ` · ${academicPeriod}` : ''}
+          </p>
+          <h1 className="mt-3 text-[34px] sm:text-[40px] font-semibold text-white leading-[1.05] tracking-[-0.025em]">
+            {smartMessage}
+          </h1>
+
+          {focusPatientName && (
+            <button
+              type="button"
+              onClick={focus.action}
+              className="oh-device-inset mt-8 w-full px-5 py-5 text-left"
+            >
+              {appointmentMetaLabel && (
+                <p className="text-[12px] font-normal text-[#86868b] tracking-[0.08em] uppercase">
+                  {appointmentMetaLabel}
+                </p>
               )}
-              <h2 className="text-[34px] font-semibold text-apple-ink leading-[1.05] tracking-[-0.025em]">
-                {focusPatientName || focus.title}
-              </h2>
-            </div>
-            {appointmentMetaLabel && (
-              <p className="mt-2 text-[13px] font-normal text-apple-gray">
-                {appointmentMetaLabel}
+              <p className="mt-1.5 text-[28px] font-semibold text-white leading-[1.05] tracking-[-0.025em]">
+                {focusPatientName}
               </p>
-            )}
+              <p className="mt-1 text-[15px] text-[#86868b] tracking-[-0.011em]">
+                {procedureHint || focus.subtitle}
+              </p>
+            </button>
+          )}
 
-            <div className="mt-7">
-              <PathNode
-                active
-                glyph={focusGlyph(focus.kind)}
-                label={focus.kind === 'calm' ? 'Rotina' : 'Começar'}
-                onClick={focus.action}
-              />
-            </div>
-
-            <p className="mt-5 max-w-md text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-apple-ink">
-              {focus.title}
-            </p>
-            <p className="mt-2 max-w-md text-[17px] font-normal text-apple-gray leading-snug tracking-[-0.011em]">
+          {!focusPatientName && (
+            <p className="mt-5 text-[17px] text-[#86868b] leading-snug tracking-[-0.011em]">
               {focus.subtitle}
             </p>
-          </div>
+          )}
 
-          {(procedureHint || lastEvolution || clinicalAlert || isFinishedFocus) && (
-            <div className="mt-6 grid gap-2.5">
-              {procedureHint && <ComicDetail label="Conduta" value={procedureHint} />}
-              {lastEvolution && <ComicDetail label="Última evolução" value={lastEvolution} />}
-              {clinicalAlert && !isFinishedFocus && (
-                <ComicDetail label="Antes do box" value={clinicalAlert} />
-              )}
-              {clinicalAlert && isFinishedFocus && (
-                <ComicDetail label="Pendente no prontuário" value={clinicalAlert.replace('pendente.', 'não registrada.')} />
-              )}
-              {isFinishedFocus && (
-                <ComicDetail
-                  label="Para fechar"
-                  value={pendingDateLabel
-                    ? 'Registre o que foi feito neste atendimento.'
-                    : 'Registre a evolução clínica.'}
-                />
-              )}
+          {showBoxMode && boxPrepItems[0] && (
+            <div className="mt-6 flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-[13px] text-[#86868b]">Checklist</p>
+                <p className="text-[17px] text-white truncate">{boxPrepItems[0].label}</p>
+              </div>
+              <span className="text-[15px] text-[#30d158] shrink-0">Pronto</span>
             </div>
           )}
 
-          <div className="mt-6 space-y-3">
+          <div className="mt-8 space-y-3">
             <DuoButton onClick={focus.action}>{focus.actionLabel}</DuoButton>
             <div className="grid grid-cols-2 gap-3">
               <DuoButton variant="secondary" onClick={() => setActiveTab('pacientes')}>
@@ -863,17 +809,16 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="comic-card overflow-hidden">
-            <div className="px-5 pt-5 pb-2 flex items-end gap-3">
-              <Siso mood="study" size={88} className="shrink-0" />
-              <div className="min-w-0 flex-1 pb-2">
-                <span className="text-[13px] font-normal text-apple-gray">
+          <div className="oh-device overflow-hidden">
+            <div className="px-5 pt-5 pb-2">
+              <div className="min-w-0">
+                <span className="text-[13px] font-normal text-[#86868b]">
                   Antes do box
                 </span>
-                <h3 className="text-[22px] font-semibold text-apple-ink leading-[1.05] tracking-[-0.025em] mt-1">
+                <h3 className="text-[22px] font-semibold text-white leading-[1.05] tracking-[-0.025em] mt-1">
                   {studySuggestion.topic}
                 </h3>
-                <p className="text-[15px] font-normal text-apple-gray mt-1.5 leading-relaxed">
+                <p className="text-[15px] font-normal text-[#86868b] mt-1.5 leading-relaxed">
                   {studySuggestion.reason}
                 </p>
               </div>
@@ -894,11 +839,11 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <h3 className="text-[17px] font-semibold text-apple-ink tracking-[-0.016em]">Para fechar</h3>
+              <h3 className="text-[17px] font-semibold text-white tracking-[-0.016em]">Para fechar</h3>
             </div>
             <span className="text-[13px] font-normal text-apple-gray">{pendingRows.length}</span>
           </div>
-          <div className="rounded-[28px] overflow-hidden bg-white">
+          <div className="rounded-[28px] overflow-hidden bg-[#1d1d1f]">
             {pendingRows.map(row => (
               <React.Fragment key={row.id}>
                 <ListRow
@@ -926,13 +871,13 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <h3 className="text-[17px] font-semibold text-apple-ink tracking-[-0.016em]">Próximos boxes</h3>
+              <h3 className="text-[17px] font-semibold text-white tracking-[-0.016em]">Próximos boxes</h3>
             </div>
             <button onClick={() => setActiveTab('agenda')} className="apple-link !text-[15px]">
               Ver tudo ›
             </button>
           </div>
-          <div className="rounded-[28px] overflow-hidden bg-white">
+          <div className="rounded-[28px] overflow-hidden bg-[#1d1d1f]">
             {otherAppointments.map((app, index) => {
               const dateTime = formatAgendaListDateTime(app.start_time);
               return (
@@ -971,7 +916,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           <motion.button
             whileTap={{ scale: 0.98, opacity: 0.9 }}
             onClick={() => openPatientRecord(pausedCase.id)}
-            className="w-full flex items-center gap-4 bg-white rounded-[28px] px-5 py-4 transition-all"
+            className="w-full flex items-center gap-4 bg-[#1d1d1f] rounded-[28px] px-5 py-4 transition-all"
           >
             <div className="w-10 h-10 bg-white rounded-[14px] flex items-center justify-center text-academy-alert-text shadow-sm shrink-0">
               <Clock size={20} />
@@ -987,12 +932,12 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
       {patients.length > 0 && pendingRows.length === 0 && otherAppointments.length === 0 && !pausedCase && (
         <section>
-          <div className="w-full flex items-center gap-4 bg-white rounded-[28px] px-5 py-4">
-            <div className="w-10 h-10 bg-apple-surface rounded-full flex items-center justify-center text-apple-green shrink-0">
+          <div className="w-full flex items-center gap-4 bg-[#1d1d1f] rounded-[28px] px-5 py-4">
+            <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-[#30d158] shrink-0">
               <CheckCircle2 size={20} />
             </div>
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-[15px] font-semibold text-academy-text">Sem paciente marcado hoje.</p>
+              <p className="text-[15px] font-semibold text-white">Sem paciente marcado hoje.</p>
               <p className="text-[12px] text-academy-muted">Revise retornos e prontuários abertos.</p>
             </div>
           </div>
@@ -1004,13 +949,6 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
     </AcademyOnboarding>
   );
 };
-
-const ComicDetail = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-[16px] bg-apple-surface px-4 py-3 text-left">
-    <span className="text-[13px] font-normal text-apple-gray">{label}</span>
-    <p className="text-[15px] font-normal text-apple-ink mt-0.5 leading-snug line-clamp-2">{value}</p>
-  </div>
-);
 
 const ListRow = ({
   title,

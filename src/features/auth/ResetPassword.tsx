@@ -46,11 +46,11 @@ export function ResetPassword() {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-apple-surface flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-[28px] text-center max-w-md">
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <div className="oh-device p-8 text-center max-w-md">
           <AlertTriangle className="mx-auto text-apple-red mb-4" size={40} />
-          <h1 className="text-[28px] font-semibold tracking-[-0.025em] leading-[1.05] mb-2">Link inválido</h1>
-          <p className="text-apple-gray mb-6 text-[17px]">Este link de recuperação expirou ou não é válido.</p>
+          <h1 className="text-[28px] font-semibold tracking-[-0.025em] leading-[1.05] mb-2 text-white">Link inválido</h1>
+          <p className="text-[#86868b] mb-6 text-[17px]">Este link de recuperação expirou ou não é válido.</p>
           <Link to="/" className="apple-btn inline-block">
             Voltar para o login
           </Link>
@@ -60,11 +60,11 @@ export function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-apple-surface flex items-center justify-center p-4 font-sans">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4 font-sans">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white w-full max-w-md rounded-[28px] overflow-hidden"
+        className="oh-device w-full max-w-md overflow-hidden"
       >
         <div className="p-8 md:p-12">
           <div className="flex justify-center mb-8">
@@ -73,7 +73,7 @@ export function ResetPassword() {
             </div>
           </div>
           <div className="text-center mb-10">
-            <h1 className="text-[34px] font-semibold text-apple-ink tracking-[-0.025em] leading-[1.05] mb-2">Nova senha</h1>
+            <h1 className="text-[34px] font-semibold text-white tracking-[-0.025em] leading-[1.05] mb-2">Nova senha</h1>
             <p className="text-apple-gray text-[17px]">Crie uma senha para a conta.</p>
           </div>
 

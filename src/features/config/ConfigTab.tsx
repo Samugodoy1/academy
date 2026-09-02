@@ -17,7 +17,7 @@ import {
   LogOut,
 } from '../../icons';
 import { SubscriptionManagement } from '../../components/SubscriptionManagement';
-import { Siso } from '../../illustrations/Siso';
+import { AcademyColorPicker } from '../../components/AcademyColorPicker';
 import type { CurrentUser, Dentist, Product, ProductAccess, ProductPlan } from '../../types/clinical';
 
 type AppTabId =
@@ -87,16 +87,12 @@ export function ConfigTab({
   return (
     <div className="page-shell space-y-6 tablet-l:max-w-3xl">
 
-      <div className="comic-card overflow-hidden">
-        <div className="h-20 bg-apple-surface relative">
-          <div className="absolute right-4 -bottom-2">
-            <Siso mood="proud" size={88} />
-          </div>
-        </div>
+      <div className="oh-device overflow-hidden">
+        <div className="h-16 bg-black" />
         <div className="px-6 pb-7 -mt-10">
           <div className="flex items-end gap-5">
             <div className="relative group shrink-0">
-              <div className="w-24 h-24 rounded-full overflow-hidden bg-apple-surface flex items-center justify-center text-apple-ink">
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-black flex items-center justify-center text-white">
                 {profile.photo_url ? (
                   <img src={profile.photo_url} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 ) : (
@@ -109,10 +105,10 @@ export function ConfigTab({
               </label>
             </div>
             <div className="pb-1 min-w-0">
-              <h2 className="text-[28px] font-semibold text-apple-ink tracking-[-0.025em] leading-[1.05] truncate">{profile.name}</h2>
+              <h2 className="text-[28px] font-semibold text-white tracking-[-0.025em] leading-[1.05] truncate">{profile.name}</h2>
               {currentProduct === 'academy' ? (
                 <>
-                  <p className="text-[15px] text-apple-gray font-normal mt-1">Perfil acadêmico</p>
+                  <p className="text-[15px] text-[#86868b] font-normal mt-1">Perfil acadêmico</p>
                   <p className="text-xs text-slate-400 mt-0.5">
                     {profile.student_registration ? `Matrícula / RA ${profile.student_registration}` : 'Matrícula / RA não informado'}
                   </p>
@@ -137,6 +133,8 @@ export function ConfigTab({
           )}
         </div>
       </div>
+
+      {currentProduct === 'academy' && <AcademyColorPicker />}
 
       {/* ── VIEW MODE ── */}
       {!isProfileEditing && (

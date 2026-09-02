@@ -13,8 +13,8 @@ import {
 } from '../../icons';
 import { DataLoadingSkeleton } from '../../components/DataLoadingSkeleton';
 import { PortalInbox } from '../../components/PortalInbox';
-import { SisoLine } from '../../illustrations/SisoLine';
-import { EmptySiso } from '../../illustrations/EmptySiso';
+import { PageIntro } from '../../components/PageIntro';
+import { QuietEmpty } from '../../components/QuietEmpty';
 import {
   getPatientCardMeta,
   formatProcedure,
@@ -398,17 +398,11 @@ function PacientesTabComponent({
       {/* Header */}
       <div className="flex flex-col gap-6 mb-4">
         <div className="flex items-end justify-between gap-3">
-          <SisoLine mood="idle" size={112}>
-            <p className="text-[13px] font-normal text-apple-gray mb-1 tracking-[-0.011em]">
-              Prontuário
-            </p>
-            <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em]">Casos</p>
-            {patientsSubView === 'list' && (
-              <p className="mt-1.5 text-[15px] font-normal leading-snug text-apple-gray">
-                {casesSmartCopy}
-              </p>
-            )}
-          </SisoLine>
+          <PageIntro
+            kicker="Prontuário"
+            title="Casos"
+            subtitle={patientsSubView === 'list' ? casesSmartCopy : undefined}
+          />
           {portalPendingCount > 0 && patientsSubView === 'list' && (
             <button
               type="button"
@@ -702,10 +696,9 @@ function PacientesTabComponent({
 
             {patientCards.length === 0 && patients.length === 0 && !searchTerm && (
               <div className="col-span-full comic-card">
-                <EmptySiso
-                  mood="wave"
+                <QuietEmpty
                   title="Ainda não tem caso no box."
-                  body="Quando entrar o primeiro paciente real, o prontuário, a evolução e o odontograma ficam aqui. Não cadastre fictício pra encher lista."
+                  body="Quando entrar o primeiro paciente real, o prontuário, a evolução e o odontograma ficam aqui."
                   actionLabel="Cadastrar caso"
                   onAction={() => setIsPatientModalOpen(true)}
                 />
@@ -714,10 +707,9 @@ function PacientesTabComponent({
 
             {patientCards.length === 0 && (patients.length > 0 || !!searchTerm) && (
               <div className="col-span-full comic-card">
-                <EmptySiso
-                  mood="think"
+                <QuietEmpty
                   title="Nenhum caso neste filtro."
-                  body="Solta o filtro ou busca de outro jeito. O siso não some — só está escondido."
+                  body="Solte o filtro ou busque de outro jeito."
                 />
               </div>
             )}

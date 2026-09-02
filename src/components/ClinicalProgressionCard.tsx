@@ -38,7 +38,7 @@ export const ClinicalProgressionCard: React.FC<ClinicalProgressionCardProps> = (
             {highlights.map(item => (
               <div key={item.skill} className="flex items-center gap-2.5">
                 <CheckCircle2 size={16} className="text-apple-green shrink-0" />
-                <span className="text-[17px] text-apple-ink">
+                <span className="text-[17px] text-white">
                   {item.count} {item.label}
                 </span>
               </div>
@@ -50,7 +50,7 @@ export const ClinicalProgressionCard: React.FC<ClinicalProgressionCardProps> = (
       {nextStep && (
         <div className={`${highlights.length > 0 ? 'mt-6 pt-5 border-t border-apple-line' : ''}`}>
           <p className="text-[13px] text-apple-gray mb-1.5">Próximo passo sugerido</p>
-          <p className="text-[22px] font-semibold text-apple-ink leading-[1.05] tracking-[-0.025em]">{nextStep.label}</p>
+          <p className="text-[22px] font-semibold text-white leading-[1.05] tracking-[-0.025em]">{nextStep.label}</p>
           <p className="text-[15px] text-apple-gray mt-2 leading-relaxed">{nextStep.reason}</p>
         </div>
       )}

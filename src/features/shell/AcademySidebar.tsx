@@ -34,23 +34,23 @@ export function AcademySidebar({
   return (
     <aside
       className={`
-        fixed inset-y-0 left-0 z-[110] bg-white border-r border-[#E5E5EA] p-3 tablet-l:p-2.5 desktop:p-4 flex flex-col transition-all duration-300 ease-in-out tablet-l:static tablet-l:translate-x-0 no-print
+        fixed inset-y-0 left-0 z-[110] bg-white border-r border-apple-line p-3 tablet-l:p-2.5 desktop:p-4 flex flex-col transition-all duration-300 ease-in-out tablet-l:static tablet-l:translate-x-0 no-print
         ${isSidebarOpen ? 'translate-x-0 w-[272px]' : '-translate-x-full w-[272px] tablet-l:w-[88px] desktop:w-[272px]'}
       `}
     >
-      <div className="flex items-center gap-3 px-1 desktop:px-2 mb-7 tablet-l:justify-center desktop:justify-start">
-        <AcademyMark size={48} />
+      <div className="flex items-center gap-3 px-1 desktop:px-2 mb-8 tablet-l:justify-center desktop:justify-start">
+        <AcademyMark size={36} />
         <div className="min-w-0 tablet-l:hidden desktop:block">
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-primary leading-none">
+          <p className="text-[12px] font-normal tracking-[-0.011em] text-apple-gray leading-none">
             Academy
           </p>
-          <p className="text-[15px] font-extrabold text-academy-text tracking-tight mt-1 truncate">
-            Box do aluno
+          <p className="text-[17px] font-semibold text-apple-ink tracking-[-0.025em] leading-[1.05] mt-1 truncate">
+            OdontoHub
           </p>
         </div>
       </div>
 
-      <nav className="flex flex-col gap-2.5 flex-1">
+      <nav className="flex flex-col gap-1 flex-1">
         {ACADEMY_NAV.map(tab => (
           <SidebarItem
             key={tab.id}
@@ -78,7 +78,7 @@ export function AcademySidebar({
 
       <div className="mt-4 pt-3 space-y-2">
         <div className="flex items-center gap-3 px-1 desktop:px-2 tablet-l:justify-center desktop:justify-start overflow-hidden">
-          <div className="w-10 h-10 rounded-[14px] overflow-hidden bg-[#F2F2F7] flex items-center justify-center text-primary font-extrabold shrink-0 border-2 border-[#E5E5EA]">
+          <div className="w-9 h-9 rounded-full overflow-hidden bg-apple-surface flex items-center justify-center text-apple-ink text-[15px] font-semibold shrink-0">
             {profile?.photo_url ? (
               <img
                 src={profile.photo_url}
@@ -91,25 +91,25 @@ export function AcademySidebar({
             )}
           </div>
           <div className="min-w-0 tablet-l:hidden desktop:block">
-            <p className="text-[14px] font-extrabold text-academy-text truncate leading-tight">
+            <p className="text-[15px] font-semibold text-apple-ink truncate leading-tight tracking-[-0.016em]">
               {firstName || 'Aluno'}
             </p>
-            <p className="text-[11px] font-bold text-primary/70 truncate">Na clínica</p>
+            <p className="text-[12px] font-normal text-apple-gray truncate">Na clínica</p>
           </div>
         </div>
 
         <button
           onClick={onLogout}
           title="Sair"
-          className="duo-btn w-full flex items-center gap-3 rounded-[16px] px-3 py-2.5 text-academy-muted tablet-l:justify-center desktop:justify-start"
+          className="w-full flex items-center gap-3 rounded-[980px] px-3 py-2.5 text-apple-gray hover:bg-apple-surface tablet-l:justify-center desktop:justify-start"
         >
           <LogOut size={18} className="shrink-0" />
-          <span className="font-extrabold uppercase tracking-[0.12em] text-[12px] tablet-l:hidden desktop:block">
+          <span className="text-[15px] tablet-l:hidden desktop:block">
             Sair
           </span>
         </button>
 
-        <p className="hidden desktop:block text-[10px] font-bold text-academy-muted/70 px-2 pt-1">
+        <p className="hidden desktop:block text-[11px] text-apple-gray/80 px-2 pt-1">
           {productLabel}
         </p>
       </div>

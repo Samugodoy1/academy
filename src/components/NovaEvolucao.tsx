@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Check, Sparkles, Activity, MapPin, Zap, Info, FlaskConical, Lock, Palette, Calendar, User, FileText, ArrowRight } from '../icons';
+import { ChevronLeft, Check, Activity, MapPin, Zap, Info, FlaskConical, Lock, Palette, Calendar, User, FileText, ArrowRight } from '../icons';
 import { useNavigate } from 'react-router-dom';
 import { formatAppointmentDate, formatAppointmentTime } from '../utils/dateUtils';
 import { generateEvolutionDraft } from '../utils/evolutionDraft';
@@ -395,10 +395,7 @@ export const NovaEvolucao: React.FC<NovaEvolucaoProps> = ({
           {/* ── "O que entendi" — subtle interpretation card ── */}
           <div className="bg-white/95 rounded-2xl sm:rounded-3xl border border-slate-100/80 shadow-[0_2px_8px_rgba(15,23,42,0.03)] p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-5 h-5 rounded-md bg-primary/8 flex items-center justify-center">
-                <Sparkles size={12} className="text-primary" />
-              </div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">O que entendi</span>
+              <span className="text-[13px] font-normal text-apple-gray">O que entendi</span>
             </div>
 
             {hasInterpretation ? (

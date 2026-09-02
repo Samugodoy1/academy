@@ -16,10 +16,10 @@ export const ClinicalObservation: React.FC<ClinicalObservationProps> = ({ observ
       transition={{ duration: 0.35, delay: 0.08 }}
       className="siso-bubble"
     >
-      <p className="font-display text-[11px] font-extrabold uppercase tracking-[0.14em] text-primary mb-1">
-        Recado do box
+      <p className="text-[13px] font-normal text-apple-gray mb-1 tracking-[-0.011em]">
+        Recado
       </p>
-      <p className="text-[15px] font-bold text-academy-text leading-snug">
+      <p className="text-[17px] font-normal text-apple-ink leading-snug tracking-[-0.011em]">
         {observation.text}
       </p>
     </motion.div>

@@ -88,7 +88,7 @@ export function ConfigTab({
     <div className="page-shell space-y-6 tablet-l:max-w-3xl">
 
       <div className="comic-card overflow-hidden">
-        <div className="h-20 bg-[#FFF6EC] border-b-[3px] border-[#3B0459] relative">
+        <div className="h-20 bg-apple-surface relative">
           <div className="absolute right-4 -bottom-2">
             <Siso mood="proud" size={88} />
           </div>
@@ -96,23 +96,23 @@ export function ConfigTab({
         <div className="px-6 pb-7 -mt-10">
           <div className="flex items-end gap-5">
             <div className="relative group shrink-0">
-              <div className="w-24 h-24 rounded-[28px] overflow-hidden border-[3px] border-[#3B0459] bg-[#FFF6EC] flex items-center justify-center text-primary shadow-[0_6px_0_#3B0459]">
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-apple-surface flex items-center justify-center text-apple-ink">
                 {profile.photo_url ? (
                   <img src={profile.photo_url} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 ) : (
                   <UserCircle size={64} />
                 )}
               </div>
-              <label className="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full shadow-lg cursor-pointer hover:opacity-90 transition-all border-2 border-[#3B0459]">
+              <label className="absolute bottom-0 right-0 bg-apple-blue text-white p-1.5 rounded-full cursor-pointer hover:bg-apple-blue-hover transition-all">
                 <Camera size={14} />
                 <input type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} />
               </label>
             </div>
             <div className="pb-1 min-w-0">
-              <h2 className="text-xl font-bold text-slate-900 truncate">{profile.name}</h2>
+              <h2 className="text-[28px] font-semibold text-apple-ink tracking-[-0.025em] leading-[1.05] truncate">{profile.name}</h2>
               {currentProduct === 'academy' ? (
                 <>
-                  <p className="text-sm text-primary font-medium">Perfil acadêmico</p>
+                  <p className="text-[15px] text-apple-gray font-normal mt-1">Perfil acadêmico</p>
                   <p className="text-xs text-slate-400 mt-0.5">
                     {profile.student_registration ? `Matrícula / RA ${profile.student_registration}` : 'Matrícula / RA não informado'}
                   </p>
@@ -129,10 +129,10 @@ export function ConfigTab({
           {!isProfileEditing && (
             <button
               onClick={startProfileEditing}
-              className="mt-5 flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
+              className="mt-5 apple-link inline-flex items-center gap-2 !text-[15px]"
             >
               <Pencil size={14} />
-              Editar perfil
+              Editar perfil ›
             </button>
           )}
         </div>
@@ -142,8 +142,8 @@ export function ConfigTab({
       {!isProfileEditing && (
         <>
           {/* Profile Section */}
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-4">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{currentProduct === 'academy' ? 'Perfil acadêmico' : 'Perfil'}</h3>
+          <div className="bg-white rounded-[28px] p-6 space-y-4">
+            <h3 className="text-[13px] font-normal text-apple-gray">{currentProduct === 'academy' ? 'Perfil acadêmico' : 'Perfil'}</h3>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <UserCircle size={16} className="text-slate-300 shrink-0" />
@@ -201,8 +201,8 @@ export function ConfigTab({
           </div>
 
           {/* Contact Section */}
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-4">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Contato</h3>
+          <div className="bg-white rounded-[28px] p-6 space-y-4">
+            <h3 className="text-[13px] font-normal text-apple-gray">Contato</h3>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <Mail size={16} className="text-slate-300 shrink-0" />
@@ -223,8 +223,8 @@ export function ConfigTab({
 
           {currentProduct === 'academy' && (
             <>
-              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-4">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Informações da faculdade</h3>
+              <div className="bg-white rounded-[28px] p-6 space-y-4">
+                <h3 className="text-[13px] font-normal text-apple-gray">Informações da faculdade</h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <Building2 size={16} className="text-slate-300 shrink-0" />
@@ -243,8 +243,8 @@ export function ConfigTab({
                 </div>
               </div>
 
-              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-4">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Acesso Academy</h3>
+              <div className="bg-white rounded-[28px] p-6 space-y-4">
+                <h3 className="text-[13px] font-normal text-apple-gray">Acesso Academy</h3>
                 <div className="space-y-3">
                   {(() => {
                     const academyAccess = profile.product_accesses?.find(access => access.product === 'academy');
@@ -263,12 +263,12 @@ export function ConfigTab({
                                 <button
                                   type="button"
                                   onClick={() => setShowAcademyUpgradeModal(true)}
-                                  className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-bold hover:bg-primary/15 transition-colors"
+                                  className="px-2.5 py-1 rounded-full bg-apple-surface text-apple-blue text-[13px] font-normal hover:bg-[#e8e8ed] transition-colors"
                                 >
                                   Mudar para Student
                                 </button>
                               ) : (
-                                <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-bold">
+                                <span className="px-2.5 py-1 rounded-full bg-apple-surface text-apple-ink text-[13px] font-normal">
                                   Plano Student
                                 </span>
                               )}
@@ -292,8 +292,8 @@ export function ConfigTab({
 
           {/* Clinic Section (dentist only) */}
           {currentProduct !== 'academy' && user.role === 'DENTIST' && (profile.clinic_name || profile.clinic_address) && (
-            <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-4">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Clínica</h3>
+            <div className="bg-white rounded-[28px] p-6 space-y-4">
+              <h3 className="text-[13px] font-normal text-apple-gray">Clínica</h3>
               <div className="space-y-3">
                 {profile.clinic_name && (
                   <div className="flex items-center gap-3">
@@ -323,14 +323,14 @@ export function ConfigTab({
       {isProfileEditing && profileDraft && (
         <form onSubmit={handleSaveProfile} className="space-y-6">
           {/* Profile Fields */}
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-5">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{currentProduct === 'academy' ? 'Dados do aluno' : 'Perfil'}</h3>
+          <div className="bg-white rounded-[28px] p-6 space-y-5">
+            <h3 className="text-[13px] font-normal text-apple-gray">{currentProduct === 'academy' ? 'Dados do aluno' : 'Perfil'}</h3>
             <div className="space-y-4">
               <div>
                 <label className="text-[11px] text-slate-400 mb-1.5 block">Nome Completo</label>
                 <input required type="text" value={profileDraft.name}
                   onChange={(e) => updateProfileDraft({ name: e.target.value })}
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-base" />
+                  className="ios-input w-full" />
               </div>
               {currentProduct === 'academy' && (
                 <div className="grid grid-cols-2 gap-4">
@@ -338,14 +338,14 @@ export function ConfigTab({
                     <label className="text-[11px] text-slate-400 mb-1.5 block">Matrícula / RA</label>
                     <input type="text" value={profileDraft.student_registration || ''}
                       onChange={(e) => updateProfileDraft({ student_registration: e.target.value })}
-                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-base"
+                      className="ios-input w-full"
                       placeholder="Não informado" />
                   </div>
                   <div>
                     <label className="text-[11px] text-slate-400 mb-1.5 block">Período ou semestre</label>
                     <input type="text" value={profileDraft.academic_period || ''}
                       onChange={(e) => updateProfileDraft({ academic_period: e.target.value })}
-                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-base"
+                      className="ios-input w-full"
                       placeholder="Não informado" />
                   </div>
                 </div>
@@ -357,14 +357,14 @@ export function ConfigTab({
                       <label className="text-[11px] text-slate-400 mb-1.5 block">CRO</label>
                       <input type="text" value={profileDraft.cro || ''}
                         onChange={(e) => updateProfileDraft({ cro: e.target.value })}
-                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-base"
+                        className="ios-input w-full"
                         placeholder="12345-SP" />
                     </div>
                     <div>
                       <label className="text-[11px] text-slate-400 mb-1.5 block">Especialidade</label>
                       <input type="text" value={profileDraft.specialty || ''}
                         onChange={(e) => updateProfileDraft({ specialty: e.target.value })}
-                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-base"
+                        className="ios-input w-full"
                         placeholder="Ortodontia" />
                     </div>
                   </div>
@@ -381,41 +381,41 @@ export function ConfigTab({
           </div>
 
           {/* Contact Fields */}
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-5">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Contato</h3>
+          <div className="bg-white rounded-[28px] p-6 space-y-5">
+            <h3 className="text-[13px] font-normal text-apple-gray">Contato</h3>
             <div className="space-y-4">
               <div>
                 <label className="text-[11px] text-slate-400 mb-1.5 block">E-mail</label>
                 <input required type="email" value={profileDraft.email}
                   onChange={(e) => updateProfileDraft({ email: e.target.value })}
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-base" />
+                  className="ios-input w-full" />
               </div>
               <div>
                 <label className="text-[11px] text-slate-400 mb-1.5 block">Telefone</label>
                 <input type="tel" inputMode="tel" value={profileDraft.phone || ''}
                   onChange={(e) => updateProfileDraft({ phone: e.target.value })}
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-base"
+                  className="ios-input w-full"
                   placeholder="(00) 00000-0000" />
               </div>
             </div>
           </div>
 
           {currentProduct === 'academy' && (
-            <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-5">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Informações da faculdade</h3>
+            <div className="bg-white rounded-[28px] p-6 space-y-5">
+              <h3 className="text-[13px] font-normal text-apple-gray">Informações da faculdade</h3>
               <div className="space-y-4">
                 <div>
                   <label className="text-[11px] text-slate-400 mb-1.5 block">Faculdade / Instituição</label>
                   <input type="text" value={profileDraft.institution || ''}
                     onChange={(e) => updateProfileDraft({ institution: e.target.value })}
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-base"
+                    className="ios-input w-full"
                     placeholder="Não informado" />
                 </div>
                 <div>
                   <label className="text-[11px] text-slate-400 mb-1.5 block">Clínica ou disciplina atual</label>
                   <input type="text" value={profileDraft.current_discipline || ''}
                     onChange={(e) => updateProfileDraft({ current_discipline: e.target.value })}
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-base"
+                    className="ios-input w-full"
                     placeholder="Não informado" />
                 </div>
               </div>
@@ -424,21 +424,21 @@ export function ConfigTab({
 
           {/* Clinic Fields (dentist only) */}
           {currentProduct !== 'academy' && user.role === 'DENTIST' && (
-            <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-5">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Clínica</h3>
+            <div className="bg-white rounded-[28px] p-6 space-y-5">
+              <h3 className="text-[13px] font-normal text-apple-gray">Clínica</h3>
               <div className="space-y-4">
                 <div>
                   <label className="text-[11px] text-slate-400 mb-1.5 block">Nome da Clínica</label>
                   <input type="text" value={profileDraft.clinic_name || ''}
                     onChange={(e) => updateProfileDraft({ clinic_name: e.target.value })}
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-base"
+                    className="ios-input w-full"
                     placeholder="Clínica Sorriso Perfeito" />
                 </div>
                 <div>
                   <label className="text-[11px] text-slate-400 mb-1.5 block">Endereço</label>
                   <input type="text" value={profileDraft.clinic_address || ''}
                     onChange={(e) => updateProfileDraft({ clinic_address: e.target.value })}
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-base"
+                    className="ios-input w-full"
                     placeholder="Rua Exemplo, 123 - Centro" />
                 </div>
               </div>
@@ -446,13 +446,13 @@ export function ConfigTab({
           )}
 
           {/* Password */}
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-5">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Segurança</h3>
+          <div className="bg-white rounded-[28px] p-6 space-y-5">
+            <h3 className="text-[13px] font-normal text-apple-gray">Segurança</h3>
             <div>
               <label className="text-[11px] text-slate-400 mb-1.5 block">Nova Senha</label>
               <input type="password" value={profilePassword}
                 onChange={(e) => setProfilePassword(e.target.value)}
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-base"
+                className="ios-input w-full"
                 placeholder="Deixe em branco para manter a atual" />
             </div>
           </div>
@@ -462,14 +462,14 @@ export function ConfigTab({
             <button
               type="button"
               onClick={() => { setIsProfileEditing(false); setProfileDraft(profile); setProfilePassword(''); fetchProfile(); }}
-              className="px-6 py-3 rounded-2xl font-semibold text-sm text-slate-500 hover:bg-slate-100 transition-all"
+              className="apple-btn-light !px-6"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSavingProfile}
-              className="bg-primary text-white px-8 py-3 rounded-2xl font-bold text-sm shadow-[0_8px_24px_rgba(139,92,246,0.15)] hover:opacity-90 transition-all active:scale-95 disabled:opacity-50"
+              className="apple-btn disabled:opacity-50"
             >
               {isSavingProfile ? 'Salvando...' : 'Salvar alterações'}
             </button>
@@ -485,9 +485,9 @@ export function ConfigTab({
       />
 
       {/* ── LEGAL (minimal) ── */}
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+      <div className="bg-white rounded-[28px] p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Legal</h3>
+          <h3 className="text-[13px] font-normal text-apple-gray">Legal</h3>
           {profile.accepted_terms_at && (
             <span className="text-[10px] text-slate-400 flex items-center gap-1">
               <CheckCircle2 size={12} className="text-primary" />
@@ -511,8 +511,8 @@ export function ConfigTab({
 
       {/* ── ADMIN ── */}
       {user?.role?.toUpperCase() === 'ADMIN' && (
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Administração</h3>
+        <div className="bg-white rounded-[28px] p-6">
+          <h3 className="text-[13px] font-normal text-apple-gray mb-4">Administração</h3>
           <button
             onClick={() => setActiveTab('admin')}
             className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-between group hover:border-primary/20 transition-all text-left"
@@ -529,7 +529,7 @@ export function ConfigTab({
       {/* ── LOGOUT (subdued) ── */}
       <button
         onClick={handleLogout}
-        className="w-full p-4 rounded-2xl flex items-center justify-center gap-2 text-sm font-medium text-slate-400 hover:text-slate-600 hover:bg-slate-100/60 transition-all"
+        className="w-full p-4 rounded-[980px] flex items-center justify-center gap-2 text-[15px] font-normal text-apple-gray hover:text-apple-ink hover:bg-apple-surface transition-all"
       >
         <LogOut size={16} />
         Sair da conta

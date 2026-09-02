@@ -46,12 +46,12 @@ export function ResetPassword() {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-3xl shadow-xl text-center max-w-md">
-          <AlertTriangle className="mx-auto text-rose-500 mb-4" size={48} />
-          <h1 className="text-2xl font-bold mb-2">Link Inválido</h1>
-          <p className="text-slate-500 mb-6">Este link de recuperação de senha é inválido ou expirou.</p>
-          <Link to="/" className="bg-primary text-white px-6 py-3 rounded-xl font-bold inline-block">
+      <div className="min-h-screen bg-apple-surface flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-[28px] text-center max-w-md">
+          <AlertTriangle className="mx-auto text-apple-red mb-4" size={40} />
+          <h1 className="text-[28px] font-semibold tracking-[-0.025em] leading-[1.05] mb-2">Link inválido</h1>
+          <p className="text-apple-gray mb-6 text-[17px]">Este link de recuperação expirou ou não é válido.</p>
+          <Link to="/" className="apple-btn inline-block">
             Voltar para o login
           </Link>
         </div>
@@ -60,64 +60,64 @@ export function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4 font-sans">
+    <div className="min-h-screen bg-apple-surface flex items-center justify-center p-4 font-sans">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-100"
+        className="bg-white w-full max-w-md rounded-[28px] overflow-hidden"
       >
         <div className="p-8 md:p-12">
           <div className="flex justify-center mb-8">
-            <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center text-white shadow-xl shadow-primary/20">
-              <Lock size={32} strokeWidth={3} />
+            <div className="w-14 h-14 bg-apple-ink rounded-full flex items-center justify-center text-white">
+              <Lock size={26} strokeWidth={1.8} />
             </div>
           </div>
           <div className="text-center mb-10">
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Nova Senha</h1>
-            <p className="text-slate-500">Crie uma nova senha segura para sua conta</p>
+            <h1 className="text-[34px] font-semibold text-apple-ink tracking-[-0.025em] leading-[1.05] mb-2">Nova senha</h1>
+            <p className="text-apple-gray text-[17px]">Crie uma senha para a conta.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="text-xs font-bold text-slate-400 uppercase mb-2 block">Nova Senha</label>
+              <label className="text-[13px] text-apple-gray mb-2 block">Nova senha</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-apple-gray" size={18} />
                 <input
                   type="password"
                   required
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  className="ios-input w-full pl-12"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-400 uppercase mb-2 block">Confirmar Nova Senha</label>
+              <label className="text-[13px] text-apple-gray mb-2 block">Confirmar senha</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-apple-gray" size={18} />
                 <input
                   type="password"
                   required
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  className="ios-input w-full pl-12"
                 />
               </div>
             </div>
 
             {error && (
-              <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600 text-sm">
+              <div className="p-4 bg-apple-surface rounded-[16px] flex items-center gap-3 text-apple-red text-[15px]">
                 <AlertCircle size={18} />
                 {error}
               </div>
             )}
 
             {message && (
-              <div className="p-4 bg-primary/5 border border-primary/10 rounded-2xl flex items-center gap-3 text-primary text-sm">
-                <CheckCircle2 size={18} />
+              <div className="p-4 bg-apple-surface rounded-[16px] flex items-center gap-3 text-apple-ink text-[15px]">
+                <CheckCircle2 size={18} className="text-apple-green" />
                 {message}
               </div>
             )}
@@ -125,15 +125,15 @@ export function ResetPassword() {
             <button
               type="submit"
               disabled={loading || success}
-              className="w-full bg-primary text-white py-4 rounded-2xl font-bold shadow-[0_12px_36px_rgba(139,92,246,0.12)] hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50"
+              className="apple-btn w-full disabled:opacity-50"
             >
-              {loading ? 'Processando...' : 'Redefinir Senha'}
+              {loading ? 'Processando...' : 'Redefinir senha'}
             </button>
           </form>
 
           {success && (
-            <div className="mt-6 text-center text-sm text-slate-500">
-              Redirecionando para o login em instantes...
+            <div className="mt-6 text-center text-[15px] text-apple-gray">
+              Redirecionando para o login.
             </div>
           )}
         </div>

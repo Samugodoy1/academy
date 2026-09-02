@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, Sparkles, X } from '../../icons';
+import { CheckCircle2, X } from '../../icons';
 
 export const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
   const isPdfFeature = data?.feature === 'pdf';
@@ -59,16 +59,12 @@ export const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
             </button>
 
             <div className="max-h-[92dvh] overflow-y-auto px-5 pb-[calc(18px+env(safe-area-inset-bottom))] pt-6 sm:px-7 sm:pb-7 sm:pt-8">
-              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-[20px] bg-slate-950 text-white shadow-lg shadow-slate-950/15 sm:h-16 sm:w-16 sm:rounded-[22px]">
-                <Sparkles size={25} />
-              </div>
-
               <div className="text-center">
-                <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400 sm:text-[11px]">
+                <p className="mb-2 text-[13px] font-normal text-apple-gray">
                   Academy Free
                 </p>
 
-                <h2 className="mx-auto max-w-[330px] text-[25px] font-bold leading-[1.06] tracking-[-0.055em] text-slate-950 sm:max-w-[360px] sm:text-[28px]">
+                <h2 className="mx-auto max-w-[330px] text-[28px] font-semibold leading-[1.05] tracking-[-0.025em] text-apple-ink sm:max-w-[360px] sm:text-[34px]">
                   {headlineText}
                 </h2>
 
@@ -106,7 +102,7 @@ export const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
                     key={item}
                     className="flex items-center gap-3 rounded-2xl bg-white px-3 py-2.5 text-[13px] text-slate-600 ring-1 ring-slate-100 sm:text-sm"
                   >
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-apple-surface text-apple-green">
                       <CheckCircle2 size={15} />
                     </div>
                     <span>{item}</span>
@@ -117,7 +113,7 @@ export const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
               <div className="sticky bottom-0 mt-6 space-y-2 bg-white/95 pt-3 backdrop-blur-md">
                 <button
                   onClick={onUpgrade}
-                  className="h-12 w-full rounded-full bg-slate-950 text-[15px] font-bold text-white shadow-[0_12px_30px_rgba(15,23,42,0.22)] transition active:scale-[0.99] sm:hover:-translate-y-0.5 sm:hover:bg-slate-800"
+                  className="apple-btn w-full"
                 >
                   Mudar para Student
                 </button>

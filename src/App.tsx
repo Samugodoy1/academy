@@ -2214,7 +2214,7 @@ export default function App() {
       <Route path="/pre-atendimento/:token" element={<PreAtendimento />} />
       <Route path="/prontuario/:id" element={
         user ? (
-          <div className="min-h-screen bg-white flex font-sans text-slate-900 relative overflow-x-hidden">
+          <div className="min-h-screen bg-apple-surface flex font-sans text-apple-ink relative overflow-x-hidden">
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
               {isSidebarOpen && (
@@ -2297,7 +2297,7 @@ export default function App() {
       } />
       <Route path="*" element={
         !user ? (
-          <div className="min-h-screen bg-white flex items-center justify-center px-5 font-sans antialiased siso-stage">
+          <div className="min-h-screen bg-apple-surface flex items-center justify-center px-5 font-sans antialiased">
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2314,16 +2314,16 @@ export default function App() {
                 <div className="mt-2 w-full">
                   <SpeechBubble>
                     {isRegistering ? (
-                      <p className="text-[18px] leading-snug">
-                        Cria a conta. Eu cuido pro box não virar pasta do Drive.
+                      <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em]">
+                        Crie a conta. O box fica no mesmo lugar.
                       </p>
                     ) : (
-                      <p className="text-[18px] leading-snug">
+                      <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em]">
                         {(() => {
                           const h = new Date().getHours();
-                          if (h >= 5 && h < 12) return 'Bom dia. Entra. O siso já tá no jaleco.';
-                          if (h >= 12 && h < 18) return 'Boa tarde. Bora pro turno.';
-                          return 'Boa noite. Fecha a evolução antes de dormir.';
+                          if (h >= 5 && h < 12) return 'Bom dia.';
+                          if (h >= 12 && h < 18) return 'Boa tarde.';
+                          return 'Boa noite.';
                         })()}
                       </p>
                     )}
@@ -2331,8 +2331,8 @@ export default function App() {
                 </div>
                 <div className="mt-6 flex items-center gap-2">
                   <AcademyMark size={28} />
-                  <p className="font-display text-[13px] font-extrabold uppercase tracking-[0.16em] text-primary">
-                    Academy · Box do aluno
+                  <p className="text-[13px] font-normal text-apple-gray tracking-[-0.011em]">
+                    Academy
                   </p>
                 </div>
               </motion.div>
@@ -2452,9 +2452,9 @@ export default function App() {
 
                 <div className="pt-3">
                   <DuoButton type="submit">
-                    {isRegistering ? 'Criar conta' : 'Entrar no box'}
+                    {isRegistering ? 'Criar conta' : 'Entrar'}
                   </DuoButton>
-                  <p className="text-center text-[11px] font-bold text-academy-muted/70 mt-3.5">Ambiente da clínica-escola · dados reais</p>
+                  <p className="text-center text-[13px] text-apple-gray mt-3.5">Ambiente da clínica-escola</p>
                 </div>
               </form>
 
@@ -2469,9 +2469,9 @@ export default function App() {
                     }}
                     whileTap={{ scale: 0.97 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                    className="text-[13px] text-academy-muted hover:text-academy-text transition-colors duration-200"
+                    className="apple-link"
                   >
-                    {isRegistering ? 'Já tem uma conta? Entrar' : 'Não tem conta? Cadastre-se'}
+                    {isRegistering ? 'Já tem uma conta? Entrar ›' : 'Não tem conta? Cadastre-se ›'}
                   </motion.button>
                 </div>
 
@@ -2485,7 +2485,7 @@ export default function App() {
           </div>
         ) : (
           <AppProvider value={appContextValue}>
-          <div className="min-h-screen bg-white flex font-sans text-academy-text relative overflow-x-hidden">
+          <div className="min-h-screen bg-apple-surface flex font-sans text-apple-ink relative overflow-x-hidden">
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
               {isSidebarOpen && (
@@ -2528,11 +2528,11 @@ export default function App() {
                     transition={{ duration: 0.3 }}
                     className="max-w-[1400px] mx-auto px-5 sm:px-6 tablet-l:px-8 desktop:px-10 mb-4 no-print"
                   >
-                    <div className="flex items-center gap-3 liquid-glass-card border border-primary/10 rounded-2xl px-5 py-3.5">
-                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
-                        <Stethoscope size={16} className="text-primary" />
+                    <div className="flex items-center gap-3 comic-card px-5 py-3.5">
+                      <div className="w-8 h-8 bg-apple-surface rounded-full flex items-center justify-center shrink-0">
+                        <Stethoscope size={16} className="text-apple-ink" />
                       </div>
-                      <p className="text-[13px] font-medium text-academy-text flex-1">
+                      <p className="text-[15px] font-normal text-apple-ink flex-1">
                         {guide.message}
                       </p>
                       <button
@@ -2544,7 +2544,7 @@ export default function App() {
                           }
                           guide.onClick?.();
                         }}
-                        className="shrink-0 bg-primary text-white px-4 py-2 rounded-xl text-[12px] font-bold hover:opacity-90 transition-all"
+                        className="shrink-0 apple-btn !px-4 !py-2 !text-[13px]"
                       >
                         {guide.action}
                       </button>
@@ -2886,7 +2886,7 @@ export default function App() {
                         </button>
                         <button
                           onClick={exportType === 'patients' ? exportPatients : exportFinance}
-                          className="flex-1 bg-primary text-white py-3 rounded-full font-bold shadow-[0_12px_36px_rgba(139,92,246,0.12)] hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2"
+                          className="flex-1 bg-primary text-white py-3 rounded-full font-bold hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2"
                         >
                           <Download size={20} />
                           Exportar
@@ -2980,7 +2980,7 @@ export default function App() {
                                   });
                                 }}
                                 className={`min-h-[40px] rounded-xl border px-3 py-2 text-[13px] font-semibold transition-all ios-press ${isActive
-                                  ? 'border-academy-primary/30 bg-academy-soft text-academy-primary-dark shadow-[0_3px_10px_rgba(82,5,123,0.08)]'
+                                  ? 'border-apple-line bg-apple-surface text-apple-ink'
                                   : 'border-slate-200/60 bg-white/70 text-slate-600 hover:border-academy-primary/20 hover:bg-academy-soft/40 hover:text-academy-primary-dark'
                                   }`}
                               >
@@ -3227,7 +3227,7 @@ export default function App() {
                           </button>
                           <button
                             type="submit"
-                            className="flex-1 px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-full shadow-[0_12px_36px_rgba(139,92,246,0.12)] hover:opacity-90 transition-all active:scale-95"
+                            className="flex-1 px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-full hover:opacity-90 transition-all active:scale-95"
                           >
                             Salvar
                           </button>
@@ -3295,7 +3295,7 @@ export default function App() {
                           </button>
                           <button
                             type="submit"
-                            className="flex-1 px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-[0_12px_36px_rgba(139,92,246,0.12)] hover:opacity-90 transition-all active:scale-95"
+                            className="flex-1 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:opacity-90 transition-all active:scale-95"
                           >
                             Salvar
                           </button>
@@ -3418,7 +3418,7 @@ export default function App() {
                           </button>
                           <button
                             type="submit"
-                            className="flex-1 px-6 py-3 bg-primary text-white font-bold rounded-full shadow-[0_12px_36px_rgba(139,92,246,0.12)] hover:opacity-90 transition-all active:scale-95"
+                            className="flex-1 px-6 py-3 bg-primary text-white font-bold rounded-full hover:opacity-90 transition-all active:scale-95"
                           >
                             Criar Plano
                           </button>
@@ -3572,7 +3572,7 @@ export default function App() {
                           </button>
                           <button
                             type="submit"
-                            className="flex-1 px-6 py-3 bg-primary text-white font-bold rounded-full shadow-[0_12px_36px_rgba(139,92,246,0.12)] hover:opacity-90 transition-all active:scale-95"
+                            className="flex-1 px-6 py-3 bg-primary text-white font-bold rounded-full hover:opacity-90 transition-all active:scale-95"
                           >
                             Salvar dentista
                           </button>
@@ -3663,7 +3663,7 @@ export default function App() {
                           </button>
                           <button
                             type="submit"
-                            className="flex-1 px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-[0_12px_36px_rgba(139,92,246,0.12)] hover:opacity-90 transition-all active:scale-95"
+                            className="flex-1 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:opacity-90 transition-all active:scale-95"
                           >
                             Salvar
                           </button>
@@ -3920,7 +3920,7 @@ export default function App() {
                         </button>
                         <button
                           onClick={() => handlePayInstallment(selectedInstallment.id, paymentMethod)}
-                          className="flex-1 py-3 px-4 bg-primary text-white font-bold rounded-full hover:opacity-90 transition-all shadow-[0_12px_36px_rgba(139,92,246,0.12)] active:scale-95"
+                          className="flex-1 py-3 px-4 bg-primary text-white font-bold rounded-full hover:opacity-90 transition-all active:scale-95"
                         >
                           Confirmar
                         </button>
@@ -4103,8 +4103,8 @@ export default function App() {
                       <div className="flex justify-center mb-2">
                         <Siso mood="proud" size={108} />
                       </div>
-                      <p className="font-display text-[11px] font-extrabold uppercase tracking-[0.14em] text-primary mb-2 text-center">Academy Free</p>
-                      <h3 className="font-display text-[22px] font-black text-academy-text mb-2 text-center leading-snug">
+                      <p className="text-[13px] font-normal text-apple-gray mb-2 text-center">Academy Free</p>
+                      <h3 className="text-[22px] font-semibold text-apple-ink mb-2 text-center leading-[1.05] tracking-[-0.025em]">
                         O box já tem os primeiros casos.
                       </h3>
                       <p className="text-sm font-semibold text-academy-muted leading-relaxed mb-4 text-center">
@@ -4123,7 +4123,7 @@ export default function App() {
                       <button
                         type="button"
                         onClick={() => setShowAcademyUpgradeModal(false)}
-                        className="duo-btn rounded-[14px] px-5 py-2.5 font-display text-[13px] font-extrabold uppercase tracking-[0.1em]"
+                        className="apple-btn-light !px-5 !py-2.5 !text-[15px]"
                       >
                         Continuar no Free
                       </button>
@@ -4134,7 +4134,7 @@ export default function App() {
                           setActiveTab('configuracoes');
                           navigate('/');
                         }}
-                        className="duo-btn duo-btn-active rounded-[14px] px-5 py-2.5 font-display text-[13px] font-extrabold uppercase tracking-[0.1em]"
+                        className="apple-btn !px-5 !py-2.5 !text-[15px]"
                       >
                         Mudar para Student
                       </button>

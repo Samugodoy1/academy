@@ -158,13 +158,13 @@ function AgendaTabComponent({
       <div className="flex flex-col gap-5 mb-2 no-print">
         <div className="flex items-end justify-between gap-3">
           <SisoLine mood="box" size={112}>
-            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-primary mb-1">
+            <p className="text-[13px] font-normal text-apple-gray mb-1 tracking-[-0.011em]">
               Agenda
             </p>
-            <p className="text-[20px] sm:text-[22px] leading-snug">
+            <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em]">
               {agendaViewMode === 'week' && !agendaFocusMode ? 'Semana clínica' : 'Atendimentos'}
             </p>
-            <p className="mt-1.5 text-[14px] font-bold leading-snug text-[#3B0459]/75">
+            <p className="mt-1.5 text-[15px] font-normal leading-snug text-apple-gray">
               {agendaSmartCopy}
             </p>
           </SisoLine>
@@ -1280,7 +1280,7 @@ function AgendaTabComponent({
                                   setMonthSheetSelectedDay(null);
                                   setIsModalOpen(true);
                                 }}
-                                className="bg-primary text-white px-6 py-3 rounded-full font-bold shadow-[0_12px_36px_rgba(139,92,246,0.12)] hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2 mx-auto"
+                                className="apple-btn mx-auto"
                               >
                                 <Plus size={18} />
                                 Criar Nova Consulta

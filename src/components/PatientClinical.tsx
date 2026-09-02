@@ -23,7 +23,6 @@ import {
   Phone,
   Plus,
   Shield,
-  Sparkles,
   Trash2,
   User,
   UserRound,
@@ -1926,7 +1925,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                 <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-[14px] bg-gradient-to-r from-slate-50 to-slate-50/60 border border-slate-200/60 transition-all duration-300 hover:border-slate-300/70">
                   <div className={`w-2.5 h-2.5 rounded-full shrink-0 animate-breathe ${resolveProcedureCategory(primaryTreatment.procedure).dotCls}`} />
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-400 mb-0.5">Próximo passo</p>
+                    <p className="text-[10px] font-normal text-slate-400 mb-0.5">Próximo passo</p>
                     <p className="text-[13px] font-semibold text-slate-900 truncate">
                       {primaryTreatment.procedure} · {formatTreatmentAnchor(primaryTreatment)}
                     </p>
@@ -1952,7 +1951,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                 <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-[14px] bg-gradient-to-r from-sky-50 to-sky-50/60 border border-sky-200/60 transition-all duration-300 hover:border-sky-300/70">
                   <div className="w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0 animate-breathe" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-sky-500 mb-0.5">Próxima consulta</p>
+                    <p className="text-[10px] font-normal text-sky-500 mb-0.5">Próxima consulta</p>
                     <p className="text-[13px] font-semibold text-slate-900">{formatDate(upcomingAppointment.start_time)} às {formatTime(upcomingAppointment.start_time)}</p>
                   </div>
                   <button
@@ -1993,7 +1992,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                 <Zap size={18} />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-primary/70 mb-1">Ações do atendimento</p>
+                <p className="text-[10px] font-normal text-primary/70 mb-1">Ações do atendimento</p>
                 <h2 className="text-[22px] sm:text-[26px] font-bold tracking-[-0.025em] text-slate-950">Atendimento no box</h2>
                 <p className="text-[13px] text-slate-500 font-medium leading-relaxed mt-1">Guia rapido e evolucao do caso atual.</p>
               </div>
@@ -2324,7 +2323,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
                               {isPriority && (
-                                <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-indigo-500 mb-1">{isAcademyProduct ? 'Próximo passo clínico' : 'Próximo passo'}</p>
+                                <p className="text-[10px] font-normal text-indigo-500 mb-1">{isAcademyProduct ? 'Próximo passo clínico' : 'Próximo passo'}</p>
                               )}
                               <p className={`font-bold leading-snug truncate ${isPriority ? 'text-[16px] text-slate-950' : 'text-[14px] text-slate-800'}`}>
                                 {item.procedure}
@@ -2359,7 +2358,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
 
                           {/* row 2: status + value */}
                           <div className="flex flex-wrap items-center gap-2 mt-2.5">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide border ${statusConfig.cls}`}>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-normal border ${statusConfig.cls}`}>
                               {statusConfig.label}
                             </span>
 
@@ -2397,12 +2396,12 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                             )}
 
                             {!isAcademyProduct && isPrepaid && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-normal bg-emerald-50 text-emerald-700 border border-emerald-200">
                                 <Check size={9} /> Pago
                               </span>
                             )}
                             {!isAcademyProduct && item.requires_prepayment && !item.prepayment_confirmed && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-amber-50 text-amber-700 border border-amber-200">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-normal bg-amber-50 text-amber-700 border border-amber-200">
                                 <Lock size={9} /> Aguardando
                               </span>
                             )}
@@ -2517,7 +2516,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                           lastGroup = group;
                           nodes.push(
                             <div key={`grp-${group}`} className="flex items-center gap-2 pl-8 pb-2 pt-3 first:pt-0">
-                              <span className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">{group}</span>
+                              <span className="text-[10px] font-normal text-slate-400">{group}</span>
                               <div className="flex-1 h-px bg-slate-100" />
                             </div>
                           );
@@ -2685,7 +2684,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                 {/* Header com botão editar/cancelar */}
                 <div className="flex items-center justify-between px-0.5">
                   <div>
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Anamnese clínica</p>
+                    <p className="text-[10px] font-normal text-slate-400">Anamnese clínica</p>
                     {!isEditingAnamnese && (
                       <p className="text-[10px] text-slate-400 mt-0.5">
                         {countFilledAnamnesisFields(patient?.anamnesis)}/7 campos preenchidos
@@ -2715,7 +2714,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                 {isEditingAnamnese ? (
                   <>
                     <div className="p-3.5 rounded-[18px] bg-blue-50 border border-blue-200/70">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-blue-600 mb-2">Queixa principal</p>
+                      <p className="text-[10px] font-normal text-blue-600 mb-2">Queixa principal</p>
                       <textarea
                         value={anamneseForm.chief_complaint}
                         onChange={(e) => setAnamneseForm((f) => ({ ...f, chief_complaint: e.target.value }))}
@@ -2727,7 +2726,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
 
                     <div className="p-3.5 rounded-[18px] bg-rose-50 border border-rose-200">
                       <div className="flex items-center justify-between gap-2 mb-2">
-                        <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-rose-600">Alergias</p>
+                        <p className="text-[10px] font-normal text-rose-600">Alergias</p>
                         <button
                           type="button"
                           onClick={() => setAnamneseForm((f) => ({ ...f, allergies: 'Nenhuma alergia referida' }))}
@@ -2747,7 +2746,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
 
                     <div className="p-3.5 rounded-[18px] bg-amber-50 border border-amber-200">
                       <div className="flex items-center justify-between gap-2 mb-2">
-                        <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-amber-600">Medicações em uso</p>
+                        <p className="text-[10px] font-normal text-amber-600">Medicações em uso</p>
                         <button
                           type="button"
                           onClick={() => setAnamneseForm((f) => ({ ...f, medications: 'Nenhuma medicação em uso' }))}
@@ -2766,7 +2765,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     </div>
 
                     <div className="p-3.5 rounded-[18px] bg-slate-50 border border-slate-200/70">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-400 mb-2">Histórico médico</p>
+                      <p className="text-[10px] font-normal text-slate-400 mb-2">Histórico médico</p>
                       <textarea
                         value={anamneseForm.medical_history}
                         onChange={(e) => setAnamneseForm((f) => ({ ...f, medical_history: e.target.value }))}
@@ -2777,7 +2776,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     </div>
 
                     <div className="p-3.5 rounded-[18px] bg-violet-50 border border-violet-200/70">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-violet-600 mb-2">Hábitos</p>
+                      <p className="text-[10px] font-normal text-violet-600 mb-2">Hábitos</p>
                       <textarea
                         value={anamneseForm.habits}
                         onChange={(e) => setAnamneseForm((f) => ({ ...f, habits: e.target.value }))}
@@ -2788,7 +2787,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     </div>
 
                     <div className="p-3.5 rounded-[18px] bg-teal-50 border border-teal-200/70">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-teal-600 mb-2">Histórico familiar</p>
+                      <p className="text-[10px] font-normal text-teal-600 mb-2">Histórico familiar</p>
                       <textarea
                         value={anamneseForm.family_history}
                         onChange={(e) => setAnamneseForm((f) => ({ ...f, family_history: e.target.value }))}
@@ -2799,7 +2798,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     </div>
 
                     <div className="p-3.5 rounded-[18px] bg-indigo-50 border border-indigo-200/70">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-indigo-600 mb-2">Sinais vitais / PA</p>
+                      <p className="text-[10px] font-normal text-indigo-600 mb-2">Sinais vitais / PA</p>
                       <textarea
                         value={anamneseForm.vital_signs}
                         onChange={(e) => setAnamneseForm((f) => ({ ...f, vital_signs: e.target.value }))}
@@ -2825,7 +2824,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                   <>
                     {hasMeaningfulAnamnesisValue(patient?.anamnesis?.chief_complaint) && (
                       <div className="p-3.5 rounded-[18px] bg-blue-50 border border-blue-200/70">
-                        <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-blue-600 mb-1.5">Queixa principal</p>
+                        <p className="text-[10px] font-normal text-blue-600 mb-1.5">Queixa principal</p>
                         <p className="text-slate-800 leading-relaxed font-medium">{patient.anamnesis.chief_complaint}</p>
                       </div>
                     )}
@@ -2833,7 +2832,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     <div className={`p-3.5 rounded-[18px] border ${hasAllergy ? 'bg-rose-50 border-rose-200' : 'bg-slate-50 border-slate-200/70'}`}>
                       <div className="flex items-center gap-1.5 mb-1.5">
                         {hasAllergy && <div className="w-[7px] h-[7px] rounded-full bg-rose-500 shrink-0" />}
-                        <p className={`text-[10px] font-extrabold uppercase tracking-[0.1em] ${hasAllergy ? 'text-rose-600' : 'text-slate-400'}`}>Alergias</p>
+                        <p className={`text-[10px] font-normal ${hasAllergy ? 'text-rose-600' : 'text-slate-400'}`}>Alergias</p>
                       </div>
                       <p className={`leading-relaxed ${hasAllergy ? 'text-rose-900 font-semibold' : 'text-slate-700'}`}>
                         {formatAllergieLabel(patient?.anamnesis?.allergies)}
@@ -2845,7 +2844,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                         {hasRecordedMedication(patient?.anamnesis?.medications) && (
                           <div className="w-[7px] h-[7px] rounded-full bg-amber-500 shrink-0" />
                         )}
-                        <p className={`text-[10px] font-extrabold uppercase tracking-[0.1em] ${hasRecordedMedication(patient?.anamnesis?.medications) ? 'text-amber-600' : 'text-slate-400'}`}>
+                        <p className={`text-[10px] font-normal ${hasRecordedMedication(patient?.anamnesis?.medications) ? 'text-amber-600' : 'text-slate-400'}`}>
                           Medicações em uso
                         </p>
                       </div>
@@ -2855,7 +2854,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     </div>
 
                     <div className="p-3.5 rounded-[18px] bg-slate-50 border border-slate-200/70">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-400 mb-1.5">Histórico médico</p>
+                      <p className="text-[10px] font-normal text-slate-400 mb-1.5">Histórico médico</p>
                       <p className="text-slate-700 leading-relaxed">
                         {hasMeaningfulAnamnesisValue(patient?.anamnesis?.medical_history)
                           ? patient.anamnesis.medical_history
@@ -2871,7 +2870,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                       .filter((field) => hasMeaningfulAnamnesisValue(field.value))
                       .map((field) => (
                         <div key={field.label} className={`p-3.5 rounded-[18px] border ${field.color}`}>
-                          <p className={`text-[10px] font-extrabold uppercase tracking-[0.1em] ${field.labelColor} mb-1.5`}>{field.label}</p>
+                          <p className={`text-[10px] font-normal ${field.labelColor} mb-1.5`}>{field.label}</p>
                           <p className="text-slate-700 leading-relaxed">{field.value}</p>
                         </div>
                       ))}
@@ -2899,7 +2898,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                             <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
                               {portalFields.map((field) => (
                                 <div key={field.label} className={`p-3.5 rounded-[18px] border ${field.color}`}>
-                                  <p className={`text-[10px] font-extrabold uppercase tracking-[0.1em] ${field.labelColor} mb-1.5`}>{field.label}</p>
+                                  <p className={`text-[10px] font-normal ${field.labelColor} mb-1.5`}>{field.label}</p>
                                   <p className="text-slate-700 leading-relaxed">{field.value}</p>
                                 </div>
                               ))}
@@ -2963,7 +2962,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                           {/* Contato de emergência */}
                           {hasEmergency && (
                             <div className="p-3.5 rounded-[18px] bg-orange-50 border border-orange-200/70">
-                              <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-orange-600 mb-2">Contato de emergência</p>
+                              <p className="text-[10px] font-normal text-orange-600 mb-2">Contato de emergência</p>
                               {patient.emergency_contact_name && (
                                 <p className="text-[13px] font-medium text-slate-800">{patient.emergency_contact_name}</p>
                               )}
@@ -2976,7 +2975,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                           {/* Convênio */}
                           {hasInsurance && (
                             <div className="p-3.5 rounded-[18px] bg-blue-50 border border-blue-200/70">
-                              <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-blue-600 mb-2">Convênio / Plano de saúde</p>
+                              <p className="text-[10px] font-normal text-blue-600 mb-2">Convênio / Plano de saúde</p>
                               <p className="text-[13px] font-medium text-slate-800">{patient.health_insurance}</p>
                               {patient.health_insurance_number && (
                                 <p className="text-[12px] text-slate-500 mt-0.5">Carteirinha: {patient.health_insurance_number}</p>
@@ -2987,7 +2986,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                           {/* Termos aceitos e assinatura */}
                           {hasConsents && (
                             <div className="p-3.5 rounded-[18px] bg-emerald-50 border border-emerald-200/70">
-                              <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-emerald-600 mb-2">Termos aceitos digitalmente</p>
+                              <p className="text-[10px] font-normal text-emerald-600 mb-2">Termos aceitos digitalmente</p>
                               <div className="space-y-2">
                                 {consents.map((c: any) => (
                                   <div key={c.id} className="flex items-center gap-2">
@@ -3006,7 +3005,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                               {/* Assinatura digital */}
                               {consents[0]?.signature_data && consents[0].signature_data.startsWith('data:image') && (
                                 <div className="mt-3 pt-3 border-t border-emerald-200/50">
-                                  <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-emerald-600 mb-2">Assinatura digital</p>
+                                  <p className="text-[10px] font-normal text-emerald-600 mb-2">Assinatura digital</p>
                                   <div className="bg-white rounded-xl border border-emerald-200/50 p-2">
                                     <img src={consents[0].signature_data} alt="Assinatura digital" className="max-h-20 mx-auto" />
                                   </div>
@@ -3028,7 +3027,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               <div className="space-y-3">
                 <div className="p-3.5 rounded-[18px] bg-slate-50 border border-slate-200/70">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-400">Anexos clínicos</p>
+                    <p className="text-[10px] font-normal text-slate-400">Anexos clínicos</p>
                     <button
                       type="button"
                       onClick={() => clinicalImageInputRef.current?.click()}
@@ -3100,13 +3099,13 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                       {/* Orçado → Concluído pipeline */}
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-400 mb-1">Orçamento total</p>
+                          <p className="text-[10px] font-normal text-slate-400 mb-1">Orçamento total</p>
                           <p className="text-[16px] font-bold text-slate-900">
                             {financialTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                           </p>
                         </div>
                         <div>
-                          <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-emerald-600 mb-1">Concluído</p>
+                          <p className="text-[10px] font-normal text-emerald-600 mb-1">Concluído</p>
                           <p className="text-[16px] font-bold text-emerald-700">
                             {completedTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                           </p>
@@ -3116,7 +3115,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                       {/* Recebimento com barra de progresso */}
                       <div className="pt-2 border-t border-slate-200/70">
                         <div className="flex items-center justify-between mb-1">
-                          <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-400">Recebido</p>
+                          <p className="text-[10px] font-normal text-slate-400">Recebido</p>
                           <span className="text-[11px] font-bold text-slate-500">{pct}%</span>
                         </div>
                         <div className="flex items-baseline gap-2">
@@ -3141,7 +3140,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                   if (pending.length === 0) return null;
                   return (
                     <div>
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-400 px-1 mb-1.5">Parcelas pendentes</p>
+                      <p className="text-[10px] font-normal text-slate-400 px-1 mb-1.5">Parcelas pendentes</p>
                       <div className="space-y-1.5">
                         {pending.slice(0, 5).map((inst: any) => {
                           const isOverdue = inst.status === 'OVERDUE' || new Date(inst.due_date) < new Date();
@@ -3180,7 +3179,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                   </div>
                 ) : (patientFinancial?.transactions || []).length > 0 ? (
                   <div>
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-400 px-1 mb-1.5">Movimentações</p>
+                    <p className="text-[10px] font-normal text-slate-400 px-1 mb-1.5">Movimentações</p>
                     <div className="space-y-1.5">
                       {patientFinancial!.transactions.slice(0, 8).map((t: any) => {
                         const isIncome = t.type === 'INCOME';
@@ -3429,10 +3428,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
             <div className="mx-auto max-w-[560px] px-4 py-5 space-y-5">
               {/* Alívio mental */}
               <section className="flex flex-col items-center text-center px-4 pt-2 pb-1">
-                <div className="w-10 h-10 rounded-full bg-academy-soft flex items-center justify-center mb-3 shadow-[0_2px_10px_rgba(47,143,163,0.15)]">
-                  <Sparkles size={18} className="text-academy-primary" />
-                </div>
-                <h3 className="text-[17px] font-bold text-slate-900 tracking-tight mb-1">Um passo de cada vez.</h3>
+                <h3 className="text-[28px] font-semibold text-apple-ink tracking-[-0.025em] leading-[1.05] mb-2">Um passo de cada vez.</h3>
                 <p className="text-[14px] font-medium text-slate-500 leading-relaxed max-w-[280px]">
                   Foque apenas no que precisa ser feito agora. Nós te guiamos no restante.
                 </p>
@@ -3960,7 +3956,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
             <div className="ios-drag-handle sm:hidden" />
 
               <div className="mb-5">
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400 mb-1.5">O que fazer agora?</p>
+              <p className="text-[10px] font-normal text-slate-400 mb-1.5">O que fazer agora?</p>
               <h3 id="treatment-action-title" className="text-xl font-bold text-slate-950 tracking-[-0.02em]">{selectedTreatmentAction.procedure}</h3>
               <span className="mt-2 inline-flex text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
                 {formatTreatmentAnchor(selectedTreatmentAction)}
@@ -4016,7 +4012,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               )}
 
               <div className="rounded-[18px] border border-slate-200/70 bg-slate-50 p-4">
-                <p className="mb-3 text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-400">Mudar o procedimento</p>
+                <p className="mb-3 text-[10px] font-normal text-slate-400">Mudar o procedimento</p>
                 <div className="grid grid-cols-2 gap-2">
                   {['Restauracao', 'Canal', 'Extracao', 'Coroa', 'Implante']
                     .filter((proc) => proc !== selectedTreatmentAction.procedure)
@@ -4073,7 +4069,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               {/* iOS drag handle */}
               <div className="ios-drag-handle sm:hidden" />
               <div className="mb-5">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400 mb-1.5">Pagamento</p>
+                <p className="text-[10px] font-normal text-slate-400 mb-1.5">Pagamento</p>
                 <h3 id="payment-modal-title" className="text-xl font-bold text-slate-950 tracking-[-0.02em]">Receber pagamento</h3>
                 <div className="mt-3 flex items-center gap-3 px-3.5 py-2.5 rounded-[14px] bg-slate-50 border border-slate-200/70">
                   <div className="min-w-0 flex-1">
@@ -4085,7 +4081,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                 </div>
               </div>
 
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-400 mb-2.5">Forma de pagamento</p>
+              <p className="text-[10px] font-normal text-slate-400 mb-2.5">Forma de pagamento</p>
               <div className="space-y-1.5">
                 {methods.map((m) => (
                   <button

@@ -2,11 +2,11 @@ import React from 'react';
 
 /** Original clinic glyphs — same thick-ink language as Siso. Not icon packs. */
 
-const stroke = '#3B0459';
-const cream = '#FFF6EC';
-const blush = '#F3DDC8';
-const purple = '#52057B';
-const gold = '#C9A227';
+const stroke = '#1d1d1f';
+const cream = '#f5f5f7';
+const blush = '#e8e8ed';
+const purple = '#0071e3';
+const gold = '#86868b';
 
 export function ToothGlyph({ size = 36 }: { size?: number }) {
   return (

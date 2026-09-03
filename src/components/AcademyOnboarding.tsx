@@ -187,16 +187,20 @@ export const AcademyActivationCard: React.FC<{
   const nick = firstPatient.name?.split(' ')[0] || 'seu caso';
 
   return (
-    <div className="oh-device p-6">
-      <p className="text-[17px] text-sys-text leading-snug tracking-[-0.011em]">
-        Tem prontuário de {nick} que ainda não foi aberto.
-      </p>
-      <p className="mt-2 text-[15px] text-sys-muted">
-        Sem anamnese o caso é só um nome na lista.
-      </p>
-      <DuoButton className="mt-5" onClick={() => openPatientRecord(firstPatient.id)}>
-        Abrir prontuário
-      </DuoButton>
-    </div>
+    <button
+      type="button"
+      onClick={() => openPatientRecord(firstPatient.id)}
+      className="flex w-full items-center justify-between gap-4 rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left"
+    >
+      <div className="min-w-0">
+        <p className="text-[15px] tracking-[-0.011em] text-[var(--neo-ink)]">
+          Prontuário de {nick} ainda não foi aberto.
+        </p>
+        <p className="mt-0.5 text-[13px] text-[var(--neo-gray)]">
+          Sem anamnese o caso é só um nome na lista.
+        </p>
+      </div>
+      <span className="neo-link shrink-0 text-[15px]">Abrir ›</span>
+    </button>
   );
 };

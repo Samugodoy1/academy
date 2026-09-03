@@ -65,5 +65,5 @@ export function applyAcademyNeoColorway(id: AcademyNeoId, enabled = true) {
   root.style.colorScheme = 'light';
 
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', colorway.wash);
+  if (meta) meta.setAttribute('content', '#ffffff');
 }

@@ -1801,9 +1801,9 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   }, [isBoxModeOpen, boxContextProcedure]);
 
   return (
-    <div className="min-h-screen bg-[var(--neo-wash,#fff4ed)] pb-24 text-[var(--neo-ink,#1d1d1f)]">
+    <div className="min-h-screen bg-white pb-24 text-[var(--neo-ink,#1d1d1f)]">
       <div aria-live="polite" className="sr-only">{uploadFeedback || (isSavingAnamnese ? 'Salvando anamnese' : '')}</div>
-      <header className="sticky top-0 z-40 bg-[color-mix(in_srgb,var(--neo-wash)_80%,transparent)] backdrop-blur-xl">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 pb-3">
           <div className="neo-control-card px-4 py-3.5 sm:px-5">
 

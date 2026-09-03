@@ -94,13 +94,13 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
           <div className="flex-1 pt-6">
             <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">Academy</p>
             <p className="mt-8 text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">
-              Oi, {firstName}.
+              Fala, {firstName}.
             </p>
             <h1 className="mt-3 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)] sm:text-[40px]">
               O box é seu.
             </h1>
             <p className="mt-4 max-w-[28ch] text-[17px] font-normal leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
-              Paciente, atendimento, prontuário. Três passos para ligar a rotina da clínica.
+              Paciente, atendimento, prontuário. Três passos e o box liga.
             </p>
           </div>
           <button
@@ -129,7 +129,7 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
                 Rotina ligada.
               </h1>
               <p className="mt-4 max-w-[28ch] text-[17px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
-                Paciente, atendimento e prontuário. A home assume daqui.
+                Paciente, atendimento e prontuário. A partir daqui a home te guia.
               </p>
               <ol className="mt-10 overflow-hidden rounded-[24px] bg-[#f5f5f7]">
                 {steps.map(step => (
@@ -158,18 +158,18 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
     const copy = !hasPatients
       ? {
           title: 'Primeiro caso.',
-          coach: 'Cadastre o paciente que você atende na faculdade.',
+          coach: 'Coloca na lista quem você atende.',
           action: 'Cadastrar paciente',
         }
       : !hasAppointments
         ? {
-            title: 'Primeiro atendimento.',
-            coach: 'Marque data, hora e o que você vai fazer na cadeira.',
+            title: 'Primeiro box.',
+            coach: 'Marca o horário e o que vai fazer na cadeira.',
             action: 'Marcar atendimento',
           }
         : {
-            title: `Abra o prontuário de ${patientNick}.`,
-            coach: 'Sem anamnese o caso é só um nome na lista.',
+            title: `Abre o prontuário de ${patientNick}.`,
+            coach: 'Sem anamnese o caso é só um nome.',
             action: 'Abrir prontuário',
           };
 

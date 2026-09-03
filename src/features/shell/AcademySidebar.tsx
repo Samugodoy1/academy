@@ -30,6 +30,7 @@ interface AcademySidebarProps {
   nextBox?: AcademyNextBox | null;
   patientCount?: number;
   openAppointmentModal?: () => void;
+  initialEditing?: boolean;
 }
 
 export function AcademySidebar({
@@ -45,10 +46,11 @@ export function AcademySidebar({
   nextBox = null,
   patientCount = 0,
   openAppointmentModal,
+  initialEditing = false,
 }: AcademySidebarProps) {
   const firstName = (user?.name || profile?.name || '').replace(/^(Dr\.|Dra\.|Dr|Dra)\s+/i, '').split(' ')[0];
   const fullName = profile?.name || user?.name || 'Conta';
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(initialEditing);
   const [clock, setClock] = useState(() => new Date());
 
   useEffect(() => {

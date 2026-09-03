@@ -1801,18 +1801,18 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   }, [isBoxModeOpen, boxContextProcedure]);
 
   return (
-    <div className="min-h-screen bg-white pb-24 text-slate-900">
+    <div className="min-h-screen bg-[var(--neo-wash,#fff4ed)] pb-24 text-[var(--neo-ink,#1d1d1f)]">
       <div aria-live="polite" className="sr-only">{uploadFeedback || (isSavingAnamnese ? 'Salvando anamnese' : '')}</div>
-      <header className="sticky top-0 z-40 border-b border-slate-100/60 ios-glass-heavy">
+      <header className="sticky top-0 z-40 bg-[color-mix(in_srgb,var(--neo-wash)_80%,transparent)] backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 pb-3">
-          <div className="rounded-[26px] border border-slate-200/60 bg-white/95 px-4 py-3.5 sm:px-5 shadow-[0_6px_24px_rgba(15,23,42,0.04),0_1px_3px_rgba(15,23,42,0.06)]">
+          <div className="neo-control-card px-4 py-3.5 sm:px-5">
 
             {/* ── Row 1: identidade + ações ── */}
             <div className="flex items-center gap-3">
               {/* Voltar */}
               <button
                 onClick={() => { setAppActiveTab('pacientes'); appNavigate('/pacientes'); }}
-                className="shrink-0 h-9 w-9 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 transition-colors hover:text-slate-900 active:scale-[0.94]"
+                className="shrink-0 h-9 w-9 rounded-full bg-white flex items-center justify-center text-[var(--neo-gray)] active:scale-[0.94]"
                 aria-label="Voltar para pacientes"
               >
                 <ArrowLeft size={16} />
@@ -1820,7 +1820,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
 
               {/* Avatar */}
               <div className="relative shrink-0 group">
-                <div className="w-12 h-12 rounded-[16px] overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200/80 flex items-center justify-center shadow-[0_2px_8px_rgba(15,23,42,0.06)] transition-shadow duration-300 group-hover:shadow-[0_4px_12px_rgba(15,23,42,0.1)]">
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-[var(--neo-soft)] flex items-center justify-center text-[var(--neo)]">
                   {patient?.photo_url ? (
                     <img src={patient.photo_url} alt={patient?.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                   ) : (
@@ -1843,16 +1843,16 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
 
               {/* Nome + badge + idade */}
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] text-slate-400 font-medium tracking-wide mb-0.5">{greetingText}</p>
+                <p className="text-[12px] text-[var(--neo-gray)] mb-0.5">{greetingText}</p>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-[19px] sm:text-[22px] font-bold tracking-[-0.025em] text-slate-950 leading-tight truncate">
+                  <h1 className="text-[19px] sm:text-[22px] font-semibold tracking-[-0.025em] text-[var(--neo-ink)] leading-tight truncate">
                     {patient?.name}
                   </h1>
                   <span className={`shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-[0.07em] uppercase transition-all duration-300 ${clinicalBadge.className}`}>
                     {clinicalBadge.label}
                   </span>
                 </div>
-                <p className="text-[12px] text-slate-400 mt-0.5 font-medium">
+                <p className="text-[12px] text-[var(--neo-gray)] mt-0.5">
                   {age !== null ? `${age} anos` : 'Idade n/i'}
                   {treatmentInProgress.length > 0 && (
                     <span className="ml-1.5 text-slate-200">·</span>
@@ -1922,11 +1922,11 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
             {/* ── Row 2: tira de contexto — próximo passo ── */}
             <div className="mt-3">
               {primaryTreatment ? (
-                <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-[14px] bg-gradient-to-r from-slate-50 to-slate-50/60 border border-slate-200/60 transition-all duration-300 hover:border-slate-300/70">
+                <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-[18px] bg-[var(--neo)] text-white">
                   <div className={`w-2.5 h-2.5 rounded-full shrink-0 animate-breathe ${resolveProcedureCategory(primaryTreatment.procedure).dotCls}`} />
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-normal text-slate-400 mb-0.5">Próximo passo</p>
-                    <p className="text-[13px] font-semibold text-slate-900 truncate">
+                    <p className="text-[12px] text-white/80 mb-0.5">Próximo passo</p>
+                    <p className="text-[15px] font-semibold tracking-[-0.016em] truncate">
                       {primaryTreatment.procedure} · {formatTreatmentAnchor(primaryTreatment)}
                     </p>
                   </div>
@@ -1942,34 +1942,34 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                       window.setTimeout(() => setHighlightedTreatmentId(null), 2200);
                       focusOdontogram();
                     }}
-                    className="shrink-0 px-3.5 py-2 rounded-xl bg-slate-950 text-white text-[12px] font-semibold hover:bg-slate-800 active:scale-[0.95] transition-all duration-200 shadow-[0_2px_8px_rgba(15,23,42,0.15)]"
+                    className="shrink-0 px-4 py-2 rounded-[980px] bg-white text-[var(--neo-ink)] text-[13px] font-normal active:scale-[0.95]"
                   >
-                    Abrir
+                    Ver
                   </button>
                 </div>
               ) : upcomingAppointment ? (
-                <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-[14px] bg-gradient-to-r from-sky-50 to-sky-50/60 border border-sky-200/60 transition-all duration-300 hover:border-sky-300/70">
-                  <div className="w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0 animate-breathe" />
+                <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-[18px] bg-[var(--neo)] text-white">
+                  <div className="w-2.5 h-2.5 rounded-full bg-white/80 shrink-0" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-normal text-sky-500 mb-0.5">Próxima consulta</p>
-                    <p className="text-[13px] font-semibold text-slate-900">{formatDate(upcomingAppointment.start_time)} às {formatTime(upcomingAppointment.start_time)}</p>
+                    <p className="text-[12px] text-white/80 mb-0.5">Próxima consulta</p>
+                    <p className="text-[15px] font-semibold tracking-[-0.016em]">{formatDate(upcomingAppointment.start_time)} às {formatTime(upcomingAppointment.start_time)}</p>
                   </div>
                   <button
                     onClick={focusOdontogram}
-                    className="shrink-0 px-3.5 py-2 rounded-xl bg-slate-950 text-white text-[12px] font-semibold hover:bg-slate-800 active:scale-[0.97] transition-all duration-150"
+                    className="shrink-0 px-4 py-2 rounded-[980px] bg-white text-[var(--neo-ink)] text-[13px] font-normal active:scale-[0.97]"
                   >
-                    Ver dentes
+                    Ver
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-[14px] bg-slate-50 border border-slate-200/60">
-                  <div className="w-2.5 h-2.5 rounded-full bg-slate-300 shrink-0" />
-                  <p className="text-[13px] text-slate-500 flex-1 font-medium">Nenhum tratamento ativo · comece pelo odontograma</p>
+                <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-[18px] bg-[var(--neo-soft)]">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[var(--neo)] shrink-0" />
+                  <p className="text-[13px] text-[var(--neo-ink)] flex-1">Nenhum tratamento ativo · comece pelo odontograma</p>
                   <button
                     onClick={focusOdontogram}
-                    className="shrink-0 px-3.5 py-2 rounded-xl bg-slate-950 text-white text-[12px] font-semibold hover:bg-slate-800 active:scale-[0.97] transition-all duration-150"
+                    className="shrink-0 px-4 py-2 rounded-[980px] bg-[var(--neo)] text-white text-[13px] font-normal active:scale-[0.97]"
                   >
-                    Ver dentes
+                    Ver
                   </button>
                 </div>
               )}
@@ -1986,26 +1986,26 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-7 space-y-6">
         {isAcademyProduct && (
-          <section className="rounded-[30px] p-4 sm:p-5 border border-primary/10 bg-white shadow-[0_12px_32px_rgba(47,143,163,0.08)]">
+          <section className="neo-card p-4 sm:p-5">
             <div className="flex items-start gap-3 mb-4">
-              <div className="w-11 h-11 rounded-[18px] bg-primary text-white flex items-center justify-center shrink-0">
+              <div className="w-11 h-11 rounded-full bg-[var(--neo)] text-white flex items-center justify-center shrink-0">
                 <Zap size={18} />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] font-normal text-primary/70 mb-1">Ações do atendimento</p>
-                <h2 className="text-[22px] sm:text-[26px] font-bold tracking-[-0.025em] text-slate-950">Atendimento no box</h2>
-                <p className="text-[13px] text-slate-500 font-medium leading-relaxed mt-1">Guia rapido e evolucao do caso atual.</p>
+                <p className="text-[13px] text-[var(--neo-gray)] mb-1">No box</p>
+                <h2 className="text-[22px] sm:text-[26px] font-semibold tracking-[-0.025em] text-[var(--neo-ink)]">O seu passo</h2>
+                <p className="text-[15px] text-[var(--neo-gray)] leading-relaxed mt-1">A lista visível. Depois, a evolução.</p>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setIsBoxModeOpen(true)}
-                className="rounded-[22px] bg-primary px-5 py-4 text-left text-white transition-all duration-200 hover:opacity-95 active:scale-[0.98] ios-press"
+                className="rounded-[22px] bg-[var(--neo)] px-5 py-4 text-left text-white active:scale-[0.98]"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[16px] font-bold">Modo Box</p>
+                    <p className="text-[16px] font-semibold tracking-[-0.016em]">Modo Box</p>
                     <p className="text-[12px] text-white/75 font-medium mt-1 line-clamp-2">
                       {boxIntelContext.criticalCheckpoint || boxIntelContext.expectedTodaySummary || boxIntelContext.boxProcedureDetail || 'Cola clínica rápida'}
                     </p>
@@ -2016,14 +2016,14 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               <button
                 type="button"
                 onClick={() => setIsAddingEvolution(true)}
-                className="rounded-[22px] border border-primary/15 bg-white px-5 py-4 text-left transition-all duration-200 hover:border-primary/30 active:scale-[0.98] ios-press"
+                className="rounded-[22px] bg-white px-5 py-4 text-left active:scale-[0.98]"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[16px] font-bold text-slate-950">Registrar evolução</p>
-                    <p className="text-[12px] text-slate-500 font-medium mt-1">Fechar o atendimento</p>
+                    <p className="text-[16px] font-semibold tracking-[-0.016em] text-[var(--neo-ink)]">Registrar evolução</p>
+                    <p className="text-[13px] text-[var(--neo-gray)] mt-1">Fechar o atendimento</p>
                   </div>
-                  <FileText size={20} className="shrink-0 text-primary" />
+                  <FileText size={20} className="shrink-0 text-[var(--neo)]" />
                 </div>
               </button>
             </div>

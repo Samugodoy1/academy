@@ -158,13 +158,13 @@ function AgendaTabComponent({
       <div className="flex flex-col gap-5 mb-2 no-print">
         <div className="flex items-end justify-between gap-3">
           <PageIntro
-            kicker="Agenda"
-            title={agendaViewMode === 'week' && !agendaFocusMode ? 'Semana clínica' : 'Atendimentos'}
+            kicker="A sua agenda"
+            title={agendaViewMode === 'week' && !agendaFocusMode ? 'A semana clínica' : 'Os seus boxes'}
             subtitle={agendaSmartCopy}
           />
           <button
             onClick={openAppointmentModal}
-            className="duo-btn duo-btn-active mb-8 w-12 h-12 flex items-center justify-center rounded-full shrink-0"
+            className="neo-pill mb-8 h-12 w-12 !px-0 shrink-0"
             title="Novo atendimento"
             aria-label="Novo atendimento"
           >
@@ -184,10 +184,10 @@ function AgendaTabComponent({
             </button>
             <button
               onClick={() => navigateDate('today')}
-              className={`px-4 py-2 text-[13px] font-bold rounded-full transition-all min-h-[36px] ${
+              className={`px-4 py-2 text-[13px] font-normal rounded-full transition-all min-h-[36px] ${
                 selectedDate.toDateString() === new Date().toDateString()
-                  ? 'liquid-glass-segment-active text-primary'
-                  : 'text-academy-muted hover:text-academy-text'
+                  ? 'liquid-glass-segment-active text-white'
+                  : 'text-[var(--neo-gray)]'
               }`}
               aria-label="Ir para hoje (T)"
             >
@@ -222,21 +222,21 @@ function AgendaTabComponent({
           <div className="grid grid-cols-3 liquid-glass-segment p-1 rounded-full w-full sm:w-auto">
             <button
               onClick={() => { setAgendaFocusMode(false); setAgendaViewMode('day'); }}
-              className={`px-5 py-2 text-[13px] font-bold rounded-full transition-all min-h-[40px] ${!agendaFocusMode && agendaViewMode === 'day' ? 'liquid-glass-segment-active text-primary' : 'text-academy-muted hover:text-academy-text'}`}
+              className={`px-5 py-2 text-[13px] font-normal rounded-full transition-all min-h-[40px] ${!agendaFocusMode && agendaViewMode === 'day' ? 'liquid-glass-segment-active text-white' : 'text-[var(--neo-gray)]'}`}
               aria-label="Visão diária"
             >
               Dia
             </button>
             <button
               onClick={() => { setAgendaFocusMode(false); setAgendaViewMode('week'); }}
-              className={`px-5 py-2 text-[13px] font-bold rounded-full transition-all min-h-[40px] ${!agendaFocusMode && agendaViewMode === 'week' ? 'liquid-glass-segment-active text-primary' : 'text-academy-muted hover:text-academy-text'}`}
+              className={`px-5 py-2 text-[13px] font-normal rounded-full transition-all min-h-[40px] ${!agendaFocusMode && agendaViewMode === 'week' ? 'liquid-glass-segment-active text-white' : 'text-[var(--neo-gray)]'}`}
               aria-label="Visão semanal"
             >
               Semana
             </button>
             <button
               onClick={() => { setAgendaFocusMode(false); setAgendaViewMode('month'); }}
-              className={`px-5 py-2 text-[13px] font-bold rounded-full transition-all min-h-[40px] ${!agendaFocusMode && agendaViewMode === 'month' ? 'liquid-glass-segment-active text-primary' : 'text-academy-muted hover:text-academy-text'}`}
+              className={`px-5 py-2 text-[13px] font-normal rounded-full transition-all min-h-[40px] ${!agendaFocusMode && agendaViewMode === 'month' ? 'liquid-glass-segment-active text-white' : 'text-[var(--neo-gray)]'}`}
               aria-label="Visão mensal"
             >
               Mês
@@ -252,12 +252,12 @@ function AgendaTabComponent({
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="flex items-start gap-4 p-5 animate-pulse">
                 <div className="flex flex-col items-center gap-1 pt-1">
-                  <div className="w-12 h-4 bg-slate-100 rounded-md" />
-                  <div className="w-8 h-3 bg-slate-50 rounded-md" />
+                  <div className="w-12 h-4 bg-[var(--neo-soft)] rounded-md" />
+                  <div className="w-8 h-3 bg-[var(--neo-wash)] rounded-md" />
                 </div>
                 <div className="flex-1 space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-slate-100 rounded-full shrink-0" />
+                    <div className="w-10 h-10 bg-[var(--neo-soft)] rounded-full shrink-0" />
                     <div className="flex-1 space-y-2">
                       <div className="h-4 bg-slate-100 rounded-lg w-2/3" />
                       <div className="h-3 bg-slate-50 rounded-lg w-1/3" />
@@ -300,16 +300,16 @@ function AgendaTabComponent({
                 const isNext = isNextAppointment(app, filtered);
 
                 return (
-                  <div key={app.id} className={`p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:gap-6 hover:bg-white/30 transition-all group relative ${isNext && !isFocusMode ? 'border-l-4 border-primary bg-primary/5' : 'border-l-4 border-transparent'}`}>
+                  <div key={app.id} className={`p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:gap-5 group relative`}>
                     {/* Time column */}
                     <div className={`${agendaViewMode === 'day' ? '' : 'hidden sm:flex'} w-12 sm:w-16 pt-1 flex flex-col items-center shrink-0`}>
-                      <p className={`text-[13px] sm:text-[15px] font-bold ${isNext && !isFocusMode ? 'text-primary' : 'text-academy-text'}`}>
+                      <p className={`text-[13px] sm:text-[15px] font-semibold ${isNext && !isFocusMode ? 'text-[var(--neo)]' : 'text-[var(--neo-ink)]'}`}>
                         {formatAppointmentTime(app.start_time)}
                       </p>
                       <div className={`w-[1px] ${agendaViewMode === 'day' ? 'flex-1' : 'h-8'} bg-academy-border/60 my-2`} />
                     </div>
 
-                    <div className="flex-1 liquid-glass-subtle rounded-2xl p-4 sm:p-5 group-hover:shadow-sm transition-all flex flex-col gap-4">
+                    <div className={`flex-1 rounded-[24px] p-4 sm:p-5 flex flex-col gap-4 ${isNext && !isFocusMode ? 'bg-[var(--neo)] text-white' : 'bg-white'}`}>
                       {/* Head: Patient info and status */}
                       <div className="flex items-start gap-3 justify-between">
                         <div className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer" onClick={() => openPatientRecord(app.patient_id)}>
@@ -324,8 +324,8 @@ function AgendaTabComponent({
                             })()}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-base sm:text-lg font-bold text-academy-text truncate">{app.patient_name}</p>
-                            <p className="text-xs sm:text-sm text-academy-muted truncate">{app.notes || 'Consulta'}</p>
+                            <p className={`text-base sm:text-lg font-semibold tracking-[-0.02em] truncate ${isNext && !isFocusMode ? 'text-white' : 'text-[var(--neo-ink)]'}`}>{app.patient_name}</p>
+                            <p className={`text-xs sm:text-sm truncate ${isNext && !isFocusMode ? 'text-white/80' : 'text-[var(--neo-gray)]'}`}>{app.notes || 'Consulta'}</p>
                           </div>
                         </div>
 
@@ -333,20 +333,18 @@ function AgendaTabComponent({
                           value={app.status}
                           onChange={(e) => updateAppointmentStatus(app.id, e.target.value as Appointment['status'])}
                           aria-label={`Status de ${app.patient_name}`}
-                          className={`px-3 py-2 border rounded-xl text-sm font-semibold focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none whitespace-nowrap shrink-0 appearance-none cursor-pointer transition-colors ${app.status === 'CONFIRMED' ? 'bg-[#F3E8FF] border-[#DDD6FE] text-academy-primary-dark' :
-                              app.status === 'IN_PROGRESS' ? 'bg-blue-50 border-blue-200 text-blue-700' :
-                                app.status === 'FINISHED' ? 'bg-slate-100 border-slate-200 text-slate-500' :
-                                  app.status === 'CANCELLED' ? 'bg-rose-50 border-rose-200 text-rose-600' :
-                                    app.status === 'NO_SHOW' ? 'bg-amber-50 border-amber-200 text-amber-700' :
-                                      'bg-white border-slate-200 text-slate-700'
-                            }`}
+                          className={`px-3 py-2 rounded-[980px] text-sm font-normal outline-none whitespace-nowrap shrink-0 appearance-none cursor-pointer ${
+                            isNext && !isFocusMode
+                              ? 'bg-white/15 text-white'
+                              : 'bg-[var(--neo-soft)] text-[var(--neo-ink)]'
+                          }`}
                         >
-                          <option value="SCHEDULED">⏳ Agendado</option>
-                          <option value="CONFIRMED">✓ Confirmado</option>
-                          <option value="IN_PROGRESS">● Atendendo</option>
-                          <option value="FINISHED">✓ Finalizado</option>
-                          <option value="CANCELLED">✕ Cancelado</option>
-                          <option value="NO_SHOW">⊘ Faltou</option>
+                          <option value="SCHEDULED">Agendado</option>
+                          <option value="CONFIRMED">Confirmado</option>
+                          <option value="IN_PROGRESS">Atendendo</option>
+                          <option value="FINISHED">Finalizado</option>
+                          <option value="CANCELLED">Cancelado</option>
+                          <option value="NO_SHOW">Faltou</option>
                         </select>
                       </div>
 
@@ -358,16 +356,18 @@ function AgendaTabComponent({
                             if (patient) openPatientRecord(patient.id);
                             navigate(`/prontuario/${app.patient_id}`);
                           }}
-                          className="flex-1 sm:flex-none bg-primary text-white px-4 py-2.5 rounded-full font-bold text-xs sm:text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-95"
+                          className={`flex-1 sm:flex-none px-4 py-2.5 rounded-[980px] font-normal text-sm flex items-center justify-center gap-2 active:scale-95 ${
+                            isNext && !isFocusMode ? 'bg-white text-[var(--neo-ink)]' : 'bg-[var(--neo)] text-white'
+                          }`}
                         >
                           <Activity size={16} />
-                          <span className="hidden sm:inline">{app.status === 'FINISHED' ? 'Ver Prontuário' : 'Iniciar Atendimento'}</span>
-                          <span className="sm:hidden">{app.status === 'FINISHED' ? 'Ver' : 'Atender'}</span>
+                          <span className="hidden sm:inline">{app.status === 'FINISHED' ? 'Ver' : 'Preparar'}</span>
+                          <span className="sm:hidden">{app.status === 'FINISHED' ? 'Ver' : 'Preparar'}</span>
                         </button>
 
                         <button
                           onClick={() => sendReminder(app)}
-                          className="p-2.5 text-primary bg-primary/5 hover:bg-primary/10 rounded-full transition-all shrink-0"
+                          className={`p-2.5 rounded-full shrink-0 ${isNext && !isFocusMode ? 'bg-white/15 text-white' : 'text-[var(--neo)] bg-[var(--neo-soft)]'}`}
                           title="WhatsApp"
                         >
                           <MessageCircle size={18} />

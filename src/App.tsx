@@ -93,7 +93,6 @@ import type {
 import { DEFAULT_PRODUCT, ACADEMY_DISABLED_TABS } from './app/constants';
 import { AcademySidebar } from './features/shell/AcademySidebar';
 import { BottomNav } from './features/shell/BottomNav';
-import { ACADEMY_NAV } from './features/shell/nav';
 import { ClinicalPageRoute } from './features/clinical/ClinicalPageRoute';
 import { LegacyClinicalRedirect } from './features/clinical/LegacyClinicalRedirect';
 import { UpgradeLimitModal } from './features/modals/UpgradeLimitModal';
@@ -2187,6 +2186,20 @@ export default function App() {
     }
   };
 
+  const nextBox = useMemo(() => {
+    const next = [...appointments]
+      .filter(app => ['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS'].includes(String(app.status || '').toUpperCase()))
+      .filter(app => getAppointmentTime(app.start_time) >= now.getTime())
+      .sort((a, b) => getAppointmentTime(a.start_time) - getAppointmentTime(b.start_time))[0];
+    if (!next) return null;
+    return {
+      time: formatAppointmentTime(next.start_time),
+      patientName: next.patient_name,
+      procedure: next.notes || 'Atendimento',
+      onOpen: () => openPatientRecord(next.patient_id),
+    };
+  }, [appointments, now]);
+
   const appContextValue = useMemo(
     () => ({
       user,
@@ -2236,6 +2249,7 @@ export default function App() {
               profile={profile}
               productLabel={PRODUCT_LABEL}
               onLogout={handleLogout}
+              nextBox={nextBox}
             />
             <main className="flex-1 min-w-0 overflow-x-hidden flex flex-col pt-4 md:pt-6 lg:pt-8">
               <ClinicalPageRoute
@@ -2498,6 +2512,7 @@ export default function App() {
               productLabel={PRODUCT_LABEL}
               onLogout={handleLogout}
               showAdmin={user?.role?.toUpperCase() === 'ADMIN'}
+              nextBox={nextBox}
             />
 
             {/* Main Content */}
@@ -4014,11 +4029,6 @@ export default function App() {
             {/* Notifications */}
             {/* Primary Action & Mobile Bottom Navigation */}
             <BottomNav
-              tabs={ACADEMY_NAV.map(tab => ({
-                id: tab.id,
-                label: tab.short,
-                icon: tab.icon,
-              }))}
               activeTab={activeTab}
               setActiveTab={setActiveTab}
               navigate={navigate}

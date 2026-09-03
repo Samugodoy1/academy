@@ -16,7 +16,7 @@ export const AcademyChecklist: React.FC<AcademyChecklistProps> = () => {
   const current = STEPS[active];
 
   return (
-    <div className="min-h-full bg-[var(--neo)] px-5 py-8 text-white">
+    <div className="min-h-screen bg-[var(--neo)] px-5 py-8 text-white">
       <div className="mx-auto flex min-h-[70vh] max-w-md flex-col">
         <p className="text-[15px] text-white/80">A lista de passos, visível de longe.</p>
         <h1 className="mt-2 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em]">

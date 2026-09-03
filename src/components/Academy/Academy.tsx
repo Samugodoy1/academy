@@ -78,8 +78,8 @@ export const Academy: React.FC<AcademyProps> = ({ user, onNavigate }) => {
           {[
             { id: 'agenda', title: 'Agenda', description: 'A semana clínica', icon: Calendar },
             { id: 'pacientes', title: 'Pacientes', description: 'Os seus casos', icon: Users },
-            { id: 'estudos', title: 'Estudos', description: 'Antes do box', icon: BookOpen, highlight: true },
-            { id: 'checklist', title: 'Modo Box', description: 'A lista visível', icon: CheckCircle2 },
+            { id: 'estudos', title: 'Estudos', description: 'Antes do box', icon: BookOpen },
+            { id: 'checklist', title: 'Modo Box', description: 'A lista visível', icon: CheckCircle2, highlight: true },
           ].map(item => (
             <button
               key={item.id}

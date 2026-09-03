@@ -2271,7 +2271,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                           isReorderMode && dragIdx === idx
                             ? 'opacity-40 scale-[0.98] border-slate-300 bg-slate-50'
                             : isReorderMode && dragOverIdx === idx
-                              ? 'border-academy-primary/40 bg-academy-primary/[0.03] shadow-[0_0_0_1px_rgba(47,143,163,0.15)]'
+                              ? 'border-academy-primary/40 bg-academy-primary/[0.03] shadow-[0_0_0_1px_color-mix(in_srgb,var(--neo)_18%,transparent)]'
                               : isPrepaid
                                 ? 'border-emerald-200/80 bg-gradient-to-r from-emerald-50/30 to-emerald-50/10 shadow-[0_4px_14px_rgba(16,185,129,0.05)]'
                                 : isPriority
@@ -3569,7 +3569,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                       setIsBoxModeOpen(false);
                       setIsAddingEvolution(true);
                     }}
-                    className="rounded-full bg-primary px-3 py-2 text-[12px] font-bold text-white shadow-[0_5px_14px_rgba(47,143,163,0.16)] active:scale-[0.96]"
+                    className="rounded-full bg-primary px-3 py-2 text-[12px] font-bold text-white shadow-[0_5px_14px_color-mix(in_srgb,var(--neo)_22%,transparent)] active:scale-[0.96]"
                   >
                     Evolucao
                   </button>
@@ -3760,7 +3760,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                       setIsBoxModeOpen(false);
                       setIsAddingEvolution(true);
                     }}
-                    className="shrink-0 rounded-full bg-primary px-3 py-2 text-[12px] font-bold text-white shadow-[0_5px_14px_rgba(47,143,163,0.18)] active:scale-[0.96]"
+                    className="shrink-0 rounded-full bg-primary px-3 py-2 text-[12px] font-bold text-white shadow-[0_5px_14px_color-mix(in_srgb,var(--neo)_22%,transparent)] active:scale-[0.96]"
                   >
                     Registrar evolucao
                   </button>
@@ -3811,7 +3811,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                         onClick={() => setSelectedBoxProcedure(key)}
                         className={`rounded-full border px-3 py-1.5 text-[12px] font-extrabold transition-all ${
                           isSelected
-                            ? 'border-primary bg-primary text-white shadow-[0_5px_14px_rgba(47,143,163,0.18)]'
+                            ? 'border-primary bg-primary text-white shadow-[0_5px_14px_color-mix(in_srgb,var(--neo)_22%,transparent)]'
                             : 'border-slate-200 bg-white text-slate-600'
                         }`}
                       >

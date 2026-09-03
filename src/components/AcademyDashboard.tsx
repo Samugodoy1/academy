@@ -1,16 +1,21 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { CalendarPlus, ChevronRight } from '../icons';
+import { CheckCircle2, ChevronRight, Clock } from '../icons';
 import { AcademyActivationCard, AcademyOnboarding } from './AcademyOnboarding';
 import { formatAppointmentTime, getAppointmentTime, parseAppointmentDateTime } from '../utils/dateUtils';
 import { buildParaFecharRows } from '../utils/deriveAcademyPatientState';
 import {
   buildTodayContext,
   getSmartBoxPrepItems,
+  getStudyRefreshSuggestion,
   getTodayHeadline,
   shouldShowBoxMode,
 } from '../utils/clinicalIntelligence';
+import { countClinicalSkills, suggestNextClinicalStep } from '../utils/clinicalProgression';
+import { STUDY_TOPIC_LABELS, StudyKey } from '../utils/studyTopics';
 import { DataLoadingSkeleton } from './DataLoadingSkeleton';
+
+const STUDY_TOPIC_STORAGE_KEY = 'academy_study_topic';
 
 interface AcademyDashboardProps {
   user?: any;
@@ -81,6 +86,22 @@ const formatWeekdayTime = (value?: string) => {
     .replace(/-feira$/i, '')
     .toUpperCase();
   return time ? `${weekday}, ${time}` : weekday;
+};
+
+const formatAgendaListDateTime = (value?: string) => {
+  const parsed = parseDate(value);
+  const time = formatTime(value);
+  if (!parsed || !time) return { date: '', time: time || '' };
+
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  if (sameDay(parsed, today)) return { date: 'Hoje', time };
+  if (sameDay(parsed, tomorrow)) return { date: 'Amanhã', time };
+
+  const dateLabel = parsed.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  return { date: dateLabel, time };
 };
 
 const getStatusLabel = (status?: string) => {
@@ -585,7 +606,6 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       appointmentId: row.appointmentId,
       title: row.title,
       meta: row.meta,
-      tone: 'coral' as const
     })),
     ...(clinicalPending && !paraFecharRows.some(row => row.patientId === clinicalPending.id)
       ? [{
@@ -594,10 +614,46 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         appointmentId: 0,
         title: clinicalPending.name,
         meta: getClinicalAlert(clinicalPending, usableAppointments, now) || 'Complete o prontuário.',
-        tone: 'coral' as const
       }]
       : [])
   ].slice(0, 3);
+
+  const otherAppointments = nextAppointments
+    .filter(app => app.id !== focus.appointment?.id)
+    .slice(0, 4);
+
+  const skillCounts = useMemo(() => countClinicalSkills(patients), [patients]);
+  const nextClinicalStep = useMemo(() => suggestNextClinicalStep(skillCounts), [skillCounts]);
+
+  const studySuggestion = useMemo(() => {
+    if (focus.kind === 'evolution' || focus.kind === 'start') return null;
+
+    const refresh = getStudyRefreshSuggestion(todayContext);
+    if (refresh) {
+      return {
+        topicKey: refresh.topic,
+        topic: STUDY_TOPIC_LABELS[refresh.topic],
+        reason: refresh.reason,
+        duration: refresh.duration,
+      };
+    }
+
+    if (nextClinicalStep?.studyTopic) {
+      return {
+        topicKey: nextClinicalStep.studyTopic,
+        topic: nextClinicalStep.label,
+        reason: nextClinicalStep.reason,
+        duration: '5 min',
+      };
+    }
+
+    return null;
+  }, [focus.kind, todayContext, nextClinicalStep]);
+
+  const openStudyTopic = (topic: StudyKey) => {
+    sessionStorage.setItem(STUDY_TOPIC_STORAGE_KEY, topic);
+    setActiveTab('estudos');
+  };
 
   const academicLine = [academicPeriod, institution].filter(Boolean).join(' · ');
   const homeHeadline = focus.appointment && (focus.kind === 'today' || focus.kind === 'next')
@@ -623,7 +679,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       onDismissOnboarding={onDismissOnboarding}
       onDismissWelcome={onDismissWelcome}
     >
-    <div className="page-shell space-y-7 tablet-l:max-w-[720px]">
+    <div className="page-shell space-y-8 tablet-l:space-y-10">
       <AcademyActivationCard
         user={user}
         patients={patients}
@@ -638,7 +694,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
             Oi{greetingName ? `, ${greetingName}` : ''}
           </p>
           {academicLine && (
-            <p className="mt-1 text-[17px] font-semibold tracking-[-0.016em] text-[var(--neo-ink)]">
+            <p className="mt-1 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
               {academicLine}
             </p>
           )}
@@ -648,137 +704,245 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         </span>
       </header>
 
-      <h1 className="text-[28px] sm:text-[34px] font-semibold text-[var(--neo-ink)] leading-[1.05] tracking-[-0.025em]">
+      <h1 className="text-[28px] sm:text-[34px] font-semibold text-[var(--neo-ink)] leading-[1.05] tracking-[-0.025em] max-w-[20ch]">
         {homeHeadline}
       </h1>
 
-      {focusPatientName ? (
-        <div className="space-y-3">
-          <button
-            type="button"
-            onClick={focus.action}
-            className="w-full rounded-[28px] bg-[var(--neo)] px-6 py-6 text-left text-white"
-          >
-            {appointmentMetaLabel && (
-              <p className="text-[12px] font-normal uppercase tracking-[0.04em] text-white/80">
-                {appointmentMetaLabel}
-              </p>
-            )}
-            <p className="mt-2 text-[26px] sm:text-[32px] font-semibold leading-[1.05] tracking-[-0.025em]">
-              {focusPatientName}
-            </p>
-            <p className="mt-2 text-[15px] text-white/85 tracking-[-0.011em]">
-              {procedureHint || focus.subtitle}
-            </p>
-          </button>
-
-          {showBoxMode && boxPrepItems[0] && (
-            <div className="flex items-center justify-between gap-4 rounded-[24px] bg-[var(--neo-wash)] px-5 py-4">
-              <div className="min-w-0">
-                <p className="text-[13px] text-[var(--neo-gray)]">O seu checklist</p>
-                <p className="mt-0.5 truncate text-[17px] text-[var(--neo-ink)]">{boxPrepItems[0].label}</p>
-              </div>
-              <span className="shrink-0 text-[15px] font-medium text-[var(--neo)]">Pronto</span>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center pt-8 pb-2 text-center">
-          <div className="mb-5 flex h-16 w-14 flex-col overflow-hidden rounded-[16px] bg-[#f5f5f7]">
-            <div className="h-4 bg-[#e8e8ed]" />
-            <div className="flex flex-1 items-center justify-center text-[18px] font-semibold tracking-[-0.025em] text-[var(--neo-ink)]">
-              {now.getDate()}
-            </div>
-          </div>
-          <p className="text-[19px] font-semibold tracking-[-0.016em] text-[var(--neo-ink)]">Agenda livre</p>
-          <p className="mt-1 max-w-sm text-[15px] text-[var(--neo-gray)] tracking-[-0.011em]">
-            {focus.subtitle || 'Nenhuma consulta por agora'}
-          </p>
-          <button
-            type="button"
-            className="neo-pill mt-6"
-            onClick={focus.kind === 'start' ? () => setIsPatientModalOpen(true) : openAppointmentModal}
-          >
-            <CalendarPlus size={18} />
-            {focus.kind === 'start' ? 'Cadastrar paciente' : 'Agendar consulta'}
-          </button>
-          {focus.kind !== 'start' && (
+      <div className="flex flex-col gap-10 tablet-l:grid tablet-l:grid-cols-12 tablet-l:items-start tablet-l:gap-x-12">
+        <div className="space-y-8 tablet-l:col-span-7">
+          {focusPatientName ? (
             <button
               type="button"
-              onClick={() => setActiveTab('agenda')}
-              className="neo-link mt-3 text-[15px]"
+              onClick={focus.action}
+              className="w-full rounded-[28px] bg-[var(--neo)] px-6 py-6 text-left text-white"
             >
-              Ver agenda completa ›
+              {appointmentMetaLabel && (
+                <p className="text-[12px] font-normal uppercase tracking-[0.04em] text-white/80">
+                  {appointmentMetaLabel}
+                </p>
+              )}
+              <p className="mt-2 text-[26px] sm:text-[32px] font-semibold leading-[1.05] tracking-[-0.025em]">
+                {focusPatientName}
+              </p>
+              <p className="mt-2 text-[15px] text-white/85 tracking-[-0.011em]">
+                {procedureHint || focus.subtitle}
+              </p>
+              <p className="mt-4 text-[15px] text-white/90">
+                {focus.actionLabel} ›
+              </p>
             </button>
+          ) : (
+            <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+              <p className="text-[13px] text-[var(--neo-gray)]">Agenda</p>
+              <p className="mt-1 text-[22px] font-semibold tracking-[-0.025em] text-[var(--neo-ink)]">
+                Livre agora
+              </p>
+              <p className="mt-1 text-[15px] text-[var(--neo-gray)] tracking-[-0.011em]">
+                {focus.subtitle || 'Nenhuma consulta por agora'}
+              </p>
+              <button
+                type="button"
+                className="neo-link mt-3 text-[15px]"
+                onClick={focus.kind === 'start' ? () => setIsPatientModalOpen(true) : openAppointmentModal}
+              >
+                {focus.kind === 'start' ? 'Cadastrar paciente ›' : 'Agendar consulta ›'}
+              </button>
+            </div>
+          )}
+
+          {showBoxMode && boxPrepItems.length > 0 && (
+            <HomeSection kicker="O seu checklist">
+              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+                {boxPrepItems.map((item, index) => (
+                  <button
+                    key={`${item.label}-${index}`}
+                    type="button"
+                    onClick={() => item.studyTopic && openStudyTopic(item.studyTopic)}
+                    className="flex w-full items-center gap-3 border-b border-black/[0.04] px-5 py-4 text-left last:border-b-0"
+                  >
+                    <CheckCircle2 size={18} className="shrink-0 text-[var(--neo)]" />
+                    <span className="min-w-0 flex-1 text-[17px] tracking-[-0.011em] text-[var(--neo-ink)]">
+                      {item.label}
+                    </span>
+                    <span className="flex shrink-0 items-center gap-1 text-[13px] text-[var(--neo-gray)]">
+                      <Clock size={12} />
+                      {item.duration}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </HomeSection>
           )}
         </div>
-      )}
 
-      {pendingRows.length > 0 && (
-        <section className="space-y-3 pt-2">
-          <h3 className="text-[13px] font-normal text-[var(--neo-gray)]">Para fechar</h3>
-          <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
-            {pendingRows.map(row => (
-              <React.Fragment key={row.id}>
-                <ListRow
-                  title={row.title}
-                  meta={row.meta}
-                  accent="coral"
-                  onClick={() => {
-                    if (row.appointmentId && openPatientEvolution) {
-                      const app = usableAppointments.find(a => a.id === row.appointmentId);
-                      if (app) {
-                        openPatientEvolution(row.patientId, app);
-                        return;
-                      }
-                    }
-                    openPatientRecord(row.patientId);
-                  }}
-                />
-              </React.Fragment>
-            ))}
-          </div>
-        </section>
-      )}
+        <div className="space-y-8 tablet-l:col-span-5">
+          {pendingRows.length > 0 && (
+            <HomeSection kicker="Para fechar">
+              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+                {pendingRows.map(row => (
+                  <React.Fragment key={row.id}>
+                    <ListRow
+                      title={row.title}
+                      meta={row.meta}
+                      onClick={() => {
+                        if (row.appointmentId && openPatientEvolution) {
+                          const app = usableAppointments.find(a => a.id === row.appointmentId);
+                          if (app) {
+                            openPatientEvolution(row.patientId, app);
+                            return;
+                          }
+                        }
+                        openPatientRecord(row.patientId);
+                      }}
+                    />
+                  </React.Fragment>
+                ))}
+              </div>
+            </HomeSection>
+          )}
+
+          {otherAppointments.length > 0 && (
+            <HomeSection
+              kicker="A seguir"
+              action={
+                <button type="button" onClick={() => setActiveTab('agenda')} className="neo-link text-[13px]">
+                  Agenda ›
+                </button>
+              }
+            >
+              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+                {otherAppointments.map(app => {
+                  const dateTime = formatAgendaListDateTime(app.start_time);
+                  return (
+                    <button
+                      key={app.id}
+                      type="button"
+                      onClick={() => openPatientRecord(app.patient_id)}
+                      className="flex w-full items-center gap-4 border-b border-black/[0.04] px-5 py-4 text-left last:border-b-0"
+                    >
+                      <div className="w-14 shrink-0">
+                        <p className="text-[12px] font-semibold text-[var(--neo)]">{dateTime.date}</p>
+                        <p className="mt-0.5 text-[17px] font-semibold tabular-nums tracking-[-0.022em] text-[var(--neo-ink)]">
+                          {dateTime.time}
+                        </p>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[15px] font-semibold text-[var(--neo-ink)]">{app.patient_name}</p>
+                        <p className="truncate text-[13px] text-[var(--neo-gray)]">{app.notes || 'Atendimento'}</p>
+                      </div>
+                      <ChevronRight size={16} className="shrink-0 text-[#C6C6C8]" />
+                    </button>
+                  );
+                })}
+              </div>
+            </HomeSection>
+          )}
+
+          {studySuggestion && (
+            <HomeSection kicker="Estudar agora">
+              <button
+                type="button"
+                onClick={() => openStudyTopic(studySuggestion.topicKey)}
+                className="w-full rounded-[24px] bg-[#f5f5f7] px-5 py-5 text-left"
+              >
+                <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
+                  {studySuggestion.topic}
+                </p>
+                <p className="mt-2 text-[15px] leading-snug text-[var(--neo-gray)] tracking-[-0.011em]">
+                  {studySuggestion.reason}
+                </p>
+                <p className="mt-4 flex items-center justify-between text-[15px]">
+                  <span className="text-[var(--neo-gray)]">{studySuggestion.duration}</span>
+                  <span className="neo-link">Revisar ›</span>
+                </p>
+              </button>
+            </HomeSection>
+          )}
+
+          {pausedCase && focus.patient?.id !== pausedCase.id && (
+            <HomeSection kicker="Retorno">
+              <button
+                type="button"
+                onClick={() => openPatientRecord(pausedCase.id)}
+                className="flex w-full items-center gap-4 rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[15px] font-semibold text-[var(--neo-ink)]">{pausedCase.name}</p>
+                  <p className="mt-0.5 text-[13px] text-[var(--neo-gray)]">Sem próximo passo marcado</p>
+                </div>
+                <ChevronRight size={16} className="shrink-0 text-[#C6C6C8]" />
+              </button>
+            </HomeSection>
+          )}
+
+          {patients.length > 0 && pendingRows.length === 0 && otherAppointments.length === 0 && !studySuggestion && !pausedCase && (
+            <HomeSection kicker="Pacientes">
+              <button
+                type="button"
+                onClick={() => setActiveTab('pacientes')}
+                className="flex w-full items-center justify-between rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left"
+              >
+                <span className="text-[15px] text-[var(--neo-ink)]">Ver os seus casos</span>
+                <span className="neo-link text-[15px]">Abrir ›</span>
+              </button>
+            </HomeSection>
+          )}
+        </div>
+      </div>
     </div>
     </AcademyOnboarding>
   );
 };
 
+function HomeSection({
+  kicker,
+  action,
+  children,
+}: {
+  kicker: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="space-y-3">
+      <div className="flex items-baseline justify-between gap-3 px-1">
+        <h2 className="text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">{kicker}</h2>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 const ListRow = ({
   title,
   meta,
-  accent,
   onClick
 }: {
   title: string;
   meta: string;
-  accent: 'coral';
   onClick: () => void;
 }) => {
   const metaLines = meta.split('\n').filter(Boolean);
   return (
     <motion.div
-      whileTap={{ backgroundColor: 'var(--academy-bg)' }}
+      whileTap={{ backgroundColor: '#ffffff' }}
       transition={{ duration: 0.2 }}
-      className="flex items-center gap-4 p-5 cursor-pointer border-b border-[#C6C6C8]/5 last:border-b-0"
+      className="flex cursor-pointer items-center gap-4 border-b border-black/[0.04] px-5 py-4 last:border-b-0"
       onClick={onClick}
     >
-      <div className="relative">
-        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-[13px] overflow-hidden border shrink-0 bg-academy-attention text-academy-attention-text border-rose-100">
-          {(title || '?').charAt(0).toUpperCase()}
-        </div>
-        <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-academy-attention-text border-2 border-white" />
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--neo-soft)] text-[13px] font-semibold text-[var(--neo)]">
+        {(title || '?').charAt(0).toUpperCase()}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[15px] font-semibold text-academy-text truncate">{title}</p>
+        <p className="truncate text-[15px] font-semibold text-[var(--neo-ink)]">{title}</p>
         {metaLines.map((line, i) => (
-          <p key={i} className={`text-[12px] ${i === 0 && metaLines.length > 1 ? 'font-medium text-academy-text/70' : 'text-academy-muted'} ${i === 0 ? 'mt-0.5' : 'mt-0'} truncate`}>
+          <p key={i} className={`truncate text-[13px] text-[var(--neo-gray)] ${i === 0 ? 'mt-0.5' : ''}`}>
             {line}
           </p>
         ))}
       </div>
-      <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
+      <ChevronRight size={16} className="shrink-0 text-[#C6C6C8]" />
     </motion.div>
   );
 };

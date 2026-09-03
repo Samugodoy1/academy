@@ -850,6 +850,15 @@ html[data-product="academy"] {
   --academy-study-text: #86868b;
   --academy-success: #f5f5f7;
   --academy-success-text: #1d1d1f;
+
+  --apple-blue: var(--neo);
+  --apple-blue-hover: color-mix(in srgb, var(--neo) 88%, #1d1d1f);
+  --apple-link: var(--neo);
+  --color-primary: var(--neo);
+  --color-apple-blue: var(--neo);
+  --color-apple-blue-hover: color-mix(in srgb, var(--neo) 88%, #1d1d1f);
+  --color-apple-link: var(--neo);
+  --color-academy-primary: var(--neo);
 }
 
 html[data-product="academy"],

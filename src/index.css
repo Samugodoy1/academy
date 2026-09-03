@@ -581,15 +581,34 @@ html[data-theme="dark"] {
     object-fit: cover;
   }
 
+  .neo-dock-screen {
+    pointer-events: none;
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 50;
+    display: none;
+    justify-content: center;
+    padding: 0 16px max(14px, env(safe-area-inset-bottom));
+  }
+
+  @media (min-width: 64rem) {
+    .neo-dock-screen {
+      display: flex;
+    }
+  }
+
   .neo-dock {
+    pointer-events: auto;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     align-items: center;
-    padding: 10px 8px 8px;
+    width: min(420px, 100%);
+    padding: 10px 12px 8px;
     border-radius: 32px;
-    background: rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.78);
     border: 1px solid rgba(255, 255, 255, 0.7);
-    box-shadow: 0 8px 28px rgba(29, 29, 31, 0.06);
+    box-shadow: 0 8px 28px rgba(29, 29, 31, 0.08);
     backdrop-filter: saturate(180%) blur(28px);
     -webkit-backdrop-filter: saturate(180%) blur(28px);
   }
@@ -786,7 +805,7 @@ html[data-theme="dark"] {
   .siso-wave-arm { animation: sisoWave 1.2s ease-in-out infinite; }
 
   .page-shell {
-    @apply w-full mx-auto max-w-[1400px] px-5 sm:px-6 tablet-l:px-8 desktop:px-10 pt-6 tablet-l:pt-8 pb-[calc(6rem+env(safe-area-inset-bottom))] tablet-l:pb-10;
+    @apply w-full mx-auto max-w-[1400px] px-5 sm:px-6 tablet-l:px-8 desktop:px-10 pt-6 tablet-l:pt-8 pb-[calc(6rem+env(safe-area-inset-bottom))] tablet-l:pb-28;
   }
 
   .duo-btn {

@@ -70,6 +70,7 @@ export function AcademySidebar({
   };
 
   return (
+    <>
     <aside
       className={`
         fixed inset-y-0 left-0 z-[110] flex w-[292px] flex-col bg-[#f5f5f7] p-4 transition-all duration-300 ease-in-out no-print
@@ -135,15 +136,6 @@ export function AcademySidebar({
         {editing ? 'Pronto' : 'Personalizar'}
       </button>
 
-      <AcademyDock
-        activeTab={activeTab}
-        onGo={goTo}
-        onSchedule={() => {
-          openAppointmentModal?.();
-          setIsSidebarOpen(false);
-        }}
-      />
-
       <div className="mt-3 space-y-0.5">
         <button
           type="button"
@@ -183,5 +175,14 @@ export function AcademySidebar({
         </button>
       </div>
     </aside>
+    <AcademyDock
+      activeTab={activeTab}
+      onGo={goTo}
+      onSchedule={() => {
+        openAppointmentModal?.();
+        setIsSidebarOpen(false);
+      }}
+    />
+    </>
   );
 }

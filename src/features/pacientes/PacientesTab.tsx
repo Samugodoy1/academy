@@ -399,8 +399,8 @@ function PacientesTabComponent({
       <div className="flex flex-col gap-6 mb-4">
         <div className="flex items-end justify-between gap-3">
           <PageIntro
-            kicker="Prontuário"
-            title="Casos"
+            kicker="Os seus casos"
+            title="Prontuário"
             subtitle={patientsSubView === 'list' ? casesSmartCopy : undefined}
           />
           {portalPendingCount > 0 && patientsSubView === 'list' && (
@@ -521,27 +521,27 @@ function PacientesTabComponent({
                 > = {
                   ABANDONO: {
                     label: 'Abandono',
-                    bg: 'bg-rose-50',
-                    text: 'text-rose-700',
-                    dot: 'bg-rose-500',
+                    bg: 'bg-[var(--neo-wash)]',
+                    text: 'text-[var(--neo-ink)]',
+                    dot: 'bg-[var(--neo)]',
                   },
                   ATENCAO: {
                     label: 'Atenção',
-                    bg: 'bg-amber-50',
-                    text: 'text-amber-700',
-                    dot: 'bg-amber-400',
+                    bg: 'bg-[var(--neo-soft)]',
+                    text: 'text-[var(--neo-ink)]',
+                    dot: 'bg-[var(--neo)]',
                   },
                   EM_TRATAMENTO: {
                     label: 'Em tratamento',
-                    bg: 'bg-sky-50',
-                    text: 'text-sky-700',
-                    dot: 'bg-sky-500',
+                    bg: 'bg-[var(--neo-soft)]',
+                    text: 'text-[var(--neo-ink)]',
+                    dot: 'bg-[var(--neo)]',
                   },
                   FINALIZADO: {
                     label: 'Concluído',
-                    bg: 'bg-emerald-50',
-                    text: 'text-emerald-700',
-                    dot: 'bg-emerald-500',
+                    bg: 'bg-[var(--neo-wash)]',
+                    text: 'text-[var(--neo-gray)]',
+                    dot: 'bg-[var(--neo-gray)]',
                   },
                 };
                 const priorityConfig: Record<
@@ -564,28 +564,16 @@ function PacientesTabComponent({
                 const stCfg = intelStatus ? statusConfig[intelStatus] : null;
                 const priCfg = intelPriority ? priorityConfig[intelPriority] : null;
 
-                const borderColor = meta.isLead
-                  ? 'border-l-violet-500 border-violet-100'
-                  : intelPriority === 'HIGH'
-                    ? 'border-l-rose-500 border-rose-100'
-                    : intelStatus === 'ATENCAO'
-                      ? 'border-l-amber-400 border-amber-50'
-                      : intelStatus === 'ABANDONO'
-                        ? 'border-l-rose-400 border-rose-50'
-                        : intelStatus === 'EM_TRATAMENTO'
-                          ? 'border-l-sky-400 border-slate-100'
-                          : 'border-l-transparent border-slate-100 hover:border-slate-200';
-
                 return (
                   <div
                     key={patient.id}
-                    className={`flex items-stretch liquid-glass-card rounded-2xl border-l-[3px] hover:shadow-md transition-all ${borderColor}`}
+                    className="neo-card flex items-stretch"
                   >
                     <div className="flex items-center gap-3.5 flex-1 min-w-0 px-4 py-3.5">
                       <button
                         type="button"
                         onClick={() => openPatientRecord(patient.id)}
-                        className="w-11 h-11 bg-primary/10 text-primary rounded-full flex items-center justify-center font-bold text-sm overflow-hidden border border-primary/20 shrink-0"
+                        className="w-11 h-11 bg-[var(--neo-soft)] text-[var(--neo)] rounded-full flex items-center justify-center font-semibold text-sm overflow-hidden shrink-0"
                       >
                         {patient.photo_url ? (
                           <img
@@ -651,7 +639,7 @@ function PacientesTabComponent({
                           type="button"
                           title="Agendar 1º atendimento"
                           onClick={() => handleScheduleFromCard(patient)}
-                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-academy-primary text-white text-[11px] font-bold hover:opacity-90 transition-colors active:scale-95"
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-[980px] bg-[var(--neo)] text-white text-[12px] font-normal active:scale-95"
                         >
                           <CalendarPlus size={14} />
                           <span className="hidden sm:inline">1º atendimento</span>
@@ -664,8 +652,8 @@ function PacientesTabComponent({
                             onClick={() => handleScheduleFromCard(patient)}
                             className={`w-9 h-9 flex items-center justify-center rounded-xl transition-colors ${
                               isActed
-                                ? 'text-academy-primary-dark bg-[#F3E8FF]'
-                                : 'text-slate-400 hover:text-primary hover:bg-primary/8'
+                                ? 'text-[var(--neo)] bg-[var(--neo-soft)]'
+                                : 'text-[var(--neo-gray)] hover:text-[var(--neo)] hover:bg-[var(--neo-soft)]'
                             }`}
                           >
                             {isActed ? <Check size={16} /> : <Calendar size={16} />}
@@ -674,7 +662,7 @@ function PacientesTabComponent({
                             type="button"
                             title="Contatar via WhatsApp"
                             onClick={() => contactPatientOnWhatsApp(patient)}
-                            className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-academy-primary-dark hover:bg-[#F3E8FF] transition-colors"
+                            className="w-9 h-9 flex items-center justify-center rounded-full text-[var(--neo-gray)] hover:text-[var(--neo)] hover:bg-[var(--neo-soft)] transition-colors"
                           >
                             <MessageCircle size={16} />
                           </button>
@@ -682,7 +670,7 @@ function PacientesTabComponent({
                             type="button"
                             title="Link Portal do Paciente"
                             onClick={() => generatePatientPortalLink(patient)}
-                            className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                            className="w-9 h-9 flex items-center justify-center rounded-full text-[var(--neo-gray)] hover:text-[var(--neo)] hover:bg-[var(--neo-soft)] transition-colors"
                           >
                             <LinkIcon size={16} />
                           </button>

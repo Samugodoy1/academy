@@ -1,29 +1,24 @@
 import React from 'react';
+import { useAcademyNavOrder } from '../../theme/AcademyNavProvider';
 import { BottomNavItem } from './BottomNavItem';
 
-type TabBarTab = {
-  id: string;
-  label: string;
-  icon: React.ElementType;
-};
-
 interface BottomNavProps {
-  tabs: TabBarTab[];
   activeTab: string;
   setActiveTab: (tab: string) => void;
   navigate: (path: string) => void;
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({
-  tabs,
   activeTab,
   setActiveTab,
   navigate,
 }) => {
+  const { tabs } = useAcademyNavOrder();
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 tablet-l:hidden no-print">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 tablet-l:hidden no-print px-3 pb-[max(10px,env(safe-area-inset-bottom))]">
       <nav
-        className="tab-bar-float pointer-events-auto flex items-stretch justify-between px-2 pb-[env(safe-area-inset-bottom)]"
+        className="tab-bar-liquid pointer-events-auto flex items-stretch justify-between px-1.5"
         aria-label="Navegação principal"
       >
         {tabs.map(tab => (
@@ -31,7 +26,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             key={tab.id}
             id={tab.id}
             icon={tab.icon}
-            label={tab.label}
+            label={tab.short}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             navigate={navigate}

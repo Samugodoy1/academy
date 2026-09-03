@@ -460,6 +460,49 @@ html[data-theme="dark"] {
     box-shadow: none;
   }
 
+  .tab-bar-liquid {
+    min-height: 58px;
+    border-radius: 980px;
+    background: color-mix(in srgb, #ffffff 58%, transparent);
+    -webkit-backdrop-filter: saturate(180%) blur(28px);
+    backdrop-filter: saturate(180%) blur(28px);
+    border: 1px solid color-mix(in srgb, #ffffff 70%, var(--neo-soft));
+    box-shadow:
+      0 10px 36px color-mix(in srgb, var(--neo) 14%, rgba(29, 29, 31, 0.08)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  }
+
+  .neo-control-card {
+    background: color-mix(in srgb, #ffffff 72%, transparent);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    backdrop-filter: saturate(180%) blur(24px);
+    border-radius: 26px;
+    border: 1px solid color-mix(in srgb, #ffffff 80%, var(--neo-soft));
+    box-shadow: 0 10px 28px color-mix(in srgb, var(--neo) 8%, transparent);
+  }
+
+  .neo-control-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 84px;
+    padding: 14px;
+    border-radius: 22px;
+    background: color-mix(in srgb, #ffffff 70%, transparent);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    color: var(--neo-ink, #1d1d1f);
+    text-align: left;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+
+  .neo-control-tile-active {
+    background: var(--neo);
+    color: #ffffff;
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--neo) 28%, transparent);
+  }
+
   .tab-bar-item-active {
     background: transparent;
     box-shadow: none;
@@ -873,6 +916,25 @@ html[data-product="academy"] .liquid-glass-nav,
 html[data-product="academy"] .tab-bar-float {
   background: color-mix(in srgb, #ffffff 86%, var(--neo-wash));
   border-top-color: color-mix(in srgb, var(--neo) 10%, #e8e8ed);
+}
+
+html[data-product="academy"] .page-shell {
+  padding-bottom: calc(7.25rem + env(safe-area-inset-bottom));
+}
+
+html[data-product="academy"] .liquid-glass-segment {
+  background: color-mix(in srgb, #ffffff 70%, var(--neo-wash));
+}
+
+html[data-product="academy"] .liquid-glass-segment-active {
+  background: var(--neo);
+  color: #ffffff;
+}
+
+html[data-product="academy"] .liquid-glass-subtle,
+html[data-product="academy"] .liquid-glass-card {
+  background: #ffffff;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--neo) 7%, transparent);
 }
 
 html[data-product="academy"] [aria-current="page"] {

@@ -93,6 +93,8 @@ import type {
 import { DEFAULT_PRODUCT, ACADEMY_DISABLED_TABS } from './app/constants';
 import { AcademySidebar } from './features/shell/AcademySidebar';
 import { BottomNav } from './features/shell/BottomNav';
+import { AcademyPrefsSync } from './theme/AcademyPrefsSync';
+import { getAcademyAccountPrefs } from './theme/academyAccount';
 import { ClinicalPageRoute } from './features/clinical/ClinicalPageRoute';
 import { LegacyClinicalRedirect } from './features/clinical/LegacyClinicalRedirect';
 import { UpgradeLimitModal } from './features/modals/UpgradeLimitModal';
@@ -737,7 +739,7 @@ export default function App() {
     try {
       const res = await apiFetch('/api/profile', {
         method: 'POST',
-        body: JSON.stringify({ ...profileDraft, password: profilePassword })
+        body: JSON.stringify({ ...profileDraft, password: profilePassword, ...getAcademyAccountPrefs() })
       });
       if (res.ok) {
         showNotification('Perfil atualizado com sucesso!');
@@ -2218,6 +2220,7 @@ export default function App() {
 
   return (
     <>
+    <AcademyPrefsSync userId={user?.id ?? null} profile={profile} />
     <Routes>
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />

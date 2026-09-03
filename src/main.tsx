@@ -5,6 +5,7 @@ import App from './App.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { SystemThemeProvider } from './theme/systemTheme';
 import { AcademyNeoProvider } from './theme/AcademyNeoProvider';
+import { AcademyWidgetsProvider } from './theme/AcademyWidgetsProvider';
 import { AcademyNavProvider } from './theme/AcademyNavProvider';
 import './index.css';
 
@@ -13,11 +14,13 @@ createRoot(document.getElementById('root')!).render(
     <ErrorBoundary fallbackTitle="OdontoHub Academy encontrou um problema">
       <SystemThemeProvider>
         <AcademyNeoProvider>
-          <AcademyNavProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
-          </AcademyNavProvider>
+          <AcademyWidgetsProvider>
+            <AcademyNavProvider>
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </AcademyNavProvider>
+          </AcademyWidgetsProvider>
         </AcademyNeoProvider>
       </SystemThemeProvider>
     </ErrorBoundary>

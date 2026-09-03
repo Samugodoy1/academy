@@ -463,44 +463,77 @@ html[data-theme="dark"] {
   .tab-bar-liquid {
     min-height: 58px;
     border-radius: 980px;
-    background: color-mix(in srgb, #ffffff 58%, transparent);
+    background: color-mix(in srgb, #ffffff 72%, transparent);
     -webkit-backdrop-filter: saturate(180%) blur(28px);
     backdrop-filter: saturate(180%) blur(28px);
-    border: 1px solid color-mix(in srgb, #ffffff 70%, var(--neo-soft));
-    box-shadow:
-      0 10px 36px color-mix(in srgb, var(--neo) 14%, rgba(29, 29, 31, 0.08)),
-      inset 0 1px 0 rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(210, 210, 215, 0.55);
+    box-shadow: 0 10px 36px rgba(29, 29, 31, 0.08);
   }
 
   .neo-control-card {
-    background: color-mix(in srgb, #ffffff 72%, transparent);
-    -webkit-backdrop-filter: saturate(180%) blur(24px);
-    backdrop-filter: saturate(180%) blur(24px);
-    border-radius: 26px;
-    border: 1px solid color-mix(in srgb, #ffffff 80%, var(--neo-soft));
-    box-shadow: 0 10px 28px color-mix(in srgb, var(--neo) 8%, transparent);
+    background: #ffffff;
+    border-radius: 24px;
   }
 
   .neo-control-tile {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
-    min-height: 84px;
-    padding: 14px;
-    border-radius: 22px;
-    background: color-mix(in srgb, #ffffff 70%, transparent);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    backdrop-filter: saturate(180%) blur(20px);
-    color: var(--neo-ink, #1d1d1f);
+    justify-content: space-between;
+    gap: 18px;
+    min-height: 108px;
+    padding: 16px;
+    border-radius: 24px;
+    background: #ffffff;
+    color: #1d1d1f;
     text-align: left;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   }
 
   .neo-control-tile-active {
-    background: var(--neo);
-    color: #ffffff;
-    box-shadow: 0 10px 24px color-mix(in srgb, var(--neo) 28%, transparent);
+    background: #e8e8ed;
+    color: #1d1d1f;
+    box-shadow: none;
+  }
+
+  .neo-control-featured {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    min-height: 76px;
+    padding: 16px 18px;
+    border-radius: 24px;
+    background: #e8e8ed;
+    color: #1d1d1f;
+    text-align: left;
+  }
+
+  .neo-control-personalize {
+    width: 100%;
+    border-radius: 980px;
+    background: #ffffff;
+    color: var(--neo);
+    padding: 13px 16px;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.011em;
+    text-align: center;
+  }
+
+  @media (min-width: 64rem) and (max-width: 79.99rem) {
+    .neo-control-tile {
+      min-height: 64px;
+      padding: 0;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .neo-control-featured {
+      min-height: 64px;
+      padding: 0;
+      justify-content: center;
+    }
   }
 
   .tab-bar-item-active {
@@ -751,7 +784,6 @@ html[data-theme="dark"] {
   .neo-card {
     background: #ffffff;
     border-radius: 26px;
-    box-shadow: 0 10px 32px color-mix(in srgb, var(--neo) 10%, transparent);
   }
 
   .neo-pill {
@@ -790,70 +822,39 @@ html[data-theme="dark"] {
     letter-spacing: -0.011em;
   }
 
-  .neo-blobs {
-    pointer-events: none;
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-  }
-
-  .neo-blobs::before,
-  .neo-blobs::after {
-    content: "";
-    position: absolute;
-    border-radius: 999px;
-    background: var(--neo-soft);
-    filter: blur(72px);
-    opacity: 0.45;
-  }
-
-  .neo-blobs::before {
-    width: 240px;
-    height: 240px;
-    top: -80px;
-    right: -40px;
-  }
-
-  .neo-blobs::after {
-    width: 280px;
-    height: 200px;
-    left: -90px;
-    top: 220px;
-    opacity: 0.32;
-  }
 }
 
 html[data-product="academy"] {
   color-scheme: light;
-  --sys-bg: var(--neo-wash);
+  --sys-bg: #ffffff;
   --sys-elevated: #ffffff;
-  --sys-inset: var(--neo-soft);
+  --sys-inset: #f5f5f7;
   --sys-text: #1d1d1f;
   --sys-muted: #86868b;
   --sys-input: #ffffff;
   --sys-input-text: #1d1d1f;
-  --sys-secondary: #ffffff;
-  --sys-secondary-hover: var(--neo-soft);
-  --sys-tabbar: color-mix(in srgb, #ffffff 88%, var(--neo-wash));
-  --sys-sidebar: var(--neo-wash);
-  --sys-hairline: color-mix(in srgb, var(--neo) 14%, #e8e8ed);
+  --sys-secondary: #f5f5f7;
+  --sys-secondary-hover: #e8e8ed;
+  --sys-tabbar: rgba(255, 255, 255, 0.82);
+  --sys-sidebar: #f5f5f7;
+  --sys-hairline: rgba(0, 0, 0, 0.08);
   --academy-primary: var(--neo);
   --academy-primary-dark: #1d1d1f;
   --academy-primary-light: var(--neo);
-  --academy-soft: var(--neo-soft);
-  --academy-bg: var(--neo-wash);
+  --academy-soft: #f5f5f7;
+  --academy-bg: #ffffff;
   --academy-card: #ffffff;
   --academy-text: #1d1d1f;
   --academy-muted: #86868b;
-  --academy-study: var(--neo-wash);
+  --academy-study: #f5f5f7;
   --academy-study-text: #86868b;
-  --academy-success: var(--neo-soft);
+  --academy-success: #f5f5f7;
   --academy-success-text: #1d1d1f;
 }
 
 html[data-product="academy"],
 html[data-product="academy"] body {
-  background-color: var(--neo-wash);
+  background-color: #ffffff;
   color: #1d1d1f;
 }
 
@@ -904,7 +905,7 @@ html[data-product="academy"] .oh-device,
 html[data-product="academy"] .comic-card,
 html[data-product="academy"] .ios-card {
   background: #ffffff;
-  box-shadow: 0 10px 32px color-mix(in srgb, var(--neo) 8%, transparent);
+  box-shadow: none;
 }
 
 html[data-product="academy"] .oh-device-inset {
@@ -914,8 +915,8 @@ html[data-product="academy"] .oh-device-inset {
 
 html[data-product="academy"] .liquid-glass-nav,
 html[data-product="academy"] .tab-bar-float {
-  background: color-mix(in srgb, #ffffff 86%, var(--neo-wash));
-  border-top-color: color-mix(in srgb, var(--neo) 10%, #e8e8ed);
+  background: rgba(255, 255, 255, 0.86);
+  border-top-color: rgba(210, 210, 215, 0.7);
 }
 
 html[data-product="academy"] .page-shell {
@@ -923,22 +924,18 @@ html[data-product="academy"] .page-shell {
 }
 
 html[data-product="academy"] .liquid-glass-segment {
-  background: color-mix(in srgb, #ffffff 70%, var(--neo-wash));
+  background: #f5f5f7;
 }
 
 html[data-product="academy"] .liquid-glass-segment-active {
-  background: var(--neo);
-  color: #ffffff;
+  background: #ffffff;
+  color: #1d1d1f;
 }
 
 html[data-product="academy"] .liquid-glass-subtle,
 html[data-product="academy"] .liquid-glass-card {
   background: #ffffff;
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--neo) 7%, transparent);
-}
-
-html[data-product="academy"] [aria-current="page"] {
-  color: var(--neo);
+  box-shadow: none;
 }
 
 html[data-product="academy"] .academy-wordmark-accent {

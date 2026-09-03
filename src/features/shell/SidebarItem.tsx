@@ -2,6 +2,7 @@ export const SidebarItem = ({
   id,
   icon: Icon,
   label,
+  description,
   activeTab,
   setActiveTab,
   setIsSidebarOpen,
@@ -24,13 +25,20 @@ export const SidebarItem = ({
       }}
       title={label}
       aria-current={isActive ? 'page' : undefined}
-      className={`neo-control-tile w-full tablet-l:min-h-[64px] tablet-l:items-center tablet-l:px-0 desktop:min-h-[84px] desktop:items-start ${isActive ? 'neo-control-tile-active' : ''} ${editing ? 'ring-1 ring-[color-mix(in_srgb,var(--neo)_28%,transparent)]' : ''}`}
+      className={`neo-control-tile w-full ${isActive ? 'neo-control-tile-active' : ''} ${editing ? 'ring-1 ring-[#d2d2d7]' : ''}`}
     >
-      <span className="flex h-8 w-8 items-center justify-center">
-        <Icon size={22} strokeWidth={isActive ? 2 : 1.6} />
+      <span className="flex h-7 w-7 items-center justify-center text-[var(--neo-ink)]">
+        <Icon size={22} />
       </span>
-      <span className="text-[14px] font-semibold tracking-[-0.016em] tablet-l:hidden desktop:block">
-        {label}
+      <span className="min-w-0 tablet-l:hidden desktop:block">
+        <span className="block text-[15px] font-semibold tracking-[-0.016em] text-[var(--neo-ink)]">
+          {label}
+        </span>
+        {description && (
+          <span className="mt-0.5 block text-[12px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
+            {description}
+          </span>
+        )}
       </span>
     </button>
   );

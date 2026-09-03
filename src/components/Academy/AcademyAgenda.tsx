@@ -179,12 +179,12 @@ export const AcademyAgenda: React.FC<AcademyAgendaProps> = ({
   const isEmpty = visibleAppointments.length === 0;
 
   return (
-    <div className="flex-1 overflow-y-auto bg-[var(--neo-wash)] pb-20 text-[var(--neo-ink)]">
+    <div className="flex-1 overflow-y-auto bg-white pb-20 text-[var(--neo-ink)]">
       <div className="mx-auto max-w-2xl">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="sticky top-0 z-20 bg-[color-mix(in_srgb,var(--neo-wash)_88%,transparent)] px-4 py-4 backdrop-blur-xl"
+          className="sticky top-0 z-20 bg-white/90 px-4 py-4 backdrop-blur-xl"
         >
           <div className="mb-5">
             <h1 className="text-[28px] font-semibold tracking-[-0.025em] leading-[1.05] mb-1">

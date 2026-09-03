@@ -1,17 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
 import {
   Activity,
-  AlertCircle,
-  ArrowLeft,
-  ArrowUpRight,
-  BookOpen,
-  Calendar,
   Check,
-  CheckCircle2,
   ChevronRight,
   ClipboardList,
-  Clock,
   FileText,
   Heart,
   Pill,
@@ -19,17 +11,11 @@ import {
   Shield,
   Stethoscope,
   Syringe,
-  Target,
   Tooth,
-  UserCircle
 } from '../icons';
 import { getAppointmentTime, parseAppointmentDateTime } from '../utils/dateUtils';
 import { mapProcedureToTopic, StudyKey } from '../utils/studyTopics';
 import { generateBoxContext, BoxIntelligenceContext } from '../data/boxIntelligence';
-import { PageIntro } from './PageIntro';
-import { QuietEmpty } from './QuietEmpty';
-import { DuoButton } from './DuoButton';
-import { BookGlyph } from '../illustrations/glyphs';
 import {
   countClinicalSkills,
   detectClinicalGaps,
@@ -1156,660 +1142,520 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
     });
   };
 
+
+  const studyNudges = useMemo(() => {
+    const items: Array<{ key: string; topic: StudyKey; title: string; reason: string }> = [];
+    for (const gap of clinicalGaps) {
+      if (!gap.studyTopic) continue;
+      const material = STUDY_LIBRARY[gap.studyTopic];
+      if (!material) continue;
+      items.push({ key: `gap-${gap.id}`, topic: gap.studyTopic, title: material.title, reason: gap.message });
+    }
+    if (consolidation) {
+      items.push({
+        key: 'consolidation',
+        topic: consolidation.topic,
+        title: STUDY_LIBRARY[consolidation.topic].title,
+        reason: `Você praticou ${consolidation.skillLabel} recentemente.`,
+      });
+    }
+    for (const request of reviewRequests) {
+      const material = STUDY_LIBRARY[request.topic];
+      items.push({
+        key: `review-${request.topic}`,
+        topic: request.topic,
+        title: material.title,
+        reason: request.level === 'review'
+          ? 'Você pediu para rever este tema.'
+          : 'Dúvida para levar ao professor.',
+      });
+    }
+    return items;
+  }, [clinicalGaps, consolidation, reviewRequests]);
+
   // ── Material view ────────────────────────────────────────────────────
   if (activeMaterial) {
-    const Icon = activeMaterial.icon;
     const caseBox = selectedCase?.box || null;
     const checkedCount = activeMaterial.checklist.filter(item => checkedItems.has(item)).length;
+    const caseName = selectedCase
+      ? firstName(selectedCase.patient?.name || selectedCase.app?.patient_name)
+      : '';
 
     return (
-      <div className="page-shell pt-6 tablet-l:pt-8">
-        <motion.button
-          type="button"
-          onClick={closeStudy}
-          whileTap={{ scale: 0.97 }}
-          className="mb-6 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[13px] font-bold text-academy-muted shadow-sm border border-academy-border hover:text-academy-text transition-colors"
-        >
-          <ArrowLeft size={15} />
-          Voltar
-        </motion.button>
+      <div className="page-shell space-y-8">
+        <button type="button" onClick={closeStudy} className="neo-link text-[15px]">
+          ‹ Estudos
+        </button>
 
         {selectedCase && caseBox && (
-          <motion.section
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-4 rounded-[28px] bg-apple-ink text-white p-6 overflow-hidden relative"
-          >
-            <span className="text-white/60 text-[11px] font-bold uppercase tracking-[0.12em]">
-              Revisão para um caso real
-            </span>
-            <h3 className="text-[22px] font-bold leading-snug mt-1.5">
-              {firstName(selectedCase.patient?.name || selectedCase.app?.patient_name)} · {getWhenLabel(selectedCase.date)}
-            </h3>
-
-            <div className="mt-4 grid gap-2.5">
-              {caseBox.boxProcedureDetail && (
-                <div className="rounded-[16px] bg-white/10 border border-white/15 px-4 py-2.5">
-                  <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.1em]">Conduta planejada</span>
-                  <p className="text-[13px] font-semibold mt-0.5 leading-snug">{caseBox.boxProcedureDetail}</p>
-                </div>
-              )}
-              {cleanCheckpoint(caseBox.criticalCheckpoint) && (
-                <div className="rounded-[16px] bg-white/10 border border-white/15 px-4 py-2.5">
-                  <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.1em]">O que importa neste caso</span>
-                  <p className="text-[13px] font-semibold mt-0.5 leading-snug">{cleanCheckpoint(caseBox.criticalCheckpoint)}</p>
-                </div>
-              )}
-              {caseBox.anamnesisAlert && (
-                <div className="rounded-[16px] bg-white px-4 py-2.5 flex items-start gap-2.5">
-                  <AlertCircle size={16} className="text-academy-attention-text shrink-0 mt-0.5" />
-                  <p className="text-[13px] font-semibold text-academy-attention-text leading-snug">{caseBox.anamnesisAlert}</p>
-                </div>
-              )}
-            </div>
-
+          <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+            <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">
+              Para o atendimento
+            </p>
+            <p className="mt-1 text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
+              {caseName} · {getWhenLabel(selectedCase.date)}
+            </p>
+            {caseBox.boxProcedureDetail && (
+              <p className="mt-2 text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
+                {caseBox.boxProcedureDetail}
+              </p>
+            )}
+            {cleanCheckpoint(caseBox.criticalCheckpoint) && (
+              <p className="mt-3 text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-ink)]">
+                {cleanCheckpoint(caseBox.criticalCheckpoint)}
+              </p>
+            )}
+            {caseBox.anamnesisAlert && (
+              <p className="mt-3 rounded-[16px] bg-[var(--neo-soft)] px-4 py-3 text-[14px] leading-snug text-[var(--neo-ink)]">
+                {caseBox.anamnesisAlert}
+              </p>
+            )}
             {openPatientRecord && (
               <button
                 type="button"
                 onClick={() => openPatientRecord(selectedCase.patient.id)}
-                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white/15 border border-white/20 px-4 py-2 text-[13px] font-bold text-white active:scale-95 transition-transform"
+                className="neo-link mt-4 text-[15px]"
               >
-                Abrir caso
-                <ArrowUpRight size={14} />
+                Abrir caso ›
               </button>
             )}
-          </motion.section>
+          </div>
         )}
 
-        <motion.section
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`rounded-[32px] border ${activeMaterial.borderColor} bg-white p-6 sm:p-7 shadow-xl shadow-slate-200/50 overflow-hidden relative`}
-        >
-          <div className={`w-14 h-14 rounded-[18px] flex items-center justify-center ${activeMaterial.color} mb-5`}>
-            <Icon size={28} />
-          </div>
-          <p className="text-[13px] font-bold uppercase tracking-widest text-academy-study-text mb-2">
-            Material de estudo
+        <header>
+          <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">
+            {activeMaterial.duration}
           </p>
-          <h2 className="text-[32px] sm:text-[38px] font-bold text-academy-text leading-[1.05] tracking-tight">
+          <h1 className="mt-2 text-[28px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)] sm:text-[34px]">
             {activeMaterial.title}
-          </h2>
-          <p className="text-[15px] text-academy-muted font-medium mt-3 leading-relaxed">
+          </h1>
+          <p className="mt-3 max-w-[42ch] text-[17px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
             {activeMaterial.objective}
           </p>
-
-          <div className="grid grid-cols-2 gap-3 mt-6">
-            <div className="rounded-[18px] bg-academy-neutral px-4 py-3">
-              <div className="flex items-center gap-2 text-academy-study-text font-bold text-[13px]">
-                <Clock size={15} />
-                {activeMaterial.duration}
-              </div>
-              <p className="text-[11px] text-academy-muted font-semibold mt-1">Tempo sugerido</p>
-            </div>
-            <div className="rounded-[18px] bg-academy-neutral px-4 py-3">
-              <div className="flex items-center gap-2 text-academy-muted font-bold text-[13px]">
-                <Target size={15} />
-                {activeMaterial.level}
-              </div>
-              <p className="text-[11px] text-academy-muted font-semibold mt-1">Nível</p>
-            </div>
-          </div>
-        </motion.section>
+        </header>
 
         {activeMaterial.quickFacts.length > 0 && (
-          <motion.section
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="bg-apple-ink rounded-[28px] p-5 mt-4 text-white"
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <BookGlyph size={18} />
-              <h3 className="text-[15px] font-bold">Na ponta da língua</h3>
-            </div>
-            <div className="grid gap-2.5">
+          <StudySection kicker="Na ponta da língua">
+            <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
               {activeMaterial.quickFacts.map(fact => (
-                <div key={fact.label} className="rounded-[16px] bg-white/10 border border-white/15 px-4 py-3">
-                  <span className="text-white/55 text-[10px] font-bold uppercase tracking-[0.1em]">{fact.label}</span>
-                  <p className="text-[13px] font-semibold mt-0.5 leading-snug">{fact.value}</p>
+                <div
+                  key={fact.label}
+                  className="border-b border-black/[0.04] px-5 py-4 last:border-b-0"
+                >
+                  <p className="text-[13px] text-[var(--neo-gray)]">{fact.label}</p>
+                  <p className="mt-1 text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-ink)]">
+                    {fact.value}
+                  </p>
                 </div>
               ))}
             </div>
-          </motion.section>
+          </StudySection>
         )}
 
-        <section className="space-y-4 mt-8">
-          <h3 className="text-[16px] font-bold text-academy-text px-1">Roteiro de revisão</h3>
-          {activeMaterial.modules.map((module, moduleIndex) => (
-            <motion.article
-              key={module.title}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: moduleIndex * 0.05 }}
-              className="bg-white rounded-[24px] border border-academy-border/70 p-5 shadow-sm"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-9 h-9 rounded-full bg-academy-neutral text-academy-muted flex items-center justify-center text-[13px] font-bold shrink-0">
-                  {moduleIndex + 1}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="text-[16px] font-bold text-academy-text">{module.title}</h4>
-                  <p className="text-[13px] text-academy-muted font-medium mt-1">{module.description}</p>
-                  <div className="space-y-2.5 mt-4">
-                    {module.steps.map(step => (
-                      <div key={step} className="flex gap-2.5 text-[13px] text-academy-muted leading-relaxed">
-                        <CheckCircle2 size={16} className="text-academy-muted shrink-0 mt-0.5" />
-                        <span>{step}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.article>
-          ))}
-        </section>
-
-        <section className="grid gap-4 mt-8">
-          <div className="bg-white rounded-[24px] border border-academy-border/70 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[15px] font-bold text-academy-text">Checklist antes do atendimento</h3>
-              <span className="text-[12px] font-bold text-academy-muted">
-                {checkedCount}/{activeMaterial.checklist.length}
-              </span>
-            </div>
-            <div className="grid gap-1.5">
-              {activeMaterial.checklist.map(item => {
-                const isChecked = checkedItems.has(item);
-                return (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => toggleChecklistItem(item)}
-                    className={`flex items-center gap-3 rounded-[14px] px-3 py-2.5 text-left transition-colors ${
-                      isChecked ? 'bg-academy-success' : 'hover:bg-academy-neutral'
-                    }`}
-                  >
-                    <span
-                      className={`w-[22px] h-[22px] rounded-full border flex items-center justify-center shrink-0 transition-colors ${
-                        isChecked
-                          ? 'bg-academy-success-text border-academy-success-text text-white'
-                          : 'border-academy-border bg-white text-transparent'
-                      }`}
-                    >
-                      <Check size={12} />
-                    </span>
-                    <span className={`text-[13px] font-medium ${isChecked ? 'text-academy-success-text' : 'text-academy-muted'}`}>
-                      {item}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {activeMaterial.selfTest.length > 0 && (
-            <div className="bg-white rounded-[24px] border border-academy-border/70 p-5">
-              <h3 className="text-[15px] font-bold text-academy-text">Teste-se antes do box</h3>
-              <p className="text-[12px] font-medium text-academy-muted mt-1 mb-4">
-                Responda de cabeça primeiro. Depois confira.
-              </p>
-              <div className="grid gap-3">
-                {activeMaterial.selfTest.map((qa, index) => {
-                  const revealed = revealedAnswers.has(index);
-                  return (
-                    <div key={qa.question} className="rounded-[18px] border border-academy-border/70 overflow-hidden">
-                      <p className="text-[14px] font-semibold text-academy-text leading-snug px-4 pt-3.5 pb-3">
-                        {qa.question}
-                      </p>
-                      {revealed ? (
-                        <div className="bg-academy-neutral px-4 py-3 border-t border-academy-border/60">
-                          <p className="text-[13px] text-academy-muted leading-relaxed">{qa.answer}</p>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => toggleAnswer(index)}
-                          className="w-full text-left px-4 py-3 bg-academy-neutral text-[13px] font-bold text-academy-primary border-t border-academy-border/60 hover:bg-academy-soft transition-colors"
-                        >
-                          Ver resposta
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          <div className="bg-white rounded-[24px] border border-academy-border/70 p-5">
-            <h3 className="text-[15px] font-bold text-academy-text mb-4">Pontos de atenção</h3>
-            <div className="grid gap-3">
-              {activeMaterial.pitfalls.map(item => (
-                <p key={item} className="text-[13px] leading-relaxed text-academy-attention-text bg-academy-attention rounded-[16px] px-4 py-3">
-                  {item}
+        <StudySection kicker="Roteiro">
+          <div className="space-y-3">
+            {activeMaterial.modules.map((module, moduleIndex) => (
+              <article key={module.title} className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+                <p className="text-[13px] tabular-nums text-[var(--neo)]">
+                  {String(moduleIndex + 1).padStart(2, '0')}
                 </p>
-              ))}
-            </div>
+                <h3 className="mt-2 text-[17px] font-semibold tracking-[-0.016em] text-[var(--neo-ink)]">
+                  {module.title}
+                </h3>
+                <p className="mt-1 text-[15px] leading-snug text-[var(--neo-gray)]">
+                  {module.description}
+                </p>
+                <ul className="mt-4 space-y-2.5">
+                  {module.steps.map(step => (
+                    <li key={step} className="flex gap-2.5 text-[15px] leading-relaxed text-[var(--neo-ink)]">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--neo)]" />
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            ))}
           </div>
+        </StudySection>
 
-          <div className="bg-white border border-academy-border rounded-[24px] p-5 text-academy-text">
-            <div className="flex items-center gap-2 mb-3">
-              <UserCircle size={18} className="text-academy-muted" />
-              <h3 className="text-[15px] font-bold">Como explicar ao paciente</h3>
-            </div>
-            <p className="text-[14px] leading-relaxed text-academy-muted">{activeMaterial.patientTalk}</p>
-          </div>
-
-          <div className="bg-white rounded-[24px] border border-academy-border/70 p-5">
-            <h3 className="text-[15px] font-bold text-academy-text">
-              Como você entraria nesse atendimento agora?
-            </h3>
-            <p className="text-[12px] font-medium text-academy-muted mt-1 mb-4">
-              Resposta honesta. Sem nota, sem ranking — só ajusta o que eu te mostro depois.
-            </p>
-            <div className="grid gap-2">
-              {CONFIDENCE_OPTIONS.map(option => {
-                const isSelected = selectedStudy ? confidenceMap[selectedStudy]?.level === option.level : false;
-                return (
-                  <button
-                    key={option.level}
-                    type="button"
-                    onClick={() => selectedStudy && setTopicConfidence(selectedStudy, option.level)}
-                    className={`flex items-center gap-3 rounded-[16px] border px-4 py-3 text-left transition-colors ${
-                      isSelected
-                        ? option.level === 'confident'
-                          ? 'bg-academy-success border-academy-success-text/20'
-                          : 'bg-academy-alert border-academy-alert-text/20'
-                        : 'bg-white border-academy-border hover:bg-academy-neutral'
+        <StudySection
+          kicker="Checklist"
+          action={
+            <span className="text-[13px] tabular-nums text-[var(--neo-gray)]">
+              {checkedCount}/{activeMaterial.checklist.length}
+            </span>
+          }
+        >
+          <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+            {activeMaterial.checklist.map(item => {
+              const isChecked = checkedItems.has(item);
+              return (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => toggleChecklistItem(item)}
+                  className="flex w-full items-center gap-3 border-b border-black/[0.04] px-5 py-4 text-left last:border-b-0"
+                >
+                  <span
+                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
+                      isChecked ? 'bg-[var(--neo)] text-white' : 'bg-white text-transparent'
                     }`}
                   >
-                    <span
-                      className={`w-[20px] h-[20px] rounded-full border flex items-center justify-center shrink-0 transition-colors ${
-                        isSelected
-                          ? option.level === 'confident'
-                            ? 'bg-academy-success-text border-academy-success-text text-white'
-                            : 'bg-academy-alert-text border-academy-alert-text text-white'
-                          : 'border-academy-border bg-white text-transparent'
-                      }`}
-                    >
-                      <Check size={11} />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-[14px] font-bold text-academy-text">
-                        {option.label}
-                      </span>
-                      {isSelected && (
-                        <span className="block text-[12px] font-medium text-academy-muted mt-0.5">
-                          {option.hint}
-                        </span>
-                      )}
-                    </span>
-                  </button>
+                    <Check size={12} />
+                  </span>
+                  <span
+                    className={`text-[15px] tracking-[-0.011em] ${
+                      isChecked ? 'text-[var(--neo-gray)] line-through' : 'text-[var(--neo-ink)]'
+                    }`}
+                  >
+                    {item}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </StudySection>
+
+        {activeMaterial.selfTest.length > 0 && (
+          <StudySection kicker="Teste-se">
+            <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+              {activeMaterial.selfTest.map((qa, index) => {
+                const revealed = revealedAnswers.has(index);
+                return (
+                  <div key={qa.question} className="border-b border-black/[0.04] px-5 py-4 last:border-b-0">
+                    <p className="text-[15px] font-semibold leading-snug tracking-[-0.011em] text-[var(--neo-ink)]">
+                      {qa.question}
+                    </p>
+                    {revealed ? (
+                      <p className="mt-2 text-[15px] leading-relaxed text-[var(--neo-gray)]">
+                        {qa.answer}
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => toggleAnswer(index)}
+                        className="neo-link mt-2 text-[15px]"
+                      >
+                        Ver resposta ›
+                      </button>
+                    )}
+                  </div>
                 );
               })}
             </div>
-          </div>
+          </StudySection>
+        )}
 
-          {selectedCase && openPatientRecord && (
-            <button
-              type="button"
-              onClick={() => openPatientRecord(selectedCase.patient.id)}
-              className="apple-btn w-full"
-            >
-              Revisei. Abrir caso de {firstName(selectedCase.patient?.name || selectedCase.app?.patient_name)}
-            </button>
-          )}
-        </section>
+        <StudySection kicker="Cuidado">
+          <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+            {activeMaterial.pitfalls.map(item => (
+              <p
+                key={item}
+                className="border-b border-black/[0.04] px-5 py-4 text-[15px] leading-relaxed text-[var(--neo-ink)] last:border-b-0"
+              >
+                {item}
+              </p>
+            ))}
+          </div>
+        </StudySection>
+
+        <StudySection kicker="Explicar">
+          <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+            <p className="text-[15px] leading-relaxed tracking-[-0.011em] text-[var(--neo-ink)]">
+              {activeMaterial.patientTalk}
+            </p>
+          </div>
+        </StudySection>
+
+        <StudySection kicker="Confiança">
+          <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+            {CONFIDENCE_OPTIONS.map(option => {
+              const isSelected = selectedStudy ? confidenceMap[selectedStudy]?.level === option.level : false;
+              return (
+                <button
+                  key={option.level}
+                  type="button"
+                  onClick={() => selectedStudy && setTopicConfidence(selectedStudy, option.level)}
+                  className="flex w-full items-center gap-3 border-b border-black/[0.04] px-5 py-4 text-left last:border-b-0"
+                >
+                  <span
+                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
+                      isSelected ? 'bg-[var(--neo)] text-white' : 'bg-white text-transparent'
+                    }`}
+                  >
+                    <Check size={12} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[15px] font-semibold tracking-[-0.011em] text-[var(--neo-ink)]">
+                      {option.label}
+                    </span>
+                    {isSelected && (
+                      <span className="mt-0.5 block text-[13px] text-[var(--neo-gray)]">
+                        {option.hint}
+                      </span>
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </StudySection>
+
+        {selectedCase && openPatientRecord && (
+          <button
+            type="button"
+            className="neo-pill w-full"
+            onClick={() => openPatientRecord(selectedCase.patient.id)}
+          >
+            Abrir caso de {caseName}
+          </button>
+        )}
       </div>
     );
   }
 
-  // ── List view ────────────────────────────────────────────────────────
-  const preceptorMessage = nextCase
-    ? `Preparei a revisão pelo caso de ${firstName(nextCase.patient?.name || nextCase.app?.patient_name)}, não por catálogo.`
-    : clinicalGaps.length > 0
-      ? 'Sem atendimento próximo na agenda. Sugeri revisões pelas lacunas do seu histórico clínico.'
-      : 'Nada urgente para estudar agora. Quando um caso entrar na agenda, a revisão certa aparece aqui primeiro.';
+  const nextPatientName = nextCase
+    ? firstName(nextCase.patient?.name || nextCase.app?.patient_name)
+    : '';
+  const headline = nextCase
+    ? `${getDayPhrase(nextCase.date)} ${nextPatientName}.`
+    : 'Antes do box';
+  const headlineMeta = nextCase && nextCaseTopic
+    ? `${nextCaseTopic.title} · ${nextCaseTopic.duration}`
+    : studyNudges.length > 0
+      ? 'Uma revisão que ainda falta no seu histórico.'
+      : 'Quando um caso entrar na agenda, a revisão certa aparece aqui.';
 
   return (
     <div className="page-shell space-y-8 tablet-l:space-y-10">
-      <section className="space-y-4">
-        <PageIntro
-          kicker="Estudos"
-          title={nextCase ? 'O que revisar agora' : 'Sua revisão clínica'}
-          subtitle={preceptorMessage}
-        />
-      </section>
+      <header>
+        <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">Estudos</p>
+        <h1 className="mt-2 max-w-[18ch] text-[28px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)] sm:text-[34px]">
+          {headline}
+        </h1>
+        <p className="mt-3 max-w-[36ch] text-[17px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
+          {headlineMeta}
+        </p>
+      </header>
 
-      <div className="tablet-l:grid tablet-l:grid-cols-12 tablet-l:gap-8 tablet-l:items-start space-y-8 tablet-l:space-y-0">
-      <div className="tablet-l:col-span-7 space-y-8">
-
-      {nextCase && nextCaseTopic ? (
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          className="space-y-4"
-        >
-          <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Antes do próximo atendimento</h3>
-          <div className="comic-card rounded-[32px] p-7 relative overflow-hidden flex flex-col">
-            <div className="absolute -right-8 -bottom-8 opacity-[0.06] text-academy-primary pointer-events-none">
-              <nextCaseTopic.icon size={200} />
-            </div>
-
-            <div className="relative z-10 flex flex-col">
-              <span className="text-apple-gray text-[13px] font-normal">
-                Foco do atendimento
-              </span>
-              <h2 className="text-[28px] sm:text-[34px] font-semibold text-apple-ink leading-[1.05] tracking-[-0.025em] mt-2">
-                {getDayPhrase(nextCase.date)} {firstName(nextCase.app.patient_name || nextCase.patient?.name)}.
-              </h2>
-
-              <div className="flex items-center gap-2 flex-wrap mt-3">
-                <span className="px-3 py-1.5 rounded-full text-[12px] font-bold bg-academy-soft text-academy-primary">
-                  {getWhenLabel(nextCase.date)}
-                </span>
-                {nextCase.box.targetTooth && (
-                  <span className="px-3 py-1.5 rounded-full text-[12px] font-bold bg-academy-neutral text-academy-muted">
-                    Dente {nextCase.box.targetTooth}
-                  </span>
-                )}
-                {nextCase.box.clinicalStageLabel && (
-                  <span className="px-3 py-1.5 rounded-full text-[12px] font-bold bg-academy-neutral text-academy-muted">
-                    {nextCase.box.clinicalStageLabel}
-                  </span>
-                )}
-              </div>
-
-              <div className="mt-5 space-y-3">
-                {cleanCheckpoint(nextCase.box.criticalCheckpoint) && (
-                  <div className="bg-academy-neutral border border-academy-border/80 rounded-[20px] px-4 py-3.5">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-academy-muted">O que importa neste caso</span>
-                    <p className="text-[14px] font-semibold text-academy-text leading-snug mt-1">
-                      {cleanCheckpoint(nextCase.box.criticalCheckpoint)}
-                    </p>
-                  </div>
-                )}
-
-                {nextCase.box.anamnesisAlert && (
-                  <div className="bg-academy-attention rounded-[20px] px-4 py-3.5 flex items-start gap-2.5">
-                    <AlertCircle size={17} className="text-academy-attention-text shrink-0 mt-0.5" />
-                    <p className="text-[13px] font-semibold text-academy-attention-text leading-snug">
-                      {nextCase.box.anamnesisAlert}
-                    </p>
-                  </div>
-                )}
-
-                <div className="bg-academy-soft border border-academy-primary/10 rounded-[20px] px-4 py-3.5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-academy-primary shadow-sm shrink-0">
-                      <nextCaseTopic.icon size={17} />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[14px] font-bold text-academy-text leading-snug">{nextCaseTopic.title}</p>
-                      <p className="text-[12px] font-semibold text-academy-muted mt-0.5">
-                        Revisão de {nextCaseTopic.duration} · {nextCaseTopic.subtitle}
-                      </p>
-                      {confidenceMap[nextCase.topicKey]?.level === 'review' && (
-                        <p className="text-[11px] font-bold text-academy-alert-text mt-1">
-                          Você marcou este tema para rever.
-                        </p>
-                      )}
-                      {confidenceMap[nextCase.topicKey]?.level === 'ask' && (
-                        <p className="text-[11px] font-bold text-academy-alert-text mt-1">
-                          Você ficou de levar uma dúvida deste tema ao professor.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                  <DuoButton onClick={() => openStudy(nextCase.topicKey, nextCase)}>
-                    Revisar para este caso
-                  </DuoButton>
-                  <DuoButton variant="secondary" onClick={() => openPatientRecord?.(nextCase.patient.id)}>
-                    Abrir caso
-                  </DuoButton>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.section>
-      ) : (
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          className="comic-card"
-        >
-          <QuietEmpty
-            title="Nenhum caso exigindo revisão agora."
-            body="Agenda tranquila. Use o tempo numa lacuna ou na biblioteca."
-            actionLabel="Ver agenda"
-            onAction={() => setActiveTab?.('agenda')}
-          />
-        </motion.section>
-      )}
-
-      {laterCases.length > 0 && (
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          className="space-y-4"
-        >
-          <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Casos seguintes</h3>
-          <div className="rounded-[24px] overflow-hidden liquid-glass-card">
-            {laterCases.map((caseInfo, index) => {
-              const material = STUDY_LIBRARY[caseInfo.topicKey];
-              return (
-                <motion.button
-                  type="button"
-                  key={`${caseInfo.app.id}`}
-                  whileTap={{ scale: 0.99 }}
-                  onClick={() => openStudy(caseInfo.topicKey, caseInfo)}
-                  className={`w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-academy-neutral/60 transition-colors ${
-                    index !== laterCases.length - 1 ? 'border-b border-academy-border/60' : ''
-                  }`}
-                >
-                  <div className={`w-11 h-11 rounded-[14px] flex items-center justify-center shrink-0 ${material.color}`}>
-                    <material.icon size={20} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-[15px] font-bold text-academy-text truncate">
-                        {firstName(caseInfo.app.patient_name || caseInfo.patient?.name)}
-                      </h4>
-                      {caseInfo.box.anamnesisAlert && (
-                        <span className="w-2 h-2 rounded-full bg-academy-attention-text shrink-0" />
-                      )}
-                    </div>
-                    <p className="text-[12px] font-semibold text-academy-muted mt-0.5 truncate">
-                      {getWhenLabel(caseInfo.date)} · {material.title} · {material.duration}
-                    </p>
-                  </div>
-                  <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
-                </motion.button>
-              );
-            })}
-          </div>
-        </motion.section>
-      )}
-
-      {clinicalGaps.length > 0 && (
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-          className="space-y-4"
-        >
-          <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Lacunas no seu histórico</h3>
-          <div className="grid gap-3">
-            {clinicalGaps.map(gap => {
-              const material = gap.studyTopic ? STUDY_LIBRARY[gap.studyTopic] : null;
-              if (!material) return null;
-              return (
-                <motion.button
-                  type="button"
-                  key={gap.id}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => openStudy(gap.studyTopic!)}
-                  className="bg-academy-alert rounded-[20px] px-5 py-4 text-left flex items-center gap-4 transition-all"
-                >
-                  <div className="w-10 h-10 rounded-[14px] bg-white flex items-center justify-center text-academy-alert-text shadow-sm shrink-0">
-                    <material.icon size={20} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[14px] font-semibold text-academy-text leading-snug">{gap.message}</p>
-                    <p className="text-[12px] font-bold text-academy-alert-text mt-1">
-                      Revisar {material.title.toLowerCase()} · {material.duration}
-                    </p>
-                  </div>
-                  <ChevronRight size={16} className="text-academy-alert-text/50 shrink-0" />
-                </motion.button>
-              );
-            })}
-          </div>
-        </motion.section>
-      )}
-
-      {consolidation && (
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <motion.button
-            type="button"
-            whileTap={{ scale: 0.98 }}
-            onClick={() => openStudy(consolidation.topic)}
-            className="w-full bg-white rounded-[20px] px-5 py-4 border border-academy-border/70 shadow-sm text-left flex items-center gap-4 hover:border-stone-300 transition-all"
-          >
-            <div className="w-10 h-10 rounded-[14px] bg-academy-success flex items-center justify-center text-academy-success-text shrink-0">
-              <Activity size={20} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[14px] font-semibold text-academy-text leading-snug">
-                Você praticou {consolidation.skillLabel} recentemente.
+      <div className="flex flex-col gap-10 tablet-l:grid tablet-l:grid-cols-12 tablet-l:items-start tablet-l:gap-x-12">
+        <div className="space-y-8 tablet-l:col-span-7">
+          {nextCase && nextCaseTopic ? (
+            <button
+              type="button"
+              onClick={() => openStudy(nextCase.topicKey, nextCase)}
+              className="w-full rounded-[28px] bg-[var(--neo)] px-6 py-6 text-left text-white"
+            >
+              <p className="text-[12px] font-normal uppercase tracking-[0.04em] text-white/80">
+                {getWhenLabel(nextCase.date)}
+                {nextCase.box.targetTooth ? ` · Dente ${nextCase.box.targetTooth}` : ''}
               </p>
-              <p className="text-[12px] font-bold text-academy-muted mt-1">
-                Consolidar {STUDY_LIBRARY[consolidation.topic].title.toLowerCase()} · {STUDY_LIBRARY[consolidation.topic].duration}
+              <p className="mt-2 text-[26px] font-semibold leading-[1.05] tracking-[-0.025em] sm:text-[32px]">
+                {nextCaseTopic.title}
               </p>
-            </div>
-            <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
-          </motion.button>
-        </motion.section>
-      )}
-
-      {reviewRequests.length > 0 && (
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
-          className="space-y-4"
-        >
-          <h3 className="text-[15px] font-bold text-academy-text tracking-tight px-1">Você marcou para voltar</h3>
-          <div className="rounded-[24px] overflow-hidden liquid-glass-card">
-            {reviewRequests.map((request, index) => {
-              const material = STUDY_LIBRARY[request.topic];
-              return (
-                <motion.button
-                  type="button"
-                  key={request.topic}
-                  whileTap={{ scale: 0.99 }}
-                  onClick={() => openStudy(request.topic)}
-                  className={`w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-academy-neutral/60 transition-colors ${
-                    index !== reviewRequests.length - 1 ? 'border-b border-academy-border/60' : ''
-                  }`}
-                >
-                  <div className={`w-11 h-11 rounded-[14px] flex items-center justify-center shrink-0 ${material.color}`}>
-                    <material.icon size={20} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-[15px] font-bold text-academy-text">{material.title}</h4>
-                    <p className="text-[12px] font-semibold text-academy-alert-text mt-0.5">
-                      {request.level === 'review'
-                        ? 'Você pediu para rever este tema'
-                        : 'Você ficou de tirar uma dúvida com o professor'} · {material.duration}
-                    </p>
-                  </div>
-                  <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
-                </motion.button>
-              );
-            })}
-          </div>
-        </motion.section>
-      )}
-
-      </div>
-      <div className="tablet-l:col-span-5 tablet-l:sticky tablet-l:top-8">
-
-      <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        className="space-y-4 pt-4 border-t border-academy-border/50"
-      >
-        <div className="px-1">
-          <div className="flex items-center gap-2">
-            <BookOpen size={16} className="text-academy-muted" />
-            <h3 className="text-[15px] font-bold text-academy-text tracking-tight">Biblioteca</h3>
-          </div>
-          <p className="text-[12px] font-medium text-academy-muted mt-1">
-            Para quando você quiser ir além do que a agenda pede.
-          </p>
-        </div>
-
-        <div className="relative">
-          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-academy-muted/60 pointer-events-none" />
-          <input
-            type="text"
-            value={librarySearch}
-            onChange={event => setLibrarySearch(event.target.value)}
-            placeholder="Buscar tema ou procedimento (ex.: siso, canal, grampo)"
-            className="w-full liquid-glass-card border border-academy-border/70 rounded-[16px] pl-11 pr-4 py-3 text-[14px] font-medium text-academy-text placeholder:text-academy-muted/60 outline-none focus:ring-2 focus:ring-academy-primary/10 transition-all"
-          />
-        </div>
-
-        {filteredLibraryItems.length > 0 ? (
-          <div className="rounded-[24px] overflow-hidden liquid-glass-card">
-            {filteredLibraryItems.map((cat, index) => (
-              <motion.button
+              <p className="mt-2 text-[15px] tracking-[-0.011em] text-white/85">
+                {nextCaseTopic.duration} · {nextCaseTopic.subtitle}
+              </p>
+              {cleanCheckpoint(nextCase.box.criticalCheckpoint) && (
+                <p className="mt-4 text-[15px] leading-snug text-white/90">
+                  {cleanCheckpoint(nextCase.box.criticalCheckpoint)}
+                </p>
+              )}
+              {nextCase.box.anamnesisAlert && (
+                <p className="mt-3 rounded-[16px] bg-white/15 px-4 py-3 text-[14px] leading-snug">
+                  {nextCase.box.anamnesisAlert}
+                </p>
+              )}
+              {(confidenceMap[nextCase.topicKey]?.level === 'review' ||
+                confidenceMap[nextCase.topicKey]?.level === 'ask') && (
+                <p className="mt-3 text-[13px] text-white/80">
+                  {confidenceMap[nextCase.topicKey]?.level === 'review'
+                    ? 'Você marcou este tema para rever.'
+                    : 'Você ficou de levar uma dúvida ao professor.'}
+                </p>
+              )}
+              <p className="mt-4 text-[15px] text-white/90">Revisar ›</p>
+            </button>
+          ) : studyNudges[0] ? (
+            <button
+              type="button"
+              onClick={() => openStudy(studyNudges[0].topic)}
+              className="w-full rounded-[24px] bg-[#f5f5f7] px-5 py-5 text-left"
+            >
+              <p className="text-[13px] text-[var(--neo-gray)]">Estudar agora</p>
+              <p className="mt-1 text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
+                {studyNudges[0].title}
+              </p>
+              <p className="mt-2 text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
+                {studyNudges[0].reason}
+              </p>
+              <p className="mt-4 flex items-center justify-between text-[15px]">
+                <span className="text-[var(--neo-gray)]">{STUDY_LIBRARY[studyNudges[0].topic].duration}</span>
+                <span className="neo-link">Revisar ›</span>
+              </p>
+            </button>
+          ) : (
+            <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+              <p className="text-[13px] text-[var(--neo-gray)]">Agenda</p>
+              <p className="mt-1 text-[22px] font-semibold tracking-[-0.025em] text-[var(--neo-ink)]">
+                Livre agora
+              </p>
+              <p className="mt-1 text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">
+                Nenhum atendimento nos próximos 15 dias.
+              </p>
+              <button
                 type="button"
-                key={`lib-${cat.id}`}
-                whileTap={{ scale: 0.99 }}
-                onClick={() => openStudy(cat.id)}
-                className={`w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-academy-neutral/60 transition-colors ${
-                  index !== filteredLibraryItems.length - 1 ? 'border-b border-academy-border/60' : ''
-                }`}
+                className="neo-link mt-3 text-[15px]"
+                onClick={() => setActiveTab?.('agenda')}
               >
-                <div className={`w-11 h-11 rounded-[14px] flex items-center justify-center shrink-0 ${cat.color}`}>
-                  <cat.icon size={20} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-[15px] font-bold text-academy-text">{cat.title}</h4>
-                  <p className="text-[12px] font-semibold text-academy-muted mt-0.5 truncate">
-                    {cat.duration} · {cat.subtitle}
-                  </p>
-                </div>
-                <ChevronRight size={16} className="text-[#C6C6C8] shrink-0" />
-              </motion.button>
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-[24px] bg-white border border-academy-border/70 px-5 py-6 text-center">
-            <p className="text-[14px] font-semibold text-academy-text">Nada com esse nome por aqui.</p>
-            <p className="text-[12px] text-academy-muted mt-1">
-              Tente o nome do procedimento — "extração", "canal", "raspagem".
-            </p>
-          </div>
-        )}
-      </motion.section>
-      </div>
+                Ver agenda ›
+              </button>
+            </div>
+          )}
+
+          {nextCase && openPatientRecord && (
+            <button
+              type="button"
+              className="neo-link text-[15px]"
+              onClick={() => openPatientRecord(nextCase.patient.id)}
+            >
+              Abrir caso de {nextPatientName} ›
+            </button>
+          )}
+
+          {laterCases.length > 0 && (
+            <StudySection kicker="A seguir">
+              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+                {laterCases.map(caseInfo => {
+                  const material = STUDY_LIBRARY[caseInfo.topicKey];
+                  return (
+                    <button
+                      type="button"
+                      key={`${caseInfo.app.id}`}
+                      onClick={() => openStudy(caseInfo.topicKey, caseInfo)}
+                      className="flex w-full items-center gap-4 border-b border-black/[0.04] px-5 py-4 text-left last:border-b-0"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[15px] font-semibold text-[var(--neo-ink)]">
+                          {firstName(caseInfo.app.patient_name || caseInfo.patient?.name)}
+                        </p>
+                        <p className="mt-0.5 truncate text-[13px] text-[var(--neo-gray)]">
+                          {getWhenLabel(caseInfo.date)} · {material.title} · {material.duration}
+                        </p>
+                      </div>
+                      <ChevronRight size={16} className="shrink-0 text-[#C6C6C8]" />
+                    </button>
+                  );
+                })}
+              </div>
+            </StudySection>
+          )}
+
+          {studyNudges.length > (nextCase ? 0 : 1) && (
+            <StudySection kicker="Para você">
+              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+                {studyNudges.slice(nextCase ? 0 : 1).map(nudge => (
+                  <button
+                    type="button"
+                    key={nudge.key}
+                    onClick={() => openStudy(nudge.topic)}
+                    className="flex w-full items-center gap-4 border-b border-black/[0.04] px-5 py-4 text-left last:border-b-0"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[15px] font-semibold text-[var(--neo-ink)]">
+                        {nudge.title}
+                      </p>
+                      <p className="mt-0.5 truncate text-[13px] text-[var(--neo-gray)]">
+                        {nudge.reason}
+                      </p>
+                    </div>
+                    <ChevronRight size={16} className="shrink-0 text-[#C6C6C8]" />
+                  </button>
+                ))}
+              </div>
+            </StudySection>
+          )}
+        </div>
+
+        <div className="space-y-8 tablet-l:col-span-5">
+          <StudySection kicker="Temas">
+            <div className="relative mb-3">
+              <Search
+                size={16}
+                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--neo-gray)]"
+              />
+              <input
+                type="text"
+                value={librarySearch}
+                onChange={event => setLibrarySearch(event.target.value)}
+                placeholder="siso, canal, grampo"
+                className="w-full rounded-[18px] bg-[#f5f5f7] py-3 pl-11 pr-4 text-[15px] tracking-[-0.011em] text-[var(--neo-ink)] outline-none placeholder:text-[var(--neo-gray)]"
+              />
+            </div>
+
+            {filteredLibraryItems.length > 0 ? (
+              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+                {filteredLibraryItems.map(cat => {
+                  const conf = confidenceMap[cat.id]?.level;
+                  const caption =
+                    nextCase?.topicKey === cat.id
+                      ? `Para ${nextPatientName} · ${cat.duration}`
+                      : conf === 'review'
+                        ? `Você pediu para rever · ${cat.duration}`
+                        : conf === 'ask'
+                          ? `Dúvida para o professor · ${cat.duration}`
+                          : `${cat.duration} · ${cat.subtitle}`;
+                  return (
+                    <button
+                      type="button"
+                      key={`lib-${cat.id}`}
+                      onClick={() => openStudy(cat.id, nextCase?.topicKey === cat.id ? nextCase : null)}
+                      className="flex w-full items-center gap-4 border-b border-black/[0.04] px-5 py-4 text-left last:border-b-0"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[15px] font-semibold text-[var(--neo-ink)]">
+                          {cat.title}
+                        </p>
+                        <p className="mt-0.5 truncate text-[13px] text-[var(--neo-gray)]">
+                          {caption}
+                        </p>
+                      </div>
+                      <ChevronRight size={16} className="shrink-0 text-[#C6C6C8]" />
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+                <p className="text-[15px] font-semibold text-[var(--neo-ink)]">Nada com esse nome.</p>
+                <p className="mt-1 text-[13px] text-[var(--neo-gray)]">
+                  Tente o procedimento — extração, canal, raspagem.
+                </p>
+              </div>
+            )}
+          </StudySection>
+        </div>
       </div>
     </div>
   );
 };
 
+function StudySection({
+  kicker,
+  action,
+  children,
+}: {
+  kicker: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="space-y-3">
+      <div className="flex items-baseline justify-between gap-3 px-1">
+        <h2 className="text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">{kicker}</h2>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}

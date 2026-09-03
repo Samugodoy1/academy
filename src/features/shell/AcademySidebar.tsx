@@ -34,7 +34,7 @@ export function AcademySidebar({
   return (
     <aside
       className={`
-        fixed inset-y-0 left-0 z-[110] bg-sys-sidebar border-r border-sys-hairline p-3 tablet-l:p-2.5 desktop:p-4 flex flex-col transition-all duration-300 ease-in-out tablet-l:static tablet-l:translate-x-0 no-print
+        fixed inset-y-0 left-0 z-[110] bg-[var(--neo-wash,var(--sys-sidebar))] border-r border-sys-hairline p-3 tablet-l:p-2.5 desktop:p-4 flex flex-col transition-all duration-300 ease-in-out tablet-l:static tablet-l:translate-x-0 no-print
         ${isSidebarOpen ? 'translate-x-0 w-[272px]' : '-translate-x-full w-[272px] tablet-l:w-[88px] desktop:w-[272px]'}
       `}
     >

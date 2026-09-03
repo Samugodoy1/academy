@@ -485,10 +485,10 @@ function PacientesTabComponent({
                   <span
                     className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold ${
                       chip.key === 'pending'
-                        ? 'bg-rose-100 text-rose-600'
+                        ? 'bg-[var(--neo-soft)] text-[var(--neo-ink)]'
                         : chip.key === 'scheduled'
-                          ? 'bg-violet-100 text-academy-primary'
-                          : 'bg-slate-200 text-slate-600'
+                          ? 'bg-[var(--neo)] text-white'
+                          : 'bg-white text-[var(--neo-gray)]'
                     }`}
                   >
                     {chip.count}
@@ -697,9 +697,9 @@ function PacientesTabComponent({
             {patientCards.length === 0 && patients.length === 0 && !searchTerm && (
               <div className="col-span-full comic-card">
                 <QuietEmpty
-                  title="Ainda não tem caso no box."
-                  body="Quando entrar o primeiro paciente real, o prontuário, a evolução e o odontograma ficam aqui."
-                  actionLabel="Cadastrar caso"
+                  title="Nenhum paciente ainda."
+                  body="Comece pelo seu primeiro caso."
+                  actionLabel="Começar"
                   onAction={() => setIsPatientModalOpen(true)}
                 />
               </div>

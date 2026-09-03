@@ -17,6 +17,7 @@ import {
   LogOut,
 } from '../../icons';
 import { SubscriptionManagement } from '../../components/SubscriptionManagement';
+import { AcademyNeoPicker } from '../../components/AcademyNeoPicker';
 import { SystemThemePicker } from '../../components/SystemThemePicker';
 import type { CurrentUser, Dentist, Product, ProductAccess, ProductPlan } from '../../types/clinical';
 
@@ -99,7 +100,7 @@ export function ConfigTab({
                   <UserCircle size={64} />
                 )}
               </div>
-              <label className="absolute bottom-0 right-0 bg-apple-blue text-white p-1.5 rounded-full cursor-pointer hover:bg-apple-blue-hover transition-all">
+              <label className="absolute bottom-0 right-0 bg-[var(--neo,#0071e3)] text-white p-1.5 rounded-full cursor-pointer hover:opacity-90 transition-all">
                 <Camera size={14} />
                 <input type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} />
               </label>
@@ -134,7 +135,7 @@ export function ConfigTab({
         </div>
       </div>
 
-      <SystemThemePicker />
+      {currentProduct === 'academy' ? <AcademyNeoPicker /> : <SystemThemePicker />}
 
       {/* ── VIEW MODE ── */}
       {!isProfileEditing && (

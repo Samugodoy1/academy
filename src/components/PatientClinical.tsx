@@ -3225,175 +3225,143 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       </main>
 
       {isBoxModeOpen && (
-        <div className="fixed inset-0 z-[197] overflow-y-auto bg-white font-sans text-[#061414]">
-          <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 pb-10 pt-5 sm:px-8">
-            {/* ── Topo ── */}
-            <header className="flex items-center justify-between gap-3 mb-1">
-              <div className="flex items-center gap-2">
-                <span className="text-[14px] font-bold text-[#17232D]">Modo Box</span>
-                <span className="rounded-md bg-[#EEF3F7] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.05em] text-[#5A6B7B]">
-                  {activeBoxStep.label}
-                </span>
+        <div className="fixed inset-0 z-[197] overflow-y-auto bg-[var(--neo)] font-sans text-white">
+          <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-5 pb-8 pt-6">
+            <header className="mb-5 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[15px] text-white/80">Modo Box</p>
+                <p className="text-[17px] font-semibold tracking-[-0.016em]">{activeBoxStep.label}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsBoxModeOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-[#8E9AA6] transition-colors hover:bg-[#F1F4F7] active:scale-95"
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white"
                 aria-label="Fechar Modo Box"
               >
-                <X size={16} />
+                <X size={20} />
               </button>
             </header>
 
-            {/* ── Progress dots ── */}
-            <div className="flex items-center gap-1.5 mb-6">
-              {boxSteps.map((_s, i) => (
-                <div
-                  key={i}
-                  className={`h-1 rounded-full transition-all duration-300 ${
-                    i === boxStep ? 'w-6 bg-academy-primary' : i < boxStep ? 'w-3 bg-academy-primary/40' : 'w-3 bg-[#E2E8F0]'
-                  }`}
-                />
-              ))}
-            </div>
-
-            {/* ── Preparar mesa (collapsible) ── */}
-            {boxStep === 0 && boxMaterialItems.length > 0 && (
-              <div className="mb-5">
-                <button
-                  type="button"
-                  onClick={() => setBoxTrayOpen((v) => !v)}
-                  className="flex w-full items-center justify-between gap-2 rounded-xl bg-[#F6F8FA] px-3.5 py-2.5 text-left transition-colors hover:bg-[#EEF1F5] active:bg-[#E8ECF0]"
-                >
-                  <span className="text-[12px] font-bold text-[#5A6B7B] uppercase tracking-[0.06em]">Preparar mesa</span>
-                  <ChevronDown
-                    size={14}
-                    className={`text-[#8E9AA6] transition-transform duration-200 ${boxTrayOpen ? 'rotate-180' : ''}`}
-                  />
-                </button>
-                {boxTrayOpen && (
-                  <ul className="mt-2 space-y-1 px-1">
-                    {boxMaterialItems.slice(0, 6).map((item, idx) => {
-                      const isChecked = boxTrayChecked.has(idx);
-                      return (
-                        <li key={idx}>
-                          <button
-                            type="button"
-                            onClick={() => setBoxTrayChecked((prev) => {
-                              const next = new Set(prev);
-                              if (next.has(idx)) next.delete(idx); else next.add(idx);
-                              return next;
-                            })}
-                            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-[#F6F8FA] active:bg-[#EEF1F5]"
-                          >
-                            <span className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] border transition-all duration-150 ${
-                              isChecked
-                                ? 'border-academy-primary bg-academy-primary text-white'
-                                : 'border-[#C8D1DA] bg-white'
-                            }`}>
-                              {isChecked && <Check size={11} strokeWidth={3} />}
-                            </span>
-                            <span className={`text-[13px] leading-snug transition-colors duration-150 ${
-                              isChecked ? 'text-[#8E9AA6] line-through' : 'text-[#3A4A58]'
-                            }`}>
-                              {item}
-                            </span>
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </div>
-            )}
-
-            {/* ── Etapa atual ── */}
-            <div className="mb-6">
-              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#8EA0C4] mb-1">
-                Etapa {boxStep + 1} de {boxSteps.length}
-              </p>
-              <h2 className="text-[24px] sm:text-[28px] font-bold leading-[1.15] tracking-[-0.02em] text-[#061414]">
-                {activeBoxStep.title}
-              </h2>
-              <p className="mt-2 text-[14px] leading-relaxed text-[#6F7D89]">
-                {activeBoxStep.text}
-              </p>
-            </div>
-
-            {/* ── Checklist ── */}
-            <ol className="space-y-4 flex-1">
-              {(activeBoxStep.steps || []).slice(0, 5).map((step: string, index: number) => (
-                <li key={`${index}-${step}`} className="flex items-start gap-3">
-                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-academy-primary/10 text-[11px] font-bold text-academy-primary">
-                    {index + 1}
-                  </span>
-                  <span className="pt-[2px] text-[14px] font-medium leading-snug text-[#17313D]">
-                    {step}
-                  </span>
-                </li>
-              ))}
-            </ol>
-
-            {/* ── Ajuda (só aparece depois de clicar no botão secundário) ── */}
-            {selectedBoxDoubt && (
-              <section className="mt-6 rounded-2xl border border-[#E7ECF2] bg-[#FAFBFC] px-4 py-4">
-                <div className="flex items-center justify-between gap-3 mb-3">
-                  <p className="text-[12px] font-bold text-academy-primary">
-                    Ajuda / Dicas
-                  </p>
+            <div className="flex flex-1 flex-col rounded-[28px] bg-white px-6 py-7 text-[var(--neo-ink)]">
+              {boxStep === 0 && boxMaterialItems.length > 0 && (
+                <div className="mb-6">
                   <button
                     type="button"
-                    onClick={() => setSelectedBoxDoubt(null)}
-                    className="text-[11px] font-medium text-[#8E9AA6] hover:text-[#4F5F6D]"
+                    onClick={() => setBoxTrayOpen((v) => !v)}
+                    className="flex w-full items-center justify-between gap-2 rounded-[18px] bg-[var(--neo-wash)] px-4 py-4 text-left"
                   >
-                    Fechar
+                    <span className="text-[17px] text-[var(--neo-ink)]">Preparar mesa</span>
+                    <ChevronDown
+                      size={18}
+                      className={`text-[var(--neo-gray)] transition-transform duration-200 ${boxTrayOpen ? 'rotate-180' : ''}`}
+                    />
                   </button>
+                  {boxTrayOpen && (
+                    <ul className="mt-3 space-y-1">
+                      {boxMaterialItems.slice(0, 6).map((item, idx) => {
+                        const isChecked = boxTrayChecked.has(idx);
+                        return (
+                          <li key={idx}>
+                            <button
+                              type="button"
+                              onClick={() => setBoxTrayChecked((prev) => {
+                                const next = new Set(prev);
+                                if (next.has(idx)) next.delete(idx); else next.add(idx);
+                                return next;
+                              })}
+                              className="flex w-full items-center gap-3 rounded-[16px] px-3 py-3 text-left"
+                            >
+                              <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
+                                isChecked
+                                  ? 'bg-[var(--neo)] text-white'
+                                  : 'bg-[var(--neo-soft)] text-[var(--neo)]'
+                              }`}>
+                                {isChecked && <Check size={14} strokeWidth={3} />}
+                              </span>
+                              <span className={`text-[17px] leading-snug ${
+                                isChecked ? 'text-[var(--neo-gray)] line-through' : 'text-[var(--neo-ink)]'
+                              }`}>
+                                {item}
+                              </span>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
                 </div>
-                <div className="-mx-4 overflow-x-auto pb-3 mb-3 border-b border-[#E7ECF2] hide-scrollbar">
-                  <div className="flex min-w-max gap-2 px-4">
-                    {selectedBoxGuide.doubtChips.map((chip) => (
-                      <button
-                        key={chip}
-                        type="button"
-                        onClick={() => setSelectedBoxDoubt(chip)}
-                        className={`rounded-full px-3 py-1.5 text-[12px] font-bold transition-colors ${
-                          selectedBoxDoubt === chip 
-                            ? 'bg-[#52057B] text-white' 
-                            : 'bg-white border border-[#E7ECF2] text-[#4F5F6D] hover:bg-slate-50'
-                        }`}
-                      >
-                        {chip}
-                      </button>
+              )}
+
+              <p className="text-[15px] text-[var(--neo-gray)]">
+                Passo {boxStep + 1} de {boxSteps.length}
+              </p>
+              <h2 className="mt-2 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] sm:text-[40px]">
+                {activeBoxStep.title}
+              </h2>
+              <p className="mt-3 text-[17px] leading-relaxed text-[var(--neo-gray)]">
+                {activeBoxStep.text}
+              </p>
+
+              <ol className="mt-8 flex-1 space-y-4">
+                {(activeBoxStep.steps || []).slice(0, 5).map((step: string, index: number) => (
+                  <li key={`${index}-${step}`} className="text-[22px] leading-snug tracking-[-0.02em] text-[var(--neo-ink)]">
+                    {step}
+                  </li>
+                ))}
+              </ol>
+
+              {selectedBoxDoubt && (
+                <section className="mt-6 rounded-[22px] bg-[var(--neo-wash)] px-4 py-4">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <p className="text-[15px] text-[var(--neo)]">Ajuda</p>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedBoxDoubt(null)}
+                      className="text-[15px] text-[var(--neo-gray)]"
+                    >
+                      Fechar
+                    </button>
+                  </div>
+                  <div className="-mx-1 overflow-x-auto pb-2">
+                    <div className="flex min-w-max gap-2">
+                      {selectedBoxGuide.doubtChips.map((chip) => (
+                        <button
+                          key={chip}
+                          type="button"
+                          onClick={() => setSelectedBoxDoubt(chip)}
+                          className={`rounded-[980px] px-4 py-2 text-[15px] ${
+                            selectedBoxDoubt === chip
+                              ? 'bg-[var(--neo)] text-white'
+                              : 'bg-white text-[var(--neo-ink)]'
+                          }`}
+                        >
+                          {chip}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-2.5 pt-2">
+                    {selectedDoubtItems.map((item) => (
+                      <p key={item} className="text-[16px] leading-relaxed text-[var(--neo-ink)]">{item}</p>
                     ))}
                   </div>
-                </div>
-                <div className="space-y-2.5">
-                  {selectedDoubtItems.map((item) => (
-                    <div key={item} className="flex gap-2.5">
-                      <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-academy-primary/60" />
-                      <span className="text-[13px] leading-relaxed text-[#4F5F6D]">{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
+                </section>
+              )}
 
-            {/* ── Botões ── */}
-            <div className="mt-8 grid gap-2.5">
-              {activeBoxStep.actions.map((action) => (
-                <button
-                  key={action.label}
-                  type="button"
-                  onClick={action.onClick}
-                  className={`rounded-2xl px-4 py-3.5 text-[14px] font-bold transition-all active:scale-[0.985] ${
-                    action.primary
-                      ? 'bg-academy-primary text-white hover:brightness-110'
-                      : 'border border-[#E7ECF2] bg-white text-[#6F7D89] hover:bg-[#F8F9FA]'
-                  }`}
-                >
-                  {action.label}
-                </button>
-              ))}
+              <div className="mt-8 grid gap-3">
+                {activeBoxStep.actions.map((action) => (
+                  <button
+                    key={action.label}
+                    type="button"
+                    onClick={action.onClick}
+                    className={action.primary
+                      ? 'neo-pill w-full py-4 text-[18px]'
+                      : 'neo-pill-secondary w-full py-4 text-[18px] bg-[var(--neo-wash)]'}
+                  >
+                    {action.primary ? (action.label || 'O seu passo') : action.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>

@@ -29,6 +29,11 @@ export function resolveTheme(id: SystemThemeId): ResolvedTheme {
 export function applyResolvedTheme(resolved: ResolvedTheme) {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
+  if (root.getAttribute('data-product') === 'academy') {
+    root.setAttribute('data-theme', 'light');
+    root.style.colorScheme = 'light';
+    return;
+  }
   root.setAttribute('data-theme', resolved);
   root.style.colorScheme = resolved;
   const meta = document.querySelector('meta[name="theme-color"]');

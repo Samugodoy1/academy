@@ -2,6 +2,13 @@
 @import "tailwindcss";
 
 :root {
+  --neo: #FF6B2C;
+  --neo-soft: #FFD8C4;
+  --neo-wash: #FFF4ED;
+  --neo-ink: #1d1d1f;
+  --neo-gray: #86868b;
+  --neo-surface: #ffffff;
+
   --apple-black: #000000;
   --apple-ink: #1d1d1f;
   --apple-gray: #86868b;
@@ -107,6 +114,12 @@ html[data-theme="dark"] {
   --color-academy-attention-text: var(--apple-red);
   --color-academy-success: var(--apple-surface);
   --color-academy-success-text: var(--apple-ink);
+
+  --color-neo: var(--neo);
+  --color-neo-soft: var(--neo-soft);
+  --color-neo-wash: var(--neo-wash);
+  --color-neo-ink: var(--neo-ink);
+  --color-neo-gray: var(--neo-gray);
 
   --color-apple-black: #000000;
   --color-apple-ink: #1d1d1f;
@@ -691,4 +704,181 @@ html[data-theme="dark"] {
     transform: none;
     box-shadow: none;
   }
+
+  .neo-card {
+    background: #ffffff;
+    border-radius: 26px;
+    box-shadow: 0 10px 32px color-mix(in srgb, var(--neo) 10%, transparent);
+  }
+
+  .neo-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    border-radius: 980px;
+    background: var(--neo);
+    color: #ffffff;
+    padding: 12px 22px;
+    font-size: 17px;
+    font-weight: 400;
+    letter-spacing: -0.022em;
+    line-height: 1.2;
+  }
+
+  .neo-pill-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    border-radius: 980px;
+    background: #ffffff;
+    color: #1d1d1f;
+    padding: 12px 22px;
+    font-size: 17px;
+    font-weight: 400;
+    letter-spacing: -0.022em;
+    line-height: 1.2;
+  }
+
+  .neo-link {
+    color: var(--neo);
+    font-weight: 400;
+    letter-spacing: -0.011em;
+  }
+
+  .neo-blobs {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .neo-blobs::before,
+  .neo-blobs::after {
+    content: "";
+    position: absolute;
+    border-radius: 999px;
+    background: var(--neo-soft);
+    filter: blur(72px);
+    opacity: 0.45;
+  }
+
+  .neo-blobs::before {
+    width: 240px;
+    height: 240px;
+    top: -80px;
+    right: -40px;
+  }
+
+  .neo-blobs::after {
+    width: 280px;
+    height: 200px;
+    left: -90px;
+    top: 220px;
+    opacity: 0.32;
+  }
+}
+
+html[data-product="academy"] {
+  color-scheme: light;
+  --sys-bg: var(--neo-wash);
+  --sys-elevated: #ffffff;
+  --sys-inset: var(--neo-soft);
+  --sys-text: #1d1d1f;
+  --sys-muted: #86868b;
+  --sys-input: #ffffff;
+  --sys-input-text: #1d1d1f;
+  --sys-secondary: #ffffff;
+  --sys-secondary-hover: var(--neo-soft);
+  --sys-tabbar: color-mix(in srgb, #ffffff 88%, var(--neo-wash));
+  --sys-sidebar: var(--neo-wash);
+  --sys-hairline: color-mix(in srgb, var(--neo) 14%, #e8e8ed);
+  --academy-primary: var(--neo);
+  --academy-primary-dark: #1d1d1f;
+  --academy-primary-light: var(--neo);
+  --academy-soft: var(--neo-soft);
+  --academy-bg: var(--neo-wash);
+  --academy-card: #ffffff;
+  --academy-text: #1d1d1f;
+  --academy-muted: #86868b;
+  --academy-study: var(--neo-wash);
+  --academy-study-text: #86868b;
+  --academy-success: var(--neo-soft);
+  --academy-success-text: #1d1d1f;
+}
+
+html[data-product="academy"],
+html[data-product="academy"] body {
+  background-color: var(--neo-wash);
+  color: #1d1d1f;
+}
+
+html[data-product="academy"] body {
+  color-scheme: light;
+}
+
+html[data-product="academy"] ::selection {
+  background: color-mix(in srgb, var(--neo) 30%, transparent);
+  color: #1d1d1f;
+}
+
+html[data-product="academy"] :focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--neo) 42%, white);
+  outline-offset: 2px;
+}
+
+html[data-product="academy"] .apple-btn,
+html[data-product="academy"] .ios-button-primary,
+html[data-product="academy"] .duo-btn-active {
+  background: var(--neo);
+  color: #ffffff;
+}
+
+html[data-product="academy"] .apple-btn:hover,
+html[data-product="academy"] .ios-button-primary:hover,
+html[data-product="academy"] .duo-btn-active:hover {
+  background: color-mix(in srgb, var(--neo) 88%, #1d1d1f);
+}
+
+html[data-product="academy"] .apple-btn-light,
+html[data-product="academy"] .ios-button-secondary {
+  background: #ffffff;
+  color: #1d1d1f;
+}
+
+html[data-product="academy"] .apple-link,
+html[data-product="academy"] .neo-link {
+  color: var(--neo);
+}
+
+html[data-product="academy"] .ios-input:focus,
+html[data-product="academy"] .apple-input:focus {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--neo) 22%, transparent);
+}
+
+html[data-product="academy"] .oh-device,
+html[data-product="academy"] .comic-card,
+html[data-product="academy"] .ios-card {
+  background: #ffffff;
+  box-shadow: 0 10px 32px color-mix(in srgb, var(--neo) 8%, transparent);
+}
+
+html[data-product="academy"] .oh-device-inset {
+  background: var(--neo);
+  color: #ffffff;
+}
+
+html[data-product="academy"] .liquid-glass-nav,
+html[data-product="academy"] .tab-bar-float {
+  background: color-mix(in srgb, #ffffff 86%, var(--neo-wash));
+  border-top-color: color-mix(in srgb, var(--neo) 10%, #e8e8ed);
+}
+
+html[data-product="academy"] [aria-current="page"] {
+  color: var(--neo);
+}
+
+html[data-product="academy"] .academy-wordmark-accent {
+  color: var(--neo);
 }

@@ -161,6 +161,9 @@ export interface Dentist {
   academic_period?: string;
   student_registration?: string;
   current_discipline?: string;
+  academy_neo?: string;
+  academy_widgets?: unknown;
+  settings?: Record<string, unknown>;
   current_product?: Product;
   product_accesses?: ProductAccess[];
   accepted_terms?: boolean;

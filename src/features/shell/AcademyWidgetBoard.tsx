@@ -6,15 +6,13 @@ import {
   cycleAcademyWidgetSize,
   moveAcademyWidget,
   patchAcademyWidget,
-  persistAcademyWidgets,
-  readAcademyWidgets,
   removeAcademyWidget,
   studentGreeting,
   type AcademyWidget,
-  type AcademyWidgetKind,
   WASH_WORDS,
   WIDGET_CATALOG,
 } from '../../theme/academyWidgets';
+import { useAcademyWidgets } from '../../theme/AcademyWidgetsProvider';
 
 interface AcademyWidgetBoardProps {
   editing: boolean;
@@ -67,7 +65,7 @@ export function AcademyWidgetBoard({
   onOpenNext,
   onSchedule,
 }: AcademyWidgetBoardProps) {
-  const [widgets, setWidgets] = useState<AcademyWidget[]>(readAcademyWidgets);
+  const { widgets, commitWidgets } = useAcademyWidgets();
   const [adding, setAdding] = useState(false);
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -75,8 +73,7 @@ export function AcademyWidgetBoard({
   const dragId = useRef<string | null>(null);
 
   const commit = (next: AcademyWidget[]) => {
-    setWidgets(next);
-    persistAcademyWidgets(next);
+    commitWidgets(next);
   };
 
   const available = WIDGET_CATALOG.filter(item => canAddAcademyWidget(widgets, item.kind));

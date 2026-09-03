@@ -134,9 +134,9 @@ export const getTodayHeadline = (
 
   if (operationalFocus?.kind === 'evolution') {
     return pickDailyVariant([
-      'Falta registrar a evolução para fechar o atendimento.',
-      'Atendimento concluído. Registre a evolução para fechar.',
-      'Feche o atendimento antes de seguir.',
+      'Falta a evolução pra fechar o box.',
+      'Atendeu. Agora registra e fecha.',
+      'Fecha essa evolução antes de seguir.',
     ], `${daySeed}|evolution`);
   }
 
@@ -144,55 +144,55 @@ export const getTodayHeadline = (
     const proc = context.nextProcedure?.toLowerCase() || '';
     if (proc.includes('anestes') || proc.includes('extra') || proc.includes('cirurg')) {
       return pickDailyVariant([
-        `Você tem clínica amanhã. Vale revisar anestesia infiltrativa.`,
-        `Amanhã tem box. Separei algo para revisar antes.`,
-        `Clínica amanhã com ${patientName}. Vale uma revisão rápida.`,
+        `Amanhã tem box. Dá tempo de revisar anestesia.`,
+        `Amanhã é ${patientName}. Vale uma cola rápida.`,
+        `Box amanhã com ${patientName}. Respira e revisa.`,
       ], `${daySeed}|tomorrow-anestesia`);
     }
     return pickDailyVariant([
-      `Você tem clínica amanhã. Vale revisar a sequência.`,
+      `Amanhã tem box com ${patientName}.`,
       `Amanhã começa com ${patientName}.`,
-      `Separei algo que pode ajudar antes da clínica.`,
+      `Cola de hoje, box de amanhã.`,
     ], `${daySeed}|tomorrow`);
   }
 
   if (context.hasClinicalToday && patientName) {
     return pickDailyVariant([
-      `Hoje começa com ${patientName}.`,
-      `Seu próximo paciente pode exigir atenção na conduta.`,
-      `Hoje a clínica pede foco.`,
+      `Hoje o box é com ${patientName}.`,
+      `${patientName} te espera na cadeira.`,
+      `Bora. Hoje tem ${patientName}.`,
     ], `${daySeed}|today`);
   }
 
   if (context.lastSkill && context.daysSinceLastEvolution !== null && context.daysSinceLastEvolution >= 5) {
     return pickDailyVariant([
-      'Faz alguns dias desde sua última evolução clínica.',
-      'Faz um tempo desde seu último registro clínico.',
-      'Vale retomar a evolução clínica.',
+      'Faz uns dias sem evolução. Bora retomar.',
+      'Sua lista tá quieta. Um registro já muda o dia.',
+      'Vale abrir um caso e fechar o que ficou.',
     ], `${daySeed}|stale-evolution`);
   }
 
   if (context.lastSkill && context.skillHighlights.length > 0) {
     const top = context.skillHighlights[0];
     return pickDailyVariant([
-      `Seu último caso envolveu ${top.label}. Separei algo para o próximo.`,
-      'Isso é o que faz mais sentido para você agora.',
+      `Último caso foi ${top.label}. Separei uma cola.`,
       'Hoje eu começaria por aqui.',
+      'Isso aqui faz sentido pra agora.',
     ], `${daySeed}|last-skill`);
   }
 
   if (context.patients.length === 0) {
     return pickDailyVariant([
-      'Comece pelo primeiro caso clínico.',
-      'A evolução começa com o primeiro registro.',
-      'Monte sua base clínica.',
+      'Primeiro caso. Bora.',
+      'Começa por quem você atende.',
+      'Coloca o paciente na lista e o box liga.',
     ], `${daySeed}|start`);
   }
 
   return pickDailyVariant([
-    'Isso é o que faz mais sentido para você agora.',
-    'Organize retornos e revise casos abertos.',
-    'Bom momento para consolidar sua evolução clínica.',
+    'Cadeira livre. Dá pra organizar retorno.',
+    'Sem box agora. Fecha o que ficou aberto.',
+    'Bom momento pra uma cola curta.',
   ], `${daySeed}|default`);
 };
 

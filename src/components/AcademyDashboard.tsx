@@ -14,6 +14,7 @@ import {
 import { countClinicalSkills, suggestNextClinicalStep } from '../utils/clinicalProgression';
 import { STUDY_TOPIC_LABELS, StudyKey } from '../utils/studyTopics';
 import { DataLoadingSkeleton } from './DataLoadingSkeleton';
+import { studentGreeting } from '../theme/academyWidgets';
 
 const STUDY_TOPIC_STORAGE_KEY = 'academy_study_topic';
 
@@ -552,7 +553,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         kind: 'start',
         eyebrow: 'Primeiro passo',
         title: 'Cadastre o primeiro paciente.',
-        subtitle: 'A rotina começa pelo caso clínico, não pela agenda.',
+        subtitle: 'A rotina começa pelo caso, não pela agenda.',
         actionLabel: 'Cadastrar paciente',
         patient: null,
         appointment: null,
@@ -562,9 +563,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
     return {
       kind: 'calm',
-      eyebrow: 'Sem box hoje',
-      title: 'Organize retornos.',
-      subtitle: 'Bom momento para revisar evoluções e pendências.',
+        eyebrow: 'Cadeira livre',
+        title: 'Organiza um retorno.',
+        subtitle: 'Bom momento pra fechar o que ficou aberto.',
       actionLabel: 'Ver pacientes',
       patient: null,
       appointment: null,
@@ -656,8 +657,8 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   };
 
   const academicLine = [academicPeriod, institution].filter(Boolean).join(' · ');
-  const homeHeadline = focus.appointment && (focus.kind === 'today' || focus.kind === 'next')
-    ? 'Tudo pronto para o seu próximo atendimento.'
+  const homeHeadline = focus.appointment && (focus.kind === 'today' || focus.kind === 'next') && focusPatientName
+    ? `Bora. ${firstName(focusPatientName)} te espera.`
     : smartMessage;
 
   if (loading) {
@@ -691,7 +692,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[15px] font-normal text-[var(--neo-gray)] tracking-[-0.011em]">
-            Oi{greetingName ? `, ${greetingName}` : ''}
+            {studentGreeting(now)}{greetingName ? `, ${greetingName}` : ''}
           </p>
           {academicLine && (
             <p className="mt-1 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
@@ -735,10 +736,10 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
             <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
               <p className="text-[13px] text-[var(--neo-gray)]">Agenda</p>
               <p className="mt-1 text-[22px] font-semibold tracking-[-0.025em] text-[var(--neo-ink)]">
-                Livre agora
+                Cadeira livre
               </p>
               <p className="mt-1 text-[15px] text-[var(--neo-gray)] tracking-[-0.011em]">
-                {focus.subtitle || 'Nenhuma consulta por agora'}
+                {focus.subtitle || 'Nenhum box por agora'}
               </p>
               <button
                 type="button"
@@ -751,7 +752,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           )}
 
           {showBoxMode && boxPrepItems.length > 0 && (
-            <HomeSection kicker="O seu checklist">
+            <HomeSection kicker="Antes de sentar">
               <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
                 {boxPrepItems.map((item, index) => (
                   <button
@@ -777,7 +778,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
         <div className="space-y-8 tablet-l:col-span-5">
           {pendingRows.length > 0 && (
-            <HomeSection kicker="Para fechar">
+            <HomeSection kicker="Pra fechar">
               <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
                 {pendingRows.map(row => (
                   <React.Fragment key={row.id}>
@@ -839,7 +840,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           )}
 
           {studySuggestion && (
-            <HomeSection kicker="Estudar agora">
+            <HomeSection kicker="Cola">
               <button
                 type="button"
                 onClick={() => openStudyTopic(studySuggestion.topicKey)}

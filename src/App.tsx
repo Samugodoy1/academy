@@ -2250,6 +2250,7 @@ export default function App() {
               productLabel={PRODUCT_LABEL}
               onLogout={handleLogout}
               nextBox={nextBox}
+              patientCount={patients.length}
               openAppointmentModal={openAppointmentModal}
             />
             <main className="flex-1 min-w-0 overflow-x-hidden flex flex-col pt-4 md:pt-6 lg:pt-8">
@@ -2514,6 +2515,7 @@ export default function App() {
               onLogout={handleLogout}
               showAdmin={user?.role?.toUpperCase() === 'ADMIN'}
               nextBox={nextBox}
+              patientCount={patients.length}
               openAppointmentModal={openAppointmentModal}
             />
 

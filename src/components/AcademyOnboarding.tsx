@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { PathNode, PathStem } from '../illustrations/PathNode';
-import { DuoButton } from './DuoButton';
+import React, { useState, useRef } from 'react';
+import { Check } from '../icons';
 
 interface AcademyOnboardingProps {
   user?: any;
@@ -17,6 +16,15 @@ interface AcademyOnboardingProps {
 const firstNameOf = (user?: any) => {
   const name = user?.name || '';
   return name.replace(/^(Dr\.|Dra\.|Dr|Dra)\s+/i, '').split(' ')[0] || 'você';
+};
+
+type SetupStep = {
+  id: 'patient' | 'appointment' | 'record';
+  label: string;
+  done: boolean;
+  active: boolean;
+  locked: boolean;
+  onOpen: () => void;
 };
 
 export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
@@ -41,128 +49,189 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
 
   const firstPatient = patients[0];
   const firstName = firstNameOf(user);
+  const patientNick = (firstPatient?.name || 'seu caso').split(' ')[0];
 
-  const n1Done = hasPatients;
-  const n1Active = !hasPatients;
-  const n2Done = hasAppointments;
-  const n2Active = hasPatients && !hasAppointments;
-  const n2Locked = !hasPatients;
-  const n3Done = recordOpened;
-  const n3Active = hasPatients && hasAppointments && !recordOpened;
-  const n3Locked = !hasAppointments;
-  const n4Active = activationComplete;
-  const n4Locked = !activationComplete;
+  const finishOnboarding = () => {
+    setOnboardingDismissed(true);
+    onDismissOnboarding();
+  };
 
-  useEffect(() => {
-    if (n3Active) {
-      const node = document.getElementById('siso-path-prontuario');
-      node?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [n3Active]);
+  const steps: SetupStep[] = [
+    {
+      id: 'patient',
+      label: 'Paciente',
+      done: hasPatients,
+      active: !hasPatients,
+      locked: false,
+      onOpen: () => setIsPatientModalOpen(true),
+    },
+    {
+      id: 'appointment',
+      label: 'Atendimento',
+      done: hasAppointments,
+      active: hasPatients && !hasAppointments,
+      locked: !hasPatients,
+      onOpen: () => openAppointmentModal(),
+    },
+    {
+      id: 'record',
+      label: 'Prontuário',
+      done: recordOpened,
+      active: hasPatients && hasAppointments && !recordOpened,
+      locked: !hasAppointments,
+      onOpen: () => firstPatient && openPatientRecord(firstPatient.id),
+    },
+  ];
+
+  const currentIndex = steps.findIndex(step => step.active);
+  const currentStep = currentIndex >= 0 ? steps[currentIndex] : null;
+  const stepNumber = currentIndex >= 0 ? currentIndex + 1 : 3;
 
   if (!welcomeSeen && !hasPatients && !hasAppointments && !onboardingDismissed) {
     return (
       <section className="page-shell">
-        <div className="mx-auto flex max-w-[440px] flex-col pt-10 pb-4">
-          <p className="text-[15px] text-sys-muted">Oi, {firstName}.</p>
-          <h1 className="mt-3 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] text-sys-text">
-            O box é seu.
-          </h1>
-          <p className="mt-4 text-[17px] font-normal leading-snug text-sys-muted tracking-[-0.011em]">
-            Casos reais, atendimento, prontuário.
-          </p>
-          <DuoButton
-            className="mt-10"
+        <div className="mx-auto flex min-h-[72vh] max-w-[440px] flex-col">
+          <div className="flex-1 pt-6">
+            <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">Academy</p>
+            <p className="mt-8 text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">
+              Oi, {firstName}.
+            </p>
+            <h1 className="mt-3 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)] sm:text-[40px]">
+              O box é seu.
+            </h1>
+            <p className="mt-4 max-w-[28ch] text-[17px] font-normal leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
+              Paciente, atendimento, prontuário. Três passos para ligar a rotina da clínica.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="neo-pill w-full"
             onClick={() => {
               setWelcomeSeen(true);
               onDismissWelcome();
             }}
           >
             Começar
-          </DuoButton>
+          </button>
         </div>
       </section>
     );
   }
 
   if (showOnboarding) {
-    const title = !hasPatients
-      ? 'Primeiro caso.'
-      : !hasAppointments
-        ? 'Marque o atendimento.'
-        : !recordOpened
-          ? `Abra o prontuário de ${(firstPatient?.name || 'seu caso').split(' ')[0]}.`
-          : 'A rotina assume daqui.';
+    if (activationComplete) {
+      return (
+        <section className="page-shell">
+          <div className="mx-auto flex min-h-[72vh] max-w-[440px] flex-col">
+            <div className="flex-1 pt-6">
+              <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">Academy</p>
+              <h1 className="mt-8 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)] sm:text-[40px]">
+                Rotina ligada.
+              </h1>
+              <p className="mt-4 max-w-[28ch] text-[17px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
+                Paciente, atendimento e prontuário. A home assume daqui.
+              </p>
+              <ol className="mt-10 overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+                {steps.map(step => (
+                  <li
+                    key={step.id}
+                    className="flex items-center gap-3 border-b border-black/[0.04] px-5 py-4 last:border-b-0"
+                  >
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--neo)] text-white">
+                      <Check size={14} />
+                    </span>
+                    <span className="text-[17px] tracking-[-0.011em] text-[var(--neo-ink)]">
+                      {step.label}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <button type="button" className="neo-pill w-full" onClick={finishOnboarding}>
+              Ir para hoje
+            </button>
+          </div>
+        </section>
+      );
+    }
 
-    const coach = !hasPatients
-      ? 'Cadastre o caso que você atende.'
+    const copy = !hasPatients
+      ? {
+          title: 'Primeiro caso.',
+          coach: 'Cadastre o paciente que você atende na faculdade.',
+          action: 'Cadastrar paciente',
+        }
       : !hasAppointments
-        ? 'Data, hora, o que vai fazer na cadeira.'
-        : !recordOpened
-          ? 'Entre no prontuário.'
-          : 'Ligue a rotina.';
+        ? {
+            title: 'Primeiro atendimento.',
+            coach: 'Marque data, hora e o que você vai fazer na cadeira.',
+            action: 'Marcar atendimento',
+          }
+        : {
+            title: `Abra o prontuário de ${patientNick}.`,
+            coach: 'Sem anamnese o caso é só um nome na lista.',
+            action: 'Abrir prontuário',
+          };
 
     return (
       <section className="page-shell">
-        <div className="mx-auto flex max-w-[440px] flex-col">
-          <h1 className="text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] text-sys-text">
-            {title}
-          </h1>
-          <p className="mt-3 text-[17px] text-sys-muted tracking-[-0.011em]">{coach}</p>
+        <div className="mx-auto flex min-h-[72vh] max-w-[440px] flex-col">
+          <div className="flex-1 pt-6">
+            <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">
+              Passo {stepNumber} de 3
+            </p>
+            <h1 className="mt-8 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)] sm:text-[40px]">
+              {copy.title}
+            </h1>
+            <p className="mt-4 max-w-[30ch] text-[17px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
+              {copy.coach}
+            </p>
 
-          <div className="mt-10 flex w-full flex-col items-center">
-            <PathNode
-              done={n1Done}
-              active={n1Active}
-              glyph="tooth"
-              label="Primeiro caso"
-              onClick={() => !n1Done && setIsPatientModalOpen(true)}
-            />
-            <PathStem dimmed={n2Locked} />
-            <PathNode
-              done={n2Done}
-              active={n2Active}
-              locked={n2Locked}
-              glyph="chair"
-              label="Primeiro box"
-              onClick={() => n2Active && openAppointmentModal()}
-            />
-            <PathStem dimmed={n3Locked} />
-            <div id="siso-path-prontuario">
-              <PathNode
-                done={n3Done}
-                active={n3Active}
-                locked={n3Locked}
-                glyph="chart"
-                label="Prontuário"
-                onClick={() => n3Active && firstPatient && openPatientRecord(firstPatient.id)}
-              />
-            </div>
-            <PathStem dimmed={n4Locked} />
-            <PathNode
-              active={n4Active}
-              locked={n4Locked}
-              glyph="check"
-              label="Rotina ligada"
-              onClick={() => {
-                if (!n4Active) return;
-                setOnboardingDismissed(true);
-                onDismissOnboarding();
-              }}
-            />
+            <ol className="mt-10 overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+              {steps.map(step => (
+                <li key={step.id} className="border-b border-black/[0.04] last:border-b-0">
+                  <button
+                    type="button"
+                    disabled={!step.active}
+                    onClick={() => step.onOpen()}
+                    className={`flex w-full items-center gap-3 px-5 py-4 text-left ${
+                      step.locked ? 'opacity-40' : ''
+                    } ${step.active ? '' : 'cursor-default'}`}
+                  >
+                    <span
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
+                        step.done
+                          ? 'bg-[var(--neo)] text-white'
+                          : step.active
+                            ? 'bg-[var(--neo-soft)] text-[var(--neo)]'
+                            : 'bg-white text-transparent'
+                      }`}
+                    >
+                      {step.done ? <Check size={14} /> : <span className="h-2 w-2 rounded-full bg-current" />}
+                    </span>
+                    <span
+                      className={`min-w-0 flex-1 text-[17px] tracking-[-0.011em] ${
+                        step.active ? 'font-semibold text-[var(--neo-ink)]' : 'text-[var(--neo-ink)]'
+                      }`}
+                    >
+                      {step.label}
+                    </span>
+                    {step.active && (
+                      <span className="neo-link shrink-0 text-[15px]">Abrir ›</span>
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ol>
           </div>
 
-          {n4Active && (
-            <DuoButton
-              className="mt-8"
-              onClick={() => {
-                setOnboardingDismissed(true);
-                onDismissOnboarding();
-              }}
-            >
-              Ir para a rotina
-            </DuoButton>
-          )}
+          <button
+            type="button"
+            className="neo-pill w-full"
+            onClick={() => currentStep?.onOpen()}
+          >
+            {copy.action}
+          </button>
         </div>
       </section>
     );

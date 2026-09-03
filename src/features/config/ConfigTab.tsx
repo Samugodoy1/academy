@@ -262,7 +262,7 @@ export function ConfigTab({
                                 <button
                                   type="button"
                                   onClick={() => setShowAcademyUpgradeModal(true)}
-                                  className="px-2.5 py-1 rounded-full bg-apple-surface text-apple-blue text-[13px] font-normal hover:bg-[#e8e8ed] transition-colors"
+                                  className="px-2.5 py-1 rounded-full bg-apple-surface text-[var(--neo)] text-[13px] font-normal hover:bg-[#e8e8ed] transition-colors"
                                 >
                                   Mudar para Student
                                 </button>

@@ -1,4 +1,4 @@
-export const ACADEMY_WIDGETS_KEY = 'odontohub-academy-widgets';
+export const ACADEMY_WIDGETS_KEY = 'odontohub-academy-widgets-v2';
 
 export const ACADEMY_WIDGET_KINDS = [
   'clock',
@@ -62,8 +62,6 @@ export function defaultAcademyWidgets(): AcademyWidget[] {
     { id: 'photo', kind: 'photo', size: 'sm' },
     { id: 'pacientes', kind: 'pacientes', size: 'sm' },
     { id: 'agenda', kind: 'agenda', size: 'sm' },
-    { id: 'estudos', kind: 'estudos', size: 'sm' },
-    { id: 'agendar', kind: 'agendar', size: 'sm' },
   ];
 }
 

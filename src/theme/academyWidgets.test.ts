@@ -20,8 +20,6 @@ describe('Academy widgets', () => {
       'photo',
       'pacientes',
       'agenda',
-      'estudos',
-      'agendar',
     ]);
     expect(widgets[0].size).toBe('md');
   });

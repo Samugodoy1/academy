@@ -2212,7 +2212,7 @@ export default function App() {
       <Route path="/pre-atendimento/:token" element={<PreAtendimento />} />
       <Route path="/prontuario/:id" element={
         user ? (
-          <div className="min-h-screen bg-sys-bg flex font-sans text-sys-text relative overflow-x-hidden">
+          <div className="min-h-screen bg-[var(--neo-wash,var(--sys-bg))] flex font-sans text-sys-text relative overflow-x-hidden">
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
               {isSidebarOpen && (
@@ -2295,7 +2295,7 @@ export default function App() {
       } />
       <Route path="*" element={
         !user ? (
-          <div className="min-h-screen bg-sys-bg flex items-center justify-center px-5 font-sans antialiased">
+          <div className="min-h-screen bg-[var(--neo-wash,var(--sys-bg))] flex items-center justify-center px-5 font-sans antialiased">
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2472,7 +2472,7 @@ export default function App() {
           </div>
         ) : (
           <AppProvider value={appContextValue}>
-          <div className="min-h-screen bg-sys-bg flex font-sans text-sys-text relative overflow-x-hidden">
+          <div className="min-h-screen bg-[var(--neo-wash,var(--sys-bg))] flex font-sans text-sys-text relative overflow-x-hidden">
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
               {isSidebarOpen && (
@@ -2502,6 +2502,9 @@ export default function App() {
 
             {/* Main Content */}
             <main className="flex-1 min-w-0 w-full print:p-0">
+              <div className="tablet-l:hidden sticky top-0 z-30 bg-[color-mix(in_srgb,var(--neo-wash)_86%,transparent)] px-5 py-3 backdrop-blur-xl no-print">
+                <AcademyWordmark size="sm" />
+              </div>
               {/* ── Floating Guide Banner ── */}
               {(() => {
                 const guide = getGuideStep();
@@ -2629,6 +2632,7 @@ export default function App() {
                       onDismissOnboarding={() => updateUserOnboarding('onboarding_done')}
                       onDismissWelcome={() => updateUserOnboarding('welcome_seen')}
                       academicPeriod={profile?.academic_period}
+                      institution={profile?.institution}
                     />
                   )}
 

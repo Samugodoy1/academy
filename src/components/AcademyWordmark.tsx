@@ -14,9 +14,9 @@ export function AcademyWordmark({
         : 'text-[17px]';
 
   return (
-    <p className={`${scale} font-semibold tracking-[-0.025em] leading-[1.05] text-sys-text`}>
+    <p className={`${scale} font-semibold tracking-[-0.025em] leading-[1.05] text-[var(--neo-ink,#1d1d1f)]`}>
       OdontoHub
-      <span className="ml-1.5 font-normal">Academy</span>
+      <span className="academy-wordmark-accent ml-1.5 font-normal">Academy</span>
     </p>
   );
 }

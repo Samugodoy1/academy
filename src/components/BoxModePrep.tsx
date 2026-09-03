@@ -29,7 +29,7 @@ export const BoxModePrep: React.FC<BoxModePrepProps> = ({
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.14, ease: [0.16, 1, 0.3, 1] }}
-      className="comic-card overflow-hidden px-6 py-7"
+      className="overflow-hidden rounded-[26px] bg-[var(--neo-soft)] px-6 py-7"
     >
       <div className="flex items-center gap-2 mb-4">
         <ChairGlyph size={24} />
@@ -43,7 +43,7 @@ export const BoxModePrep: React.FC<BoxModePrepProps> = ({
       </h3>
       <p className="text-[17px] text-apple-gray mt-2 tracking-[-0.011em]">{procedure}</p>
       {scheduleLabel && (
-        <p className="text-[13px] text-apple-blue mt-2">{scheduleLabel}</p>
+        <p className="text-[13px] text-[var(--neo)] mt-2">{scheduleLabel}</p>
       )}
 
       <p className="text-[15px] text-apple-gray mt-5 leading-relaxed">
@@ -56,9 +56,9 @@ export const BoxModePrep: React.FC<BoxModePrepProps> = ({
             key={`${item.label}-${index}`}
             whileTap={{ scale: 0.98, opacity: 0.92 }}
             onClick={() => onReviewItem?.(item)}
-              className="w-full flex items-center gap-3 rounded-[16px] bg-sys-inset px-4 py-3.5 text-left"
+              className="w-full flex items-center gap-3 rounded-[16px] bg-white px-4 py-3.5 text-left"
           >
-            <CheckCircle2 size={16} className="text-apple-green shrink-0" />
+            <CheckCircle2 size={16} className="text-[var(--neo)] shrink-0" />
               <span className="flex-1 text-[17px] text-sys-text">{item.label}</span>
             <span className="text-[13px] text-apple-gray flex items-center gap-1 shrink-0">
               <Clock size={11} />

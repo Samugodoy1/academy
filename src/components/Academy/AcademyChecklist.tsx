@@ -1,51 +1,48 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { CheckCircle2 } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface AcademyChecklistProps {
   appointmentId?: number;
 }
 
+const STEPS = [
+  { title: 'Anestesia', done: true },
+  { title: 'Sindesmotomia', done: false, current: true },
+  { title: 'Luxação', done: false },
+  { title: 'Avulsão', done: false },
+];
+
 export const AcademyChecklist: React.FC<AcademyChecklistProps> = () => {
-  const phases: any[] = [];
+  const [active] = useState(1);
+  const current = STEPS[active];
 
   return (
-    <div className="flex-1 bg-academy-bg overflow-y-auto pb-20">
-      <div className="max-w-2xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="sticky top-0 z-20 bg-academy-bg/80 backdrop-blur-md px-4 py-4"
-        >
-          <div className="mb-4">
-            <h1 className="ios-title text-2xl mb-1">Seu Caminho</h1>
-            <p className="ios-text-secondary">Antes, durante e depois da clinica</p>
-          </div>
+    <div className="min-h-full bg-[var(--neo)] px-5 py-8 text-white">
+      <div className="mx-auto flex min-h-[70vh] max-w-md flex-col">
+        <p className="text-[15px] text-white/80">A lista de passos, visível de longe.</p>
+        <h1 className="mt-2 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em]">
+          Modo Box
+        </h1>
 
-          <div className="ios-card bg-academy-study border border-academy-border/70 mb-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-academy-text">Progresso Geral</h3>
-              <span className="text-xl font-bold text-primary">0%</span>
-            </div>
-            <div className="w-full bg-academy-border rounded-full h-2 overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: '0%' }}
-                transition={{ duration: 0.5 }}
-                className="h-full bg-academy-primary"
-              />
-            </div>
-          </div>
-        </motion.div>
-
-        <div className="px-4 space-y-4 py-4">
-          {phases.length === 0 && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
-              <CheckCircle2 size={40} className="mx-auto mb-3 text-academy-muted/50" />
-              <p className="text-academy-muted font-medium">Nenhum checklist disponivel</p>
-              <p className="text-sm text-academy-muted/70 mt-1">A tela ainda nao possui uma API real de checklists Academy.</p>
-            </motion.div>
-          )}
+        <div className="neo-card mt-8 flex flex-1 flex-col px-6 py-8 text-[var(--neo-ink)]">
+          <p className="text-[15px] text-[var(--neo-gray)]">Passo {active + 1} de {STEPS.length}</p>
+          <p className="mt-3 text-[40px] font-semibold leading-[1.05] tracking-[-0.025em]">
+            {current.title}
+          </p>
+          <ol className="mt-8 space-y-4">
+            {STEPS.map((step, index) => (
+              <li
+                key={step.title}
+                className={`text-[22px] tracking-[-0.02em] ${
+                  index === active ? 'font-semibold text-[var(--neo-ink)]' : 'text-[var(--neo-gray)]'
+                }`}
+              >
+                {step.title}
+              </li>
+            ))}
+          </ol>
+          <button type="button" className="neo-pill mt-auto w-full py-4 text-[18px]">
+            O seu passo
+          </button>
         </div>
       </div>
     </div>

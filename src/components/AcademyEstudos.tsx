@@ -378,7 +378,7 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
     duration: '18 min',
     level: 'Muito comum na clinica',
     icon: Activity,
-    color: 'bg-green-50 text-green-700',
+    color: 'bg-[var(--neo-soft)] text-[var(--neo-ink)]',
     borderColor: 'border-green-100',
     objective: 'Revisar diagnostico periodontal inicial e execucao de raspagem/profilaxia com foco em inflamacao, biofilme e manutencao.',
     modules: [
@@ -600,7 +600,7 @@ const STUDY_LIBRARY: Record<StudyKey, StudyMaterial> = {
     duration: '14 min',
     level: 'Pratico',
     icon: Tooth,
-    color: 'bg-green-50 text-green-700',
+    color: 'bg-[var(--neo-soft)] text-[var(--neo-ink)]',
     borderColor: 'border-green-100',
     objective: 'Preparar a sequencia para restauracoes diretas com isolamento, adesao controlada e anatomia funcional.',
     modules: [

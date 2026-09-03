@@ -16,10 +16,35 @@
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="googlebot" content="index, follow" />
     <meta name="application-name" content="OdontoHub Academy" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#FFF4ED" />
     <script>
       (function () {
         try {
+          var host = location.hostname || '';
+          var isSistema = host.indexOf('sistema.odontohub') !== -1;
+          var isAcademyHost = host.indexOf('academy.odontohub') !== -1;
+          var applyNeo = !isSistema && (isAcademyHost || !isSistema);
+          var colorways = {
+            laranja: ['#FF6B2C', '#FFD8C4', '#FFF4ED'],
+            lima: ['#34C759', '#C8F5D4', '#F0FBF3'],
+            azul: ['#32ADE6', '#C5EBFA', '#F0F9FD'],
+            rosa: ['#FF6482', '#FFD0D9', '#FFF0F3'],
+            violeta: ['#BF5AF2', '#E8C8FA', '#F8F0FD']
+          };
+          if (applyNeo) {
+            var neoId = localStorage.getItem('odontohub-academy-neo') || 'laranja';
+            var neo = colorways[neoId] || colorways.laranja;
+            document.documentElement.setAttribute('data-product', 'academy');
+            document.documentElement.setAttribute('data-neo', colorways[neoId] ? neoId : 'laranja');
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.documentElement.style.colorScheme = 'light';
+            document.documentElement.style.setProperty('--neo', neo[0]);
+            document.documentElement.style.setProperty('--neo-soft', neo[1]);
+            document.documentElement.style.setProperty('--neo-wash', neo[2]);
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', neo[2]);
+            return;
+          }
           var stored = localStorage.getItem('system_theme') || 'dark';
           var theme = stored;
           if (stored === 'auto') {
@@ -28,10 +53,11 @@
           if (theme !== 'light' && theme !== 'dark') theme = 'dark';
           document.documentElement.setAttribute('data-theme', theme);
           document.documentElement.style.colorScheme = theme;
-          var meta = document.querySelector('meta[name="theme-color"]');
-          if (meta) meta.setAttribute('content', theme === 'light' ? '#f5f5f7' : '#000000');
+          var proMeta = document.querySelector('meta[name="theme-color"]');
+          if (proMeta) proMeta.setAttribute('content', theme === 'light' ? '#f5f5f7' : '#000000');
         } catch (e) {
-          document.documentElement.setAttribute('data-theme', 'dark');
+          document.documentElement.setAttribute('data-product', 'academy');
+          document.documentElement.setAttribute('data-theme', 'light');
         }
       })();
     </script>

@@ -19,6 +19,7 @@ import {
 import { countClinicalSkills, suggestNextClinicalStep, getTopSkillHighlights } from '../utils/clinicalProgression';
 import { STUDY_TOPIC_LABELS, StudyKey } from '../utils/studyTopics';
 import { DataLoadingSkeleton } from './DataLoadingSkeleton';
+import { AcademyNeoPicker } from './AcademyNeoPicker';
 
 const STUDY_TOPIC_STORAGE_KEY = 'academy_study_topic';
 
@@ -36,6 +37,7 @@ interface AcademyDashboardProps {
   onDismissOnboarding: () => void;
   onDismissWelcome: () => void;
   academicPeriod?: string;
+  institution?: string;
 }
 
 const ACTIVE_STATUSES = new Set(['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS']);
@@ -52,13 +54,6 @@ const firstName = (name?: string) => (name || 'paciente').trim().split(' ')[0] |
 const getGreetingName = (user?: any) => {
   const name = user?.name || '';
   return name.replace(/^(Dr\.|Dra\.|Dr|Dra)\s+/i, '').split(' ')[0];
-};
-
-const getTimeGreeting = () => {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Bom dia';
-  if (hour < 18) return 'Boa tarde';
-  return 'Boa noite';
 };
 
 const formatTime = (value?: string) => {
@@ -413,6 +408,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   onDismissOnboarding,
   onDismissWelcome,
   academicPeriod,
+  institution,
 }) => {
   const usableAppointments = useMemo(() => {
     return appointments
@@ -664,6 +660,11 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
     };
   }, [focus.kind, showBoxMode, todayContext]);
 
+  const academicLine = [academicPeriod, institution].filter(Boolean).join(' · ');
+  const homeHeadline = focus.appointment && (focus.kind === 'today' || focus.kind === 'next')
+    ? 'Tudo pronto para o seu próximo atendimento.'
+    : smartMessage;
+
   if (loading) {
     return (
       <div className="page-shell">
@@ -683,8 +684,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       onDismissOnboarding={onDismissOnboarding}
       onDismissWelcome={onDismissWelcome}
     >
-    <div className="page-shell space-y-8 tablet-l:space-y-10">
-      <section className="space-y-5">
+    <div className="page-shell relative space-y-8 tablet-l:space-y-10">
+      <div className="neo-blobs" aria-hidden="true" />
+      <section className="relative space-y-5">
         <AcademyActivationCard
           user={user}
           patients={patients}
@@ -695,86 +697,110 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         <ClinicalObservation observation={clinicalObservation} />
       </section>
 
-      <div className="flex flex-col gap-8 tablet-l:grid tablet-l:grid-cols-12 tablet-l:gap-8 tablet-l:items-start">
+      <div className="relative flex flex-col gap-8 tablet-l:grid tablet-l:grid-cols-12 tablet-l:gap-8 tablet-l:items-start">
       <div className="space-y-5 tablet-l:col-span-7">
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="oh-device px-6 py-8 tablet-l:px-9 tablet-l:py-10"
+          className="neo-card overflow-hidden px-6 py-8 tablet-l:px-9 tablet-l:py-10"
         >
-          <p className="text-[15px] font-normal text-sys-muted tracking-[-0.011em]">
-            {getTimeGreeting()}{greetingName ? `, ${greetingName}` : ''}
-            {academicPeriod ? ` · ${academicPeriod}` : ''}
-          </p>
-          <h1 className="mt-3 text-[34px] sm:text-[40px] font-semibold text-sys-text leading-[1.05] tracking-[-0.025em]">
-            {smartMessage}
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[15px] font-normal text-[var(--neo-gray)] tracking-[-0.011em]">
+                Oi{greetingName ? `, ${greetingName}` : ''}
+              </p>
+              {academicLine && (
+                <p className="mt-1 text-[15px] font-semibold tracking-[-0.016em] text-[var(--neo-ink)]">
+                  {academicLine}
+                </p>
+              )}
+            </div>
+            <span className="neo-pill !px-3 !py-1.5 !text-[13px] shrink-0">
+              {patients.length} {patients.length === 1 ? 'paciente' : 'pacientes'}
+            </span>
+          </div>
+          <h1 className="mt-5 text-[28px] sm:text-[34px] font-semibold text-[var(--neo-ink)] leading-[1.05] tracking-[-0.025em]">
+            {homeHeadline}
           </h1>
 
           {focusPatientName && (
             <button
               type="button"
               onClick={focus.action}
-              className="oh-device-inset mt-8 w-full px-5 py-5 text-left"
+              className="mt-7 w-full rounded-[22px] bg-[var(--neo)] px-5 py-5 text-left text-white"
             >
               {appointmentMetaLabel && (
-                <p className="text-[12px] font-normal text-sys-muted tracking-[0.08em] uppercase">
+                <p className="text-[13px] font-normal text-white/80 tracking-[-0.011em]">
                   {appointmentMetaLabel}
                 </p>
               )}
-              <p className="mt-1.5 text-[28px] font-semibold text-sys-text leading-[1.05] tracking-[-0.025em]">
+              <p className="mt-1.5 text-[26px] font-semibold leading-[1.05] tracking-[-0.025em]">
                 {focusPatientName}
               </p>
-              <p className="mt-1 text-[15px] text-sys-muted tracking-[-0.011em]">
+              <p className="mt-1 text-[15px] text-white/80 tracking-[-0.011em]">
                 {procedureHint || focus.subtitle}
               </p>
             </button>
           )}
 
           {!focusPatientName && (
-            <p className="mt-5 text-[17px] text-sys-muted leading-snug tracking-[-0.011em]">
+            <p className="mt-5 text-[17px] text-[var(--neo-gray)] leading-snug tracking-[-0.011em]">
               {focus.subtitle}
             </p>
           )}
 
           {showBoxMode && boxPrepItems[0] && (
-            <div className="mt-6 flex items-center justify-between gap-4">
+            <div className="mt-5 flex items-center justify-between gap-4 rounded-[20px] bg-[var(--neo-wash)] px-4 py-4">
               <div className="min-w-0">
-                <p className="text-[13px] text-sys-muted">Checklist</p>
-                <p className="text-[17px] text-sys-text truncate">{boxPrepItems[0].label}</p>
+                <p className="text-[13px] text-[var(--neo-gray)]">Checklist</p>
+                <p className="text-[17px] text-[var(--neo-ink)] truncate">{boxPrepItems[0].label}</p>
               </div>
-              <span className="text-[15px] text-[#30d158] shrink-0">Pronto</span>
+              <span className="text-[15px] text-[var(--neo)] shrink-0">Pronto</span>
             </div>
           )}
 
           <div className="mt-8 space-y-3">
-            <DuoButton onClick={focus.action}>{focus.actionLabel}</DuoButton>
+            <DuoButton onClick={focus.action}>{focus.actionLabel === 'Cadastrar paciente' ? 'Começar' : focus.actionLabel}</DuoButton>
             <div className="grid grid-cols-2 gap-3">
               <DuoButton variant="secondary" onClick={() => setActiveTab('pacientes')}>
-                Casos
+                Ver casos
               </DuoButton>
               <DuoButton variant="secondary" onClick={openAppointmentModal}>
-                Agendar
+                Preparar
               </DuoButton>
             </div>
           </div>
         </motion.section>
 
-        <div className="flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => setIsPatientModalOpen(true)}
-            className="apple-btn-light !px-4 !py-2 !text-[15px]"
-          >
-            Caso
-          </button>
-          <button
-            type="button"
-            onClick={openAppointmentModal}
-            className="apple-btn !px-4 !py-2 !text-[15px]"
-          >
-            Agendar
-          </button>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { id: 'agenda', title: 'Agenda', description: 'A semana clínica' },
+            { id: 'pacientes', title: 'Pacientes', description: 'Os seus casos' },
+            { id: 'estudos', title: 'Estudos', description: 'Antes do box' },
+            { id: 'checklist', title: 'Modo Box', description: 'A lista visível', highlight: true },
+          ].map(item => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => {
+                if (item.id === 'checklist') {
+                  if (todayContext.nextAppointment) {
+                    openPatientRecord(todayContext.nextAppointment.patient_id);
+                    return;
+                  }
+                  setActiveTab('pacientes');
+                  return;
+                }
+                setActiveTab(item.id);
+              }}
+              className={`rounded-[24px] p-5 text-left ${item.highlight ? 'bg-[var(--neo-soft)]' : 'bg-white'}`}
+            >
+              <p className="font-semibold tracking-[-0.016em] text-[var(--neo-ink)]">{item.title}</p>
+              <p className="mt-1 text-[13px] text-[var(--neo-gray)]">{item.description}</p>
+              <p className="neo-link mt-3 text-[14px]">Ver ›</p>
+            </button>
+          ))}
         </div>
 
       {showBoxMode && todayContext.nextAppointment && todayContext.nextProcedure && (
@@ -799,6 +825,8 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           }
         />
       )}
+
+      <AcademyNeoPicker compact />
       </div>
 
       <div className="space-y-6 tablet-l:col-span-5 tablet-l:sticky tablet-l:top-8">
@@ -809,7 +837,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="oh-device overflow-hidden">
+          <div className="neo-card overflow-hidden">
             <div className="px-5 pt-5 pb-2">
               <div className="min-w-0">
                 <span className="text-[13px] font-normal text-sys-muted">
@@ -843,7 +871,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
             </div>
             <span className="text-[13px] font-normal text-apple-gray">{pendingRows.length}</span>
           </div>
-          <div className="rounded-[28px] overflow-hidden bg-sys-elevated">
+          <div className="neo-card overflow-hidden">
             {pendingRows.map(row => (
               <React.Fragment key={row.id}>
                 <ListRow
@@ -873,11 +901,11 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
             <div className="flex items-center gap-2.5">
               <h3 className="text-[17px] font-semibold text-sys-text tracking-[-0.016em]">Próximos boxes</h3>
             </div>
-            <button onClick={() => setActiveTab('agenda')} className="apple-link !text-[15px]">
+            <button onClick={() => setActiveTab('agenda')} className="neo-link !text-[15px]">
               Ver tudo ›
             </button>
           </div>
-          <div className="rounded-[28px] overflow-hidden bg-sys-elevated">
+          <div className="neo-card overflow-hidden">
             {otherAppointments.map((app, index) => {
               const dateTime = formatAgendaListDateTime(app.start_time);
               return (
@@ -916,7 +944,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           <motion.button
             whileTap={{ scale: 0.98, opacity: 0.9 }}
             onClick={() => openPatientRecord(pausedCase.id)}
-            className="w-full flex items-center gap-4 bg-sys-elevated rounded-[28px] px-5 py-4 transition-all"
+            className="neo-card w-full flex items-center gap-4 px-5 py-4 transition-all"
           >
             <div className="w-10 h-10 bg-white rounded-[14px] flex items-center justify-center text-academy-alert-text shadow-sm shrink-0">
               <Clock size={20} />
@@ -932,8 +960,8 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
       {patients.length > 0 && pendingRows.length === 0 && otherAppointments.length === 0 && !pausedCase && (
         <section>
-          <div className="w-full flex items-center gap-4 bg-sys-elevated rounded-[28px] px-5 py-4">
-            <div className="w-10 h-10 bg-sys-inset rounded-full flex items-center justify-center text-[#30d158] shrink-0">
+          <div className="neo-card w-full flex items-center gap-4 px-5 py-4">
+            <div className="w-10 h-10 bg-[var(--neo-soft)] rounded-full flex items-center justify-center text-[var(--neo)] shrink-0">
               <CheckCircle2 size={20} />
             </div>
             <div className="flex-1 min-w-0 text-left">

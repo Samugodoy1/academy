@@ -11,7 +11,7 @@ export const SidebarItem = ({ id, icon: Icon, label, activeTab, setActiveTab, se
       title={label}
       aria-current={isActive ? 'page' : undefined}
       className={`w-full flex items-center gap-3 rounded-[16px] px-3 py-2.5 tablet-l:justify-center tablet-l:px-0 tablet-l:py-3 desktop:justify-start desktop:px-3 transition-colors ${
-        isActive ? 'bg-sys-elevated text-sys-text' : 'text-sys-muted hover:bg-sys-elevated hover:text-sys-text'
+        isActive ? 'bg-white text-[var(--neo)]' : 'text-sys-muted hover:bg-white/70 hover:text-[var(--neo-ink,#1d1d1f)]'
       }`}
     >
       <span className="flex items-center justify-center w-8 h-8 shrink-0">

@@ -680,7 +680,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       onDismissOnboarding={onDismissOnboarding}
       onDismissWelcome={onDismissWelcome}
     >
-    <div className="page-shell space-y-8 tablet-l:space-y-10">
+    <div className="page-shell space-y-8 desktop:space-y-10">
       <AcademyActivationCard
         user={user}
         patients={patients}
@@ -709,8 +709,8 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         {homeHeadline}
       </h1>
 
-      <div className="flex flex-col gap-10 tablet-l:grid tablet-l:grid-cols-12 tablet-l:items-start tablet-l:gap-x-12">
-        <div className="space-y-8 tablet-l:col-span-7">
+      <div className="flex flex-col gap-10 desktop:grid desktop:grid-cols-12 desktop:items-start desktop:gap-x-12">
+        <div className="space-y-8 desktop:col-span-7">
           {focusPatientName ? (
             <button
               type="button"
@@ -776,7 +776,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           )}
         </div>
 
-        <div className="space-y-8 tablet-l:col-span-5">
+        <div className="space-y-8 desktop:col-span-5">
           {pendingRows.length > 0 && (
             <HomeSection kicker="Pra fechar">
               <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">

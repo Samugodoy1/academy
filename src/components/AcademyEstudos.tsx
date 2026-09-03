@@ -1427,7 +1427,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
       : 'Quando um caso entrar na agenda, a revisão certa aparece aqui.';
 
   return (
-    <div className="page-shell space-y-8 tablet-l:space-y-10">
+    <div className="page-shell space-y-8 desktop:space-y-10">
       <header>
         <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">Estudos</p>
         <h1 className="mt-2 max-w-[18ch] text-[28px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)] sm:text-[34px]">
@@ -1438,8 +1438,8 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         </p>
       </header>
 
-      <div className="flex flex-col gap-10 tablet-l:grid tablet-l:grid-cols-12 tablet-l:items-start tablet-l:gap-x-12">
-        <div className="space-y-8 tablet-l:col-span-7">
+      <div className="flex flex-col gap-10 desktop:grid desktop:grid-cols-12 desktop:items-start desktop:gap-x-12">
+        <div className="space-y-8 desktop:col-span-7">
           {nextCase && nextCaseTopic ? (
             <button
               type="button"
@@ -1577,7 +1577,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           )}
         </div>
 
-        <div className="space-y-8 tablet-l:col-span-5">
+        <div className="space-y-8 desktop:col-span-5">
           <StudySection kicker="Temas">
             <div className="relative mb-3">
               <Search

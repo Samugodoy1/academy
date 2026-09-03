@@ -30,7 +30,7 @@ export const SidebarItem = ({
       <span className="flex h-7 w-7 items-center justify-center text-[var(--neo-ink)]">
         <Icon size={22} />
       </span>
-      <span className="min-w-0 tablet-l:hidden desktop:block">
+      <span className="min-w-0">
         <span className="block text-[15px] font-semibold tracking-[-0.016em] text-[var(--neo-ink)]">
           {label}
         </span>

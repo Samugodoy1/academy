@@ -525,21 +525,21 @@ html[data-theme="dark"] {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    justify-content: space-between;
+    justify-content: flex-start;
     width: 100%;
-    min-height: 108px;
-    padding: 14px;
-    border-radius: 24px;
+    min-height: 126px;
+    padding: 16px;
+    border-radius: 28px;
     overflow: hidden;
+    text-align: left;
   }
 
-  .neo-widget-md,
-  .neo-widget-lg {
-    min-height: 108px;
+  .neo-widget-md {
+    min-height: 126px;
   }
 
   .neo-widget-lg {
-    min-height: 168px;
+    min-height: 264px;
   }
 
   .neo-widget-neo {
@@ -563,7 +563,7 @@ html[data-theme="dark"] {
   }
 
   .neo-widget-note {
-    background: #fff4c8;
+    background: var(--neo-wash);
     color: var(--neo-ink);
   }
 
@@ -581,67 +581,17 @@ html[data-theme="dark"] {
     object-fit: cover;
   }
 
-  .neo-widget-active {
-    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--neo) 45%, transparent);
-  }
-
-  .neo-widget-add {
+  .neo-dock {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: center;
-    justify-content: center;
-    flex-direction: row;
-    gap: 8px;
-    min-height: 64px;
-    border: 1.5px dashed color-mix(in srgb, var(--neo) 40%, #d2d2d7);
-    background: transparent;
-    color: var(--neo);
-    font-size: 15px;
-  }
-
-  @keyframes neo-widget-jiggle {
-    0% { transform: rotate(-0.5deg); }
-    100% { transform: rotate(0.5deg); }
-  }
-
-  .neo-widget-editing {
-    animation: neo-widget-jiggle 0.22s ease-in-out infinite alternate;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .neo-widget-editing {
-      animation: none;
-    }
-  }
-
-  @media (min-width: 64rem) and (max-width: 79.99rem) {
-    .neo-control-tile {
-      min-height: 64px;
-      padding: 0;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .neo-control-featured {
-      min-height: 64px;
-      padding: 0;
-      justify-content: center;
-    }
-
-    .neo-widget,
-    .neo-widget-md,
-    .neo-widget-lg {
-      min-height: 64px;
-      padding: 8px;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .neo-widget-photo {
-      padding: 0;
-    }
-
-    .neo-widget-add {
-      display: none;
-    }
+    padding: 10px 8px 8px;
+    border-radius: 32px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 8px 28px rgba(29, 29, 31, 0.06);
+    backdrop-filter: saturate(180%) blur(28px);
+    -webkit-backdrop-filter: saturate(180%) blur(28px);
   }
 
   .tab-bar-item-active {

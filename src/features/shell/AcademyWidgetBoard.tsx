@@ -1,14 +1,5 @@
 import React, { useRef, useState } from 'react';
-import {
-  BookOpen,
-  Calendar,
-  CalendarPlus,
-  Camera,
-  Home,
-  Plus,
-  Users,
-  X,
-} from '../../icons';
+import { Plus, X } from '../../icons';
 import {
   addAcademyWidget,
   canAddAcademyWidget,
@@ -27,7 +18,6 @@ import {
 
 interface AcademyWidgetBoardProps {
   editing: boolean;
-  activeTab: string;
   firstName?: string;
   clock: Date;
   nextBox?: { time: string; patientName: string; procedure?: string } | null;
@@ -66,17 +56,8 @@ function compressWidgetImage(file: File): Promise<string> {
   });
 }
 
-const NAV_ICON: Partial<Record<AcademyWidgetKind, React.ElementType>> = {
-  hoje: Home,
-  pacientes: Users,
-  agenda: Calendar,
-  estudos: BookOpen,
-  agendar: CalendarPlus,
-};
-
 export function AcademyWidgetBoard({
   editing,
-  activeTab,
   firstName,
   clock,
   nextBox,
@@ -157,7 +138,7 @@ export function AcademyWidgetBoard({
         className="hidden"
         onChange={onPhotoFile}
       />
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-3">
         {widgets.map(widget => (
           <div
             key={widget.id}
@@ -173,7 +154,7 @@ export function AcademyWidgetBoard({
               commit(moveAcademyWidget(widgets, dragId.current, widget.id));
               dragId.current = null;
             }}
-            className={`relative ${widget.size === 'sm' ? '' : 'col-span-2'} ${editing ? 'neo-widget-editing' : ''}`}
+            className={`relative ${widget.size === 'sm' ? '' : 'col-span-2'}`}
           >
             {editing && (
               <button
@@ -192,7 +173,6 @@ export function AcademyWidgetBoard({
               widget={widget}
               editing={editing}
               editingNote={editingNoteId === widget.id}
-              activeTab={activeTab}
               firstName={firstName}
               clock={clock}
               nextBox={nextBox}
@@ -209,10 +189,9 @@ export function AcademyWidgetBoard({
           <button
             type="button"
             onClick={() => setAdding(value => !value)}
-            className="neo-widget neo-widget-add col-span-2 min-h-[72px]"
+            className="col-span-2 mt-1 py-2 text-center text-[15px] text-[var(--neo)]"
           >
-            <Plus size={18} />
-            Adicionar widget
+            {adding ? 'Fechar' : 'Adicionar widget'}
           </button>
         )}
       </div>
@@ -249,7 +228,6 @@ function WidgetFace({
   widget,
   editing,
   editingNote,
-  activeTab,
   firstName,
   clock,
   nextBox,
@@ -262,7 +240,6 @@ function WidgetFace({
   widget: AcademyWidget;
   editing: boolean;
   editingNote: boolean;
-  activeTab: string;
   firstName?: string;
   clock: Date;
   nextBox?: { time: string; patientName: string; procedure?: string } | null;
@@ -273,20 +250,26 @@ function WidgetFace({
   onNoteDone: () => void;
 }) {
   const timeLabel = clock.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  const weekday = clock.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
-  const Icon = NAV_ICON[widget.kind];
+  const weekday = clock
+    .toLocaleDateString('pt-BR', { weekday: 'short' })
+    .replace('.', '')
+    .toUpperCase();
+  const day = clock.getDate();
+  const month = clock.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
   const sizeClass =
     widget.size === 'lg' ? 'neo-widget neo-widget-lg' : widget.size === 'md' ? 'neo-widget neo-widget-md' : 'neo-widget';
 
   if (widget.kind === 'clock') {
     return (
-      <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-neo text-left`}>
-        <span className="text-[13px] text-white/80">{studentGreeting(clock)}{firstName ? `, ${firstName}` : ''}</span>
-        <span className="mt-1 block text-[28px] font-semibold leading-none tracking-[-0.025em] tabular-nums">
+      <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-neo`}>
+        <span className="text-[12px] font-medium uppercase tracking-[0.06em] text-white/80">
+          {weekday} {day}
+        </span>
+        <span className="mt-auto block text-[40px] font-semibold leading-none tracking-[-0.05em] tabular-nums">
           {timeLabel}
         </span>
-        <span className="mt-1 hidden text-[12px] text-white/80 desktop:block">
-          {weekday} · toca e vai pro hoje
+        <span className="mt-1.5 block text-[13px] text-white/80">
+          {studentGreeting(clock)}{firstName ? `, ${firstName}` : ''}
         </span>
       </button>
     );
@@ -294,13 +277,15 @@ function WidgetFace({
 
   if (widget.kind === 'next') {
     return (
-      <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-soft text-left`}>
-        <span className="text-[12px] text-[var(--neo)]">{nextBox ? 'Box' : 'Cadeira'}</span>
-        <span className="mt-1 block truncate text-[17px] font-semibold tracking-[-0.02em] text-[var(--neo-ink)]">
-          {nextBox ? nextBox.patientName.split(' ')[0] : 'Livre'}
+      <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-soft`}>
+        <span className="text-[12px] font-medium text-[var(--neo)]">
+          {nextBox ? 'Box' : 'Livre'}
         </span>
-        <span className="mt-0.5 block truncate text-[12px] text-[var(--neo-ink)]/70">
-          {nextBox ? `${nextBox.time}${nextBox.procedure ? ` · ${nextBox.procedure}` : ''}` : 'Nada marcado'}
+        <span className="mt-auto block truncate text-[32px] font-semibold leading-none tracking-[-0.05em] tabular-nums text-[var(--neo-ink)]">
+          {nextBox ? nextBox.time : '—'}
+        </span>
+        <span className="mt-1.5 block truncate text-[13px] text-[var(--neo-ink)]/70">
+          {nextBox ? nextBox.patientName.split(' ')[0] : 'Cadeira'}
         </span>
       </button>
     );
@@ -311,12 +296,9 @@ function WidgetFace({
     return (
       <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-photo`}>
         {src ? (
-          <img src={src} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+          <img src={src} alt="" referrerPolicy="no-referrer" />
         ) : (
-          <span className="flex h-full min-h-[108px] flex-col items-center justify-center gap-1 bg-[var(--neo-soft)] text-[var(--neo)]">
-            <Camera size={22} />
-            <span className="text-[12px]">{editing ? 'Manda uma foto' : 'Sua foto'}</span>
-          </span>
+          <span className="absolute inset-0 bg-[linear-gradient(160deg,var(--neo-soft),var(--neo))]" />
         )}
       </button>
     );
@@ -330,16 +312,16 @@ function WidgetFace({
             autoFocus
             value={widget.note || ''}
             maxLength={140}
-            placeholder="Recado pro box"
+            placeholder="Recado"
             onChange={event => onNoteChange(event.target.value)}
             onBlur={onNoteDone}
             className="h-full w-full resize-none bg-transparent text-[15px] leading-snug text-[var(--neo-ink)] outline-none"
           />
         ) : (
-          <button type="button" onClick={onActivate} className="h-full w-full text-left">
-            <span className="text-[12px] text-[var(--neo)]">Recado</span>
-            <span className="mt-1 block text-[15px] leading-snug text-[var(--neo-ink)]">
-              {widget.note || (editing ? 'Escreve aqui' : 'Nada anotado')}
+          <button type="button" onClick={onActivate} className="flex h-full w-full flex-col text-left">
+            <span className="text-[12px] text-[var(--neo-gray)]">Recado</span>
+            <span className="mt-auto text-[15px] leading-snug tracking-[-0.016em] text-[var(--neo-ink)]">
+              {widget.note || (editing ? 'Escreve' : ' ')}
             </span>
           </button>
         )}
@@ -349,45 +331,66 @@ function WidgetFace({
 
   if (widget.kind === 'wash') {
     return (
-      <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-neo items-end`}>
-        <span className="text-[26px] font-semibold leading-[0.95] tracking-[-0.025em]">
+      <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-neo justify-end`}>
+        <span className="text-[28px] font-semibold leading-[0.95] tracking-[-0.04em]">
           {widget.wash || 'Box'}
         </span>
       </button>
     );
   }
 
-  const copy: Record<string, { label: string; meta: string; tone: string }> = {
-    hoje: { label: 'Hoje', meta: 'O seu dia', tone: 'neo-widget-white' },
-    pacientes: {
-      label: 'Casos',
-      meta: `${patientCount} na lista`,
-      tone: 'neo-widget-wash',
-    },
-    agenda: { label: 'Agenda', meta: 'Os boxes', tone: 'neo-widget-white' },
-    estudos: { label: 'Cola', meta: 'Antes de sentar', tone: 'neo-widget-soft' },
-    agendar: { label: 'Encaixar', meta: 'Marca um horário', tone: 'neo-widget-white' },
-  };
-  const item = copy[widget.kind] || copy.hoje;
-  const active = widget.kind === 'hoje' ? activeTab === 'dashboard' : activeTab === widget.kind;
+  if (widget.kind === 'pacientes') {
+    return (
+      <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-wash`}>
+        <span className="text-[12px] text-[var(--neo-gray)]">Casos</span>
+        <span className="mt-auto block text-[40px] font-semibold leading-none tracking-[-0.05em] tabular-nums text-[var(--neo-ink)]">
+          {patientCount}
+        </span>
+      </button>
+    );
+  }
+
+  if (widget.kind === 'agenda') {
+    return (
+      <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-white`}>
+        <span className="text-[12px] font-medium uppercase tracking-[0.06em] text-[var(--neo)]">{weekday}</span>
+        <span className="mt-auto block text-[40px] font-semibold leading-none tracking-[-0.05em] tabular-nums text-[var(--neo-ink)]">
+          {day}
+        </span>
+        <span className="mt-1 block text-[13px] capitalize text-[var(--neo-gray)]">{month}</span>
+      </button>
+    );
+  }
+
+  if (widget.kind === 'estudos') {
+    return (
+      <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-soft`}>
+        <span className="text-[12px] text-[var(--neo)]">Antes</span>
+        <span className="mt-auto block text-[26px] font-semibold leading-[0.95] tracking-[-0.04em] text-[var(--neo-ink)]">
+          Cola
+        </span>
+      </button>
+    );
+  }
+
+  if (widget.kind === 'agendar') {
+    return (
+      <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-white`}>
+        <span className="text-[12px] text-[var(--neo-gray)]">Agenda</span>
+        <span className="mt-auto block text-[26px] font-semibold leading-[0.95] tracking-[-0.04em] text-[var(--neo)]">
+          +
+        </span>
+      </button>
+    );
+  }
 
   return (
-    <button
-      type="button"
-      onClick={onActivate}
-      className={`${sizeClass} ${item.tone} ${active ? 'neo-widget-active' : ''} text-left`}
-    >
-      {Icon && (
-        <span className="flex h-7 w-7 items-center justify-center text-[var(--neo)]">
-          <Icon size={22} />
-        </span>
-      )}
-      <span className="min-w-0 tablet-l:hidden desktop:block">
-        <span className="block text-[15px] font-semibold tracking-[-0.016em] text-[var(--neo-ink)]">
-          {item.label}
-        </span>
-        <span className="mt-0.5 block truncate text-[12px] text-[var(--neo-gray)]">{item.meta}</span>
+    <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-white`}>
+      <span className="text-[12px] text-[var(--neo-gray)]">Hoje</span>
+      <span className="mt-auto block text-[26px] font-semibold leading-[0.95] tracking-[-0.04em] text-[var(--neo-ink)]">
+        Home
       </span>
     </button>
   );
 }
+

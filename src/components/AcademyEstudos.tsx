@@ -23,6 +23,7 @@ import {
   getLastPerformedSkill,
   mapSkillToStudyTopic,
 } from '../utils/clinicalProgression';
+import type { GamePlan } from '../features/game';
 
 const ColaGame = lazy(() =>
   import('../features/game').then(m => ({ default: m.ColaGame }))
@@ -38,6 +39,9 @@ interface AcademyEstudosProps {
   appointments?: any[];
   setActiveTab?: (tab: any) => void;
   openPatientRecord?: (id: number) => void;
+  /** Academy plan of the student: drives the game's free limits. */
+  plan?: GamePlan;
+  onUpgrade?: () => void;
 }
 
 type StudyMaterial = {
@@ -997,7 +1001,9 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
   patients = [],
   appointments = [],
   setActiveTab,
-  openPatientRecord
+  openPatientRecord,
+  plan,
+  onUpgrade
 }) => {
   const [selectedStudy, setSelectedStudy] = useState<StudyKey | null>(null);
   const [selectedCase, setSelectedCase] = useState<UpcomingCase | null>(null);
@@ -1523,6 +1529,8 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
             spotlightTopic={gameTopic ?? nextCase?.topicKey ?? null}
             spotlightLabel={gameTopic ? null : gameSpotlightLabel}
             autoStartTopic={gameTopic}
+            plan={plan ?? 'free'}
+            onUpgrade={onUpgrade}
             onOpenStudy={topic => {
               changeMode('estudar');
               openStudy(topic, nextCase?.topicKey === topic ? nextCase : null);

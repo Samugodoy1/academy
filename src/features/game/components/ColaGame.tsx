@@ -1,7 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { StudyKey } from '../../../utils/studyTopics';
 import { STUDY_TOPIC_LABELS } from '../../../utils/studyTopics';
-import { Flame, Heart, SoundOff, SoundOn, Target, TrendingUp, Zap } from '../../../icons';
+import {
+  Flame,
+  Gem,
+  Heart,
+  Restore,
+  Shield,
+  SoundOff,
+  SoundOn,
+  Target,
+  Zap,
+} from '../../../icons';
 import { ALL_EXERCISES, getUnit } from '../content';
 import {
   BLITZ_SECONDS,
@@ -9,19 +19,29 @@ import {
   buildLesson,
   buildMistakesLesson,
   buildUnitReview,
+  levelOf,
 } from '../engine';
+import { type GamePlan, type PlanBlock } from '../plan';
 import {
   DAILY_GOAL_OPTIONS,
+  HEART_REFILL_COST,
   MAX_HEARTS,
-  currentStreak,
+  STREAK_REPAIR_COST,
+  canStartLesson,
   getUnitState,
+  lessonsLeftToday,
   msToNextHeart,
 } from '../progress';
+import { canRepairStreak, streakAtRisk } from '../streak';
 import { useGameState } from '../useGameState';
 import type { LessonOutcome, LessonPlan, LessonReward } from '../types';
 import { GameSession } from './GameSession';
 import { GameTrail, type TrailSelection } from './GameTrail';
 import { LessonComplete, LessonFailed } from './LessonComplete';
+import { PlanSheet } from './PlanSheet';
+import { QuestBoard } from './QuestBoard';
+import { StreakCelebration } from './StreakCelebration';
+import { StreakPanel } from './StreakPanel';
 
 interface ColaGameProps {
   /** Topic of the student's next appointment: always unlocked and highlighted. */
@@ -29,7 +49,9 @@ interface ColaGameProps {
   spotlightLabel?: string | null;
   /** Opens straight into this topic's current lesson (used by "jogar a lição"). */
   autoStartTopic?: StudyKey | null;
+  plan?: GamePlan;
   onOpenStudy?: (topic: StudyKey) => void;
+  onUpgrade?: () => void;
 }
 
 interface RunningLesson {
@@ -44,33 +66,60 @@ export const ColaGame: React.FC<ColaGameProps> = ({
   spotlightTopic,
   spotlightLabel,
   autoStartTopic,
+  plan,
   onOpenStudy,
+  onUpgrade,
 }) => {
-  const { state, loseHeart, completeLesson, failLesson, setDailyGoal, toggleSound } = useGameState();
+  const {
+    state,
+    limits,
+    loseHeart,
+    beginLesson,
+    completeLesson,
+    failLesson,
+    setDailyGoal,
+    toggleSound,
+    purchaseFreeze,
+    purchaseHearts,
+    purchaseStreakRepair,
+  } = useGameState(plan ?? 'free');
+
   const [running, setRunning] = useState<RunningLesson | null>(null);
   const [result, setResult] = useState<{ outcome: LessonOutcome; reward: LessonReward } | null>(null);
+  const [celebration, setCelebration] = useState<number | null>(null);
   const [noHearts, setNoHearts] = useState(false);
   const [goalOpen, setGoalOpen] = useState(false);
+  const [streakOpen, setStreakOpen] = useState(false);
+  const [planBlock, setPlanBlock] = useState<PlanBlock | null>(null);
 
-  const streak = currentStreak(state);
+  const streak = state.streak;
+  const level = levelOf(state.xp);
   const goalProgress = Math.min(1, state.dayXp / Math.max(1, state.dailyGoal));
   const heartsFull = state.hearts >= MAX_HEARTS;
+  const atRisk = streakAtRisk(state);
+  const repairable = canRepairStreak(state);
+  const lessonsLeft = lessonsLeftToday(state, new Date(), limits);
 
   const startTrailNode = useCallback(
     (selection: TrailSelection) => {
       const unit = getUnit(selection.topic);
       if (!unit) return;
-      if (state.hearts <= 0) {
+      if (!canStartLesson(state, new Date(), limits)) {
+        setPlanBlock('dailyLessons');
+        return;
+      }
+      if (!limits.infiniteHearts && state.hearts <= 0) {
         setNoHearts(true);
         return;
       }
-      const plan =
+      const lessonPlan =
         selection.kind === 'review'
           ? buildUnitReview(unit, getUnitState(state, unit.topic).crowns)
           : buildLesson(unit, selection.index);
-      setRunning({ plan, useHearts: true });
+      beginLesson();
+      setRunning({ plan: lessonPlan, useHearts: true });
     },
-    [state]
+    [beginLesson, limits, state]
   );
 
   /** Current node of a unit: the next unfinished lesson, or its review. */
@@ -96,20 +145,24 @@ export const ColaGame: React.FC<ColaGameProps> = ({
 
   const startMistakes = useCallback(
     (ids?: string[]) => {
-      const plan = buildMistakesLesson(
+      const lessonPlan = buildMistakesLesson(
         ALL_EXERCISES,
         ids && ids.length > 0 ? ids : state.mistakes,
         `mistakes-${Date.now()}`
       );
-      if (!plan) return;
+      if (!lessonPlan) return;
       setNoHearts(false);
       setResult(null);
-      setRunning({ plan, useHearts: false });
+      setRunning({ plan: lessonPlan, useHearts: false });
     },
     [state.mistakes]
   );
 
   const startBlitz = useCallback(() => {
+    if (!limits.blitz) {
+      setPlanBlock('blitz');
+      return;
+    }
     setNoHearts(false);
     setResult(null);
     setRunning({
@@ -117,7 +170,7 @@ export const ColaGame: React.FC<ColaGameProps> = ({
       useHearts: false,
       timeLimitSec: BLITZ_SECONDS,
     });
-  }, []);
+  }, [limits.blitz]);
 
   const handleFinish = useCallback(
     (outcome: LessonOutcome, reason: 'complete' | 'failed') => {
@@ -131,6 +184,12 @@ export const ColaGame: React.FC<ColaGameProps> = ({
     },
     [completeLesson, failLesson]
   );
+
+  /** Results screen closes into the streak celebration when a mark was hit. */
+  const closeResult = useCallback(() => {
+    if (result && result.reward.milestone > 0) setCelebration(result.reward.milestone);
+    setResult(null);
+  }, [result]);
 
   const nextLesson = useMemo(() => {
     if (!result || result.outcome.kind !== 'lesson' || !result.outcome.topic) return null;
@@ -152,7 +211,7 @@ export const ColaGame: React.FC<ColaGameProps> = ({
         key={running.plan.id}
         plan={running.plan}
         hearts={state.hearts}
-        useHearts={running.useHearts}
+        useHearts={running.useHearts && !limits.infiniteHearts}
         soundOn={state.sound}
         timeLimitSec={running.timeLimitSec}
         onHeartLost={loseHeart}
@@ -169,12 +228,12 @@ export const ColaGame: React.FC<ColaGameProps> = ({
         outcome={result.outcome}
         reward={result.reward}
         soundOn={state.sound}
-        onContinue={() => setResult(null)}
+        onContinue={closeResult}
         onReviewMistakes={
           result.outcome.missed.length > 0 ? () => startMistakes(result.outcome.missed) : undefined
         }
         onNextLesson={
-          nextLesson && state.hearts > 0
+          nextLesson && (limits.infiniteHearts || state.hearts > 0) && result.reward.milestone === 0
             ? () => {
                 setResult(null);
                 startTrailNode(nextLesson);
@@ -190,33 +249,55 @@ export const ColaGame: React.FC<ColaGameProps> = ({
     );
   }
 
+  if (celebration !== null) {
+    return (
+      <StreakCelebration
+        milestone={celebration}
+        soundOn={state.sound}
+        onContinue={() => setCelebration(null)}
+      />
+    );
+  }
+
   if (noHearts) {
     return (
       <LessonFailed
-        minutesToHeart={minutesLeft(msToNextHeart(state))}
+        minutesToHeart={minutesLeft(msToNextHeart(state, new Date(), limits))}
+        gems={state.gems}
+        refillCost={HEART_REFILL_COST}
         onPractice={() => (state.mistakes.length > 0 ? startMistakes() : startBlitz())}
+        onRefill={() => {
+          purchaseHearts();
+          setNoHearts(false);
+        }}
         onExit={() => setNoHearts(false)}
+        onUpgrade={onUpgrade && !limits.infiniteHearts ? () => setPlanBlock('hearts') : undefined}
       />
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-[560px] space-y-8">
-      <div className="flex items-center justify-between gap-3 rounded-[24px] bg-[#f5f5f7] px-5 py-4">
-        <span className="flex items-center gap-2 text-[17px] font-semibold tabular-nums text-[var(--neo-ink)]">
-          <Flame size={20} className={streak > 0 ? 'text-[#ff9500]' : 'text-[#c7c7cc]'} />
+    <div className="mx-auto w-full max-w-[560px] space-y-6">
+      <div className="flex items-center justify-between gap-2 rounded-[24px] bg-[#f5f5f7] px-4 py-4 sm:px-5">
+        <button
+          type="button"
+          onClick={() => setStreakOpen(open => !open)}
+          aria-label="Ver ofensiva"
+          className="flex items-center gap-2 text-[17px] font-semibold tabular-nums text-[var(--neo-ink)]"
+        >
+          <Flame size={20} className={streak > 0 && !atRisk ? 'text-[#ff9500]' : 'text-[#c7c7cc]'} />
           {streak}
-        </span>
+        </button>
         <span className="flex items-center gap-2 text-[17px] font-semibold tabular-nums text-[var(--neo-ink)]">
-          <TrendingUp size={20} className="text-[var(--neo)]" />
-          {state.xp}
+          <Gem size={19} className="text-[#0a84ff]" />
+          {state.gems}
         </span>
         <span className="flex items-center gap-2 text-[17px] font-semibold tabular-nums text-[var(--neo-ink)]">
           <Heart size={20} className="text-[var(--game-wrong)]" />
-          {state.hearts}
-          {!heartsFull && (
+          {limits.infiniteHearts ? '∞' : state.hearts}
+          {!limits.infiniteHearts && !heartsFull && (
             <span className="text-[12px] font-normal text-[var(--neo-gray)]">
-              +1 em {minutesLeft(msToNextHeart(state))}min
+              +1 em {minutesLeft(msToNextHeart(state, new Date(), limits))}min
             </span>
           )}
         </span>
@@ -230,11 +311,53 @@ export const ColaGame: React.FC<ColaGameProps> = ({
         </button>
       </div>
 
+      {(atRisk || repairable) && !streakOpen && (
+        <button
+          type="button"
+          onClick={() => setStreakOpen(true)}
+          className={`flex w-full items-center gap-3 rounded-[20px] px-4 py-3 text-left ${
+            repairable ? 'bg-[var(--game-wrong-wash)]' : 'bg-[#fff3e0]'
+          }`}
+        >
+          <span className="shrink-0 text-[#ff9500]">
+            {repairable ? <Restore size={18} /> : <Flame size={18} />}
+          </span>
+          <span className="min-w-0 flex-1 text-[14px] leading-snug text-[var(--neo-ink)]">
+            {repairable
+              ? `Sua ofensiva de ${state.lostStreak?.value} dias caiu. Dá para recuperar por ${STREAK_REPAIR_COST} cristais.`
+              : `Você ainda não treinou hoje. Uma lição mantém a ofensiva de ${streak} ${streak === 1 ? 'dia' : 'dias'}.`}
+          </span>
+        </button>
+      )}
+
+      {streakOpen && (
+        <StreakPanel
+          state={state}
+          limits={limits}
+          onBuyFreeze={purchaseFreeze}
+          onRepair={purchaseStreakRepair}
+        />
+      )}
+
       <section className="space-y-3">
+        <div className="flex items-baseline justify-between gap-3 px-1">
+          <span className="text-[13px] text-[var(--neo-gray)]">
+            Nível {level.level} · {level.title}
+          </span>
+          <span className="text-[13px] tabular-nums text-[var(--neo-gray)]">
+            {level.into}/{level.size} XP
+          </span>
+        </div>
+        <div className="game-bar game-bar-thin">
+          <div
+            className="game-bar-fill game-bar-fill-xp"
+            style={{ width: `${Math.round((level.into / level.size) * 100)}%` }}
+          />
+        </div>
         <button
           type="button"
           onClick={() => setGoalOpen(open => !open)}
-          className="flex w-full items-baseline justify-between gap-3 px-1"
+          className="flex w-full items-baseline justify-between gap-3 px-1 pt-1"
         >
           <span className="text-[13px] text-[var(--neo-gray)]">Meta do dia</span>
           <span className="text-[13px] tabular-nums text-[var(--neo)]">
@@ -270,14 +393,21 @@ export const ColaGame: React.FC<ColaGameProps> = ({
         )}
       </section>
 
+      <QuestBoard quests={state.quests} />
+
       <div className="grid gap-3 sm:grid-cols-2">
         <button type="button" onClick={startBlitz} className="game-tile items-start gap-3 py-4">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--neo-wash)] text-[var(--neo)]">
             <Zap size={20} />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[16px] font-semibold text-[var(--neo-ink)]">
+            <span className="flex items-center gap-2 text-[16px] font-semibold text-[var(--neo-ink)]">
               Desafio relâmpago
+              {!limits.blitz && (
+                <span className="rounded-full bg-[var(--neo-wash)] px-2 py-0.5 text-[11px] font-medium text-[var(--neo)]">
+                  Student
+                </span>
+              )}
             </span>
             <span className="block text-[13px] text-[var(--neo-gray)]">
               {BLITZ_SECONDS} segundos, sem gastar vidas
@@ -308,6 +438,22 @@ export const ColaGame: React.FC<ColaGameProps> = ({
         </button>
       </div>
 
+      {lessonsLeft !== null && (
+        <button
+          type="button"
+          onClick={() => setPlanBlock('dailyLessons')}
+          className="flex w-full items-center gap-3 rounded-[20px] bg-[#f5f5f7] px-4 py-3 text-left"
+        >
+          <Shield size={16} className="shrink-0 text-[var(--neo-gray)]" />
+          <span className="min-w-0 flex-1 text-[13px] leading-snug text-[var(--neo-gray)]">
+            {lessonsLeft > 0
+              ? `Plano Free: ${lessonsLeft} ${lessonsLeft === 1 ? 'lição' : 'lições'} de trilha ainda hoje.`
+              : 'Plano Free: as lições de hoje acabaram. Revisar erros continua liberado.'}
+          </span>
+          <span className="shrink-0 text-[13px] font-medium text-[var(--neo)]">Ver ›</span>
+        </button>
+      )}
+
       <GameTrail
         state={state}
         spotlightTopic={spotlightTopic}
@@ -320,6 +466,21 @@ export const ColaGame: React.FC<ColaGameProps> = ({
         Conteúdo de estudo para revisão acadêmica. A conduta final é sempre do professor
         responsável pelo caso.
       </p>
+
+      {planBlock && (
+        <PlanSheet
+          block={planBlock}
+          onClose={() => setPlanBlock(null)}
+          onUpgrade={
+            onUpgrade
+              ? () => {
+                  setPlanBlock(null);
+                  onUpgrade();
+                }
+              : undefined
+          }
+        />
+      )}
     </div>
   );
 };

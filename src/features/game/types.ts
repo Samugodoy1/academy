@@ -108,8 +108,26 @@ export interface UnitState {
   crowns: number;
 }
 
+export type QuestKind = 'xp' | 'lessons' | 'correct' | 'perfect' | 'combo' | 'mistakes';
+
+export interface Quest {
+  id: string;
+  kind: QuestKind;
+  title: string;
+  target: number;
+  progress: number;
+  gems: number;
+}
+
+/** A streak that just broke and can still be bought back. */
+export interface LostStreak {
+  value: number;
+  /** Day the streak was found broken; the offer expires after REPAIR_WINDOW_DAYS. */
+  day: string;
+}
+
 export interface GameState {
-  version: 1;
+  version: 2;
   xp: number;
   hearts: number;
   /** Epoch ms of the last heart regeneration checkpoint. */
@@ -129,6 +147,21 @@ export interface GameState {
   lessonsDone: number;
   perfectLessons: number;
   bestCombo: number;
+  /** Currency earned by playing, spent on freezes, hearts and streak repair. */
+  gems: number;
+  /** Streak freezes in stock; one is spent automatically on a missed day. */
+  freezes: number;
+  bestStreak: number;
+  /** Days with a completed lesson, oldest first. */
+  history: string[];
+  /** Days saved by a freeze, oldest first. */
+  frozen: string[];
+  lostStreak: LostStreak | null;
+  /** Highest streak milestone already celebrated. */
+  milestone: number;
+  quests: Quest[];
+  /** Trail lessons started today, checked against the free plan cap. */
+  dayLessons: number;
 }
 
 export interface LessonOutcome {
@@ -155,4 +188,10 @@ export interface LessonReward {
   streakIncreased: boolean;
   goalReached: boolean;
   heartRecovered: boolean;
+  gems: number;
+  /** Quests finished by this lesson, for the celebration on the results screen. */
+  questsDone: Quest[];
+  /** Streak milestone reached now (3, 7, 14 …), or 0. */
+  milestone: number;
+  levelUp: number | null;
 }

@@ -2655,6 +2655,7 @@ export default function App() {
                       onDismissWelcome={() => updateUserOnboarding('welcome_seen')}
                       academicPeriod={profile?.academic_period}
                       institution={profile?.institution}
+                      gamePlan={(getProductAccess(getCurrentProduct())?.plan || 'free') === 'free' ? 'free' : 'student'}
                     />
                   )}
 
@@ -2666,6 +2667,8 @@ export default function App() {
                           appointments={appointments}
                           setActiveTab={setActiveTab}
                           openPatientRecord={openPatientRecord}
+                          plan={(getProductAccess(getCurrentProduct())?.plan || 'free') === 'free' ? 'free' : 'student'}
+                          onUpgrade={() => setShowAcademyUpgradeModal(true)}
                         />
                       </Suspense>
                     </ErrorBoundary>

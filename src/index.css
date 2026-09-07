@@ -1100,6 +1100,14 @@ html[data-theme="dark"] {
     transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
+  .game-bar-thin {
+    height: 10px;
+  }
+
+  .game-bar-fill-xp {
+    background: #ffb400;
+  }
+
   .game-sheet {
     animation: gameSheetIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
   }

@@ -211,3 +211,51 @@ export function lessonXp(outcome: LessonOutcome): number {
     (perfect ? 5 : 0)
   );
 }
+
+/** Gems are the slow currency: enough to buy a freeze every few days. */
+export function lessonGems(outcome: LessonOutcome): number {
+  const perfect = outcome.heartsLost === 0 && outcome.correct === outcome.total;
+  const base = outcome.kind === 'review' ? 8 : 3;
+  return base + (perfect ? 3 : 0);
+}
+
+// ── Levels ────────────────────────────────────────────────────────────
+
+const LEVEL_TITLES = [
+  'Calouro',
+  'Pré-clínica',
+  'Primeiro box',
+  'Clínica geral',
+  'Plantonista',
+  'Interno',
+  'Chefe de box',
+  'Residente',
+  'Especialista',
+  'Referência da turma',
+];
+
+export interface LevelInfo {
+  level: number;
+  title: string;
+  /** XP already earned inside the current level. */
+  into: number;
+  /** XP the current level costs in total. */
+  size: number;
+}
+
+export function levelTitle(level: number): string {
+  return LEVEL_TITLES[Math.min(Math.max(1, level) - 1, LEVEL_TITLES.length - 1)];
+}
+
+/** Each level costs 50 XP more than the one before, starting at 100. */
+const levelSize = (level: number) => 100 + (level - 1) * 50;
+
+export function levelOf(xp: number): LevelInfo {
+  let level = 1;
+  let remaining = Math.max(0, xp);
+  while (remaining >= levelSize(level)) {
+    remaining -= levelSize(level);
+    level += 1;
+  }
+  return { level, title: levelTitle(level), into: remaining, size: levelSize(level) };
+}

@@ -15,8 +15,11 @@ import { countClinicalSkills, suggestNextClinicalStep } from '../utils/clinicalP
 import { STUDY_TOPIC_LABELS, StudyKey } from '../utils/studyTopics';
 import { DataLoadingSkeleton } from './DataLoadingSkeleton';
 import { studentGreeting } from '../theme/academyWidgets';
+import { ColaShortcut } from '../features/game/ColaShortcut';
+import type { GamePlan } from '../features/game/plan';
 
 const STUDY_TOPIC_STORAGE_KEY = 'academy_study_topic';
+const STUDY_MODE_STORAGE_KEY = 'academy_study_mode';
 
 interface AcademyDashboardProps {
   user?: any;
@@ -33,6 +36,7 @@ interface AcademyDashboardProps {
   onDismissWelcome: () => void;
   academicPeriod?: string;
   institution?: string;
+  gamePlan?: GamePlan;
 }
 
 const ACTIVE_STATUSES = new Set(['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS']);
@@ -410,6 +414,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   onDismissWelcome,
   academicPeriod,
   institution,
+  gamePlan,
 }) => {
   const usableAppointments = useMemo(() => {
     return appointments
@@ -653,6 +658,16 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
   const openStudyTopic = (topic: StudyKey) => {
     sessionStorage.setItem(STUDY_TOPIC_STORAGE_KEY, topic);
+    try {
+      localStorage.setItem(STUDY_MODE_STORAGE_KEY, 'estudar');
+    } catch { /* storage indisponível: a Cola abre no último modo salvo */ }
+    setActiveTab('estudos');
+  };
+
+  const openGame = () => {
+    try {
+      localStorage.setItem(STUDY_MODE_STORAGE_KEY, 'treinar');
+    } catch { /* storage indisponível: a Cola abre no modo padrão */ }
     setActiveTab('estudos');
   };
 
@@ -838,6 +853,10 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
               </div>
             </HomeSection>
           )}
+
+          <HomeSection kicker="Treino">
+            <ColaShortcut plan={gamePlan ?? 'free'} onOpen={openGame} />
+          </HomeSection>
 
           {studySuggestion && (
             <HomeSection kicker="Cola">

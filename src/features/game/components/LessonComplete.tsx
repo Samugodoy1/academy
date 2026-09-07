@@ -117,7 +117,9 @@ export const LessonComplete: React.FC<LessonCompleteProps> = ({
           )}
           {outcome.missed.length > 0 && onReviewMistakes && (
             <button type="button" onClick={onReviewMistakes} className="game-cta game-cta-ghost">
-              Revisar os {outcome.missed.length} erros
+              {outcome.missed.length === 1
+                ? 'Revisar o erro'
+                : `Revisar os ${outcome.missed.length} erros`}
             </button>
           )}
           {studyLink && (

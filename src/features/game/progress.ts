@@ -140,10 +140,11 @@ export function registerLessonResult(
     units[outcome.topic] = { lessons, crowns };
   }
 
-  // Practice modes give a heart back instead of costing one.
+  // Practice modes give a heart back instead of costing one, as long as the
+  // round was actually played through.
   const heartRecovered =
     (outcome.kind === 'mistakes' || outcome.kind === 'blitz') &&
-    outcome.heartsLost === 0 &&
+    outcome.correct >= Math.ceil(outcome.total / 2) &&
     rolled.hearts < MAX_HEARTS;
 
   const dayXp = rolled.dayXp + xp;
@@ -176,6 +177,25 @@ export function registerLessonResult(
       goalReached: dayXp >= rolled.dailyGoal && rolled.dayXp < rolled.dailyGoal,
       heartRecovered,
     },
+  };
+}
+
+/**
+ * A lesson lost to the hearts running out gives no XP and no streak, but the
+ * questions that were missed still go to the review pile.
+ */
+export function registerFailedLesson(
+  state: GameState,
+  outcome: LessonOutcome,
+  now: Date = new Date()
+): GameState {
+  const rolled = applyDayRollover(regenerateHearts(state, now), now);
+  return {
+    ...rolled,
+    mistakes: rememberMistakes(rolled.mistakes, outcome.missed, outcome.mastered),
+    totalCorrect: rolled.totalCorrect + outcome.correct,
+    totalAnswered: rolled.totalAnswered + outcome.correct + outcome.missed.length,
+    bestCombo: Math.max(rolled.bestCombo, outcome.bestCombo),
   };
 }
 

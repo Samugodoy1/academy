@@ -214,6 +214,22 @@ export const GameSession: React.FC<GameSessionProps> = ({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [answer, checked, current, handleContinue, submit]);
 
+  // The instruction above the question would read twice for formats whose
+  // prompt is already "Complete a frase" or "Verdadeiro ou falso".
+  const kickerLabel = useMemo(() => {
+    if (!current) return '';
+    const label = EXERCISE_KIND_LABEL[current.kind];
+    const firstWord = (value: string) =>
+      value
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z ]/g, '')
+        .trim()
+        .split(' ')[0];
+    return firstWord(label) === firstWord(current.prompt) ? plan.title : label;
+  }, [current, plan.title]);
+
   const feedbackCopy = useMemo(() => {
     if (!checked || !current) return null;
     if (checked.correct) {
@@ -267,7 +283,7 @@ export const GameSession: React.FC<GameSessionProps> = ({
         <div className="mx-auto w-full max-w-[620px]">
           <div className="mb-4 flex items-center justify-between gap-3">
             <p className="text-[13px] font-medium uppercase tracking-[0.06em] text-[var(--neo-gray)]">
-              {EXERCISE_KIND_LABEL[current.kind]}
+              {kickerLabel}
             </p>
             {combo >= 2 && (
               <span className="game-pop flex items-center gap-1 rounded-full bg-[var(--neo-wash)] px-3 py-1 text-[13px] font-semibold text-[var(--neo)]">

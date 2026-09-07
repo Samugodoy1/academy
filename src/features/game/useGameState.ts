@@ -3,6 +3,7 @@ import {
   applyDayRollover,
   loadGameState,
   regenerateHearts,
+  registerFailedLesson,
   registerLessonResult,
   saveGameState,
   spendHeart,
@@ -49,6 +50,13 @@ export function useGameState() {
     [commit]
   );
 
+  const failLesson = useCallback(
+    (outcome: LessonOutcome) => {
+      commit(registerFailedLesson(stateRef.current, outcome));
+    },
+    [commit]
+  );
+
   const setDailyGoal = useCallback(
     (dailyGoal: number) => {
       commit({ ...stateRef.current, dailyGoal });
@@ -60,5 +68,5 @@ export function useGameState() {
     commit({ ...stateRef.current, sound: !stateRef.current.sound });
   }, [commit]);
 
-  return { state, loseHeart, completeLesson, setDailyGoal, toggleSound };
+  return { state, loseHeart, completeLesson, failLesson, setDailyGoal, toggleSound };
 }

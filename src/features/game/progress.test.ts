@@ -10,6 +10,7 @@ import {
   getUnitState,
   msToNextHeart,
   regenerateHearts,
+  registerFailedLesson,
   registerLessonResult,
   sanitizeState,
   spendHeart,
@@ -158,6 +159,35 @@ describe('progresso da trilha', () => {
     );
     expect(reward.heartRecovered).toBe(true);
     expect(state.hearts).toBe(MAX_HEARTS);
+  });
+
+  it('não devolve vida quando o treino livre foi majoritariamente errado', () => {
+    const now = at('2026-03-01T09:00:00');
+    const spent = spendHeart(createInitialState(now), now);
+    const { state, reward } = registerLessonResult(
+      spent,
+      baseOutcome({ kind: 'mistakes', correct: 1, total: 6 }),
+      now
+    );
+    expect(reward.heartRecovered).toBe(false);
+    expect(state.hearts).toBe(MAX_HEARTS - 1);
+  });
+});
+
+describe('lição perdida', () => {
+  it('guarda os erros mas não dá xp nem ofensiva', () => {
+    const now = at('2026-03-01T09:00:00');
+    const start = createInitialState(now);
+    const next = registerFailedLesson(
+      start,
+      baseOutcome({ correct: 1, missed: ['anest-04', 'anest-09'] }),
+      now
+    );
+    expect(next.xp).toBe(0);
+    expect(next.lastDay).toBeNull();
+    expect(next.streak).toBe(0);
+    expect(next.mistakes).toEqual(['anest-04', 'anest-09']);
+    expect(getUnitState(next, 'anestesia').lessons).toBe(0);
   });
 });
 

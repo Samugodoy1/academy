@@ -1082,6 +1082,10 @@ html[data-theme="dark"] {
     box-shadow: 0 6px 0 var(--game-line-shadow);
   }
 
+  .game-node-current {
+    animation: gameNodeBreath 2.4s ease-in-out infinite;
+  }
+
   .game-bar {
     height: 16px;
     border-radius: 999px;
@@ -1145,10 +1149,16 @@ html[data-theme="dark"] {
   80% { transform: translateX(4px); }
 }
 
+@keyframes gameNodeBreath {
+  0%, 100% { box-shadow: 0 6px 0 color-mix(in srgb, var(--neo) 68%, #1d1d1f); }
+  50% { box-shadow: 0 6px 0 color-mix(in srgb, var(--neo) 68%, #1d1d1f), 0 0 0 10px var(--neo-wash); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .game-sheet,
   .game-pop,
-  .game-shake {
+  .game-shake,
+  .game-node-current {
     animation: none;
   }
 }

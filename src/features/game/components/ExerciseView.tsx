@@ -239,11 +239,6 @@ const OrderView: React.FC<ExerciseViewProps & { exercise: OrderExercise }> = ({
           </button>
         ))}
       </div>
-      {locked && (
-        <div className="rounded-[18px] bg-[#f5f5f7] px-4 py-3 text-[14px] leading-snug text-[var(--neo-gray)]">
-          Ordem correta: {exercise.steps.join(' → ')}
-        </div>
-      )}
     </div>
   );
 };
@@ -269,18 +264,18 @@ const BlankView: React.FC<ExerciseViewProps & { exercise: BlankExercise }> = ({
 
   return (
     <div className="space-y-6">
-      <p className="text-[19px] leading-relaxed tracking-[-0.016em] text-[var(--neo-ink)]">
+      <p className="text-[19px] leading-[2] tracking-[-0.016em] text-[var(--neo-ink)]">
         {before}
         <span
-          className={`mx-1 inline-flex min-w-[92px] items-center justify-center rounded-lg border-b-[3px] px-2 py-0.5 align-baseline font-semibold ${
+          className={`mx-1 inline-block min-w-[88px] rounded-md border-b-2 px-2 text-center font-semibold ${
             value
               ? locked
-                ? 'border-current text-[var(--neo-ink)]'
+                ? 'border-[var(--neo-ink)] text-[var(--neo-ink)]'
                 : 'border-[var(--neo)] text-[var(--neo)]'
-              : 'border-[var(--game-line-shadow)] text-transparent'
+              : 'border-[var(--game-line-shadow)]'
           }`}
         >
-          {value ?? '—'}
+          {value ?? '\u00A0'}
         </span>
         {after}
       </p>

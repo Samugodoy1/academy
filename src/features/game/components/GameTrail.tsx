@@ -19,8 +19,8 @@ interface GameTrailProps {
   onOpenStudy?: (topic: StudyKey) => void;
 }
 
-/** Zigzag offsets, in pixels, applied to consecutive nodes. */
-const OFFSETS = [0, 44, 64, 44, 0, -44, -64, -44];
+/** Snake offsets, in pixels, applied to consecutive nodes. */
+const OFFSETS = [0, 52, 0, -52];
 
 function isUnitUnlocked(
   unit: GameUnit,
@@ -171,7 +171,7 @@ export const GameTrail: React.FC<GameTrailProps> = ({
                             : isDone
                               ? 'game-node-done'
                               : 'game-node-open'
-                      } ${isCurrent ? 'ring-4 ring-[var(--neo-soft)]' : ''}`}
+                      } ${isCurrent ? 'game-node-current' : ''}`}
                     >
                       {isLocked ? (
                         <Lock size={22} />

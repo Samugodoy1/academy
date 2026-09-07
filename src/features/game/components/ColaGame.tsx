@@ -46,7 +46,7 @@ export const ColaGame: React.FC<ColaGameProps> = ({
   autoStartTopic,
   onOpenStudy,
 }) => {
-  const { state, loseHeart, completeLesson, setDailyGoal, toggleSound } = useGameState();
+  const { state, loseHeart, completeLesson, failLesson, setDailyGoal, toggleSound } = useGameState();
   const [running, setRunning] = useState<RunningLesson | null>(null);
   const [result, setResult] = useState<{ outcome: LessonOutcome; reward: LessonReward } | null>(null);
   const [noHearts, setNoHearts] = useState(false);
@@ -123,12 +123,13 @@ export const ColaGame: React.FC<ColaGameProps> = ({
     (outcome: LessonOutcome, reason: 'complete' | 'failed') => {
       setRunning(null);
       if (reason === 'failed') {
+        failLesson(outcome);
         setNoHearts(true);
         return;
       }
       setResult({ outcome, reward: completeLesson(outcome) });
     },
-    [completeLesson]
+    [completeLesson, failLesson]
   );
 
   const nextLesson = useMemo(() => {
@@ -200,7 +201,7 @@ export const ColaGame: React.FC<ColaGameProps> = ({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-[560px] space-y-8">
       <div className="flex items-center justify-between gap-3 rounded-[24px] bg-[#f5f5f7] px-5 py-4">
         <span className="flex items-center gap-2 text-[17px] font-semibold tabular-nums text-[var(--neo-ink)]">
           <Flame size={20} className={streak > 0 ? 'text-[#ff9500]' : 'text-[#c7c7cc]'} />

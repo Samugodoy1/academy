@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import type { StudyKey } from '../../../utils/studyTopics';
 import { BookOpen, Check, Crown, Lock, Play, Star, Trophy } from '../../../icons';
+import { CharacterAvatar, hostFor } from '../characters';
 import { GAME_UNITS } from '../content';
 import { CROWNS_PER_UNIT, getUnitState } from '../progress';
 import type { GameState, GameUnit } from '../types';
@@ -68,6 +69,7 @@ export const GameTrail: React.FC<GameTrailProps> = ({
     <div className="space-y-10">
       {units.map(({ unit, unlocked, progress }) => {
         const isSpotlight = spotlightTopic === unit.topic;
+        const host = hostFor(unit.topic);
         const done = Math.min(progress.lessons, unit.lessons);
         const nodes = [
           ...Array.from({ length: unit.lessons }, (_, index) => ({ kind: 'lesson' as const, index })),
@@ -82,22 +84,37 @@ export const GameTrail: React.FC<GameTrailProps> = ({
               }`}
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  {isSpotlight && spotlightLabel && (
-                    <p className="text-[12px] font-medium uppercase tracking-[0.05em] text-white/80">
-                      {spotlightLabel}
+                <div className="flex min-w-0 gap-3">
+                  <CharacterAvatar
+                    id={host.id}
+                    mood={unlocked ? 'happy' : 'idle'}
+                    size={56}
+                    className={unlocked ? '' : 'opacity-45 grayscale'}
+                  />
+                  <div className="min-w-0">
+                    {isSpotlight && spotlightLabel && (
+                      <p className="text-[12px] font-medium uppercase tracking-[0.05em] text-white/80">
+                        {spotlightLabel}
+                      </p>
+                    )}
+                    <h3 className="text-[20px] font-semibold leading-[1.15] tracking-[-0.02em]">
+                      {unit.title}
+                    </h3>
+                    <p
+                      className={`mt-1 text-[14px] leading-snug ${
+                        isSpotlight ? 'text-white/85' : 'text-[var(--neo-gray)]'
+                      }`}
+                    >
+                      {unit.tagline}
                     </p>
-                  )}
-                  <h3 className="text-[20px] font-semibold leading-[1.15] tracking-[-0.02em]">
-                    {unit.title}
-                  </h3>
-                  <p
-                    className={`mt-1 text-[14px] leading-snug ${
-                      isSpotlight ? 'text-white/85' : 'text-[var(--neo-gray)]'
-                    }`}
-                  >
-                    {unit.tagline}
-                  </p>
+                    <p
+                      className={`mt-2 text-[13px] leading-snug ${
+                        isSpotlight ? 'text-white/75' : 'text-[var(--neo-gray)]'
+                      }`}
+                    >
+                      Com {host.name}, {host.role}
+                    </p>
+                  </div>
                 </div>
                 {unlocked ? (
                   <CrownRow crowns={progress.crowns} />
@@ -200,6 +217,11 @@ export const GameTrail: React.FC<GameTrailProps> = ({
                                 ? 'Já concluída. Refazer não custa vidas extras de propósito — só reforça.'
                                 : 'Seis perguntas rápidas sobre o tema.'}
                         </p>
+                        {!isLocked && (
+                          <p className="mt-3 text-[13px] leading-snug text-[var(--neo-gray)]">
+                            {host.name}: “{host.lines.trail}”
+                          </p>
+                        )}
                         {!isLocked && (
                           <button
                             type="button"

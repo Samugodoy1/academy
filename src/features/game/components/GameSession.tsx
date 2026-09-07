@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Check, Clock, Heart, X, Zap } from '../../../icons';
-import { checkAnswer, describeAnswer } from '../engine';
+import { CharacterSay, hostFor, pickLine } from '../characters';
+import { checkAnswer, describeAnswer, exerciseSpeech } from '../engine';
 import { feedback } from '../sound';
 import type { Answer, Exercise, LessonOutcome, LessonPlan } from '../types';
 import { EXERCISE_KIND_LABEL, ExerciseView } from './ExerciseView';
@@ -169,8 +170,14 @@ export const GameSession: React.FC<GameSessionProps> = ({
     advance(queue, nextResolved);
   }, [advance, checked, current, queue, resolved]);
 
+  const outOfHearts = useHearts && hearts <= 0;
+
   const handleContinue = useCallback(() => {
     if (!checked || !current) return;
+    if (outOfHearts && !checked.correct) {
+      finish('failed');
+      return;
+    }
     const nextResolved = checked.correct || (attempts[current.id] ?? 0) >= MAX_ATTEMPTS
       ? resolved.includes(current.id)
         ? resolved
@@ -179,13 +186,13 @@ export const GameSession: React.FC<GameSessionProps> = ({
     const nextQueue = queue;
     setResolved(nextResolved);
     advance(nextQueue, nextResolved);
-  }, [advance, attempts, checked, current, queue, resolved]);
+  }, [advance, attempts, checked, current, finish, outOfHearts, queue, resolved]);
 
-  // Out of hearts ends the run, but only after the student reads the feedback.
-  const outOfHearts = useHearts && hearts <= 0;
+  // Out of hearts ends the run: right away if the student keeps tapping, or
+  // after a beat so the feedback can be read.
   useEffect(() => {
     if (outOfHearts && checked && !checked.correct) {
-      const timer = window.setTimeout(() => finish('failed'), 1200);
+      const timer = window.setTimeout(() => finish('failed'), 1600);
       return () => window.clearTimeout(timer);
     }
     return undefined;
@@ -230,17 +237,26 @@ export const GameSession: React.FC<GameSessionProps> = ({
     return firstWord(label) === firstWord(current.prompt) ? plan.title : label;
   }, [current, plan.title]);
 
+  // Quem apresenta o caso: o dono da unidade. Em revisão e relâmpago, os temas
+  // se misturam e a turma vai se revezando exercício a exercício.
+  const host = useMemo(() => hostFor(current?.topic), [current?.topic]);
+
+  const speech = useMemo(() => {
+    if (!current) return '';
+    return exerciseSpeech(current) ?? pickLine(host.lines.intro, `${current.id}:${host.id}`);
+  }, [current, host]);
+
   const feedbackCopy = useMemo(() => {
     if (!checked || !current) return null;
+    const seed = `${current.id}:${resolved.length}`;
     if (checked.correct) {
-      const cheers = ['Isso!', 'Mandou bem!', 'Exatamente!', 'Perfeito!'];
-      return { title: cheers[resolved.length % cheers.length], detail: current.explanation };
+      return { title: pickLine(host.lines.right, seed), detail: current.explanation };
     }
     return {
-      title: 'Resposta correta',
-      detail: `${describeAnswer(current)}. ${current.explanation}`,
+      title: pickLine(host.lines.wrong, seed),
+      detail: `Resposta: ${describeAnswer(current)}. ${current.explanation}`,
     };
-  }, [checked, current, resolved.length]);
+  }, [checked, current, host, resolved.length]);
 
   if (!current) return null;
 
@@ -296,6 +312,14 @@ export const GameSession: React.FC<GameSessionProps> = ({
           <h2 className="mb-5 text-[24px] font-semibold leading-[1.15] tracking-[-0.02em] text-[var(--neo-ink)] sm:text-[28px]">
             {current.prompt}
           </h2>
+
+          <CharacterSay
+            className="mb-6"
+            character={host}
+            text={speech}
+            size={72}
+            mood={checked ? (checked.correct ? 'happy' : 'sad') : 'idle'}
+          />
 
           <ExerciseView
             key={`${current.id}-${attempts[current.id] ?? 0}`}

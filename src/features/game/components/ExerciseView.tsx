@@ -21,13 +21,6 @@ export interface ExerciseViewProps {
   onTap: () => void;
 }
 
-const Scenario: React.FC<{ text?: string }> = ({ text }) =>
-  text ? (
-    <div className="rounded-[20px] rounded-bl-[6px] bg-[#f5f5f7] px-5 py-4 text-[16px] leading-snug text-[var(--neo-ink)]">
-      {text}
-    </div>
-  ) : null;
-
 function toneFor(locked: boolean, selected: boolean, correct: boolean) {
   if (!locked) return selected ? 'game-tile-selected' : '';
   if (correct) return 'game-tile-right';
@@ -46,8 +39,7 @@ const ChoiceView: React.FC<ExerciseViewProps & { exercise: ChoiceExercise }> = (
 }) => {
   const selected = answer?.kind === 'choice' ? answer.index : null;
   return (
-    <div className="space-y-4">
-      <Scenario text={exercise.scenario} />
+    <div className="space-y-3">
       <div className="space-y-3">
         {exercise.options.map((option, index) => (
           <button
@@ -93,7 +85,6 @@ const MultiView: React.FC<ExerciseViewProps & { exercise: MultiExercise }> = ({
   };
   return (
     <div className="space-y-4">
-      <Scenario text={exercise.scenario} />
       <p className="px-1 text-[13px] text-[var(--neo-gray)]">Pode marcar mais de uma.</p>
       <div className="space-y-3">
         {exercise.options.map((option, index) => {
@@ -140,9 +131,6 @@ const BooleanView: React.FC<ExerciseViewProps & { exercise: BooleanExercise }> =
   ];
   return (
     <div className="space-y-5">
-      <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-6 text-[19px] font-semibold leading-snug tracking-[-0.016em] text-[var(--neo-ink)]">
-        {exercise.statement}
-      </div>
       <div className="grid grid-cols-2 gap-3">
         {options.map(option => (
           <button
@@ -198,7 +186,6 @@ const OrderView: React.FC<ExerciseViewProps & { exercise: OrderExercise }> = ({
 
   return (
     <div className="space-y-5">
-      <Scenario text={exercise.scenario} />
       <div className="space-y-2 rounded-[22px] border-2 border-dashed border-[var(--game-line)] p-3">
         {chosen.length === 0 && (
           <p className="px-2 py-6 text-center text-[14px] text-[var(--neo-gray)]">

@@ -90,6 +90,9 @@ import {
   Play           as PhPlay,
   SpeakerSimpleHigh as PhSpeakerHigh,
   SpeakerSimpleSlash as PhSpeakerSlash,
+  Diamond        as PhDiamond,
+  Gift           as PhGift,
+  ArrowClockwise as PhArrowClockwise,
 } from '@phosphor-icons/react';
 
 // ─── Prop types ──────────────────────────────────────────────────────────────
@@ -215,3 +218,6 @@ export const Star          = fill(PhStar);
 export const Play          = fill(PhPlay);
 export const SoundOn       = fill(PhSpeakerHigh);
 export const SoundOff      = fill(PhSpeakerSlash);
+export const Gem           = fill(PhDiamond);
+export const Gift          = fill(PhGift);
+export const Restore       = bold(PhArrowClockwise);

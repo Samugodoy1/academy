@@ -90,6 +90,15 @@ export function checkAnswer(exercise: Exercise, answer: Answer): boolean {
   }
 }
 
+/** The part of an exercise a character can read out loud, when there is one. */
+export function exerciseSpeech(exercise: Exercise): string | null {
+  if (exercise.kind === 'boolean') return exercise.statement;
+  if (exercise.kind === 'choice' || exercise.kind === 'multi' || exercise.kind === 'order') {
+    return exercise.scenario ?? null;
+  }
+  return null;
+}
+
 /** Human readable correct answer, used by the feedback sheet when the student misses. */
 export function describeAnswer(exercise: Exercise): string {
   switch (exercise.kind) {

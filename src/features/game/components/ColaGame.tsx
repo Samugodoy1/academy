@@ -1,17 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { StudyKey } from '../../../utils/studyTopics';
 import { STUDY_TOPIC_LABELS } from '../../../utils/studyTopics';
-import {
-  Flame,
-  Gem,
-  Heart,
-  Restore,
-  Shield,
-  SoundOff,
-  SoundOn,
-  Target,
-  Zap,
-} from '../../../icons';
+import { Flame, Gem, Heart, Shield, SoundOff, SoundOn, Target, Zap } from '../../../icons';
+import { CAST, CharacterSay } from '../characters';
 import { ALL_EXERCISES, getUnit } from '../content';
 import {
   BLITZ_SECONDS,
@@ -100,6 +91,19 @@ export const ColaGame: React.FC<ColaGameProps> = ({
   const atRisk = streakAtRisk(state);
   const repairable = canRepairStreak(state);
   const lessonsLeft = lessonsLeftToday(state, new Date(), limits);
+
+  /** O Siso comenta o estado do dia em vez de mais um aviso de sistema. */
+  const sisoLine = (() => {
+    if (repairable) {
+      return `Sua ofensiva de ${state.lostStreak?.value} dias caiu. Dá para recuperar por ${STREAK_REPAIR_COST} cristais.`;
+    }
+    if (atRisk) {
+      return `Você ainda não treinou hoje. Uma lição mantém a ofensiva de ${streak} ${streak === 1 ? 'dia' : 'dias'}.`;
+    }
+    if (goalProgress >= 1) return 'Meta do dia batida. Se quiser mais uma, eu topo.';
+    if (streak > 0) return `Ofensiva de ${streak} ${streak === 1 ? 'dia' : 'dias'}. Bora manter.`;
+    return 'Duas perguntas e você já esquenta. Escolhe um box aí embaixo.';
+  })();
 
   const startTrailNode = useCallback(
     (selection: TrailSelection) => {
@@ -315,22 +319,20 @@ export const ColaGame: React.FC<ColaGameProps> = ({
         </button>
       </div>
 
-      {(atRisk || repairable) && !streakOpen && (
+      {!streakOpen && (
         <button
           type="button"
           onClick={() => setStreakOpen(true)}
-          className={`flex w-full items-center gap-3 rounded-[20px] px-4 py-3 text-left ${
-            repairable ? 'bg-[var(--game-wrong-wash)]' : 'bg-[#fff3e0]'
-          }`}
+          aria-label="Ver ofensiva"
+          className="block w-full text-left"
         >
-          <span className="shrink-0 text-[#ff9500]">
-            {repairable ? <Restore size={18} /> : <Flame size={18} />}
-          </span>
-          <span className="min-w-0 flex-1 text-[14px] leading-snug text-[var(--neo-ink)]">
-            {repairable
-              ? `Sua ofensiva de ${state.lostStreak?.value} dias caiu. Dá para recuperar por ${STREAK_REPAIR_COST} cristais.`
-              : `Você ainda não treinou hoje. Uma lição mantém a ofensiva de ${streak} ${streak === 1 ? 'dia' : 'dias'}.`}
-          </span>
+          <CharacterSay
+            character={CAST.siso}
+            text={sisoLine}
+            size={72}
+            mood={repairable ? 'sad' : atRisk ? 'wow' : goalProgress >= 1 ? 'cheer' : 'happy'}
+            tone={repairable ? 'wrong' : 'default'}
+          />
         </button>
       )}
 

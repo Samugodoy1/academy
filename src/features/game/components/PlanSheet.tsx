@@ -1,5 +1,6 @@
 import React from 'react';
-import { Check, Sparkles } from '../../../icons';
+import { Check } from '../../../icons';
+import { CharacterAvatar } from '../characters';
 import { BLOCK_COPY, STUDENT_PERKS, type PlanBlock } from '../plan';
 
 interface PlanSheetProps {
@@ -15,9 +16,7 @@ export const PlanSheet: React.FC<PlanSheetProps> = ({ block, onClose, onUpgrade 
   return (
     <div className="fixed inset-0 z-[210] flex items-end justify-center bg-black/40 px-4 pb-4 sm:items-center sm:pb-0">
       <div className="game-pop w-full max-w-[440px] rounded-[28px] bg-white px-6 py-7">
-        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--neo-wash)] text-[var(--neo)]">
-          <Sparkles size={24} />
-        </span>
+        <CharacterAvatar id="siso" mood="idle" size={84} />
         <p className="mt-4 text-[12px] font-medium uppercase tracking-[0.06em] text-[var(--neo-gray)]">
           Academy Free
         </p>

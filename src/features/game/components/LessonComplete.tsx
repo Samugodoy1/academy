@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Check, Gem, Heart, Sparkles, Target, TrendingUp, Zap } from '../../../icons';
+import { CAST, CharacterAvatar, hostFor } from '../characters';
 import { levelTitle } from '../engine';
 import { feedback } from '../sound';
 import type { LessonOutcome, LessonReward } from '../types';
@@ -50,6 +51,7 @@ export const LessonComplete: React.FC<LessonCompleteProps> = ({
 }) => {
   const accuracy = outcome.total > 0 ? outcome.correct / outcome.total : 0;
   const seconds = Math.round(outcome.elapsedMs / 1000);
+  const host = hostFor(outcome.topic);
 
   useEffect(() => {
     feedback('complete', soundOn);
@@ -59,13 +61,17 @@ export const LessonComplete: React.FC<LessonCompleteProps> = ({
     <div className="fixed inset-0 z-[200] flex flex-col overflow-y-auto bg-white">
       <div className="mx-auto flex w-full max-w-[620px] flex-1 flex-col justify-center px-5 py-10 sm:px-6">
         <div className="game-pop text-center">
-          <p className="text-[13px] font-medium uppercase tracking-[0.06em] text-[var(--neo)]">
+          <CharacterAvatar id={host.id} mood="cheer" size={132} className="mx-auto" />
+          <p className="mt-2 text-[13px] font-medium uppercase tracking-[0.06em] text-[var(--neo)]">
             {reward.perfect ? 'Sem erros' : 'Concluído'}
           </p>
           <h2 className="mt-2 text-[32px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)] sm:text-[40px]">
             {headlineFor(reward, accuracy)}
           </h2>
           <p className="mx-auto mt-3 max-w-[34ch] text-[17px] leading-snug text-[var(--neo-gray)]">
+            {host.name}: “{reward.perfect ? host.lines.perfect : host.lines.done}”
+          </p>
+          <p className="mx-auto mt-2 max-w-[34ch] text-[15px] leading-snug text-[var(--neo-gray)]">
             {reward.streakIncreased
               ? `Ofensiva de ${reward.streak} ${reward.streak === 1 ? 'dia' : 'dias'} garantida hoje.`
               : `Você acertou ${outcome.correct} de ${outcome.total} de primeira.`}
@@ -184,15 +190,18 @@ export const LessonFailed: React.FC<LessonFailedProps> = ({
 }) => (
   <div className="fixed inset-0 z-[200] flex flex-col justify-center overflow-y-auto bg-white px-5 py-10 sm:px-6">
     <div className="mx-auto w-full max-w-[520px] text-center">
-      <span className="game-pop mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--game-wrong-wash)] text-[var(--game-wrong)]">
-        <Heart size={38} />
+      <span className="game-pop relative mx-auto flex w-[132px] items-end justify-center">
+        <CharacterAvatar id="siso" mood="sad" size={132} />
+        <span className="absolute -right-2 bottom-0 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--game-wrong-wash)] text-[var(--game-wrong)]">
+          <Heart size={22} />
+        </span>
       </span>
-      <h2 className="mt-6 text-[30px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
+      <h2 className="mt-4 text-[30px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
         Você ficou sem vidas
       </h2>
       <p className="mx-auto mt-3 max-w-[34ch] text-[17px] leading-snug text-[var(--neo-gray)]">
-        Errar é como se aprende — mas vamos com calma. A próxima vida chega em{' '}
-        {minutesToHeart} min, ou você recupera uma agora no treino livre.
+        {CAST.siso.name}: “{CAST.siso.lines.fail}” A próxima vida chega em {minutesToHeart} min, ou
+        você recupera uma agora no treino livre.
       </p>
       <div className="mt-8 space-y-2 text-left">
         <button type="button" onClick={onPractice} className="game-cta">

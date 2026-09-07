@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ChevronRight, Flame, Gem, Target } from '../../icons';
+import { CharacterAvatar } from './characters';
 import { limitsFor, type GamePlan } from './plan';
 import { loadGameState } from './progress';
 import { streakAtRisk } from './streak';
@@ -64,13 +65,16 @@ export const ColaShortcut: React.FC<ColaShortcutProps> = ({ plan, onOpen }) => {
       }`}
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[22px] font-semibold leading-[1.08] tracking-[-0.025em] text-[var(--neo-ink)]">
-            {headline}
-          </p>
-          <p className="mt-2 text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
-            {subline}
-          </p>
+        <div className="flex min-w-0 gap-3">
+          <CharacterAvatar id="siso" mood={atRisk ? 'wow' : goalDone ? 'cheer' : 'happy'} size={64} />
+          <div className="min-w-0">
+            <p className="text-[22px] font-semibold leading-[1.08] tracking-[-0.025em] text-[var(--neo-ink)]">
+              {headline}
+            </p>
+            <p className="mt-2 text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
+              {subline}
+            </p>
+          </div>
         </div>
         <span className="flex shrink-0 items-center gap-1 text-[17px] font-semibold tabular-nums text-[var(--neo-ink)]">
           <Flame size={20} className={state.streak > 0 && !atRisk ? 'text-[#ff9500]' : 'text-[#c7c7cc]'} />

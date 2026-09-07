@@ -7,10 +7,10 @@ export function AcademyNeoPicker() {
   if (!enabled) return null;
 
   return (
-    <div className="neo-card p-6 space-y-4">
+    <div className="rounded-[24px] bg-[#f5f5f7] p-5 space-y-4">
       <div>
-        <h3 className="text-[13px] font-normal text-[var(--neo-gray)]">A sua cor</h3>
-        <p className="mt-1 text-[17px] text-[var(--neo-ink)] tracking-[-0.011em]">
+        <h3 className="text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">A sua cor</h3>
+        <p className="mt-1 text-[17px] tracking-[-0.011em] text-[var(--neo-ink)]">
           Ela pinta o box, os widgets e os detalhes da conta.
         </p>
       </div>

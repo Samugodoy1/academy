@@ -96,19 +96,13 @@ const Eyes: React.FC<{ mood: Mood }> = ({ mood }) => {
       </>
     );
   }
-  const radius = mood === 'wow' ? 6.2 : 5;
+  const radius = mood === 'wow' ? 6.2 : mood === 'sad' ? 4.2 : 5;
   return (
     <>
-      <circle cx="49" cy="56" r={radius} fill={INK} />
-      <circle cx={50.8} cy={54} r={1.8} fill={CREAM} />
-      <circle cx="71" cy="56" r={radius} fill={INK} />
-      <circle cx={72.8} cy={54} r={1.8} fill={CREAM} />
-      {mood === 'sad' && (
-        <>
-          <path d="M43 52c3-3 9-3 12 0" stroke={INK} strokeWidth="3.4" strokeLinecap="round" fill="none" />
-          <path d="M65 52c3-3 9-3 12 0" stroke={INK} strokeWidth="3.4" strokeLinecap="round" fill="none" />
-        </>
-      )}
+      <circle cx="49" cy="57" r={radius} fill={INK} />
+      <circle cx={50.8} cy={55} r={1.8} fill={CREAM} />
+      <circle cx="71" cy="57" r={radius} fill={INK} />
+      <circle cx={72.8} cy={55} r={1.8} fill={CREAM} />
     </>
   );
 };
@@ -117,8 +111,8 @@ const Brows: React.FC<{ mood: Mood }> = ({ mood }) => {
   if (mood === 'sad') {
     return (
       <>
-        <path d="M42 45c4-1 9 1 12 4" stroke={INK} strokeWidth="3.6" strokeLinecap="round" fill="none" />
-        <path d="M78 45c-4-1-9 1-12 4" stroke={INK} strokeWidth="3.6" strokeLinecap="round" fill="none" />
+        <path d="M42 43c4-1 9 1 12 5" stroke={INK} strokeWidth="3.6" strokeLinecap="round" fill="none" />
+        <path d="M78 43c-4-1-9 1-12 5" stroke={INK} strokeWidth="3.6" strokeLinecap="round" fill="none" />
       </>
     );
   }

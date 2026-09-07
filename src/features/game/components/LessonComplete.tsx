@@ -192,7 +192,7 @@ export const LessonFailed: React.FC<LessonFailedProps> = ({
     <div className="mx-auto w-full max-w-[520px] text-center">
       <span className="game-pop relative mx-auto flex w-[132px] items-end justify-center">
         <CharacterAvatar id="siso" mood="sad" size={132} />
-        <span className="absolute -right-2 bottom-0 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--game-wrong-wash)] text-[var(--game-wrong)]">
+        <span className="absolute -right-4 bottom-1 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--game-wrong-wash)] text-[var(--game-wrong)]">
           <Heart size={22} />
         </span>
       </span>

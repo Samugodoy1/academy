@@ -35,7 +35,7 @@ export const StreakCelebration: React.FC<StreakCelebrationProps> = ({
       <div className="mx-auto w-full max-w-[440px] text-center">
         <span className="game-pop relative mx-auto flex w-[150px] items-end justify-center">
           <CharacterAvatar id="siso" mood="cheer" size={150} />
-          <span className="absolute -right-2 bottom-0 flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#ff9500]">
+          <span className="absolute -right-5 bottom-1 flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#ff9500]">
             <Flame size={26} />
           </span>
         </span>

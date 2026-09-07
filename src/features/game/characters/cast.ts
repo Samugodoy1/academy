@@ -1,7 +1,7 @@
 import type { StudyKey } from '../../../utils/studyTopics';
 import { hashSeed } from '../engine';
 
-export type CharacterId = 'siso' | 'val' | 'kaio' | 'nina' | 'teo' | 'zaira' | 'duda';
+export type CharacterId = 'val' | 'kaio' | 'nina' | 'teo' | 'zaira' | 'duda';
 
 export type Mood = 'idle' | 'happy' | 'cheer' | 'sad' | 'wow';
 
@@ -31,26 +31,6 @@ export interface Character {
 }
 
 export const CAST: Record<CharacterId, Character> = {
-  siso: {
-    id: 'siso',
-    name: 'Siso',
-    role: 'mascote do Academy',
-    accent: '#52057B',
-    wash: '#f4ecfa',
-    lines: {
-      intro: [
-        'Essa aqui cai em prova. Pensa com calma.',
-        'Sem chute. Você sabe mais do que acha.',
-        'Duas respiradas e responde.',
-      ],
-      right: ['Isso!', 'Mandou bem!', 'Tá voando hoje.'],
-      wrong: ['Errou aqui, acerta na cadeira.', 'Guarda essa.', 'Bora de novo.'],
-      perfect: 'Lição limpa. Nenhum arranhão.',
-      done: 'Fechou mais uma. Amanhã tem mais.',
-      fail: 'Acabaram as vidas. Isso também é parte do treino.',
-      trail: 'Eu fico de olho na sua ofensiva.',
-    },
-  },
   val: {
     id: 'val',
     name: 'Dra. Val',
@@ -178,7 +158,6 @@ export const CAST: Record<CharacterId, Character> = {
 };
 
 export const CAST_LIST: Character[] = [
-  CAST.siso,
   CAST.val,
   CAST.kaio,
   CAST.nina,
@@ -202,8 +181,13 @@ export const HOST_BY_TOPIC: Record<StudyKey, CharacterId> = {
   odontopediatria: 'duda',
 };
 
+/** Quem fala pelo jogo fora de um tema: revisão, relâmpago, ofensiva, atalho. */
+export const GUIDE_ID: CharacterId = 'nina';
+
+export const guide = (): Character => CAST[GUIDE_ID];
+
 export const hostFor = (topic: StudyKey | null | undefined): Character =>
-  topic ? CAST[HOST_BY_TOPIC[topic]] ?? CAST.siso : CAST.siso;
+  (topic ? CAST[HOST_BY_TOPIC[topic]] : undefined) ?? CAST[GUIDE_ID];
 
 /**
  * Same seed, same line: the character does not change what it said when the

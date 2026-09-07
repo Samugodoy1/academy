@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ChevronRight, Flame, Gem, Target } from '../../icons';
-import { CharacterAvatar } from './characters';
+import { CharacterAvatar, GUIDE_ID } from './characters';
 import { limitsFor, type GamePlan } from './plan';
 import { loadGameState } from './progress';
 import { streakAtRisk } from './streak';
@@ -66,7 +66,11 @@ export const ColaShortcut: React.FC<ColaShortcutProps> = ({ plan, onOpen }) => {
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 gap-3">
-          <CharacterAvatar id="siso" mood={atRisk ? 'wow' : goalDone ? 'cheer' : 'happy'} size={64} />
+          <CharacterAvatar
+            id={GUIDE_ID}
+            mood={atRisk ? 'wow' : goalDone ? 'cheer' : 'happy'}
+            size={64}
+          />
           <div className="min-w-0">
             <p className="text-[22px] font-semibold leading-[1.08] tracking-[-0.025em] text-[var(--neo-ink)]">
               {headline}

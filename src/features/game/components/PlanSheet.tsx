@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check } from '../../../icons';
-import { CharacterAvatar } from '../characters';
+import { CharacterAvatar, GUIDE_ID } from '../characters';
 import { BLOCK_COPY, STUDENT_PERKS, type PlanBlock } from '../plan';
 
 interface PlanSheetProps {
@@ -16,7 +16,7 @@ export const PlanSheet: React.FC<PlanSheetProps> = ({ block, onClose, onUpgrade 
   return (
     <div className="fixed inset-0 z-[210] flex items-end justify-center bg-black/40 px-4 pb-4 sm:items-center sm:pb-0">
       <div className="game-pop w-full max-w-[440px] rounded-[28px] bg-white px-6 py-7">
-        <CharacterAvatar id="siso" mood="idle" size={84} />
+        <CharacterAvatar id={GUIDE_ID} mood="idle" size={84} />
         <p className="mt-4 text-[12px] font-medium uppercase tracking-[0.06em] text-[var(--neo-gray)]">
           Academy Free
         </p>

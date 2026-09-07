@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { StudyKey } from '../../../utils/studyTopics';
 import { STUDY_TOPIC_LABELS } from '../../../utils/studyTopics';
 import { Flame, Gem, Heart, Shield, SoundOff, SoundOn, Target, Zap } from '../../../icons';
-import { CAST, CharacterSay } from '../characters';
+import { CharacterSay, guide } from '../characters';
 import { ALL_EXERCISES, getUnit } from '../content';
 import {
   BLITZ_SECONDS,
@@ -92,8 +92,8 @@ export const ColaGame: React.FC<ColaGameProps> = ({
   const repairable = canRepairStreak(state);
   const lessonsLeft = lessonsLeftToday(state, new Date(), limits);
 
-  /** O Siso comenta o estado do dia em vez de mais um aviso de sistema. */
-  const sisoLine = (() => {
+  /** A guia comenta o estado do dia em vez de mais um aviso de sistema. */
+  const guideLine = (() => {
     if (repairable) {
       return `Sua ofensiva de ${state.lostStreak?.value} dias caiu. Dá para recuperar por ${STREAK_REPAIR_COST} cristais.`;
     }
@@ -327,8 +327,8 @@ export const ColaGame: React.FC<ColaGameProps> = ({
           className="block w-full text-left"
         >
           <CharacterSay
-            character={CAST.siso}
-            text={sisoLine}
+            character={guide()}
+            text={guideLine}
             size={72}
             mood={repairable ? 'sad' : atRisk ? 'wow' : goalProgress >= 1 ? 'cheer' : 'happy'}
             tone={repairable ? 'wrong' : 'default'}

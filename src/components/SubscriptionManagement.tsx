@@ -203,15 +203,16 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
 
   if (loading) {
     return (
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+      <div className={product === 'academy' ? 'rounded-[24px] bg-[#f5f5f7] p-5' : 'bg-white rounded-3xl border border-slate-100 shadow-sm p-6'}>
         <div className="animate-pulse space-y-3">
-          <div className="h-4 bg-slate-100 rounded w-1/3" />
-          <div className="h-10 bg-slate-50 rounded-xl w-full" />
+          <div className="h-4 bg-black/5 rounded w-1/3" />
+          <div className="h-10 bg-black/5 rounded-xl w-full" />
         </div>
       </div>
     );
   }
 
+  const neo = product === 'academy';
   const isFree = currentPlan === 'free';
   const isProActive = subscription?.status === 'authorized' || subscription?.status === 'paused';
   const isPending = subscription?.status === 'pending';
@@ -222,7 +223,7 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
   const statusInfo = subscription && hasSubscriptionCard
     ? STATUS_MAP[subscription.status] || STATUS_MAP.pending
     : null;
-  const subscribeCtaLabel = product === 'academy' ? `Assinar ${paidPlan?.name || 'agora'}` : 'Assinar OdontoHub Pro';
+  const subscribeCtaLabel = product === 'academy' ? `Assinar ${paidPlan?.name || 'Student'}` : 'Assinar OdontoHub Pro';
   const showFreeUpgrade = isFree && !isPending && !isProActive && paidPlan;
   const showCancelledExpired = subscription && ['cancelled', 'expired'].includes(subscription.status) && paidPlan;
   const hasCardBody = Boolean(
@@ -235,9 +236,8 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
 
   return (
     <div className="space-y-4">
-      {/* Subscription Card */}
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-        {/* Header gradient */}
+      <div className={neo ? 'overflow-hidden rounded-[24px] bg-[#f5f5f7]' : 'bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden'}>
+        {!neo && (
         <div className={`px-6 py-4 ${isProActive ? 'bg-gradient-to-r from-primary/10 via-primary/5 to-transparent' : isPendingCheckout ? 'bg-gradient-to-r from-amber-50/80 to-transparent' : 'bg-gradient-to-r from-slate-50 to-transparent'}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -258,8 +258,17 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
             )}
           </div>
         </div>
+        )}
 
-        <div className="p-6 space-y-4">
+        <div className={neo ? 'p-5 space-y-4' : 'p-6 space-y-4'}>
+          {neo && (
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">Assinatura</p>
+              {statusInfo && hasSubscriptionCard && (
+                <span className="text-[13px] tracking-[-0.011em] text-[var(--neo-ink)]">{statusInfo.label}</span>
+              )}
+            </div>
+          )}
           {/* Pro active — subscription details */}
           {isProActive && subscription && (
             <>
@@ -347,6 +356,26 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
 
           {/* Free plan — upgrade CTA */}
           {showFreeUpgrade && (
+            neo ? (
+              <div className="space-y-4">
+                <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
+                  {formatCurrency(paidPlan.amount)} por mês
+                </p>
+                {paidPlan.description && (
+                  <p className="text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">{paidPlan.description}</p>
+                )}
+                <button
+                  onClick={() => handleCreateSubscription(paidPlan.id)}
+                  disabled={createLoading}
+                  className="neo-pill w-full disabled:opacity-50"
+                >
+                  {createLoading ? 'Processando' : subscribeCtaLabel}
+                </button>
+                <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">
+                  Mercado Pago. Cancela quando quiser.
+                </p>
+              </div>
+            ) : (
             <div className="space-y-3">
               <div className="bg-slate-50 rounded-xl p-4">
                 <div className="flex items-center gap-3 mb-3">
@@ -374,6 +403,7 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
                 <span>Pagamento seguro via Mercado Pago. Cancele quando quiser.</span>
               </div>
             </div>
+            )
           )}
 
           {/* Cancelled / expired — resubscribe */}

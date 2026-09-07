@@ -2767,7 +2767,7 @@ export default function App() {
                   )}
 
                   {activeTab === 'configuracoes' && (
-                    <ErrorBoundary fallbackTitle="Não foi possível carregar Configurações">
+                    <ErrorBoundary fallbackTitle="Não foi possível carregar a conta">
                       {!profile || !user ? (
                         <div className="page-shell">
                           <DataLoadingSkeleton rows={5} />

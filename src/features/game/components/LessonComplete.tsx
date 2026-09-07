@@ -102,7 +102,7 @@ export const LessonComplete: React.FC<LessonCompleteProps> = ({
               className="flex items-center gap-2 rounded-[18px] bg-[var(--game-right-wash)] px-4 py-3 text-[15px] text-[var(--game-right-ink)]"
             >
               <Check size={16} className="shrink-0" />
-              Missão concluída: {quest.title.toLowerCase()} · +{quest.gems} cristais
+              Missão concluída · {quest.title} · +{quest.gems} cristais
             </p>
           ))}
           {reward.goalReached && (

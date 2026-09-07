@@ -170,6 +170,12 @@ export function startLesson(state: GameState, now: Date = new Date()): GameState
   return { ...rolled, dayLessons: rolled.dayLessons + 1 };
 }
 
+/** Gives the allowance back when the student quits before answering. */
+export function cancelLesson(state: GameState, now: Date = new Date()): GameState {
+  const rolled = applyDayRollover(state, now);
+  return { ...rolled, dayLessons: Math.max(0, rolled.dayLessons - 1) };
+}
+
 function rememberMistakes(mistakes: string[], missed: string[], mastered: string[]): string[] {
   const next = mistakes.filter(id => !mastered.includes(id) && !missed.includes(id));
   next.push(...missed);

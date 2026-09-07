@@ -169,8 +169,14 @@ export const GameSession: React.FC<GameSessionProps> = ({
     advance(queue, nextResolved);
   }, [advance, checked, current, queue, resolved]);
 
+  const outOfHearts = useHearts && hearts <= 0;
+
   const handleContinue = useCallback(() => {
     if (!checked || !current) return;
+    if (outOfHearts && !checked.correct) {
+      finish('failed');
+      return;
+    }
     const nextResolved = checked.correct || (attempts[current.id] ?? 0) >= MAX_ATTEMPTS
       ? resolved.includes(current.id)
         ? resolved
@@ -179,13 +185,13 @@ export const GameSession: React.FC<GameSessionProps> = ({
     const nextQueue = queue;
     setResolved(nextResolved);
     advance(nextQueue, nextResolved);
-  }, [advance, attempts, checked, current, queue, resolved]);
+  }, [advance, attempts, checked, current, finish, outOfHearts, queue, resolved]);
 
-  // Out of hearts ends the run, but only after the student reads the feedback.
-  const outOfHearts = useHearts && hearts <= 0;
+  // Out of hearts ends the run: right away if the student keeps tapping, or
+  // after a beat so the feedback can be read.
   useEffect(() => {
     if (outOfHearts && checked && !checked.correct) {
-      const timer = window.setTimeout(() => finish('failed'), 1200);
+      const timer = window.setTimeout(() => finish('failed'), 1600);
       return () => window.clearTimeout(timer);
     }
     return undefined;

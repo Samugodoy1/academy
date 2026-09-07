@@ -4,6 +4,7 @@ import {
   applyDailyGoal,
   buyFreeze,
   buyHearts,
+  cancelLesson,
   loadGameState,
   refreshState,
   registerFailedLesson,
@@ -55,6 +56,10 @@ export function useGameState(plan: GamePlan = 'free') {
     commit(startLesson(stateRef.current));
   }, [commit]);
 
+  const abandonLesson = useCallback(() => {
+    commit(cancelLesson(stateRef.current));
+  }, [commit]);
+
   const completeLesson = useCallback(
     (outcome: LessonOutcome): LessonReward => {
       const { state: next, reward } = registerLessonResult(
@@ -104,6 +109,7 @@ export function useGameState(plan: GamePlan = 'free') {
     limits,
     loseHeart,
     beginLesson,
+    abandonLesson,
     completeLesson,
     failLesson,
     setDailyGoal,

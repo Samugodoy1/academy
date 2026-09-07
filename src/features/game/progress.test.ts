@@ -10,6 +10,7 @@ import {
   applyDayRollover,
   buyFreeze,
   buyHearts,
+  cancelLesson,
   canStartLesson,
   createInitialState,
   currentStreak,
@@ -210,6 +211,15 @@ describe('limites do plano', () => {
     }
     expect(canStartLesson(state, now, FREE_LIMITS)).toBe(false);
     expect(lessonsLeftToday(state, now, FREE_LIMITS)).toBe(0);
+  });
+
+  it('devolve a cota quando a lição é abandonada', () => {
+    const now = at('2026-03-01T09:00:00');
+    const started = startLesson(createInitialState(now), now);
+    expect(lessonsLeftToday(started, now, FREE_LIMITS)).toBe(4);
+    const quit = cancelLesson(started, now);
+    expect(lessonsLeftToday(quit, now, FREE_LIMITS)).toBe(5);
+    expect(cancelLesson(quit, now).dayLessons).toBe(0);
   });
 
   it('a cota volta na virada do dia', () => {

@@ -16,7 +16,51 @@
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="googlebot" content="index, follow" />
     <meta name="application-name" content="OdontoHub Academy" />
-    <meta name="theme-color" content="#F6F8FA" />
+    <meta name="theme-color" content="#ffffff" />
+    <script>
+      (function () {
+        try {
+          var host = location.hostname || '';
+          var isSistema = host.indexOf('sistema.odontohub') !== -1;
+          var isAcademyHost = host.indexOf('academy.odontohub') !== -1;
+          var applyNeo = !isSistema && (isAcademyHost || !isSistema);
+          var colorways = {
+            laranja: ['#FF6B2C', '#FFD8C4', '#FFF4ED'],
+            lima: ['#34C759', '#C8F5D4', '#F0FBF3'],
+            azul: ['#32ADE6', '#C5EBFA', '#F0F9FD'],
+            rosa: ['#FF6482', '#FFD0D9', '#FFF0F3'],
+            violeta: ['#BF5AF2', '#E8C8FA', '#F8F0FD']
+          };
+          if (applyNeo) {
+            var neoId = localStorage.getItem('odontohub-academy-neo') || 'laranja';
+            var neo = colorways[neoId] || colorways.laranja;
+            document.documentElement.setAttribute('data-product', 'academy');
+            document.documentElement.setAttribute('data-neo', colorways[neoId] ? neoId : 'laranja');
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.documentElement.style.colorScheme = 'light';
+            document.documentElement.style.setProperty('--neo', neo[0]);
+            document.documentElement.style.setProperty('--neo-soft', neo[1]);
+            document.documentElement.style.setProperty('--neo-wash', neo[2]);
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', '#ffffff');
+            return;
+          }
+          var stored = localStorage.getItem('system_theme') || 'dark';
+          var theme = stored;
+          if (stored === 'auto') {
+            theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          }
+          if (theme !== 'light' && theme !== 'dark') theme = 'dark';
+          document.documentElement.setAttribute('data-theme', theme);
+          document.documentElement.style.colorScheme = theme;
+          var proMeta = document.querySelector('meta[name="theme-color"]');
+          if (proMeta) proMeta.setAttribute('content', theme === 'light' ? '#f5f5f7' : '#000000');
+        } catch (e) {
+          document.documentElement.setAttribute('data-product', 'academy');
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="canonical" href="https://academy.odontohub.app.br/" />
     <link rel="alternate" hreflang="pt-BR" href="https://academy.odontohub.app.br/" />
@@ -91,8 +135,8 @@
         ]
       }
     </script>
-    <script type="module" crossorigin src="/assets/index-C8A551zO.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-COdcRK6K.css">
+    <script type="module" crossorigin src="/assets/index-7KpSJDmh.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-M9AjpRdj.css">
   </head>
   <body>
     <div id="seo-static" aria-hidden="true" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import {
   Activity,
   Check,
@@ -7,6 +7,7 @@ import {
   FileText,
   Heart,
   Pill,
+  Play,
   Search,
   Shield,
   Stethoscope,
@@ -23,7 +24,14 @@ import {
   mapSkillToStudyTopic,
 } from '../utils/clinicalProgression';
 
+const ColaGame = lazy(() =>
+  import('../features/game').then(m => ({ default: m.ColaGame }))
+);
+
 const STUDY_TOPIC_STORAGE_KEY = 'academy_study_topic';
+const STUDY_MODE_STORAGE_KEY = 'academy_study_mode';
+
+type StudyMode = 'estudar' | 'treinar';
 
 interface AcademyEstudosProps {
   patients?: any[];
@@ -977,6 +985,14 @@ const CONFIDENCE_OPTIONS: Array<{ level: ConfidenceLevel; label: string; hint: s
 const normalizeSearch = (value: string) =>
   value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
+const loadStudyMode = (): StudyMode => {
+  try {
+    return localStorage.getItem(STUDY_MODE_STORAGE_KEY) === 'treinar' ? 'treinar' : 'estudar';
+  } catch {
+    return 'estudar';
+  }
+};
+
 export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
   patients = [],
   appointments = [],
@@ -989,7 +1005,18 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
   const [revealedAnswers, setRevealedAnswers] = useState<Set<number>>(new Set());
   const [confidenceMap, setConfidenceMap] = useState<ConfidenceMap>(loadConfidenceMap);
   const [librarySearch, setLibrarySearch] = useState('');
+  const [mode, setMode] = useState<StudyMode>(loadStudyMode);
+  const [gameTopic, setGameTopic] = useState<StudyKey | null>(null);
   const now = new Date();
+
+  const changeMode = (next: StudyMode, topic: StudyKey | null = null) => {
+    setMode(next);
+    setGameTopic(topic);
+    try {
+      localStorage.setItem(STUDY_MODE_STORAGE_KEY, next);
+    } catch { /* storage indisponível: a preferência vale só nesta sessão */ }
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0 });
+  };
 
   useEffect(() => {
     const stored = sessionStorage.getItem(STUDY_TOPIC_STORAGE_KEY) as StudyKey | null;
@@ -1401,6 +1428,29 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           </div>
         </StudySection>
 
+        <StudySection kicker="Treino">
+          <button
+            type="button"
+            onClick={() => {
+              closeStudy();
+              changeMode('treinar', activeMaterial.id);
+            }}
+            className="game-tile items-center gap-3 py-4"
+          >
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--neo-wash)] text-[var(--neo)]">
+              <Play size={18} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[16px] font-semibold text-[var(--neo-ink)]">
+                Jogar a lição de {activeMaterial.title.toLowerCase()}
+              </span>
+              <span className="block text-[13px] text-[var(--neo-gray)]">
+                Perguntas rápidas para ver se ficou mesmo.
+              </span>
+            </span>
+          </button>
+        </StudySection>
+
         {selectedCase && openPatientRecord && (
           <button
             type="button"
@@ -1426,18 +1476,60 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
       ? 'Uma revisão que ainda falta no seu histórico.'
       : 'Quando um caso entrar na agenda, a revisão certa aparece aqui.';
 
+  const gameSpotlightLabel = nextCase
+    ? `Do box de ${nextPatientName} · ${getWhenLabel(nextCase.date)}`
+    : null;
+
   return (
     <div className="page-shell space-y-8 desktop:space-y-10">
       <header>
         <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">Estudos</p>
         <h1 className="mt-2 max-w-[18ch] text-[28px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)] sm:text-[34px]">
-          {headline}
+          {mode === 'treinar' ? 'Treino da Cola' : headline}
         </h1>
         <p className="mt-3 max-w-[36ch] text-[17px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
-          {headlineMeta}
+          {mode === 'treinar'
+            ? 'Lições curtas, vidas e ofensiva diária. Aprenda a clínica jogando.'
+            : headlineMeta}
         </p>
       </header>
 
+      <div className="grid grid-cols-2 gap-1 rounded-full bg-[#f5f5f7] p-1 desktop:max-w-[320px]">
+        {(['estudar', 'treinar'] as StudyMode[]).map(option => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => changeMode(option)}
+            className={`rounded-full py-2.5 text-[14px] font-medium transition-all ${
+              mode === option
+                ? 'bg-white text-[var(--neo-ink)] shadow-[0_1px_3px_rgba(0,0,0,0.08)]'
+                : 'text-[var(--neo-gray)]'
+            }`}
+          >
+            {option === 'estudar' ? 'Ler a cola' : 'Treinar'}
+          </button>
+        ))}
+      </div>
+
+      {mode === 'treinar' ? (
+        <Suspense
+          fallback={
+            <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-8 text-center text-[15px] text-[var(--neo-gray)]">
+              Carregando o treino…
+            </div>
+          }
+        >
+          <ColaGame
+            spotlightTopic={gameTopic ?? nextCase?.topicKey ?? null}
+            spotlightLabel={gameTopic ? null : gameSpotlightLabel}
+            autoStartTopic={gameTopic}
+            onOpenStudy={topic => {
+              changeMode('estudar');
+              openStudy(topic, nextCase?.topicKey === topic ? nextCase : null);
+            }}
+          />
+        </Suspense>
+      ) : (
       <div className="flex flex-col gap-10 desktop:grid desktop:grid-cols-12 desktop:items-start desktop:gap-x-12">
         <div className="space-y-8 desktop:col-span-7">
           {nextCase && nextCaseTopic ? (
@@ -1636,6 +1728,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
           </StudySection>
         </div>
       </div>
+      )}
     </div>
   );
 };

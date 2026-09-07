@@ -83,6 +83,13 @@ import {
   Tooth          as PhTooth,
   Syringe        as PhSyringe,
   DotsSixVertical as PhDotsSixVertical,
+  Crown          as PhCrown,
+  Fire           as PhFire,
+  Trophy         as PhTrophy,
+  Star           as PhStar,
+  Play           as PhPlay,
+  SpeakerSimpleHigh as PhSpeakerHigh,
+  SpeakerSimpleSlash as PhSpeakerSlash,
 } from '@phosphor-icons/react';
 
 // ─── Prop types ──────────────────────────────────────────────────────────────
@@ -198,3 +205,13 @@ export const Loader2 = bold(PhCircleNotch);
 export const Tooth = fill(PhTooth);
 export const Syringe = fill(PhSyringe);
 export const GripVertical = bold(PhDotsSixVertical);
+
+// ─── Cola game ────────────────────────────────────────────────────────────────
+
+export const Crown         = fill(PhCrown);
+export const Flame         = fill(PhFire);
+export const Trophy        = fill(PhTrophy);
+export const Star          = fill(PhStar);
+export const Play          = fill(PhPlay);
+export const SoundOn       = fill(PhSpeakerHigh);
+export const SoundOff      = fill(PhSpeakerSlash);

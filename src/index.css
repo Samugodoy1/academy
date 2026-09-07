@@ -901,6 +901,258 @@ html[data-theme="dark"] {
 
 }
 
+/* ── Cola game ──────────────────────────────────────────────────────── */
+/* Chunky, tappable, slightly springy: the language of a mobile game,     */
+/* rebuilt with the Academy palette instead of a generic green.           */
+
+:root {
+  --game-right: #34c759;
+  --game-right-ink: #1c7a36;
+  --game-right-wash: #e9fbee;
+  --game-wrong: #ff3b30;
+  --game-wrong-ink: #c62a21;
+  --game-wrong-wash: #ffeeed;
+  --game-line: #e5e5ea;
+  --game-line-shadow: #d7d7dc;
+}
+
+@layer utilities {
+  .game-tile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 18px;
+    border: 2px solid var(--game-line);
+    background: #ffffff;
+    box-shadow: 0 4px 0 var(--game-line-shadow);
+    color: var(--neo-ink);
+    text-align: left;
+    font-size: 16px;
+    line-height: 1.35;
+    letter-spacing: -0.011em;
+    transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease,
+      box-shadow 0.08s ease, color 0.15s ease;
+  }
+
+  .game-tile:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--game-line-shadow);
+  }
+
+  .game-tile-selected {
+    border-color: var(--neo);
+    background: var(--neo-wash);
+    box-shadow: 0 4px 0 var(--neo-soft);
+    color: var(--neo);
+  }
+
+  .game-tile-right {
+    border-color: var(--game-right);
+    background: var(--game-right-wash);
+    box-shadow: 0 4px 0 color-mix(in srgb, var(--game-right) 35%, #ffffff);
+    color: var(--game-right-ink);
+  }
+
+  .game-tile-wrong {
+    border-color: var(--game-wrong);
+    background: var(--game-wrong-wash);
+    box-shadow: 0 4px 0 color-mix(in srgb, var(--game-wrong) 30%, #ffffff);
+    color: var(--game-wrong-ink);
+  }
+
+  .game-tile-ghost {
+    opacity: 0.35;
+    box-shadow: none;
+  }
+
+  .game-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    border-radius: 14px;
+    border: 2px solid var(--game-line);
+    background: #ffffff;
+    box-shadow: 0 3px 0 var(--game-line-shadow);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.011em;
+    color: var(--neo-ink);
+    transition: transform 0.08s ease, opacity 0.15s ease, box-shadow 0.08s ease;
+  }
+
+  .game-chip:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--game-line-shadow);
+  }
+
+  .game-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 15px 20px;
+    border-radius: 16px;
+    background: var(--neo);
+    color: #ffffff;
+    box-shadow: 0 4px 0 color-mix(in srgb, var(--neo) 70%, #1d1d1f);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.15s ease;
+  }
+
+  .game-cta:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--neo) 70%, #1d1d1f);
+  }
+
+  .game-cta:disabled {
+    background: var(--game-line);
+    color: #a1a1a6;
+    box-shadow: 0 4px 0 var(--game-line-shadow);
+  }
+
+  .game-cta-right {
+    background: var(--game-right);
+    box-shadow: 0 4px 0 color-mix(in srgb, var(--game-right) 70%, #1d1d1f);
+  }
+
+  .game-cta-right:active:not(:disabled) {
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--game-right) 70%, #1d1d1f);
+  }
+
+  .game-cta-wrong {
+    background: var(--game-wrong);
+    box-shadow: 0 4px 0 color-mix(in srgb, var(--game-wrong) 70%, #1d1d1f);
+  }
+
+  .game-cta-wrong:active:not(:disabled) {
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--game-wrong) 70%, #1d1d1f);
+  }
+
+  .game-cta-ghost {
+    background: #ffffff;
+    color: var(--neo-gray);
+    box-shadow: 0 4px 0 var(--game-line-shadow);
+    border: 2px solid var(--game-line);
+  }
+
+  .game-node {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 68px;
+    height: 68px;
+    border-radius: 999px;
+    background: var(--game-line);
+    color: #ffffff;
+    box-shadow: 0 6px 0 var(--game-line-shadow);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+
+  .game-node:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 var(--game-line-shadow);
+  }
+
+  .game-node-open {
+    background: var(--neo);
+    box-shadow: 0 6px 0 color-mix(in srgb, var(--neo) 68%, #1d1d1f);
+  }
+
+  .game-node-done {
+    background: var(--game-right);
+    box-shadow: 0 6px 0 color-mix(in srgb, var(--game-right) 68%, #1d1d1f);
+  }
+
+  .game-node-crown {
+    background: #ffb400;
+    box-shadow: 0 6px 0 #cc8f00;
+  }
+
+  .game-node-locked {
+    background: #efeff4;
+    color: #b6b6bb;
+    box-shadow: 0 6px 0 var(--game-line-shadow);
+  }
+
+  .game-bar {
+    height: 16px;
+    border-radius: 999px;
+    background: var(--game-line);
+    overflow: hidden;
+  }
+
+  .game-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--neo);
+    transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .game-sheet {
+    animation: gameSheetIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .game-pop {
+    animation: gamePop 0.32s cubic-bezier(0.22, 1.4, 0.36, 1) both;
+  }
+
+  .game-shake {
+    animation: gameShake 0.36s ease-in-out both;
+  }
+}
+
+@keyframes gameSheetIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gamePop {
+  0% {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+
+  70% {
+    transform: scale(1.04);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes gameShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-sheet,
+  .game-pop,
+  .game-shake {
+    animation: none;
+  }
+}
+
 html[data-product="academy"] {
   color-scheme: light;
   --sys-bg: #ffffff;

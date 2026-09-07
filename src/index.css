@@ -1162,11 +1162,33 @@ html[data-theme="dark"] {
   50% { box-shadow: 0 6px 0 color-mix(in srgb, var(--neo) 68%, #1d1d1f), 0 0 0 10px var(--neo-wash); }
 }
 
+@keyframes gameFaceIdle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes gameFaceBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes gameFaceWiggle {
+  0%, 100% { transform: rotate(-1.5deg); }
+  50% { transform: rotate(1.5deg); }
+}
+
+.game-face-idle { animation: gameFaceIdle 4s ease-in-out infinite; }
+.game-face-bounce { animation: gameFaceBounce 2.4s ease-in-out infinite; }
+.game-face-wiggle { animation: gameFaceWiggle 2.4s ease-in-out infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   .game-sheet,
   .game-pop,
   .game-shake,
-  .game-node-current {
+  .game-node-current,
+  .game-face-idle,
+  .game-face-bounce,
+  .game-face-wiggle {
     animation: none;
   }
 }

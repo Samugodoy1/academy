@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Check, Gem, Heart, Sparkles, Target, TrendingUp, Zap } from '../../../icons';
-import { CAST, CharacterAvatar, hostFor } from '../characters';
+import { CharacterAvatar, guide, hostFor } from '../characters';
 import { levelTitle } from '../engine';
 import { feedback } from '../sound';
 import type { LessonOutcome, LessonReward } from '../types';
@@ -191,8 +191,8 @@ export const LessonFailed: React.FC<LessonFailedProps> = ({
   <div className="fixed inset-0 z-[200] flex flex-col justify-center overflow-y-auto bg-white px-5 py-10 sm:px-6">
     <div className="mx-auto w-full max-w-[520px] text-center">
       <span className="game-pop relative mx-auto flex w-[132px] items-end justify-center">
-        <CharacterAvatar id="siso" mood="sad" size={132} />
-        <span className="absolute -right-4 bottom-1 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--game-wrong-wash)] text-[var(--game-wrong)]">
+        <CharacterAvatar id={guide().id} mood="sad" size={132} />
+        <span className="absolute -right-6 bottom-2 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--game-wrong-wash)] text-[var(--game-wrong)]">
           <Heart size={22} />
         </span>
       </span>
@@ -200,7 +200,7 @@ export const LessonFailed: React.FC<LessonFailedProps> = ({
         Você ficou sem vidas
       </h2>
       <p className="mx-auto mt-3 max-w-[34ch] text-[17px] leading-snug text-[var(--neo-gray)]">
-        {CAST.siso.name}: “{CAST.siso.lines.fail}” A próxima vida chega em {minutesToHeart} min, ou
+        {guide().name}: “{guide().lines.fail}” A próxima vida chega em {minutesToHeart} min, ou
         você recupera uma agora no treino livre.
       </p>
       <div className="mt-8 space-y-2 text-left">

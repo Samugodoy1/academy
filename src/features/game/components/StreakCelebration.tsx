@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Flame, Gem } from '../../../icons';
-import { CharacterAvatar } from '../characters';
+import { CharacterAvatar, GUIDE_ID } from '../characters';
 import { feedback } from '../sound';
 import { milestoneGems } from '../streak';
 
@@ -34,8 +34,8 @@ export const StreakCelebration: React.FC<StreakCelebrationProps> = ({
     <div className="fixed inset-0 z-[210] flex flex-col justify-center bg-[#ff9500] px-5 py-10 text-white sm:px-6">
       <div className="mx-auto w-full max-w-[440px] text-center">
         <span className="game-pop relative mx-auto flex w-[150px] items-end justify-center">
-          <CharacterAvatar id="siso" mood="cheer" size={150} />
-          <span className="absolute -right-5 bottom-1 flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#ff9500]">
+          <CharacterAvatar id={GUIDE_ID} mood="cheer" size={150} />
+          <span className="absolute -right-7 bottom-2 flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#ff9500]">
             <Flame size={26} />
           </span>
         </span>

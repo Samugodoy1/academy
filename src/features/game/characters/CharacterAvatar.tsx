@@ -2,9 +2,9 @@ import React from 'react';
 import type { CharacterId, Mood } from './cast';
 
 /**
- * A turma da clínica, desenhada no mesmo traço do Siso: contorno grosso roxo,
- * fundo creme e nada de kit genérico. Cada personagem é um busto de 120×120
- * para caber em chip, balão de fala e tela cheia sem redesenhar.
+ * A turma da clínica: contorno grosso roxo, fundo creme e nada de kit genérico.
+ * Cada personagem é um busto de 120×120 para caber em chip, balão de fala e
+ * tela cheia sem redesenhar.
  */
 
 const INK = '#3B0459';
@@ -28,7 +28,7 @@ interface Traits {
   freckles?: boolean;
 }
 
-const TRAITS: Record<Exclude<CharacterId, 'siso'>, Traits> = {
+const TRAITS: Record<CharacterId, Traits> = {
   val: {
     skin: '#F2CBAB',
     shade: '#D9A87F',
@@ -108,11 +108,12 @@ const Eyes: React.FC<{ mood: Mood }> = ({ mood }) => {
 };
 
 const Brows: React.FC<{ mood: Mood }> = ({ mood }) => {
+  // Sobrancelha com a ponta de dentro para cima: preocupado, não bravo.
   if (mood === 'sad') {
     return (
       <>
-        <path d="M42 43c4-1 9 1 12 5" stroke={INK} strokeWidth="3.6" strokeLinecap="round" fill="none" />
-        <path d="M78 43c-4-1-9 1-12 5" stroke={INK} strokeWidth="3.6" strokeLinecap="round" fill="none" />
+        <path d="M42 49c4-4 9-6 12-6" stroke={INK} strokeWidth="3.6" strokeLinecap="round" fill="none" />
+        <path d="M78 49c-4-4-9-6-12-6" stroke={INK} strokeWidth="3.6" strokeLinecap="round" fill="none" />
       </>
     );
   }
@@ -339,35 +340,6 @@ const HumanBust: React.FC<{ traits: Traits; mood: Mood }> = ({ traits, mood }) =
   </g>
 );
 
-// ── Siso em busto ─────────────────────────────────────────────────────
-
-const SisoBust: React.FC<{ mood: Mood }> = ({ mood }) => (
-  <g>
-    <path
-      d="M21 54C21 26 37 10 60 10s39 16 39 44c0 12-2 22-4 32l-4 24c-1 7-4 10-8 9-4-1-6-6-7-13l-3-18c-1-6-3-9-6-9s-5 3-6 9l-3 18c-1 7-3 12-7 13-4 1-7-2-8-9l-4-24c-2-10-4-20-4-32z"
-      fill={CREAM}
-      stroke={INK}
-      strokeWidth="5.5"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M33 42c1-14 11-23 27-23"
-      stroke="#ffffff"
-      strokeWidth="7"
-      strokeLinecap="round"
-      opacity="0.9"
-      fill="none"
-    />
-    <ellipse cx="36" cy="64" rx="7.5" ry="5" fill={BLUSH} opacity="0.85" />
-    <ellipse cx="84" cy="64" rx="7.5" ry="5" fill={BLUSH} opacity="0.85" />
-    <g transform="translate(0 -4)">
-      <Brows mood={mood} />
-      <Eyes mood={mood} />
-      <Mouth mood={mood} />
-    </g>
-  </g>
-);
-
 // ── Componente ────────────────────────────────────────────────────────
 
 export interface CharacterAvatarProps {
@@ -383,7 +355,8 @@ export const CharacterAvatar: React.FC<CharacterAvatarProps> = ({
   size = 56,
   className = '',
 }) => {
-  const animation = mood === 'cheer' ? 'siso-bounce' : mood === 'sad' ? 'siso-wiggle' : 'siso-idle';
+  const animation =
+    mood === 'cheer' ? 'game-face-bounce' : mood === 'sad' ? 'game-face-wiggle' : 'game-face-idle';
   return (
     <span
       className={`inline-block shrink-0 ${animation} ${className}`}
@@ -391,7 +364,7 @@ export const CharacterAvatar: React.FC<CharacterAvatarProps> = ({
       aria-hidden
     >
       <svg viewBox="0 0 120 120" width="100%" height="100%" fill="none">
-        {id === 'siso' ? <SisoBust mood={mood} /> : <HumanBust traits={TRAITS[id]} mood={mood} />}
+        <HumanBust traits={TRAITS[id]} mood={mood} />
       </svg>
     </span>
   );

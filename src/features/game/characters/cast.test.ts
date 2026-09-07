@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GAME_UNITS } from '../content';
-import { CAST, CAST_LIST, HOST_BY_TOPIC, hostFor, pickLine } from './cast';
+import { CAST, CAST_LIST, GUIDE_ID, guide, HOST_BY_TOPIC, hostFor, pickLine } from './cast';
 
 describe('elenco', () => {
   it('dá um anfitrião a cada unidade da trilha', () => {
@@ -11,9 +11,10 @@ describe('elenco', () => {
     });
   });
 
-  it('usa o mascote quando a lição mistura temas', () => {
-    expect(hostFor(null).id).toBe('siso');
-    expect(hostFor(undefined).id).toBe('siso');
+  it('usa a guia quando a lição mistura temas', () => {
+    expect(hostFor(null)).toBe(guide());
+    expect(hostFor(undefined)).toBe(guide());
+    expect(CAST[GUIDE_ID]).toBe(guide());
   });
 
   it('mantém id, nome e falas de todo mundo', () => {

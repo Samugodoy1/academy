@@ -18,12 +18,18 @@ export interface AcademyAccountPrefs {
 
 type ProfileLike = {
   id?: number;
+  bio?: unknown;
+  photo_url?: unknown;
   academy_neo?: unknown;
   academy_widgets?: unknown;
   settings?: unknown;
   preferences?: unknown;
   [key: string]: unknown;
 };
+
+const ENVELOPE_OPEN = '[[OH_ACADEMY]]';
+const ENVELOPE_CLOSE = '[[/OH_ACADEMY]]';
+const ENVELOPE_RE = /\[\[OH_ACADEMY\]\]([\s\S]*?)\[\[\/OH_ACADEMY\]\]/;
 
 let profileSnapshot: ProfileLike | null = null;
 let currentPrefs: AcademyAccountPrefs = {
@@ -32,6 +38,7 @@ let currentPrefs: AcademyAccountPrefs = {
 };
 let saveTimer: number | null = null;
 let pendingPatch: Partial<AcademyAccountPrefs> = {};
+let saveChain: Promise<boolean> = Promise.resolve(false);
 
 function readNestedPrefs(source: unknown): { neo?: AcademyNeoId; widgets?: AcademyWidget[] } {
   if (!source || typeof source !== 'object') return {};
@@ -42,10 +49,46 @@ function readNestedPrefs(source: unknown): { neo?: AcademyNeoId; widgets?: Acade
   return { neo, widgets };
 }
 
+export function parseAcademyPrefsEnvelope(raw: unknown): { neo?: AcademyNeoId; widgets?: AcademyWidget[] } {
+  if (typeof raw !== 'string' || !raw.includes(ENVELOPE_OPEN)) return {};
+  const match = raw.match(ENVELOPE_RE);
+  if (!match) return {};
+  try {
+    const parsed = JSON.parse(decodeURIComponent(match[1])) as Record<string, unknown>;
+    return readNestedPrefs({
+      academy_neo: parsed.neo ?? parsed.academy_neo,
+      academy_widgets: parsed.widgets ?? parsed.academy_widgets,
+    });
+  } catch {
+    return {};
+  }
+}
+
+export function stripAcademyPrefsEnvelope(raw: unknown): string {
+  if (typeof raw !== 'string' || !raw) return '';
+  return raw.replace(ENVELOPE_RE, '').trim();
+}
+
+export function encodeAcademyPrefsEnvelope(prefs: AcademyAccountPrefs): string {
+  return `${ENVELOPE_OPEN}${encodeURIComponent(JSON.stringify({
+    v: 1,
+    neo: prefs.academy_neo,
+    widgets: serializeAcademyWidgets(prefs.academy_widgets),
+  }))}${ENVELOPE_CLOSE}`;
+}
+
+export function embedAcademyPrefsInBio(bio: unknown, prefs: AcademyAccountPrefs): string {
+  const visible = stripAcademyPrefsEnvelope(bio);
+  const envelope = encodeAcademyPrefsEnvelope(prefs);
+  return visible ? `${visible}\n${envelope}` : envelope;
+}
+
 export function resolveAcademyPrefs(profile: unknown): { neo: AcademyNeoId | null; widgets: AcademyWidget[] | null } {
   if (!profile || typeof profile !== 'object') return { neo: null, widgets: null };
   const record = profile as ProfileLike;
   const layers = [
+    parseAcademyPrefsEnvelope(record.bio),
+    parseAcademyPrefsEnvelope(record.clinic_address),
     readNestedPrefs(record.preferences),
     readNestedPrefs(record.settings),
     readNestedPrefs(record),
@@ -78,57 +121,99 @@ export function serializeAcademyWidgets(widgets: AcademyWidget[]): AcademyWidget
   return parseAcademyWidgets(widgets) || [];
 }
 
-async function academyFetch(path: string, options: RequestInit = {}) {
-  const token = typeof localStorage === 'undefined' ? '' : localStorage.getItem('token');
+export function applyAcademyPrefsToProfile<T extends Record<string, unknown>>(profile: T, prefs = currentPrefs): T {
+  const nextBio = embedAcademyPrefsInBio(profile.bio, prefs);
+  const address = typeof profile.clinic_address === 'string' ? profile.clinic_address : '';
+  const addressIsOurs = !stripAcademyPrefsEnvelope(address);
+  return {
+    ...profile,
+    academy_neo: prefs.academy_neo,
+    academy_widgets: serializeAcademyWidgets(prefs.academy_widgets),
+    settings: {
+      ...(typeof profile.settings === 'object' && profile.settings ? profile.settings : {}),
+      academy_neo: prefs.academy_neo,
+      academy_widgets: serializeAcademyWidgets(prefs.academy_widgets),
+    },
+    bio: nextBio,
+    ...(addressIsOurs ? { clinic_address: encodeAcademyPrefsEnvelope(prefs) } : {}),
+  };
+}
+
+function authHeaders(json = true): Record<string, string> {
+  const token = typeof localStorage === 'undefined' ? '' : localStorage.getItem('token') || '';
   const headers: Record<string, string> = {
     Accept: 'application/json',
-    'Content-Type': 'application/json',
     'x-product': CURRENT_PRODUCT,
-    ...(options.headers as Record<string, string> | undefined),
   };
+  if (json) headers['Content-Type'] = 'application/json';
   if (token && token !== 'null' && token !== 'undefined') {
     headers.Authorization = `Bearer ${token}`;
     headers['x-auth-token'] = token;
   }
+  return headers;
+}
+
+async function academyFetch(path: string, options: RequestInit = {}, json = true) {
   const fullUrl = path.startsWith('http') ? path : `${API_URL}${path}`;
   return fetch(fullUrl, {
     ...options,
-    headers,
+    headers: { ...authHeaders(json), ...(options.headers as Record<string, string> | undefined) },
     credentials: API_URL ? 'include' : 'same-origin',
   });
 }
 
+async function postProfile(prefs: AcademyAccountPrefs): Promise<boolean> {
+  if (!profileSnapshot) return false;
+  const body = applyAcademyPrefsToProfile({ ...profileSnapshot, password: '' }, prefs);
+  const res = await academyFetch('/api/profile', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) return false;
+  profileSnapshot = { ...profileSnapshot, ...body };
+  return true;
+}
+
 export async function saveAcademyAccount(patch: Partial<AcademyAccountPrefs>): Promise<boolean> {
   if (!patch.academy_neo && !Array.isArray(patch.academy_widgets)) return false;
-  const payload: Record<string, unknown> = {};
-  if (patch.academy_neo) payload.academy_neo = patch.academy_neo;
-  if (Array.isArray(patch.academy_widgets)) payload.academy_widgets = serializeAcademyWidgets(patch.academy_widgets);
+  setAcademyAccountPrefs(patch);
+  if (!profileSnapshot) return false;
 
-  try {
-    const dedicated = await academyFetch('/api/profile/academy', {
-      method: 'PATCH',
-      body: JSON.stringify(payload),
-    });
-    if (dedicated.ok) return true;
+  saveChain = saveChain.then(async () => {
+    const prefs: AcademyAccountPrefs = { ...currentPrefs };
 
-    if (!profileSnapshot) return false;
-    const merged = {
-      ...profileSnapshot,
-      ...payload,
-      password: '',
-      settings: {
-        ...(typeof profileSnapshot.settings === 'object' && profileSnapshot.settings ? profileSnapshot.settings : {}),
-        ...payload,
-      },
-    };
-    const fallback = await academyFetch('/api/profile', {
-      method: 'POST',
-      body: JSON.stringify(merged),
-    });
-    return fallback.ok;
-  } catch {
-    return false;
-  }
+    try {
+      await academyFetch('/api/profile/academy', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          academy_neo: prefs.academy_neo,
+          academy_widgets: serializeAcademyWidgets(prefs.academy_widgets),
+        }),
+      });
+    } catch {
+      /* dedicated route is optional */
+    }
+
+    const saved = await postProfile(prefs);
+    if (!saved) return false;
+
+    try {
+      const verify = await academyFetch('/api/profile');
+      if (verify.ok) {
+        const fresh = await verify.json();
+        setAcademyProfileSnapshot(fresh);
+        const resolved = resolveAcademyPrefs(fresh);
+        if (resolved.neo) setAcademyAccountPrefs({ academy_neo: resolved.neo });
+        if (resolved.widgets) setAcademyAccountPrefs({ academy_widgets: resolved.widgets });
+        return Boolean(resolved.neo || resolved.widgets);
+      }
+    } catch {
+      /* POST already succeeded */
+    }
+    return saved;
+  });
+
+  return saveChain;
 }
 
 export function queueAcademyAccountSave(patch: Partial<AcademyAccountPrefs>) {

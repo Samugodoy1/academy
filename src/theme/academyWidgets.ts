@@ -69,6 +69,12 @@ export function isAcademyWidgetKind(value: string): value is AcademyWidgetKind {
   return (ACADEMY_WIDGET_KINDS as readonly string[]).includes(value);
 }
 
+export function isAcademyWidgetPhoto(value: string) {
+  if (!value) return false;
+  if (value.startsWith('data:image')) return value.length < 1_500_000;
+  return /^https?:\/\//i.test(value);
+}
+
 export function isAcademyWidgetSize(value: string): value is AcademyWidgetSize {
   return value === 'sm' || value === 'md' || value === 'lg';
 }
@@ -84,7 +90,7 @@ export function parseAcademyWidgets(raw: unknown): AcademyWidget[] | null {
     if (typeof record.kind !== 'string' || !isAcademyWidgetKind(record.kind)) continue;
     const size = typeof record.size === 'string' && isAcademyWidgetSize(record.size) ? record.size : 'sm';
     const widget: AcademyWidget = { id: record.id, kind: record.kind, size };
-    if (typeof record.photo === 'string' && record.photo.startsWith('data:image')) widget.photo = record.photo;
+    if (typeof record.photo === 'string' && isAcademyWidgetPhoto(record.photo)) widget.photo = record.photo;
     if (typeof record.note === 'string') widget.note = record.note.slice(0, 140);
     if (typeof record.wash === 'string') widget.wash = record.wash.slice(0, 24);
     widgets.push(widget);

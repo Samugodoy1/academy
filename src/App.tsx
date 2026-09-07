@@ -94,7 +94,7 @@ import { DEFAULT_PRODUCT, ACADEMY_DISABLED_TABS } from './app/constants';
 import { AcademySidebar } from './features/shell/AcademySidebar';
 import { BottomNav } from './features/shell/BottomNav';
 import { AcademyPrefsSync } from './theme/AcademyPrefsSync';
-import { getAcademyAccountPrefs } from './theme/academyAccount';
+import { applyAcademyPrefsToProfile } from './theme/academyAccount';
 import { ClinicalPageRoute } from './features/clinical/ClinicalPageRoute';
 import { LegacyClinicalRedirect } from './features/clinical/LegacyClinicalRedirect';
 import { UpgradeLimitModal } from './features/modals/UpgradeLimitModal';
@@ -739,7 +739,7 @@ export default function App() {
     try {
       const res = await apiFetch('/api/profile', {
         method: 'POST',
-        body: JSON.stringify({ ...profileDraft, password: profilePassword, ...getAcademyAccountPrefs() })
+        body: JSON.stringify(applyAcademyPrefsToProfile({ ...profileDraft, password: profilePassword } as Record<string, unknown>)),
       });
       if (res.ok) {
         showNotification('Perfil atualizado com sucesso!');

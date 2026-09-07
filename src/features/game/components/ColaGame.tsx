@@ -75,6 +75,7 @@ export const ColaGame: React.FC<ColaGameProps> = ({
     limits,
     loseHeart,
     beginLesson,
+    abandonLesson,
     completeLesson,
     failLesson,
     setDailyGoal,
@@ -216,7 +217,10 @@ export const ColaGame: React.FC<ColaGameProps> = ({
         timeLimitSec={running.timeLimitSec}
         onHeartLost={loseHeart}
         onFinish={handleFinish}
-        onQuit={() => setRunning(null)}
+        onQuit={() => {
+          if (running.useHearts) abandonLesson();
+          setRunning(null);
+        }}
       />
     );
   }

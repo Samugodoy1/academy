@@ -41,6 +41,9 @@ export const StreakPanel: React.FC<StreakPanelProps> = ({
   const canBuyFreeze = state.gems >= FREEZE_COST && state.freezes < limits.maxFreezes;
 
   const headline = (() => {
+    if (repairable && state.lostStreak) {
+      return `Sua ofensiva de ${state.lostStreak.value} dias caiu`;
+    }
     if (state.streak === 0) return 'Comece sua ofensiva hoje';
     if (atRisk) return `Sua ofensiva de ${state.streak} ${state.streak === 1 ? 'dia' : 'dias'} está em risco`;
     return `${state.streak} ${state.streak === 1 ? 'dia' : 'dias'} de ofensiva`;
@@ -101,11 +104,9 @@ export const StreakPanel: React.FC<StreakPanelProps> = ({
 
       {repairable && state.lostStreak && (
         <div className="rounded-[18px] bg-white px-4 py-3">
-          <p className="text-[15px] font-semibold text-[var(--neo-ink)]">
-            Sua ofensiva de {state.lostStreak.value} dias caiu
-          </p>
-          <p className="mt-0.5 text-[13px] leading-snug text-[var(--neo-gray)]">
-            Dá para trazer de volta antes que ela esfrie de vez.
+          <p className="text-[15px] leading-snug text-[var(--neo-ink)]">
+            Dá para trazer de volta antes que ela esfrie de vez. Depois disso, a contagem recomeça
+            do zero.
           </p>
           <button
             type="button"

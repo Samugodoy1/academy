@@ -1,19 +1,28 @@
 import { describe, expect, it } from 'vitest';
+import { FREE_LIMITS, STUDENT_LIMITS } from './plan';
 import {
   CROWNS_PER_UNIT,
+  FREEZE_COST,
+  HEART_REFILL_COST,
   HEART_REGEN_MS,
   MAX_HEARTS,
+  applyDailyGoal,
   applyDayRollover,
+  buyFreeze,
+  buyHearts,
+  canStartLesson,
   createInitialState,
   currentStreak,
   dayKeyOf,
   getUnitState,
+  lessonsLeftToday,
   msToNextHeart,
   regenerateHearts,
   registerFailedLesson,
   registerLessonResult,
   sanitizeState,
   spendHeart,
+  startLesson,
 } from './progress';
 import type { GameState, LessonOutcome } from './types';
 
@@ -191,6 +200,104 @@ describe('lição perdida', () => {
   });
 });
 
+describe('limites do plano', () => {
+  it('o Free libera cinco lições por dia', () => {
+    const now = at('2026-03-01T09:00:00');
+    let state = createInitialState(now);
+    for (let i = 0; i < 5; i += 1) {
+      expect(canStartLesson(state, now, FREE_LIMITS)).toBe(true);
+      state = startLesson(state, now);
+    }
+    expect(canStartLesson(state, now, FREE_LIMITS)).toBe(false);
+    expect(lessonsLeftToday(state, now, FREE_LIMITS)).toBe(0);
+  });
+
+  it('a cota volta na virada do dia', () => {
+    const now = at('2026-03-01T09:00:00');
+    let state = createInitialState(now);
+    for (let i = 0; i < 5; i += 1) state = startLesson(state, now);
+    const tomorrow = at('2026-03-02T07:00:00');
+    expect(canStartLesson(state, tomorrow, FREE_LIMITS)).toBe(true);
+    expect(lessonsLeftToday(state, tomorrow, FREE_LIMITS)).toBe(5);
+  });
+
+  it('o Student não tem cota nem gasta vidas', () => {
+    const now = at('2026-03-01T09:00:00');
+    let state = createInitialState(now);
+    for (let i = 0; i < 12; i += 1) state = startLesson(state, now);
+    expect(canStartLesson(state, now, STUDENT_LIMITS)).toBe(true);
+    expect(lessonsLeftToday(state, now, STUDENT_LIMITS)).toBeNull();
+
+    const spent = spendHeart(state, now, STUDENT_LIMITS);
+    expect(spent.hearts).toBe(MAX_HEARTS);
+    expect(msToNextHeart(spent, now, STUDENT_LIMITS)).toBe(0);
+  });
+
+  it('o Student volta com as vidas cheias ao trocar de plano', () => {
+    const now = at('2026-03-01T09:00:00');
+    const drained = spendHeart(spendHeart(createInitialState(now), now), now);
+    expect(regenerateHearts(drained, now, STUDENT_LIMITS).hearts).toBe(MAX_HEARTS);
+  });
+});
+
+describe('cristais', () => {
+  it('a lição paga cristais e a meta do dia dá bônus', () => {
+    const now = at('2026-03-01T09:00:00');
+    const start: GameState = { ...createInitialState(now), dailyGoal: 20 };
+    const { state, reward } = registerLessonResult(start, baseOutcome(), now);
+    expect(reward.gems).toBeGreaterThan(0);
+    expect(state.gems).toBe(reward.gems);
+  });
+
+  it('compra protetor respeitando o teto do plano', () => {
+    const now = at('2026-03-01T09:00:00');
+    const rich: GameState = { ...createInitialState(now), gems: 500 };
+    const one = buyFreeze(rich, FREE_LIMITS);
+    expect(one.freezes).toBe(1);
+    expect(one.gems).toBe(500 - FREEZE_COST);
+    expect(buyFreeze(one, FREE_LIMITS).freezes).toBe(1);
+    expect(buyFreeze(one, STUDENT_LIMITS).freezes).toBe(2);
+  });
+
+  it('não compra protetor sem cristais', () => {
+    const now = at('2026-03-01T09:00:00');
+    const broke: GameState = { ...createInitialState(now), gems: 5 };
+    expect(buyFreeze(broke, FREE_LIMITS).freezes).toBe(0);
+  });
+
+  it('enche as vidas pagando cristais', () => {
+    const now = at('2026-03-01T09:00:00');
+    const spent = spendHeart(spendHeart(createInitialState(now), now), now);
+    const paid = buyHearts({ ...spent, gems: 100 }, now);
+    expect(paid.hearts).toBe(MAX_HEARTS);
+    expect(paid.gems).toBe(100 - HEART_REFILL_COST);
+  });
+});
+
+describe('missões no resultado', () => {
+  it('a lição avança as missões e paga quando fecha', () => {
+    const now = at('2026-03-01T09:00:00');
+    const start: GameState = {
+      ...createInitialState(now),
+      quests: [
+        { id: 'lessons-1', kind: 'lessons', title: 'Complete 1 lição', target: 1, progress: 0, gems: 15 },
+      ],
+    };
+    const { state, reward } = registerLessonResult(start, baseOutcome(), now);
+    expect(state.quests[0].progress).toBe(1);
+    expect(reward.questsDone).toHaveLength(1);
+    expect(reward.gems).toBeGreaterThanOrEqual(15);
+  });
+
+  it('trocar a meta do dia atualiza a missão de XP pendente', () => {
+    const now = at('2026-03-01T09:00:00');
+    const state = applyDailyGoal(createInitialState(now), 50);
+    const xpQuest = state.quests.find(quest => quest.kind === 'xp');
+    expect(state.dailyGoal).toBe(50);
+    expect(xpQuest?.target).toBe(50);
+  });
+});
+
 describe('sanitize', () => {
   it('recupera de um estado corrompido', () => {
     const now = at('2026-03-01T09:00:00');
@@ -204,5 +311,20 @@ describe('sanitize', () => {
     const now = at('2026-03-01T09:00:00');
     expect(sanitizeState(null, now).xp).toBe(0);
     expect(sanitizeState('oi', now).hearts).toBe(MAX_HEARTS);
+  });
+
+  it('migra um save antigo sem cristais nem missões', () => {
+    const now = at('2026-03-11T09:00:00');
+    const state = sanitizeState(
+      { version: 1, xp: 320, streak: 4, lastDay: '2026-03-10', hearts: 3, dailyGoal: 30 },
+      now
+    );
+    expect(state.version).toBe(2);
+    expect(state.gems).toBe(0);
+    expect(state.freezes).toBe(0);
+    expect(state.quests).toHaveLength(3);
+    expect(state.bestStreak).toBe(4);
+    // O último dia jogado alimenta a semana mesmo sem histórico salvo.
+    expect(state.history).toEqual(['2026-03-10']);
   });
 });

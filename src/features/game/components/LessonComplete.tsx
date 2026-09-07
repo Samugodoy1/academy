@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { Heart, Target, TrendingUp, Zap } from '../../../icons';
+import { Check, Gem, Heart, Sparkles, Target, TrendingUp, Zap } from '../../../icons';
+import { levelTitle } from '../engine';
 import { feedback } from '../sound';
 import type { LessonOutcome, LessonReward } from '../types';
 
@@ -85,9 +86,25 @@ export const LessonComplete: React.FC<LessonCompleteProps> = ({
             value={`x${outcome.bestCombo}`}
             tone="text-[#ffb400]"
           />
+          <Stat icon={Gem} label="Cristais" value={`+${reward.gems}`} tone="text-[#0a84ff]" />
         </div>
 
         <div className="mt-4 space-y-2">
+          {reward.levelUp !== null && (
+            <p className="flex items-center gap-2 rounded-[18px] bg-[var(--neo)] px-4 py-3 text-[15px] font-medium text-white">
+              <Sparkles size={16} className="shrink-0" />
+              Nível {reward.levelUp}: {levelTitle(reward.levelUp)}
+            </p>
+          )}
+          {reward.questsDone.map(quest => (
+            <p
+              key={quest.id}
+              className="flex items-center gap-2 rounded-[18px] bg-[var(--game-right-wash)] px-4 py-3 text-[15px] text-[var(--game-right-ink)]"
+            >
+              <Check size={16} className="shrink-0" />
+              Missão concluída: {quest.title.toLowerCase()} · +{quest.gems} cristais
+            </p>
+          ))}
           {reward.goalReached && (
             <p className="rounded-[18px] bg-[var(--neo-wash)] px-4 py-3 text-[15px] text-[var(--neo-ink)]">
               Meta do dia batida. Amanhã a ofensiva continua.
@@ -148,16 +165,24 @@ export const LessonComplete: React.FC<LessonCompleteProps> = ({
 
 interface LessonFailedProps {
   minutesToHeart: number;
+  gems: number;
+  refillCost: number;
   onPractice: () => void;
+  onRefill: () => void;
   onExit: () => void;
+  onUpgrade?: () => void;
 }
 
 export const LessonFailed: React.FC<LessonFailedProps> = ({
   minutesToHeart,
+  gems,
+  refillCost,
   onPractice,
+  onRefill,
   onExit,
+  onUpgrade,
 }) => (
-  <div className="fixed inset-0 z-[200] flex flex-col justify-center bg-white px-5 py-10 sm:px-6">
+  <div className="fixed inset-0 z-[200] flex flex-col justify-center overflow-y-auto bg-white px-5 py-10 sm:px-6">
     <div className="mx-auto w-full max-w-[520px] text-center">
       <span className="game-pop mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--game-wrong-wash)] text-[var(--game-wrong)]">
         <Heart size={38} />
@@ -173,7 +198,29 @@ export const LessonFailed: React.FC<LessonFailedProps> = ({
         <button type="button" onClick={onPractice} className="game-cta">
           Treino livre para recuperar
         </button>
-        <button type="button" onClick={onExit} className="game-cta game-cta-ghost">
+        <button
+          type="button"
+          disabled={gems < refillCost}
+          onClick={onRefill}
+          className={`game-cta game-cta-ghost ${gems < refillCost ? 'opacity-50' : ''}`}
+        >
+          Encher as vidas por {refillCost}
+          <Gem size={15} />
+        </button>
+        {onUpgrade && (
+          <button
+            type="button"
+            onClick={onUpgrade}
+            className="w-full py-3 text-[15px] font-medium text-[var(--neo)]"
+          >
+            No Student as vidas são infinitas
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={onExit}
+          className="w-full py-2 text-[14px] font-medium text-[var(--neo-gray)]"
+        >
           Sair por enquanto
         </button>
       </div>

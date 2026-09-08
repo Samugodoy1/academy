@@ -2228,7 +2228,7 @@ export default function App() {
       <Route path="/pre-atendimento/:token" element={<PreAtendimento />} />
       <Route path="/prontuario/:id" element={
         user ? (
-          <div className="min-h-screen bg-white flex font-sans text-sys-text relative overflow-x-hidden">
+          <div className="min-h-screen bg-[#f2f2f7] flex font-sans text-sys-text relative overflow-x-hidden">
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
               {isSidebarOpen && (
@@ -2256,7 +2256,7 @@ export default function App() {
               patientCount={patients.length}
               openAppointmentModal={openAppointmentModal}
             />
-            <main className="flex-1 min-w-0 overflow-x-hidden flex flex-col pt-4 md:pt-6 lg:pt-8">
+            <main className="flex-1 min-w-0 overflow-x-hidden flex flex-col">
               <ClinicalPageRoute
                 transactions={transactions}
                 appointments={appointments}

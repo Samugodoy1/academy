@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { useParams } from 'react-router-dom';
 import { DEFAULT_PRODUCT } from '../../app/constants';
 import { patientHasEvolutionForAppointment } from '../../utils/patientEvolution';
-import { Loader2 } from '../../icons';
 
 const PatientClinical = lazy(() =>
   import('../../components/PatientClinical').then(m => ({ default: m.PatientClinical }))
@@ -51,23 +50,23 @@ export const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient,
   }, [pendingEvolutionAlreadyClosed, onClearPendingEvolution]);
 
   if (loading) return (
-    <div className="flex-1 flex items-center justify-center bg-[#f2f2f7] min-h-[60vh]">
-      <div className="flex flex-col items-center gap-3">
-        <Loader2 size={22} className="animate-spin text-[#86868b]" />
-        <p className="text-[15px] text-[#6e6e73] tracking-[-0.016em]">Abrindo o caso</p>
+    <div className="flex-1 flex items-center justify-center bg-slate-50">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-slate-500 font-medium">Abrindo prontuário...</p>
       </div>
     </div>
   );
 
-  if (!patient) return <div className="p-8 text-center text-[17px] text-[#6e6e73]">Caso não encontrado.</div>;
+  if (!patient) return <div className="p-8 text-center">Prontuário não encontrado.</div>;
 
   return (
     <Suspense
       fallback={
-        <div className="flex-1 flex items-center justify-center bg-[#f2f2f7] min-h-[60vh]">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 size={22} className="animate-spin text-[#86868b]" />
-            <p className="text-[15px] text-[#6e6e73] tracking-[-0.016em]">Abrindo o caso</p>
+        <div className="flex-1 flex items-center justify-center bg-slate-50">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            <p className="text-slate-500 font-medium">Abrindo prontuário...</p>
           </div>
         </div>
       }

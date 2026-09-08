@@ -1,36 +1,29 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Activity,
   ArrowDownRight,
-  ArrowLeft,
   ArrowUpRight,
   BookOpen,
-  Calendar,
   Camera,
   Check,
   CheckCircle2,
   ChevronDown,
   ChevronLeft,
-  Circle,
-  Clock3,
   CreditCard,
+  ChevronRight,
   Download,
   FileText,
   GripVertical,
-  Info,
+  Heart,
   Lock,
   Loader2,
-  Phone,
   Plus,
   Shield,
   Trash2,
-  User,
-  UserRound,
   WalletCards,
   X,
   Zap,
 } from '../icons';
-import { AnimatePresence, motion } from 'motion/react';
+import { motion } from 'motion/react';
 import { CLINICAL_PROCEDURES, getProcedureDefinition, resolveProcedureValue } from '../constants/clinicalProcedures';
 import { NovaEvolucao } from './NovaEvolucao';
 import { DentitionIndicator, DentitionRevealHint } from './DentitionIndicator';
@@ -99,23 +92,11 @@ type InfoTab = 'anamneses' | 'dados' | 'imagens' | 'financeiro';
 
 type ClinicalStatus = 'EM_TRATAMENTO' | 'REVISAO' | 'ABANDONADO' | 'NOVO';
 
-const statusConfig: Record<ClinicalStatus, { label: string; className: string }> = {
-  EM_TRATAMENTO: {
-    label: 'Em tratamento',
-    className: 'bg-emerald-100 ring-1 ring-emerald-200 text-emerald-900',
-  },
-  REVISAO: {
-    label: 'Em revisão',
-    className: 'bg-amber-100 ring-1 ring-amber-200 text-amber-900',
-  },
-  ABANDONADO: {
-    label: 'Abandonado',
-    className: 'bg-rose-100 ring-1 ring-rose-200 text-rose-900',
-  },
-  NOVO: {
-    label: 'Novo paciente',
-    className: 'bg-sky-100 ring-1 ring-sky-200 text-sky-900',
-  },
+const statusConfig: Record<ClinicalStatus, { label: string }> = {
+  EM_TRATAMENTO: { label: 'Em tratamento' },
+  REVISAO: { label: 'Em revisão' },
+  ABANDONADO: { label: 'Sem retorno há 6 meses' },
+  NOVO: { label: 'Primeiro caso' },
 };
 
 const getAge = (birthDate?: string) => {
@@ -187,15 +168,6 @@ const resolveClinicalStatus = (patient: any, appointments: any[]): ClinicalStatu
   return 'REVISAO';
 };
 
-const resolveTimelineIcon = (label: string) => {
-  const lower = (label || '').toLowerCase();
-  if (/canal|endo/.test(lower)) return Activity;
-  if (/restaura|resina/.test(lower)) return CheckCircle2;
-  if (/extra|exo|cirurg/.test(lower)) return Zap;
-  if (/limpeza|profilax|raspagem/.test(lower)) return Circle;
-  return FileText;
-};
-
 const resolveProcedureCategory = (title: string) => {
   const lower = (title || '').toLowerCase();
   if (/canal|endo|obtur|pulp|odontometr|instrument|lima/.test(lower))
@@ -211,10 +183,10 @@ const resolveProcedureCategory = (title: string) => {
   return { label: 'Evolução', dotCls: 'bg-slate-400', tagCls: 'bg-slate-100 text-slate-600', borderCls: 'border-l-slate-300' };
 };
 
-const TIMELINE_STATUS_STYLES: Record<string, { dot: string; text: string; label: string }> = {
-  CONCLUIDO:    { dot: 'bg-emerald-500', text: 'text-emerald-700', label: 'Concluído' },
-  EM_ANDAMENTO: { dot: 'bg-amber-500',   text: 'text-amber-700',   label: 'Em andamento' },
-  OBSERVACAO:   { dot: 'bg-sky-500',     text: 'text-sky-600',     label: 'Observação' },
+const TIMELINE_STATUS_STYLES: Record<string, { dot: string; label: string }> = {
+  CONCLUIDO:    { dot: 'chart-status-dot-done', label: 'Concluído' },
+  EM_ANDAMENTO: { dot: 'chart-status-dot-open', label: 'Em andamento' },
+  OBSERVACAO:   { dot: 'chart-status-dot-note', label: 'Observação' },
 };
 
 const resolveTimelineMonthGroup = (dateStr: string) => {
@@ -1718,13 +1690,6 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     ? (isAcademyProduct ? 'Abrir plano clínico' : 'Abrir tratamento atual')
     : 'Ir para odontograma';
 
-  const greetingText = (() => {
-    const h = new Date().getHours();
-    if (h < 12) return 'Bom dia';
-    if (h < 18) return 'Boa tarde';
-    return 'Boa noite';
-  })();
-
   const handleExportClinicalCasePdf = async () => {
     if (isExportingPdf) return;
     if (!canExportClinicalCasePdf) {
@@ -1746,10 +1711,6 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     }
   };
 
-  const iosCard =
-    'bg-white/92 border border-slate-200/70 shadow-[0_8px_24px_rgba(15,23,42,0.05)]';
-  const iosSubtleCard =
-    'bg-slate-50/70 border border-slate-200/70';
   const selectedBoxGuide = boxGuides[selectedBoxProcedure];
   const boxContextProcedure =
     primaryTreatment?.procedure || boxIntelContext.appointmentLabel || boxIntelContext.boxProcedureDetail || '';
@@ -1800,292 +1761,220 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     setBoxTrayChecked(new Set());
   }, [isBoxModeOpen, boxContextProcedure]);
 
+  const patientInitials = String(patient?.name || 'P')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((n: string) => n[0].toUpperCase())
+    .join('');
+
   return (
-    <div className="min-h-screen bg-white pb-24 text-[var(--neo-ink,#1d1d1f)]">
+    <div className="chart-shell">
       <div aria-live="polite" className="sr-only">{uploadFeedback || (isSavingAnamnese ? 'Salvando anamnese' : '')}</div>
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 pb-3">
-          <div className="neo-control-card px-4 py-3.5 sm:px-5">
-
-            {/* ── Row 1: identidade + ações ── */}
-            <div className="flex items-center gap-3">
-              {/* Voltar */}
-              <button
-                onClick={() => { setAppActiveTab('pacientes'); appNavigate('/pacientes'); }}
-                className="shrink-0 h-9 w-9 rounded-full bg-white flex items-center justify-center text-[var(--neo-gray)] active:scale-[0.94]"
-                aria-label="Voltar para pacientes"
-              >
-                <ArrowLeft size={16} />
-              </button>
-
-              {/* Avatar */}
-              <div className="relative shrink-0 group">
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-[var(--neo-soft)] flex items-center justify-center text-[var(--neo)]">
-                  {patient?.photo_url ? (
-                    <img src={patient.photo_url} alt={patient?.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                  ) : (
-                    <span className="text-slate-700 font-bold text-sm select-none">
-                      {String(patient?.name || 'P').split(' ').filter(Boolean).slice(0, 2).map((n: string) => n[0].toUpperCase()).join('')}
-                    </span>
-                  )}
-                </div>
+      <header className="chart-nav">
+        <div className="chart-nav-inner">
+          <div className="chart-nav-bar">
+            <button
+              type="button"
+              onClick={() => { setAppActiveTab('pacientes'); appNavigate('/pacientes'); }}
+              className="chart-back"
+              aria-label="Voltar para pacientes"
+            >
+              <ChevronLeft size={22} />
+              Pacientes
+            </button>
+            <div className="chart-tools">
+              <div className="chart-segment" role="group" aria-label="Modo de visualização">
+                <button type="button" aria-pressed={isFocusMode} onClick={() => setIsFocusMode(true)}>Foco</button>
+                <button type="button" aria-pressed={!isFocusMode} onClick={() => setIsFocusMode(false)}>Ficha</button>
+              </div>
+              {isAcademyProduct && (
                 <button
                   type="button"
-                  onClick={() => profilePhotoInputRef.current?.click()}
-                  disabled={isUploadingProfilePhoto}
-                  className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 shadow-sm transition-colors hover:text-slate-900 disabled:opacity-60"
-                  aria-label="Enviar foto"
+                  onClick={() => setIsBoxModeOpen(true)}
+                  className="chart-tool"
+                  title="Modo Box"
+                  aria-label="Abrir Modo Box"
                 >
-                  <Camera size={10} />
+                  <BookOpen size={22} />
                 </button>
-                <input ref={profilePhotoInputRef} type="file" accept="image/*" onChange={handleProfilePhotoUpload} className="hidden" />
-              </div>
-
-              {/* Nome + badge + idade */}
-              <div className="min-w-0 flex-1">
-                <p className="text-[12px] text-[var(--neo-gray)] mb-0.5">{greetingText}</p>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-[19px] sm:text-[22px] font-semibold tracking-[-0.025em] text-[var(--neo-ink)] leading-tight truncate">
-                    {patient?.name}
-                  </h1>
-                  <span className={`shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-[0.07em] uppercase transition-all duration-300 ${clinicalBadge.className}`}>
-                    {clinicalBadge.label}
-                  </span>
-                </div>
-                <p className="text-[12px] text-[var(--neo-gray)] mt-0.5">
-                  {age !== null ? `${age} anos` : 'Idade n/i'}
-                  {treatmentInProgress.length > 0 && (
-                    <span className="ml-1.5 text-slate-200">·</span>
-                  )}
-                  {treatmentInProgress.length > 0 && (
-                    <span className="ml-1.5 tabular-nums">{treatmentInProgress.length} procedimento{treatmentInProgress.length !== 1 ? 's' : ''} {isAcademyProduct ? `planejado${treatmentInProgress.length !== 1 ? 's' : ''}` : `ativo${treatmentInProgress.length !== 1 ? 's' : ''}`}</span>
-                  )}
-                </p>
-              </div>
-
-              {/* Ações compactas */}
-              <div className="shrink-0 flex items-center gap-1.5">
-                <div className="hidden sm:inline-flex items-center rounded-full border border-slate-200/60 bg-slate-50/80 p-0.5 shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)]">
-                  <button
-                    type="button"
-                    onClick={() => setIsFocusMode(true)}
-                    className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all duration-200 ease-out ${isFocusMode ? 'bg-white text-slate-900 shadow-[0_1px_4px_rgba(15,23,42,0.08)]' : 'text-slate-400 hover:text-slate-600'}`}
-                  >Foco</button>
-                  <button
-                    type="button"
-                    onClick={() => setIsFocusMode(false)}
-                    className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all duration-200 ease-out ${!isFocusMode ? 'bg-white text-slate-900 shadow-[0_1px_4px_rgba(15,23,42,0.08)]' : 'text-slate-400 hover:text-slate-600'}`}
-                  >Geral</button>
-                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsAddingEvolution(true)}
+                className="chart-tool"
+                title="Novo registro"
+                aria-label="Novo registro clínico"
+              >
+                <Plus size={22} />
+              </button>
+              <button
+                type="button"
+                onClick={openImagesTab}
+                className="chart-tool"
+                title="Imagens e RX"
+                aria-label="Abrir imagens e radiografias"
+              >
+                <Camera size={20} />
+              </button>
+              {isAcademyProduct && (
                 <button
-                  onClick={() => setIsAddingEvolution(true)}
-                  className="h-9 w-9 flex items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-500 transition-all duration-200 hover:text-slate-900 hover:border-slate-300 hover:shadow-sm ios-press"
-                  title="Nova evolução"
+                  type="button"
+                  onClick={handleExportClinicalCasePdf}
+                  disabled={isExportingPdf}
+                  className="chart-tool"
+                  title={
+                    canExportClinicalCasePdf
+                      ? 'Exportar caso em PDF'
+                      : 'PDF exclusivo do plano Student'
+                  }
+                  aria-label="Exportar caso clínico em PDF"
                 >
-                  <Plus size={15} />
-                </button>
-                <button
-                  onClick={openImagesTab}
-                  className="h-9 w-9 flex items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-500 transition-all duration-200 hover:text-slate-900 hover:border-slate-300 hover:shadow-sm ios-press"
-                  title="Imagens/RX"
-                >
-                  <Camera size={15} />
-                </button>
-                {isAcademyProduct && (
-                  <button
-                    type="button"
-                    onClick={handleExportClinicalCasePdf}
-                    disabled={isExportingPdf}
-                    className={`h-9 w-9 flex items-center justify-center rounded-full border transition-all duration-200 ios-press disabled:opacity-60 ${
-                      canExportClinicalCasePdf
-                        ? 'border-primary/15 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/25 hover:shadow-sm'
-                        : 'border-slate-200/80 bg-slate-50 text-slate-400 hover:border-slate-300 hover:text-slate-600'
-                    }`}
-                    title={
-                      canExportClinicalCasePdf
-                        ? 'Exportar caso em PDF (Academy Student)'
-                        : 'Exportar PDF — exclusivo para assinantes Academy Student'
-                    }
-                  >
-                    {isExportingPdf ? (
-                      <Loader2 size={15} className="animate-spin" />
-                    ) : canExportClinicalCasePdf ? (
-                      <Download size={15} />
-                    ) : (
-                      <Lock size={14} />
-                    )}
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* ── Row 2: tira de contexto — próximo passo ── */}
-            <div className="mt-3">
-              {primaryTreatment ? (
-                <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-[18px] bg-[var(--neo)] text-white">
-                  <div className={`w-2.5 h-2.5 rounded-full shrink-0 animate-breathe ${resolveProcedureCategory(primaryTreatment.procedure).dotCls}`} />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[12px] text-white/80 mb-0.5">Próximo passo</p>
-                    <p className="text-[15px] font-semibold tracking-[-0.016em] truncate">
-                      {primaryTreatment.procedure} · {formatTreatmentAnchor(primaryTreatment)}
-                    </p>
-                  </div>
-                  {upcomingAppointment && (
-                    <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] text-slate-400 font-medium shrink-0">
-                      <Calendar size={10} className="text-slate-300" />
-                      {formatDate(upcomingAppointment.start_time)}
-                    </span>
+                  {isExportingPdf ? (
+                    <Loader2 size={20} className="animate-spin" />
+                  ) : canExportClinicalCasePdf ? (
+                    <Download size={20} />
+                  ) : (
+                    <Lock size={18} />
                   )}
-                  <button
-                    onClick={() => {
-                      setHighlightedTreatmentId(primaryTreatment.id);
-                      window.setTimeout(() => setHighlightedTreatmentId(null), 2200);
-                      focusOdontogram();
-                    }}
-                    className="shrink-0 px-4 py-2 rounded-[980px] bg-white text-[var(--neo-ink)] text-[13px] font-normal active:scale-[0.95]"
-                  >
-                    Ver
-                  </button>
-                </div>
-              ) : upcomingAppointment ? (
-                <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-[18px] bg-[var(--neo)] text-white">
-                  <div className="w-2.5 h-2.5 rounded-full bg-white/80 shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[12px] text-white/80 mb-0.5">Próxima consulta</p>
-                    <p className="text-[15px] font-semibold tracking-[-0.016em]">{formatDate(upcomingAppointment.start_time)} às {formatTime(upcomingAppointment.start_time)}</p>
-                  </div>
-                  <button
-                    onClick={focusOdontogram}
-                    className="shrink-0 px-4 py-2 rounded-[980px] bg-white text-[var(--neo-ink)] text-[13px] font-normal active:scale-[0.97]"
-                  >
-                    Ver
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-[18px] bg-[var(--neo-soft)]">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[var(--neo)] shrink-0" />
-                  <p className="text-[13px] text-[var(--neo-ink)] flex-1">Nenhum tratamento ativo · comece pelo odontograma</p>
-                  <button
-                    onClick={focusOdontogram}
-                    className="shrink-0 px-4 py-2 rounded-[980px] bg-[var(--neo)] text-white text-[13px] font-normal active:scale-[0.97]"
-                  >
-                    Ver
-                  </button>
-                </div>
+                </button>
               )}
             </div>
+          </div>
 
-            {/* Focus toggle mobile */}
-            <div className="mt-2.5 sm:hidden flex gap-1 p-0.5 bg-slate-50/80 rounded-2xl border border-slate-200/60 shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)]">
-              <button type="button" onClick={() => setIsFocusMode(true)} className={`flex-1 py-1.5 rounded-xl text-[11px] font-semibold transition-all duration-200 ease-out ${isFocusMode ? 'bg-white text-slate-900 shadow-[0_1px_4px_rgba(15,23,42,0.08)]' : 'text-slate-400'}`}>Foco</button>
-              <button type="button" onClick={() => setIsFocusMode(false)} className={`flex-1 py-1.5 rounded-xl text-[11px] font-semibold transition-all duration-200 ease-out ${!isFocusMode ? 'bg-white text-slate-900 shadow-[0_1px_4px_rgba(15,23,42,0.08)]' : 'text-slate-400'}`}>Geral</button>
+          <div className="chart-identity">
+            <div className="chart-avatar">
+              <div className="chart-avatar-face">
+                {patient?.photo_url ? (
+                  <img src={patient.photo_url} alt={patient?.name} referrerPolicy="no-referrer" />
+                ) : (
+                  <span aria-hidden="true">{patientInitials}</span>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => profilePhotoInputRef.current?.click()}
+                disabled={isUploadingProfilePhoto}
+                className="chart-avatar-edit"
+                aria-label="Enviar foto do paciente"
+              >
+                <Camera size={12} />
+              </button>
+              <input ref={profilePhotoInputRef} type="file" accept="image/*" onChange={handleProfilePhotoUpload} className="hidden" />
             </div>
+            <div className="min-w-0 flex-1">
+              <h1 className="chart-name truncate">{patient?.name}</h1>
+              <p className="chart-meta">
+                {age !== null ? `${age} anos` : 'Idade não informada'}
+                {' · '}
+                {clinicalBadge.label}
+                {treatmentInProgress.length > 0 && (
+                  <>
+                    {' · '}
+                    {treatmentInProgress.length} {isAcademyProduct ? 'no plano' : 'em andamento'}
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
+
+          {hasAllergy && (
+            <div className="chart-medical" role="status">
+              <div className="chart-medical-kicker">
+                <Heart size={13} />
+                Informação médica
+              </div>
+              <p>{formatAllergieLabel(patient?.anamnesis?.allergies)}</p>
+            </div>
+          )}
+
+          <div className="chart-today">
+            <button
+              type="button"
+              className={`chart-tile ${primaryTreatment ? 'chart-tile-accent' : ''}`}
+              onClick={() => {
+                if (primaryTreatment) {
+                  setHighlightedTreatmentId(primaryTreatment.id);
+                  window.setTimeout(() => setHighlightedTreatmentId(null), 2200);
+                }
+                focusOdontogram();
+              }}
+            >
+              <span className="chart-tile-kicker">{primaryTreatment ? 'Hoje no box' : 'Plano clínico'}</span>
+              <span className="chart-tile-title truncate">
+                {primaryTreatment
+                  ? primaryTreatment.procedure
+                  : 'Comece pela boca'}
+              </span>
+              <span className="chart-tile-caption truncate">
+                {primaryTreatment
+                  ? formatTreatmentAnchor(primaryTreatment)
+                  : 'Toque no dente para planejar o caso'}
+              </span>
+            </button>
+            <button
+              type="button"
+              className="chart-tile"
+              onClick={focusOdontogram}
+            >
+              <span className="chart-tile-kicker">Cadeira</span>
+              <span className="chart-tile-title truncate">
+                {upcomingAppointment
+                  ? `${formatTime(upcomingAppointment.start_time) || formatDate(upcomingAppointment.start_time)}`
+                  : 'Livre'}
+              </span>
+              <span className="chart-tile-caption truncate">
+                {upcomingAppointment
+                  ? formatDate(upcomingAppointment.start_time)
+                  : 'Nenhum atendimento marcado'}
+              </span>
+            </button>
+            <button
+              type="button"
+              className="chart-tile"
+              onClick={() => {
+                setIsFocusMode(false);
+                setInfoTab('anamneses');
+                requestAnimationFrame(() => {
+                  infoPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+              }}
+            >
+              <span className="chart-tile-kicker">Anamnese</span>
+              <span className="chart-tile-title">{anamnesisFilledCount} de 7</span>
+              <span className="chart-tile-caption">
+                {hasAllergy
+                  ? 'Alergia registrada'
+                  : anamnesisIncomplete
+                    ? 'Complete antes de anestesiar'
+                    : 'Pronta para o box'}
+              </span>
+            </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-7 space-y-6">
+      <main className="chart-body">
         {isAcademyProduct && (
-          <section className="neo-card p-4 sm:p-5">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="w-11 h-11 rounded-full bg-[var(--neo)] text-white flex items-center justify-center shrink-0">
-                <Zap size={18} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[13px] text-[var(--neo-gray)] mb-1">No box</p>
-                <h2 className="text-[22px] sm:text-[26px] font-semibold tracking-[-0.025em] text-[var(--neo-ink)]">O seu passo</h2>
-                <p className="text-[15px] text-[var(--neo-gray)] leading-relaxed mt-1">A lista visível. Depois, a evolução.</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setIsBoxModeOpen(true)}
-                className="rounded-[22px] bg-[var(--neo)] px-5 py-4 text-left text-white active:scale-[0.98]"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[16px] font-semibold tracking-[-0.016em]">Modo Box</p>
-                    <p className="text-[12px] text-white/75 font-medium mt-1 line-clamp-2">
-                      {boxIntelContext.criticalCheckpoint || boxIntelContext.expectedTodaySummary || boxIntelContext.boxProcedureDetail || 'Cola clínica rápida'}
-                    </p>
-                  </div>
-                  <BookOpen size={20} className="shrink-0 text-white/90" />
-                </div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsAddingEvolution(true)}
-                className="rounded-[22px] bg-white px-5 py-4 text-left active:scale-[0.98]"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[16px] font-semibold tracking-[-0.016em] text-[var(--neo-ink)]">Registrar evolução</p>
-                    <p className="text-[13px] text-[var(--neo-gray)] mt-1">Fechar o atendimento</p>
-                  </div>
-                  <FileText size={20} className="shrink-0 text-[var(--neo)]" />
-                </div>
-              </button>
-            </div>
-            <button
-              type="button"
-              onClick={handleExportClinicalCasePdf}
-              disabled={isExportingPdf}
-              className={`mt-3 w-full rounded-[22px] px-5 py-3.5 text-left transition-all duration-200 active:scale-[0.98] ios-press disabled:opacity-60 ${
-                canExportClinicalCasePdf
-                  ? 'border border-primary/12 bg-academy-soft hover:border-primary/25'
-                  : 'border border-slate-200/80 bg-slate-50/80 hover:border-slate-300'
-              }`}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className={`text-[15px] font-bold ${canExportClinicalCasePdf ? 'text-academy-primary-dark' : 'text-slate-700'}`}>
-                      Exportar resumo do caso
-                    </p>
-                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] ${
-                      canExportClinicalCasePdf
-                        ? 'bg-primary/10 text-primary'
-                        : 'bg-slate-200/80 text-slate-500'
-                    }`}>
-                      {canExportClinicalCasePdf ? (
-                        <>Academy Student</>
-                      ) : (
-                        <>
-                          <Lock size={10} />
-                          Student
-                        </>
-                      )}
-                    </span>
-                  </div>
-                  <p className="text-[12px] text-academy-muted font-medium mt-1">
-                    {canExportClinicalCasePdf
-                      ? 'PDF para revisão, estudo e apresentação acadêmica'
-                      : 'Recurso exclusivo do plano Academy Student. Toque para conhecer o plano.'}
-                  </p>
-                </div>
-                {isExportingPdf ? (
-                  <Loader2 size={18} className="shrink-0 text-primary animate-spin" />
-                ) : canExportClinicalCasePdf ? (
-                  <Download size={18} className="shrink-0 text-primary" />
-                ) : (
-                  <Lock size={18} className="shrink-0 text-slate-400" />
-                )}
-              </div>
-            </button>
-          </section>
+          <p className="chart-footnote">
+            Caso clínico acadêmico. Não substitui o prontuário oficial da faculdade.
+          </p>
         )}
 
-        <section ref={odontogramRef} className="rounded-[30px] p-4 sm:p-5 border border-slate-200/60 bg-white/95 shadow-[0_10px_28px_rgba(15,23,42,0.04),0_1px_3px_rgba(15,23,42,0.06)] transition-shadow duration-500 hover:shadow-[0_14px_36px_rgba(15,23,42,0.06)]">
-          <div className="flex items-center justify-between gap-3 mb-1">
-            <h2 className="text-[24px] sm:text-[28px] font-semibold tracking-[-0.02em] text-slate-950">Odontograma</h2>
+        <section ref={odontogramRef}>
+          <div className="chart-section-head">
+            <div>
+              <h2 className="chart-section-title">Odontograma</h2>
+              <p className="chart-section-caption">A boca do caso. Diagnóstico e plano saem daqui.</p>
+            </div>
             <ScopeProcedureMenu
               onSelect={handleScopeProcedureSelect}
               hint={scopeProcedureWarning}
             />
           </div>
 
-          <div className="mb-2 flex items-start justify-between gap-3">
+          <div className="chart-group chart-group-flush">
+          <div className="flex items-start justify-between gap-3 px-2 pt-2 pb-1">
             <div className="min-w-0 flex-1">
               <OdontogramActiveSummary
                 items={treatmentInProgress}
@@ -2121,7 +2010,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
             />
           )}
 
-          <div className="rounded-[24px] p-0.5 sm:p-1 ring-1 ring-slate-100/50">
+          <div className="px-1 pb-2 pt-1">
             <Odontogram
               data={mergedOdontogram}
               history={patient?.toothHistory || []}
@@ -2138,20 +2027,18 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               dentitionMode={effectiveDentitionMode}
             />
           </div>
+          </div>
         </section>
 
-        <div className={`grid grid-cols-1 gap-6 ${isFocusMode ? '' : 'xl:grid-cols-[1.7fr_1fr]'}`}>
-          <div className="space-y-6">
-            <section
-              ref={treatmentSectionRef}
-              className="rounded-[28px] border border-slate-200/60 bg-white/95 p-5 sm:p-6 shadow-[0_10px_28px_rgba(15,23,42,0.04),0_1px_3px_rgba(15,23,42,0.06)] transition-shadow duration-500 hover:shadow-[0_14px_36px_rgba(15,23,42,0.06)]"
-            >
-              <div className="flex items-center justify-between mb-4">
+        <div className={isFocusMode ? '' : 'chart-split'}>
+          <div className="space-y-7">
+            <section ref={treatmentSectionRef}>
+              <div className="chart-section-head">
                 <div>
-                  <h3 className="text-lg sm:text-xl font-semibold tracking-[-0.02em] text-slate-950">{isAcademyProduct ? 'Plano clínico' : 'Tratamento atual'}</h3>
+                  <h3 className="chart-section-title">{isAcademyProduct ? 'Plano clínico' : 'Tratamento atual'}</h3>
                   {treatmentInProgress.length > 0 ? (
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      {treatmentInProgress.length} procedimento{treatmentInProgress.length !== 1 ? 's' : ''} planejado{treatmentInProgress.length !== 1 ? 's' : ''}
+                    <p className="chart-section-caption">
+                      {treatmentInProgress.length} procedimento{treatmentInProgress.length !== 1 ? 's' : ''} no caso
                       {!isAcademyProduct && (
                         <>
                           {' · '}
@@ -2161,7 +2048,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                       )}
                     </p>
                   ) : (
-                    <p className="text-xs text-slate-500 mt-0.5">Nenhum procedimento ativo</p>
+                    <p className="chart-section-caption">Nada planejado ainda</p>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
@@ -2172,9 +2059,8 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                         setReorderItems([...treatmentInProgress]);
                         setIsReorderMode(true);
                       }}
-                      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold text-slate-500 border border-slate-200 bg-white transition-all duration-200 hover:text-slate-700 hover:border-slate-300 hover:shadow-sm"
+                      className="chart-link"
                     >
-                      <GripVertical size={12} />
                       Reordenar
                     </button>
                   )}
@@ -2187,31 +2073,19 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                       type="button"
                       onClick={togglePrepaymentAll}
                       disabled={allPaid}
-                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide transition-all duration-200 ${
-                        allPaid
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-default'
-                          : allActive
-                            ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
-                            : 'bg-slate-50 text-slate-400 border border-slate-200 hover:text-slate-600 hover:border-slate-300'
-                      }`}
+                      className="chart-link"
                       title={allPaid ? 'Orçamento quitado' : allActive ? 'Cobrar antes de executar (ativo)' : 'Exigir pagamento antes de executar'}
                     >
-                      {allPaid ? (
-                        <><Check size={11} /> Quitado</>
-                      ) : allActive ? (
-                        <><Lock size={11} /> Cobrar antes</>
-                      ) : (
-                        <><Shield size={11} /> Cobrar antes</>
-                      )}
+                      {allPaid ? 'Quitado' : 'Cobrar antes'}
                     </button>
                   );
                 })()}
               </div>
             </div>
 
-              <div className="space-y-3">
+              <div className="chart-group">
                 {isReorderMode && (
-                  <div className="flex items-center gap-2.5 mb-2 p-1.5 rounded-[18px] bg-slate-50/80 border border-slate-200/60 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                  <div className="chart-reorder-bar">
                     <button
                       type="button"
                       disabled={isSavingOrder}
@@ -2232,15 +2106,15 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                           setIsReorderMode(false);
                         }
                       }}
-                      className="flex-1 rounded-2xl bg-slate-950 text-white text-[13px] font-bold py-2.5 transition-all hover:bg-slate-800 active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2 shadow-[0_2px_8px_rgba(15,23,42,0.15)]"
+                      className="chart-primary !w-auto flex-1 !m-0"
                     >
-                      {isSavingOrder ? <Loader2 size={14} className="animate-spin" /> : <Check size={13} />}
-                      Salvar nova ordem
+                      {isSavingOrder ? <Loader2 size={16} className="animate-spin" /> : null}
+                      Salvar ordem
                     </button>
                     <button
                       type="button"
                       onClick={() => { setIsReorderMode(false); setReorderItems([]); }}
-                      className="rounded-2xl border border-slate-200/80 bg-white text-slate-600 text-[13px] font-bold px-4 py-2.5 transition-all hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98] shadow-sm"
+                      className="chart-link"
                     >
                       Cancelar
                     </button>
@@ -2253,56 +2127,49 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     const rawStatus = String(item.status || '').toUpperCase();
                     const isPrepaid = !isAcademyProduct && item.requires_prepayment && item.prepayment_confirmed;
 
-                    const statusConfig = rawStatus === 'APROVADO'
-                      ? { cls: 'bg-emerald-50 text-emerald-700 border-emerald-200', label: 'Em andamento' }
+                    const itemStatusLabel = rawStatus === 'APROVADO'
+                      ? 'Em andamento'
                       : rawStatus === 'PENDENTE'
-                        ? { cls: 'bg-amber-50 text-amber-700 border-amber-200', label: 'Aguardando' }
-                        : { cls: 'bg-sky-50 text-sky-700 border-sky-200', label: 'Planejado' };
+                        ? 'Aguardando'
+                        : 'Planejado';
 
                     return (
                       <div
                         key={item.id}
                         data-reorder-index={idx}
-                        className={`rounded-2xl border p-4 flex flex-col gap-3 transition-all duration-300 ease-out sm:flex-row sm:items-center sm:justify-between ${
-                          isReorderMode
-                            ? 'select-none'
-                            : 'ios-hover-lift'
+                        className={`chart-row ${
+                          isReorderMode ? 'select-none' : ''
                         } ${
                           isReorderMode && dragIdx === idx
-                            ? 'opacity-40 scale-[0.98] border-slate-300 bg-slate-50'
+                            ? 'opacity-40'
                             : isReorderMode && dragOverIdx === idx
-                              ? 'border-academy-primary/40 bg-academy-primary/[0.03] shadow-[0_0_0_1px_color-mix(in_srgb,var(--neo)_18%,transparent)]'
-                              : isPrepaid
-                                ? 'border-emerald-200/80 bg-gradient-to-r from-emerald-50/30 to-emerald-50/10 shadow-[0_4px_14px_rgba(16,185,129,0.05)]'
-                                : isPriority
-                                  ? 'border-slate-200/80 bg-white shadow-[0_4px_16px_rgba(15,23,42,0.05)]'
-                                  : 'border-slate-100 bg-slate-50/50 hover:border-slate-200'
+                              ? 'chart-highlight'
+                              : ''
                         } ${
                           !isReorderMode && highlightedTreatmentId === item.id
-                            ? 'ring-2 ring-indigo-200/70 shadow-[0_6px_20px_rgba(99,102,241,0.1)] animate-glow-pulse'
+                            ? 'chart-highlight'
                             : ''
                         }`}
-                        style={{ animationDelay: `${idx * 50}ms` }}
                       >
                         {isReorderMode && (
-                          <div className="flex shrink-0 items-center gap-1.5 sm:pr-2">
+                          <div className="flex shrink-0 items-center gap-1">
                             <button
                               type="button"
                               onPointerDown={(event) => startPointerReorder(event, idx)}
                               disabled={isSavingOrder}
                               aria-label={`Arrastar ${item.procedure}`}
                               title="Arrastar"
-                              className="h-10 w-10 shrink-0 touch-none rounded-xl border border-slate-200 bg-white text-slate-400 transition-all hover:border-slate-300 hover:text-slate-600 active:scale-[0.97] disabled:opacity-50 cursor-grab active:cursor-grabbing flex items-center justify-center"
+                              className="chart-tool !min-w-10 !min-h-10 text-[#86868b] cursor-grab active:cursor-grabbing"
                             >
-                              <GripVertical size={20} />
+                              <GripVertical size={18} />
                             </button>
-                            <div className="flex shrink-0 items-center gap-1 sm:hidden">
+                            <div className="flex shrink-0 items-center sm:hidden">
                               <button
                                 type="button"
                                 onClick={() => moveReorderItemByStep(idx, -1)}
                                 disabled={idx === 0 || isSavingOrder}
                                 aria-label={`Subir ${item.procedure}`}
-                                className="h-8 w-8 rounded-lg border border-slate-200 bg-white text-slate-400 transition-all active:scale-[0.96] disabled:opacity-30 disabled:active:scale-100 flex items-center justify-center"
+                                className="chart-tool !min-w-8 !min-h-8 text-[#86868b]"
                               >
                                 <ChevronDown size={14} className="rotate-180" />
                               </button>
@@ -2311,60 +2178,28 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                                 onClick={() => moveReorderItemByStep(idx, 1)}
                                 disabled={idx === reorderItems.length - 1 || isSavingOrder}
                                 aria-label={`Descer ${item.procedure}`}
-                                className="h-8 w-8 rounded-lg border border-slate-200 bg-white text-slate-400 transition-all active:scale-[0.96] disabled:opacity-30 disabled:active:scale-100 flex items-center justify-center"
+                                className="chart-tool !min-w-8 !min-h-8 text-[#86868b]"
                               >
                                 <ChevronDown size={14} />
                               </button>
                             </div>
                           </div>
                         )}
-                        <div className="min-w-0 flex-1">
-                          {/* row 1: procedure name */}
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="min-w-0">
-                              {isPriority && (
-                                <p className="text-[10px] font-normal text-indigo-500 mb-1">{isAcademyProduct ? 'Próximo passo clínico' : 'Próximo passo'}</p>
-                              )}
-                              <p className={`font-bold leading-snug truncate ${isPriority ? 'text-[16px] text-slate-950' : 'text-[14px] text-slate-800'}`}>
-                                {item.procedure}
-                              </p>
-                            </div>
-                            <div className="flex shrink-0 items-center gap-1">
-                              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                                {formatTreatmentAnchor(item)}
-                              </span>
-                              {!isReorderMode && (() => {
-                                const itemScope = normalizeTreatmentItem(item);
-                                if (
-                                  itemScope.scope !== TREATMENT_SCOPES.PATIENT &&
-                                  itemScope.scope !== TREATMENT_SCOPES.QUADRANT
-                                ) {
-                                  return null;
-                                }
-                                return (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveScopeTreatment(item)}
-                                    className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
-                                    aria-label={`Remover ${item.procedure}`}
-                                    title="Remover"
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                );
-                              })()}
-                            </div>
-                          </div>
-
-                          {/* row 2: status + value */}
-                          <div className="flex flex-wrap items-center gap-2 mt-2.5">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-normal border ${statusConfig.cls}`}>
-                              {statusConfig.label}
-                            </span>
-
-                            {!isAcademyProduct && (
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-[11px] text-slate-400 font-medium">R$</span>
+                        <div className="chart-row-body">
+                          <p className={`chart-row-title truncate ${isPriority ? 'chart-row-title-strong' : ''}`}>
+                            {item.procedure}
+                          </p>
+                          <p className="chart-row-sub">
+                            {isPriority ? (isAcademyProduct ? 'Próximo no box · ' : 'Próximo · ') : ''}
+                            {formatTreatmentAnchor(item)}
+                            {' · '}
+                            {itemStatusLabel}
+                            {!isAcademyProduct && isPrepaid ? ' · Pago' : ''}
+                            {!isAcademyProduct && item.requires_prepayment && !item.prepayment_confirmed ? ' · Aguardando pagamento' : ''}
+                          </p>
+                          {!isAcademyProduct && (
+                            <div className="mt-2 flex items-center gap-2">
+                              <span className="chart-row-sub !mt-0">R$</span>
                               <input
                                 type="text"
                                 inputMode="decimal"
@@ -2385,59 +2220,53 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                                     (event.currentTarget as HTMLInputElement).blur();
                                   }
                                 }}
-                                className={`w-24 rounded-lg border px-2.5 py-1.5 text-[13px] font-semibold outline-none ${
-                                  isPrepaid
-                                    ? 'border-emerald-200 bg-emerald-50/40 text-emerald-700 cursor-default'
-                                    : 'border-slate-200 bg-white text-slate-700 focus:border-slate-400'
-                                }`}
+                                className="ios-input !py-2 !px-3 !text-[15px] w-[7.5rem]"
                                 aria-label="Valor do procedimento"
                               />
                             </div>
-                            )}
-
-                            {!isAcademyProduct && isPrepaid && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-normal bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                <Check size={9} /> Pago
-                              </span>
-                            )}
-                            {!isAcademyProduct && item.requires_prepayment && !item.prepayment_confirmed && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-normal bg-amber-50 text-amber-700 border border-amber-200">
-                                <Lock size={9} /> Aguardando
-                              </span>
-                            )}
-                          </div>
+                          )}
                         </div>
+
+                        {!isReorderMode && (() => {
+                          const itemScope = normalizeTreatmentItem(item);
+                          if (
+                            itemScope.scope !== TREATMENT_SCOPES.PATIENT &&
+                            itemScope.scope !== TREATMENT_SCOPES.QUADRANT
+                          ) {
+                            return null;
+                          }
+                          return (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveScopeTreatment(item)}
+                              className="chart-tool !text-[#86868b]"
+                              aria-label={`Remover ${item.procedure}`}
+                              title="Remover"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          );
+                        })()}
 
                         {!isReorderMode && (
                           <button
                             onClick={() => setSelectedTreatmentAction(item)}
-                            className={`w-full sm:w-auto shrink-0 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 ios-press ${
-                              isPriority
-                                ? 'bg-slate-950 text-white hover:bg-slate-800 shadow-[0_2px_8px_rgba(15,23,42,0.15)]'
-                                : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm'
-                            }`}
+                            className="chart-row-trail"
                           >
                             Continuar
+                            <ChevronRight size={14} />
                           </button>
                         )}
                       </div>
                     );
                   })
                 ) : (
-                  <div className={`rounded-2xl py-10 text-center ${iosSubtleCard}`}>
-                    <div className="flex flex-col items-center gap-3 px-4">
-                      <div className="w-11 h-11 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 animate-gentle-float shadow-[0_4px_12px_rgba(15,23,42,0.04)]">
-                        <Clock3 size={18} />
-                      </div>
-                      <p className="text-slate-800 text-sm font-bold">{isAcademyProduct ? 'Nenhum procedimento planejado no momento' : 'Nenhum tratamento ativo no momento'}</p>
-                      <p className="text-slate-500 text-xs leading-relaxed max-w-[240px]">Inicie pelo odontograma para planejar o próximo passo clínico.</p>
-                      <button
-                        onClick={focusOdontogram}
-                        className="mt-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-extrabold text-slate-700 hover:bg-slate-50 hover:shadow-sm hover:border-slate-300 ios-press transition-all duration-200"
-                      >
-                        Adicionar tratamento
-                      </button>
-                    </div>
+                  <div className="chart-empty">
+                    <h4>{isAcademyProduct ? 'Nada no plano ainda' : 'Nenhum tratamento ativo'}</h4>
+                    <p>Toque um dente no odontograma para montar o caso.</p>
+                    <button type="button" onClick={focusOdontogram} className="chart-link mt-2">
+                      Ir ao odontograma
+                    </button>
                   </div>
                 )}
                   </div>
@@ -2479,150 +2308,89 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
             </section>
 
             {!isFocusMode && (
-            <section className="rounded-[24px] border border-slate-200/60 bg-white/95 p-4 sm:p-5 shadow-[0_8px_22px_rgba(15,23,42,0.04),0_1px_3px_rgba(15,23,42,0.06)] transition-shadow duration-500 hover:shadow-[0_12px_30px_rgba(15,23,42,0.06)]">
-              {/* ── Header ── */}
-              <div className="flex items-center justify-between mb-5">
+            <section>
+              <div className="chart-section-head">
                 <div>
-                  <h3 className="text-base font-bold tracking-[-0.015em] text-slate-900">Histórico clínico</h3>
+                  <h3 className="chart-section-title">Registros</h3>
                   {timelineItems.length > 0 && (
-                    <p className="text-[11px] text-slate-400 mt-0.5 font-medium tabular-nums">
-                      {timelineItems.length} registro{timelineItems.length !== 1 ? 's' : ''}
+                    <p className="chart-section-caption">
+                      {timelineItems.length} {timelineItems.length === 1 ? 'evolução' : 'evoluções'}
                     </p>
                   )}
                 </div>
-                <button
-                  onClick={() => setIsAddingEvolution(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 text-white text-xs font-semibold hover:bg-slate-800 ios-press transition-all duration-200 shadow-[0_2px_8px_rgba(15,23,42,0.15)]"
-                >
-                  <Plus size={11} />
-                  Registro clínico
+                <button type="button" onClick={() => setIsAddingEvolution(true)} className="chart-link">
+                  Novo
                 </button>
               </div>
 
               {timelineItems.length > 0 ? (
-                <div className="relative">
-                  {/* vertical guide line */}
-                  <div className="absolute left-[14px] top-3 bottom-3 w-[2px] rounded-full bg-slate-100" />
-
-                  <div>
+                <div className="chart-group">
                     {(() => {
                       const visibleItems = showAllEvolutions ? timelineItems : timelineItems.slice(0, 5);
                       const nodes: React.ReactNode[] = [];
                       let lastGroup = '';
 
-                      visibleItems.forEach((item: any, idx: number) => {
+                      visibleItems.forEach((item: any) => {
                         const group = resolveTimelineMonthGroup(item.date);
                         if (group !== lastGroup) {
                           lastGroup = group;
                           nodes.push(
-                            <div key={`grp-${group}`} className="flex items-center gap-2 pl-8 pb-2 pt-3 first:pt-0">
-                              <span className="text-[10px] font-normal text-slate-400">{group}</span>
-                              <div className="flex-1 h-px bg-slate-100" />
-                            </div>
+                            <div key={`grp-${group}`} className="chart-month">{group}</div>
                           );
                         }
 
                         const cat = resolveProcedureCategory(item.title);
                         const isNewlyAdded = highlightedTimelineId === item.id;
                         const statusStyle = TIMELINE_STATUS_STYLES[item.status] ?? TIMELINE_STATUS_STYLES.OBSERVACAO;
+                        const kindLabel = item.recordKind === 'closed'
+                          ? 'Atendimento fechado'
+                          : item.recordKind === 'manual'
+                            ? 'Registro manual'
+                            : 'Registro antigo';
 
                         nodes.push(
-                          <motion.div
+                          <div
                             key={item.id}
-                            layout
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.22, ease: 'easeOut', delay: idx * 0.025 }}
-                            className="relative flex items-start gap-3 pb-3"
+                            className={`chart-row items-start ${isNewlyAdded ? 'chart-highlight' : ''}`}
                           >
-                            {/* colored dot on vertical line */}
-                            <div className="relative z-10 flex-shrink-0 w-[30px] flex items-center justify-center mt-[15px]">
-                              <div className={`w-[11px] h-[11px] rounded-full ring-[3px] ring-white shadow-sm transition-transform duration-300 hover:scale-125 ${cat.dotCls}`} />
-                            </div>
-
-                            {/* card */}
-                            <div className={`flex-1 min-w-0 rounded-[18px] bg-white border border-slate-200/70 border-l-[3px] ${cat.borderCls} p-3.5 shadow-[0_1px_4px_rgba(15,23,42,0.03)] transition-all duration-300 ease-out hover:shadow-[0_4px_16px_rgba(15,23,42,0.06)] hover:translate-y-[-1px] ${isNewlyAdded ? 'ring-2 ring-blue-200/60 shadow-[0_4px_16px_rgba(99,102,241,0.08)] animate-glow-pulse' : ''}`}>
-                              {/* row 1: record kind badge + category tag + date */}
-                              <div className="flex items-center justify-between gap-2 mb-2">
-                                <div className="flex items-center gap-1.5 min-w-0">
-                                  {item.recordKind === 'closed' && (
-                                    <span className="inline-flex text-[9px] font-extrabold uppercase tracking-[0.07em] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 shrink-0">Fechado</span>
-                                  )}
-                                  {item.recordKind === 'manual' && (
-                                    <span className="inline-flex text-[9px] font-extrabold uppercase tracking-[0.07em] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 shrink-0">Manual</span>
-                                  )}
-                                  {item.recordKind === 'legacy' && (
-                                    <span className="inline-flex text-[9px] font-extrabold uppercase tracking-[0.07em] px-1.5 py-0.5 rounded-full bg-slate-50 text-slate-400 shrink-0">Antigo</span>
-                                  )}
-                                  <span className={`inline-flex text-[10px] font-extrabold uppercase tracking-[0.07em] px-2 py-0.5 rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.03)] ${cat.tagCls} truncate`}>
-                                    {cat.label}
-                                  </span>
-                                </div>
-                                <span className="text-[11px] text-slate-400 font-medium tabular-nums shrink-0">{formatDate(item.date)}</span>
-                              </div>
-
-                              {/* row 2: procedure title */}
-                              <p className="text-[14px] font-bold text-slate-900 leading-snug">{item.title}</p>
-
-                              {/* row 3: notes */}
+                            <span className={`chart-status-dot mt-2 ${statusStyle.dot}`} />
+                            <div className="chart-row-body">
+                              <p className="chart-row-title">{item.title}</p>
+                              <p className="chart-row-sub">
+                                {cat.label} · {kindLabel}
+                                {item.recordKind === 'closed' && item.appointmentDate ? ` · ${item.appointmentDate}` : ''}
+                              </p>
                               {item.notes && (
-                                <p className="text-[12px] text-slate-500 mt-1.5 leading-relaxed line-clamp-2">{item.notes}</p>
+                                <p className="chart-row-sub line-clamp-2">{item.notes}</p>
                               )}
-
-                              {/* row 3b: appointment context (enriched) */}
-                              {item.recordKind === 'closed' && (item.appointmentDate || item.registeredDate) && (
-                                <div className="mt-1.5 text-[11px] text-slate-400 leading-relaxed space-y-0.5">
-                                  {item.appointmentDate && (
-                                    <p>Atendido em {item.appointmentDate}</p>
-                                  )}
-                                  {item.registeredDate && item.registeredDate !== item.appointmentDate && (
-                                    <p>Registrado em {item.registeredDate}</p>
-                                  )}
-                                </div>
-                              )}
-
-                              {/* row 4: status */}
-                              <div className="mt-2.5 flex items-center gap-1.5">
-                                <div className={`w-[7px] h-[7px] rounded-full flex-shrink-0 ${statusStyle.dot}`} />
-                                <span className={`text-[11px] font-semibold ${statusStyle.text}`}>
-                                  {item.recordKind === 'closed' ? 'Fechado' : statusStyle.label}
-                                </span>
-                              </div>
                             </div>
-                          </motion.div>
+                            <span className="chart-row-trail chart-row-trail-muted tabular-nums">{formatDate(item.date)}</span>
+                          </div>
                         );
                       });
 
                       return nodes;
                     })()}
-                  </div>
 
                   {timelineItems.length > 5 && (
-                    <div className="pl-[42px] pt-1">
-                      <button
-                        onClick={() => setShowAllEvolutions(prev => !prev)}
-                        className="w-full py-2.5 rounded-xl bg-slate-50 text-sm font-semibold text-slate-600 border border-slate-200 hover:bg-white hover:shadow-sm active:scale-[0.98] transition-all duration-200"
-                      >
-                        {showAllEvolutions
-                          ? 'Mostrar menos'
-                          : `Ver mais ${timelineItems.length - 5} registro${timelineItems.length - 5 !== 1 ? 's' : ''}`}
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowAllEvolutions(prev => !prev)}
+                      className="chart-link w-full"
+                    >
+                      {showAllEvolutions
+                        ? 'Mostrar menos'
+                        : `Mais ${timelineItems.length - 5}`}
+                    </button>
                   )}
                 </div>
               ) : (
-                <div className={`rounded-2xl py-10 text-center ${iosSubtleCard}`}>
-                  <div className="flex flex-col items-center gap-3 px-4">
-                    <div className="w-11 h-11 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 animate-gentle-float shadow-[0_4px_12px_rgba(15,23,42,0.04)]">
-                      <FileText size={18} />
-                    </div>
-                    <p className="text-slate-800 text-sm font-bold">Nenhum registro clínico ainda</p>
-                    <p className="text-slate-500 text-xs leading-relaxed max-w-[260px]">Registre o primeiro atendimento ou observação para iniciar o histórico clínico.</p>
-                    <button
-                      onClick={() => setIsAddingEvolution(true)}
-                      className="mt-2 px-4 py-2.5 rounded-xl bg-slate-950 text-white text-xs font-semibold hover:bg-slate-900 ios-press transition-all duration-200 shadow-[0_2px_8px_rgba(15,23,42,0.15)]"
-                    >
-                      + Registro clínico
+                <div className="chart-group">
+                  <div className="chart-empty">
+                    <h4>Nenhum registro ainda</h4>
+                    <p>Feche o atendimento com uma evolução. É o que o preceptor lê.</p>
+                    <button type="button" onClick={() => setIsAddingEvolution(true)} className="chart-link mt-1">
+                      Escrever o primeiro
                     </button>
                   </div>
                 </div>
@@ -2632,7 +2400,14 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
           </div>
 
           {!isFocusMode && (
-          <aside ref={infoPanelRef} className={`${iosCard} rounded-[26px] p-4 sm:p-5 h-fit xl:sticky xl:top-[112px] transition-shadow duration-500 hover:shadow-[0_12px_32px_rgba(15,23,42,0.07)]`}>
+          <aside ref={infoPanelRef} className="chart-split-side space-y-3">
+            <div className="chart-section-head">
+              <div>
+                <h3 className="chart-section-title">Ficha</h3>
+                <p className="chart-section-caption">O que você precisa saber antes de sentar.</p>
+              </div>
+            </div>
+            <div className="chart-group">
             {(() => {
               const pendingCount = (patientFinancial?.installments || []).filter((i: any) => i.status === 'PENDING' || i.status === 'OVERDUE').length;
               const fileCount = patientFiles.length;
@@ -2641,38 +2416,24 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                 {
                   id: 'anamneses',
                   label: 'Anamnese',
-                  dot: hasAllergy ? 'bg-rose-500' : anamnesisIncomplete ? 'bg-amber-500' : null,
-                  count: null,
                 },
-                { id: 'dados', label: 'Dados', dot: null, count: null },
-                { id: 'imagens', label: 'Imagens', dot: null, count: fileCount > 0 ? fileCount : null },
+                { id: 'dados', label: 'Dados' },
+                { id: 'imagens', label: fileCount > 0 ? `RX · ${fileCount}` : 'RX' },
                 ...(!isAcademyProduct
-                  ? [{ id: 'financeiro', label: 'Financeiro', dot: pendingCount > 0 ? 'bg-amber-500' : null, count: pendingCount > 0 ? pendingCount : null }]
+                  ? [{ id: 'financeiro', label: pendingCount > 0 ? `Conta · ${pendingCount}` : 'Conta' }]
                   : []),
               ];
-              const tabGridClass = tabs.length === 3 ? 'grid-cols-3' : 'grid-cols-4';
 
               return (
-                <div className={`grid ${tabGridClass} gap-1 p-1 bg-slate-50/80 rounded-2xl mb-4 border border-slate-200/60 shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)]`}>
+                <div className="chart-tabs" role="tablist">
                   {tabs.map((tab) => (
                     <button
                       key={tab.id}
+                      role="tab"
+                      aria-selected={infoTab === tab.id}
                       onClick={() => setInfoTab(tab.id as InfoTab)}
-                      className={`relative px-2 py-2 rounded-xl text-[11px] font-semibold transition-all duration-250 ease-out ${
-                        infoTab === tab.id
-                          ? 'bg-white text-slate-950 shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]'
-                          : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
-                      }`}
                     >
                       {tab.label}
-                      {tab.dot && infoTab !== tab.id && (
-                        <span className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ${tab.dot} ring-2 ring-slate-50`} />
-                      )}
-                      {tab.count && tab.count > 0 && infoTab !== tab.id && (
-                        <span className="ml-1 inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-slate-200 text-[9px] font-bold text-slate-600">
-                          {tab.count}
-                        </span>
-                      )}
                     </button>
                   ))}
                 </div>
@@ -2680,32 +2441,25 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
             })()}
 
             {infoTab === 'anamneses' && (
-              <div className="space-y-3 text-sm">
-                {/* Header com botão editar/cancelar */}
-                <div className="flex items-center justify-between px-0.5">
-                  <div>
-                    <p className="text-[10px] font-normal text-slate-400">Anamnese clínica</p>
-                    {!isEditingAnamnese && (
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        {countFilledAnamnesisFields(patient?.anamnesis)}/7 campos preenchidos
-                      </p>
-                    )}
+              <div>
+                <div className="chart-row">
+                  <div className="chart-row-body">
+                    <p className="chart-row-title">Anamnese</p>
+                    <p className="chart-row-sub">{countFilledAnamnesisFields(patient?.anamnesis)} de 7 campos</p>
                   </div>
                   {!isEditingAnamnese ? (
                     <button
+                      type="button"
                       onClick={() => {
                         setAnamneseForm(anamnesisToForm(patient?.anamnesis));
                         setIsEditingAnamnese(true);
                       }}
-                      className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition-colors px-2 py-1 rounded-lg hover:bg-slate-100"
+                      className="chart-row-trail"
                     >
                       Editar
                     </button>
                   ) : (
-                    <button
-                      onClick={() => setIsEditingAnamnese(false)}
-                      className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors px-2 py-1 rounded-lg hover:bg-slate-100"
-                    >
+                    <button type="button" onClick={() => setIsEditingAnamnese(false)} className="chart-row-trail chart-row-trail-muted">
                       Cancelar
                     </button>
                   )}
@@ -2713,173 +2467,138 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
 
                 {isEditingAnamnese ? (
                   <>
-                    <div className="p-3.5 rounded-[18px] bg-blue-50 border border-blue-200/70">
-                      <p className="text-[10px] font-normal text-blue-600 mb-2">Queixa principal</p>
+                    <div className="chart-field">
+                      <p className="chart-field-label">Queixa principal</p>
                       <textarea
                         value={anamneseForm.chief_complaint}
                         onChange={(e) => setAnamneseForm((f) => ({ ...f, chief_complaint: e.target.value }))}
                         rows={2}
-                        placeholder="Motivo da consulta, nas palavras do paciente..."
-                        className="w-full resize-none rounded-xl border border-blue-200 bg-white px-3 py-2.5 text-[13px] text-slate-800 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none transition-colors leading-relaxed"
+                        placeholder="Nas palavras do paciente."
                       />
                     </div>
-
-                    <div className="p-3.5 rounded-[18px] bg-rose-50 border border-rose-200">
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <p className="text-[10px] font-normal text-rose-600">Alergias</p>
+                    <div className="chart-field">
+                      <p className="chart-field-label" data-alert="true">
+                        Alergias
                         <button
                           type="button"
                           onClick={() => setAnamneseForm((f) => ({ ...f, allergies: 'Nenhuma alergia referida' }))}
-                          className="text-[10px] font-semibold text-rose-500 hover:text-rose-700 px-2 py-0.5 rounded-md bg-white border border-rose-200"
+                          className="chart-ghost"
                         >
-                          Negou alergias
+                          Negou
                         </button>
-                      </div>
+                      </p>
                       <textarea
                         value={anamneseForm.allergies}
                         onChange={(e) => setAnamneseForm((f) => ({ ...f, allergies: e.target.value }))}
                         rows={2}
-                        placeholder="Ex: Penicilina, látex, anestésico... ou negado"
-                        className="w-full resize-none rounded-xl border border-rose-200 bg-white px-3 py-2.5 text-[13px] text-slate-800 placeholder:text-slate-400 focus:border-rose-400 focus:outline-none transition-colors leading-relaxed"
+                        placeholder="Penicilina, látex, anestésico…"
                       />
                     </div>
-
-                    <div className="p-3.5 rounded-[18px] bg-amber-50 border border-amber-200">
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <p className="text-[10px] font-normal text-amber-600">Medicações em uso</p>
+                    <div className="chart-field">
+                      <p className="chart-field-label">
+                        Medicações
                         <button
                           type="button"
                           onClick={() => setAnamneseForm((f) => ({ ...f, medications: 'Nenhuma medicação em uso' }))}
-                          className="text-[10px] font-semibold text-amber-600 hover:text-amber-800 px-2 py-0.5 rounded-md bg-white border border-amber-200"
+                          className="chart-ghost"
                         >
-                          Não usa medicação
+                          Não usa
                         </button>
-                      </div>
+                      </p>
                       <textarea
                         value={anamneseForm.medications}
                         onChange={(e) => setAnamneseForm((f) => ({ ...f, medications: e.target.value }))}
                         rows={2}
-                        placeholder="Ex: Losartana 50mg, Metformina..."
-                        className="w-full resize-none rounded-xl border border-amber-200 bg-white px-3 py-2.5 text-[13px] text-slate-800 placeholder:text-slate-400 focus:border-amber-400 focus:outline-none transition-colors leading-relaxed"
+                        placeholder="Losartana 50 mg, Metformina…"
                       />
                     </div>
-
-                    <div className="p-3.5 rounded-[18px] bg-slate-50 border border-slate-200/70">
-                      <p className="text-[10px] font-normal text-slate-400 mb-2">Histórico médico</p>
+                    <div className="chart-field">
+                      <p className="chart-field-label">Histórico médico</p>
                       <textarea
                         value={anamneseForm.medical_history}
                         onChange={(e) => setAnamneseForm((f) => ({ ...f, medical_history: e.target.value }))}
                         rows={3}
-                        placeholder="Doenças, cirurgias, internações, condições sistêmicas..."
-                        className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none transition-colors leading-relaxed"
+                        placeholder="Doenças, cirurgias, condições sistêmicas."
                       />
                     </div>
-
-                    <div className="p-3.5 rounded-[18px] bg-violet-50 border border-violet-200/70">
-                      <p className="text-[10px] font-normal text-violet-600 mb-2">Hábitos</p>
+                    <div className="chart-field">
+                      <p className="chart-field-label">Hábitos</p>
                       <textarea
                         value={anamneseForm.habits}
                         onChange={(e) => setAnamneseForm((f) => ({ ...f, habits: e.target.value }))}
                         rows={2}
-                        placeholder="Tabagismo, bruxismo, higiene, consumo de açúcar..."
-                        className="w-full resize-none rounded-xl border border-violet-200 bg-white px-3 py-2.5 text-[13px] text-slate-800 placeholder:text-slate-400 focus:border-violet-400 focus:outline-none transition-colors leading-relaxed"
+                        placeholder="Tabagismo, bruxismo, higiene."
                       />
                     </div>
-
-                    <div className="p-3.5 rounded-[18px] bg-teal-50 border border-teal-200/70">
-                      <p className="text-[10px] font-normal text-teal-600 mb-2">Histórico familiar</p>
+                    <div className="chart-field">
+                      <p className="chart-field-label">Histórico familiar</p>
                       <textarea
                         value={anamneseForm.family_history}
                         onChange={(e) => setAnamneseForm((f) => ({ ...f, family_history: e.target.value }))}
                         rows={2}
-                        placeholder="Diabetes, hipertensão, cardiopatias na família..."
-                        className="w-full resize-none rounded-xl border border-teal-200 bg-white px-3 py-2.5 text-[13px] text-slate-800 placeholder:text-slate-400 focus:border-teal-400 focus:outline-none transition-colors leading-relaxed"
+                        placeholder="Diabetes, hipertensão, cardiopatias."
                       />
                     </div>
-
-                    <div className="p-3.5 rounded-[18px] bg-indigo-50 border border-indigo-200/70">
-                      <p className="text-[10px] font-normal text-indigo-600 mb-2">Sinais vitais / PA</p>
+                    <div className="chart-field">
+                      <p className="chart-field-label">Sinais vitais</p>
                       <textarea
                         value={anamneseForm.vital_signs}
                         onChange={(e) => setAnamneseForm((f) => ({ ...f, vital_signs: e.target.value }))}
                         rows={2}
-                        placeholder="Ex: PA 120x80 mmHg, FC 72 bpm..."
-                        className="w-full resize-none rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-[13px] text-slate-800 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none transition-colors leading-relaxed"
+                        placeholder="PA 120×80 mmHg, FC 72 bpm."
                       />
                     </div>
-
                     <button
                       onClick={saveAnamnese}
                       disabled={isSavingAnamnese}
-                      className="w-full py-2.5 rounded-xl bg-slate-950 text-white text-[13px] font-semibold hover:bg-slate-800 ios-press transition-all duration-200 disabled:opacity-60 flex items-center justify-center gap-2 shadow-[0_2px_8px_rgba(15,23,42,0.15)]"
+                      className="chart-primary"
                     >
-                      {isSavingAnamnese ? (
-                        <><Loader2 size={14} className="animate-spin" /> Salvando...</>
-                      ) : (
-                        <><Check size={14} /> Salvar anamnese</>
-                      )}
+                      {isSavingAnamnese ? <Loader2 size={16} className="animate-spin" /> : null}
+                      {isSavingAnamnese ? 'Salvando' : 'Salvar anamnese'}
                     </button>
                   </>
                 ) : (
                   <>
                     {hasMeaningfulAnamnesisValue(patient?.anamnesis?.chief_complaint) && (
-                      <div className="p-3.5 rounded-[18px] bg-blue-50 border border-blue-200/70">
-                        <p className="text-[10px] font-normal text-blue-600 mb-1.5">Queixa principal</p>
-                        <p className="text-slate-800 leading-relaxed font-medium">{patient.anamnesis.chief_complaint}</p>
+                      <div className="chart-field">
+                        <p className="chart-field-label">Queixa principal</p>
+                        <p className="chart-field-value">{patient.anamnesis.chief_complaint}</p>
                       </div>
                     )}
-
-                    <div className={`p-3.5 rounded-[18px] border ${hasAllergy ? 'bg-rose-50 border-rose-200' : 'bg-slate-50 border-slate-200/70'}`}>
-                      <div className="flex items-center gap-1.5 mb-1.5">
-                        {hasAllergy && <div className="w-[7px] h-[7px] rounded-full bg-rose-500 shrink-0" />}
-                        <p className={`text-[10px] font-normal ${hasAllergy ? 'text-rose-600' : 'text-slate-400'}`}>Alergias</p>
-                      </div>
-                      <p className={`leading-relaxed ${hasAllergy ? 'text-rose-900 font-semibold' : 'text-slate-700'}`}>
-                        {formatAllergieLabel(patient?.anamnesis?.allergies)}
-                      </p>
+                    <div className="chart-field">
+                      <p className="chart-field-label" data-alert={hasAllergy ? 'true' : undefined}>Alergias</p>
+                      <p className="chart-field-value">{formatAllergieLabel(patient?.anamnesis?.allergies)}</p>
                     </div>
-
-                    <div className={`p-3.5 rounded-[18px] border ${hasRecordedMedication(patient?.anamnesis?.medications) ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200/70'}`}>
-                      <div className="flex items-center gap-1.5 mb-1.5">
-                        {hasRecordedMedication(patient?.anamnesis?.medications) && (
-                          <div className="w-[7px] h-[7px] rounded-full bg-amber-500 shrink-0" />
-                        )}
-                        <p className={`text-[10px] font-normal ${hasRecordedMedication(patient?.anamnesis?.medications) ? 'text-amber-600' : 'text-slate-400'}`}>
-                          Medicações em uso
-                        </p>
-                      </div>
-                      <p className={`leading-relaxed ${hasRecordedMedication(patient?.anamnesis?.medications) ? 'text-amber-900 font-semibold' : 'text-slate-700'}`}>
-                        {formatMedicationLabel(patient?.anamnesis?.medications)}
-                      </p>
+                    <div className="chart-field">
+                      <p className="chart-field-label">Medicações</p>
+                      <p className="chart-field-value">{formatMedicationLabel(patient?.anamnesis?.medications)}</p>
                     </div>
-
-                    <div className="p-3.5 rounded-[18px] bg-slate-50 border border-slate-200/70">
-                      <p className="text-[10px] font-normal text-slate-400 mb-1.5">Histórico médico</p>
-                      <p className="text-slate-700 leading-relaxed">
+                    <div className="chart-field">
+                      <p className="chart-field-label">Histórico médico</p>
+                      <p className="chart-field-value">
                         {hasMeaningfulAnamnesisValue(patient?.anamnesis?.medical_history)
                           ? patient.anamnesis.medical_history
                           : 'Não informado'}
                       </p>
                     </div>
-
                     {[
-                      { label: 'Hábitos', value: patient?.anamnesis?.habits, color: 'bg-violet-50 border-violet-200/70', labelColor: 'text-violet-600' },
-                      { label: 'Histórico familiar', value: patient?.anamnesis?.family_history, color: 'bg-teal-50 border-teal-200/70', labelColor: 'text-teal-600' },
-                      { label: 'Sinais vitais / PA', value: patient?.anamnesis?.vital_signs, color: 'bg-indigo-50 border-indigo-200/70', labelColor: 'text-indigo-600' },
+                      { label: 'Hábitos', value: patient?.anamnesis?.habits },
+                      { label: 'Histórico familiar', value: patient?.anamnesis?.family_history },
+                      { label: 'Sinais vitais', value: patient?.anamnesis?.vital_signs },
                     ]
                       .filter((field) => hasMeaningfulAnamnesisValue(field.value))
                       .map((field) => (
-                        <div key={field.label} className={`p-3.5 rounded-[18px] border ${field.color}`}>
-                          <p className={`text-[10px] font-normal ${field.labelColor} mb-1.5`}>{field.label}</p>
-                          <p className="text-slate-700 leading-relaxed">{field.value}</p>
+                        <div key={field.label} className="chart-field">
+                          <p className="chart-field-label">{field.label}</p>
+                          <p className="chart-field-value">{field.value}</p>
                         </div>
                       ))}
 
                     {(() => {
                       const extra = patient?.anamnesis;
                       const portalFields = [
-                        { label: 'Doenças sistêmicas', value: extra?.systemic_diseases, color: 'bg-teal-50 border-teal-200/70', labelColor: 'text-teal-600' },
-                        { label: 'Observações clínicas', value: extra?.clinical_notes, color: 'bg-indigo-50 border-indigo-200/70', labelColor: 'text-indigo-600' },
+                        { label: 'Doenças sistêmicas', value: extra?.systemic_diseases },
+                        { label: 'Observações clínicas', value: extra?.clinical_notes },
                       ].filter((field) => hasMeaningfulAnamnesisValue(field.value));
 
                       if (portalFields.length === 0) return null;
@@ -2889,22 +2608,16 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                           <button
                             type="button"
                             onClick={() => setShowAnamneseExtra((v) => !v)}
-                            className="w-full flex items-center justify-center gap-1.5 py-2 text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors"
+                            className="chart-link w-full"
                           >
-                            {showAnamneseExtra ? 'Ver menos' : `Pré-atendimento (${portalFields.length})`}
-                            <ChevronDown size={13} className={`transition-transform ${showAnamneseExtra ? 'rotate-180' : ''}`} />
+                            {showAnamneseExtra ? 'Ocultar pré-atendimento' : `Pré-atendimento (${portalFields.length})`}
                           </button>
-                          {showAnamneseExtra && (
-                            <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                              {portalFields.map((field) => (
-                                <div key={field.label} className={`p-3.5 rounded-[18px] border ${field.color}`}>
-                                  <p className={`text-[10px] font-normal ${field.labelColor} mb-1.5`}>{field.label}</p>
-                                  <p className="text-slate-700 leading-relaxed">{field.value}</p>
-                                </div>
-                              ))}
-                              <p className="text-[10px] text-slate-300 text-center">Informações enviadas pelo paciente via pré-atendimento</p>
+                          {showAnamneseExtra && portalFields.map((field) => (
+                            <div key={field.label} className="chart-field">
+                              <p className="chart-field-label">{field.label}</p>
+                              <p className="chart-field-value">{field.value}</p>
                             </div>
-                          )}
+                          ))}
                         </>
                       );
                     })()}
@@ -2914,21 +2627,16 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
             )}
 
             {infoTab === 'dados' && (
-              <div className="space-y-2 text-sm">
+              <div>
                 {[
-                  { label: 'CPF', value: patient?.cpf, icon: <UserRound size={13} /> },
-                  { label: 'Telefone', value: patient?.phone, icon: <Phone size={13} /> },
-                  { label: 'E-mail', value: patient?.email, icon: <Info size={13} /> },
-                  { label: 'Data de nascimento', value: patient?.birth_date ? formatDate(patient.birth_date) : null, icon: <Calendar size={13} /> },
-                ].map(({ label, value, icon }) => (
-                  <div key={label} className="flex items-center gap-3 px-3.5 py-3 rounded-[16px] bg-slate-50/80 border border-slate-200/60 transition-all duration-300 ease-out hover:bg-white hover:border-slate-300/70 hover:shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
-                    <div className="w-7 h-7 rounded-lg bg-white border border-slate-200/80 flex items-center justify-center text-slate-400 shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-                      {icon}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.09em] text-slate-400">{label}</p>
-                      <p className="text-[13px] font-medium text-slate-800 truncate mt-0.5">{value || 'Não informado'}</p>
-                    </div>
+                  { label: 'CPF', value: patient?.cpf },
+                  { label: 'Telefone', value: patient?.phone },
+                  { label: 'E-mail', value: patient?.email },
+                  { label: 'Nascimento', value: patient?.birth_date ? formatDate(patient.birth_date) : null },
+                ].map(({ label, value }) => (
+                  <div key={label} className="chart-field">
+                    <p className="chart-field-label">{label}</p>
+                    <p className="chart-field-value">{value || 'Não informado'}</p>
                   </div>
                 ))}
 
@@ -2952,70 +2660,41 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                       <button
                         type="button"
                         onClick={() => setShowDadosExtra(v => !v)}
-                        className="w-full flex items-center justify-center gap-1.5 py-2 text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors"
+                        className="chart-link w-full"
                       >
-                        {showDadosExtra ? 'Ver menos' : 'Ver mais — Pré-atendimento'}
-                        <ChevronDown size={13} className={`transition-transform ${showDadosExtra ? 'rotate-180' : ''}`} />
+                        {showDadosExtra ? 'Ocultar pré-atendimento' : 'Pré-atendimento'}
                       </button>
                       {showDadosExtra && (
-                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                          {/* Contato de emergência */}
+                        <>
                           {hasEmergency && (
-                            <div className="p-3.5 rounded-[18px] bg-orange-50 border border-orange-200/70">
-                              <p className="text-[10px] font-normal text-orange-600 mb-2">Contato de emergência</p>
-                              {patient.emergency_contact_name && (
-                                <p className="text-[13px] font-medium text-slate-800">{patient.emergency_contact_name}</p>
-                              )}
-                              {patient.emergency_contact_phone && (
-                                <p className="text-[12px] text-slate-500 mt-0.5">{patient.emergency_contact_phone}</p>
-                              )}
+                            <div className="chart-field">
+                              <p className="chart-field-label">Emergência</p>
+                              <p className="chart-field-value">
+                                {[patient.emergency_contact_name, patient.emergency_contact_phone].filter(Boolean).join(' · ')}
+                              </p>
                             </div>
                           )}
-
-                          {/* Convênio */}
                           {hasInsurance && (
-                            <div className="p-3.5 rounded-[18px] bg-blue-50 border border-blue-200/70">
-                              <p className="text-[10px] font-normal text-blue-600 mb-2">Convênio / Plano de saúde</p>
-                              <p className="text-[13px] font-medium text-slate-800">{patient.health_insurance}</p>
-                              {patient.health_insurance_number && (
-                                <p className="text-[12px] text-slate-500 mt-0.5">Carteirinha: {patient.health_insurance_number}</p>
-                              )}
+                            <div className="chart-field">
+                              <p className="chart-field-label">Convênio</p>
+                              <p className="chart-field-value">
+                                {patient.health_insurance}
+                                {patient.health_insurance_number ? ` · ${patient.health_insurance_number}` : ''}
+                              </p>
                             </div>
                           )}
-
-                          {/* Termos aceitos e assinatura */}
-                          {hasConsents && (
-                            <div className="p-3.5 rounded-[18px] bg-emerald-50 border border-emerald-200/70">
-                              <p className="text-[10px] font-normal text-emerald-600 mb-2">Termos aceitos digitalmente</p>
-                              <div className="space-y-2">
-                                {consents.map((c: any) => (
-                                  <div key={c.id} className="flex items-center gap-2">
-                                    <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
-                                      <Check size={11} className="text-white" />
-                                    </div>
-                                    <div className="min-w-0">
-                                      <p className="text-[12px] font-semibold text-slate-700">{consentLabels[c.consent_type] || c.consent_type}</p>
-                                      <p className="text-[10px] text-slate-400">
-                                        Assinado em {new Date(c.signed_at).toLocaleDateString('pt-BR')} às {new Date(c.signed_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                      </p>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                              {/* Assinatura digital */}
-                              {consents[0]?.signature_data && consents[0].signature_data.startsWith('data:image') && (
-                                <div className="mt-3 pt-3 border-t border-emerald-200/50">
-                                  <p className="text-[10px] font-normal text-emerald-600 mb-2">Assinatura digital</p>
-                                  <div className="bg-white rounded-xl border border-emerald-200/50 p-2">
-                                    <img src={consents[0].signature_data} alt="Assinatura digital" className="max-h-20 mx-auto" />
-                                  </div>
-                                </div>
+                          {hasConsents && consents.map((c: any) => (
+                            <div key={c.id} className="chart-field">
+                              <p className="chart-field-label">{consentLabels[c.consent_type] || c.consent_type}</p>
+                              <p className="chart-field-value">
+                                Assinado em {new Date(c.signed_at).toLocaleDateString('pt-BR')}
+                              </p>
+                              {c.signature_data && c.signature_data.startsWith('data:image') && c === consents[0] && (
+                                <img src={c.signature_data} alt="Assinatura digital" className="max-h-16 mt-2" />
                               )}
                             </div>
-                          )}
-
-                          <p className="text-[10px] text-slate-300 text-center">Informações enviadas pelo paciente via pré-atendimento</p>
-                        </div>
+                          ))}
+                        </>
                       )}
                     </>
                   );
@@ -3024,20 +2703,20 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
             )}
 
             {infoTab === 'imagens' && (
-              <div className="space-y-3">
-                <div className="p-3.5 rounded-[18px] bg-slate-50 border border-slate-200/70">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-[10px] font-normal text-slate-400">Anexos clínicos</p>
-                    <button
-                      type="button"
-                      onClick={() => clinicalImageInputRef.current?.click()}
-                      disabled={isUploadingClinicalImage}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-60"
-                    >
-                      <Camera size={12} />
-                {isUploadingClinicalImage ? 'Enviando...' : 'Adicionar imagem / RX'}
-                    </button>
+              <div>
+                <div className="chart-row">
+                  <div className="chart-row-body">
+                    <p className="chart-row-title">Radiografias e fotos</p>
+                    <p className="chart-row-sub">JPG, PNG, WEBP, GIF ou PDF</p>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => clinicalImageInputRef.current?.click()}
+                    disabled={isUploadingClinicalImage}
+                    className="chart-row-trail"
+                  >
+                    {isUploadingClinicalImage ? 'Enviando' : 'Adicionar'}
+                  </button>
                   <input
                     ref={clinicalImageInputRef}
                     type="file"
@@ -3054,33 +2733,27 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                       href={file.file_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-[18px] bg-slate-50/80 border border-slate-200/60 transition-all duration-300 ease-out hover:bg-white hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(15,23,42,0.06)] hover:translate-y-[-1px] ios-press-gentle"
+                      className="chart-row"
                     >
-                      <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 shrink-0">
-                        {(file.file_url || '').toLowerCase().endsWith('.pdf')
-                          ? <FileText size={16} />
-                          : <Camera size={16} />}
+                      <div className="chart-row-body">
+                        <p className="chart-row-title truncate">{file.description || 'Arquivo clínico'}</p>
+                        <p className="chart-row-sub">{file.created_at ? formatDate(file.created_at) : 'Data não informada'}</p>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[13px] font-semibold text-slate-800 truncate">{file.description || 'Arquivo clínico'}</p>
-                        <p className="text-[11px] text-slate-400 font-medium mt-0.5">{file.created_at ? formatDate(file.created_at) : 'Data n/i'}</p>
-                      </div>
+                      <span className="chart-row-trail chart-row-trail-muted">
+                        {(file.file_url || '').toLowerCase().endsWith('.pdf') ? 'PDF' : 'Imagem'}
+                        <ChevronRight size={14} />
+                      </span>
                     </a>
                   ))
                 ) : (
-                  <div className="p-8 rounded-[20px] text-center text-sm text-slate-500 bg-slate-50 border border-slate-200/70">Sem imagens ou RX ainda</div>
+                  <div className="chart-empty">
+                    <h4>Nenhum RX ainda</h4>
+                    <p>Anexe a radiografia do caso antes da próxima cadeira.</p>
+                  </div>
                 )}
 
                 {uploadFeedback && (
-                  <motion.p
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    className="text-xs text-slate-500 px-1 flex items-center gap-1.5"
-                  >
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    {uploadFeedback}
-                  </motion.p>
+                  <p className="chart-footnote px-4 py-2">{uploadFeedback}</p>
                 )}
               </div>
             )}
@@ -3212,13 +2885,13 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     setAppActiveTab('financeiro');
                     appNavigate('/financeiro');
                   }}
-                  className="w-full mt-2 px-4 py-2.5 rounded-xl bg-slate-950 text-white text-sm font-semibold hover:bg-slate-900 ios-press transition-all duration-200 flex items-center justify-center gap-2 shadow-[0_2px_8px_rgba(15,23,42,0.15)]"
+                  className="chart-primary"
                 >
-                  <CreditCard size={15} /> Abrir financeiro
+                  Abrir financeiro
                 </button>
               </div>
             )}
-
+            </div>
           </aside>
           )}
         </div>
@@ -3918,17 +3591,15 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
             transition={{ type: 'spring', damping: 28, stiffness: 340 }}
-            className="w-full sm:max-w-lg rounded-t-[28px] sm:rounded-[28px] border border-slate-200/60 bg-white p-5 sm:p-6 shadow-[0_-8px_40px_rgba(15,23,42,0.12),0_28px_70px_rgba(15,23,42,0.18)] max-h-[85vh] overflow-y-auto"
+            className="w-full sm:max-w-lg chart-sheet sm:!rounded-[14px] max-h-[85vh] overflow-y-auto"
           >
             {/* iOS drag handle */}
             <div className="ios-drag-handle sm:hidden" />
 
-              <div className="mb-5">
-              <p className="text-[10px] font-normal text-slate-400 mb-1.5">O que fazer agora?</p>
-              <h3 id="treatment-action-title" className="text-xl font-bold text-slate-950 tracking-[-0.02em]">{selectedTreatmentAction.procedure}</h3>
-              <span className="mt-2 inline-flex text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                {formatTreatmentAnchor(selectedTreatmentAction)}
-              </span>
+              <div className="mb-5 px-1">
+              <p className="chart-sheet-kicker">O que fazer agora</p>
+              <h3 id="treatment-action-title" className="chart-sheet-title">{selectedTreatmentAction.procedure}</h3>
+              <p className="chart-section-caption mt-1">{formatTreatmentAnchor(selectedTreatmentAction)}</p>
             </div>
 
             <div className="space-y-2.5">
@@ -4037,8 +3708,8 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
               {/* iOS drag handle */}
               <div className="ios-drag-handle sm:hidden" />
               <div className="mb-5">
-                <p className="text-[10px] font-normal text-slate-400 mb-1.5">Pagamento</p>
-                <h3 id="payment-modal-title" className="text-xl font-bold text-slate-950 tracking-[-0.02em]">Receber pagamento</h3>
+                <p className="chart-sheet-kicker">Pagamento</p>
+                <h3 id="payment-modal-title" className="chart-sheet-title">Receber</h3>
                 <div className="mt-3 flex items-center gap-3 px-3.5 py-2.5 rounded-[14px] bg-slate-50 border border-slate-200/70">
                   <div className="min-w-0 flex-1">
                     <p className="text-[11px] text-slate-500 font-medium">{unpaid.length} procedimento{unpaid.length !== 1 ? 's' : ''} pendente{unpaid.length !== 1 ? 's' : ''}</p>

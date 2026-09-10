@@ -163,6 +163,7 @@ export interface Dentist {
   current_discipline?: string;
   academy_neo?: string;
   academy_widgets?: unknown;
+  academy_game?: unknown;
   settings?: Record<string, unknown>;
   current_product?: Product;
   product_accesses?: ProductAccess[];

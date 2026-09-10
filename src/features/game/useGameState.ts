@@ -5,15 +5,14 @@ import {
   buyFreeze,
   buyHearts,
   cancelLesson,
-  loadGameState,
   refreshState,
   registerFailedLesson,
   registerLessonResult,
   repairStreak,
-  saveGameState,
   spendHeart,
   startLesson,
 } from './progress';
+import { hydrateGameFromServer, loadLocalGameState, persistGameState } from './sync';
 import type { GameState, LessonOutcome, LessonReward } from './types';
 
 const TICK_MS = 15000;
@@ -27,14 +26,27 @@ export function useGameState(plan: GamePlan = 'free') {
   const limitsRef = useRef(limits);
   limitsRef.current = limits;
 
-  const [state, setState] = useState<GameState>(() => loadGameState(new Date(), limits));
+  const [state, setState] = useState<GameState>(() => loadLocalGameState(new Date(), limits));
   const stateRef = useRef(state);
   stateRef.current = state;
 
   const commit = useCallback((next: GameState) => {
     stateRef.current = next;
     setState(next);
-    saveGameState(next);
+    persistGameState(next);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void hydrateGameFromServer(stateRef.current, new Date(), limitsRef.current).then(next => {
+      if (cancelled || next === stateRef.current) return;
+      stateRef.current = next;
+      setState(next);
+      persistGameState(next);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Hearts, quests and the streak all move with the clock while the page is open.

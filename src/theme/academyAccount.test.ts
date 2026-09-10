@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   embedAcademyPrefsInBio,
   parseAcademyPrefsEnvelope,
+  prefsFromUnknown,
   resolveAcademyPrefs,
   stripAcademyPrefsEnvelope,
 } from './academyAccount';
@@ -74,5 +75,15 @@ describe('Academy account prefs', () => {
     const resolved = resolveAcademyPrefs({ academy_neo: 'space-black' });
     expect(resolved.neo).toBeNull();
     expect(resolved.widgets).toBeNull();
+  });
+
+  it('reads the dedicated /api/academy/prefs payload', () => {
+    const prefs = prefsFromUnknown({
+      academy_neo: 'azul',
+      academy_widgets: [{ id: 'clock', kind: 'clock', size: 'md' }],
+    });
+    expect(prefs?.academy_neo).toBe('azul');
+    expect(prefs?.academy_widgets).toHaveLength(1);
+    expect(prefsFromUnknown({})).toBeNull();
   });
 });

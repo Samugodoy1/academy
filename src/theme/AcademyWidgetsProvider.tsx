@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { queueAcademyAccountSave, setAcademyAccountPrefs } from './academyAccount';
-import { defaultAcademyWidgets, type AcademyWidget } from './academyWidgets';
+import { defaultAcademyWidgets, persistAcademyWidgets, type AcademyWidget } from './academyWidgets';
 
 interface AcademyWidgetsContextValue {
   widgets: AcademyWidget[];
@@ -19,11 +19,13 @@ export function AcademyWidgetsProvider({ children }: { children: React.ReactNode
 
   const hydrateWidgets = useCallback((next: AcademyWidget[]) => {
     setWidgets(next);
+    persistAcademyWidgets(next);
     setAcademyAccountPrefs({ academy_widgets: next });
   }, []);
 
   const commitWidgets = useCallback((next: AcademyWidget[]) => {
     setWidgets(next);
+    persistAcademyWidgets(next);
     queueAcademyAccountSave({ academy_widgets: next });
   }, []);
 

@@ -99,6 +99,7 @@ import { ClinicalPageRoute } from './features/clinical/ClinicalPageRoute';
 import { LegacyClinicalRedirect } from './features/clinical/LegacyClinicalRedirect';
 import { UpgradeLimitModal } from './features/modals/UpgradeLimitModal';
 import { ForgotPassword } from './features/auth/ForgotPassword';
+import { GoogleSignInButton } from './features/auth/GoogleSignInButton';
 import { ResetPassword } from './features/auth/ResetPassword';
 import PrintDocument from './features/print/PrintRoutes';
 import { useAgendaState } from './features/agenda/useAgendaState';
@@ -1112,6 +1113,14 @@ export default function App() {
     }
   };
 
+  const applyAuthSession = (data: { token: string; user: CurrentUser }) => {
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    setUser(data.user);
+    fetchData(data.token);
+    fetchProfile();
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
@@ -1123,15 +1132,38 @@ export default function App() {
       });
       const data = await res.json();
       if (res.ok) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setUser(data.user);
-        fetchData(data.token);
-        if (data.user.role === 'DENTIST') {
-          // No filter needed
-        }
+        applyAuthSession(data);
       } else {
         setLoginError(data.error || 'Erro ao fazer login');
+      }
+    } catch (error) {
+      setLoginError('Erro de conexão com o servidor');
+    }
+  };
+
+  const handleGoogleLogin = async (credential: string) => {
+    setLoginError('');
+    setRegisterMessage('');
+    try {
+      const res = await fetch(`${API_URL}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: API_URL ? 'include' : 'same-origin',
+        body: JSON.stringify({
+          credential,
+          rememberMe: true,
+          product: getCurrentProduct(),
+          acceptedTerms: registerData.acceptedTerms,
+          acceptedPrivacyPolicy: registerData.acceptedPrivacyPolicy,
+          acceptedResponsibility: registerData.acceptedResponsibility,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setIsRegistering(false);
+        applyAuthSession(data);
+      } else {
+        setLoginError(data.error || 'Erro ao entrar com Google');
       }
     } catch (error) {
       setLoginError('Erro de conexão com o servidor');
@@ -2462,6 +2494,16 @@ export default function App() {
                   </DuoButton>
                   <p className="text-center text-[13px] text-apple-gray mt-3.5">Ambiente da clínica-escola</p>
                 </div>
+
+                <div className="flex items-center gap-3 pt-1">
+                  <div className="h-px flex-1 bg-[#d2d2d7]" />
+                  <span className="text-[12px] text-[#86868b]">ou</span>
+                  <div className="h-px flex-1 bg-[#d2d2d7]" />
+                </div>
+                <GoogleSignInButton
+                  onCredential={handleGoogleLogin}
+                  text={isRegistering ? 'signup_with' : 'signin_with'}
+                />
               </form>
 
               {/* Footer links */}

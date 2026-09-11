@@ -48,6 +48,7 @@ O backend centralizado está no repositório [odontohub-api](https://github.com/
 | Variável | Descrição | Exemplo |
 |----------|-----------|---------|
 | `VITE_API_URL` | URL da API central | `https://api.odontohub.app.br` |
+| `VITE_GOOGLE_CLIENT_ID` | Client ID OAuth do Google Identity Services | o mesmo do OdontoHub Sistema |
 
 ## Scripts
 

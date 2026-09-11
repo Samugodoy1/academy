@@ -1,13 +1,14 @@
-import { API_URL } from '../config';
-import { CURRENT_PRODUCT } from '../config/product';
+import { academyApiFetch } from '../api/client';
 import {
   DEFAULT_ACADEMY_NEO_ID,
   isAcademyNeoId,
+  persistAcademyNeoId,
   type AcademyNeoId,
 } from './academyNeo';
 import {
   defaultAcademyWidgets,
   parseAcademyWidgets,
+  persistAcademyWidgets,
   type AcademyWidget,
 } from './academyWidgets';
 
@@ -139,33 +140,45 @@ export function applyAcademyPrefsToProfile<T extends Record<string, unknown>>(pr
   };
 }
 
-function authHeaders(json = true): Record<string, string> {
-  const token = typeof localStorage === 'undefined' ? '' : localStorage.getItem('token') || '';
-  const headers: Record<string, string> = {
-    Accept: 'application/json',
-    'x-product': CURRENT_PRODUCT,
+export function prefsFromUnknown(raw: unknown): AcademyAccountPrefs | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const resolved = resolveAcademyPrefs(raw);
+  if (!resolved.neo && !resolved.widgets) return null;
+  return {
+    academy_neo: resolved.neo || currentPrefs.academy_neo,
+    academy_widgets: resolved.widgets || currentPrefs.academy_widgets,
   };
-  if (json) headers['Content-Type'] = 'application/json';
-  if (token && token !== 'null' && token !== 'undefined') {
-    headers.Authorization = `Bearer ${token}`;
-    headers['x-auth-token'] = token;
-  }
-  return headers;
 }
 
-async function academyFetch(path: string, options: RequestInit = {}, json = true) {
-  const fullUrl = path.startsWith('http') ? path : `${API_URL}${path}`;
-  return fetch(fullUrl, {
-    ...options,
-    headers: { ...authHeaders(json), ...(options.headers as Record<string, string> | undefined) },
-    credentials: API_URL ? 'include' : 'same-origin',
-  });
+export async function fetchAcademyPrefs(): Promise<AcademyAccountPrefs | null> {
+  try {
+    const res = await academyApiFetch('/api/academy/prefs');
+    if (!res.ok) return null;
+    return prefsFromUnknown(await res.json());
+  } catch {
+    return null;
+  }
+}
+
+async function putAcademyPrefs(prefs: AcademyAccountPrefs): Promise<boolean> {
+  try {
+    const res = await academyApiFetch('/api/academy/prefs', {
+      method: 'PUT',
+      body: JSON.stringify({
+        academy_neo: prefs.academy_neo,
+        academy_widgets: serializeAcademyWidgets(prefs.academy_widgets),
+      }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 async function postProfile(prefs: AcademyAccountPrefs): Promise<boolean> {
   if (!profileSnapshot) return false;
   const body = applyAcademyPrefsToProfile({ ...profileSnapshot, password: '' }, prefs);
-  const res = await academyFetch('/api/profile', {
+  const res = await academyApiFetch('/api/profile', {
     method: 'POST',
     body: JSON.stringify(body),
   });
@@ -174,16 +187,25 @@ async function postProfile(prefs: AcademyAccountPrefs): Promise<boolean> {
   return true;
 }
 
+function persistPrefsLocally(prefs: AcademyAccountPrefs) {
+  persistAcademyNeoId(prefs.academy_neo);
+  persistAcademyWidgets(prefs.academy_widgets);
+}
+
 export async function saveAcademyAccount(patch: Partial<AcademyAccountPrefs>): Promise<boolean> {
   if (!patch.academy_neo && !Array.isArray(patch.academy_widgets)) return false;
   setAcademyAccountPrefs(patch);
-  if (!profileSnapshot) return false;
+  persistPrefsLocally(currentPrefs);
 
   saveChain = saveChain.then(async () => {
     const prefs: AcademyAccountPrefs = { ...currentPrefs };
+    persistPrefsLocally(prefs);
+
+    const dedicated = await putAcademyPrefs(prefs);
+    if (dedicated) return true;
 
     try {
-      await academyFetch('/api/profile/academy', {
+      await academyApiFetch('/api/profile/academy', {
         method: 'PATCH',
         body: JSON.stringify({
           academy_neo: prefs.academy_neo,
@@ -191,26 +213,10 @@ export async function saveAcademyAccount(patch: Partial<AcademyAccountPrefs>): P
         }),
       });
     } catch {
-      /* dedicated route is optional */
+      /* rota antiga é opcional */
     }
 
-    const saved = await postProfile(prefs);
-    if (!saved) return false;
-
-    try {
-      const verify = await academyFetch('/api/profile');
-      if (verify.ok) {
-        const fresh = await verify.json();
-        setAcademyProfileSnapshot(fresh);
-        const resolved = resolveAcademyPrefs(fresh);
-        if (resolved.neo) setAcademyAccountPrefs({ academy_neo: resolved.neo });
-        if (resolved.widgets) setAcademyAccountPrefs({ academy_widgets: resolved.widgets });
-        return Boolean(resolved.neo || resolved.widgets);
-      }
-    } catch {
-      /* POST already succeeded */
-    }
-    return saved;
+    return postProfile(prefs);
   });
 
   return saveChain;
@@ -218,6 +224,7 @@ export async function saveAcademyAccount(patch: Partial<AcademyAccountPrefs>): P
 
 export function queueAcademyAccountSave(patch: Partial<AcademyAccountPrefs>) {
   setAcademyAccountPrefs(patch);
+  persistPrefsLocally(currentPrefs);
   pendingPatch = { ...pendingPatch, ...patch };
   if (typeof window === 'undefined') return;
   if (saveTimer) window.clearTimeout(saveTimer);

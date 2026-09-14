@@ -3,6 +3,7 @@ import { Search, Clock, CheckCircle2, Trash2 } from '../../icons';
 import AdminEngagement from '../../components/AdminEngagement';
 import { DEFAULT_PRODUCT } from '../../app/constants';
 import { AmbassadorCouponsPanel } from './AmbassadorCouponsPanel';
+import { adminPlanSelectOptions, adminPlanSelectValue } from './adminPlanSelect';
 import type {
   Product,
   ProductAccess,
@@ -199,12 +200,13 @@ export function AdminTab({
                       <td className="px-6 py-4 text-sm font-bold text-slate-700">{u.product}</td>
                       <td className="px-6 py-4">
                         <select
-                          value={u.plan}
+                          value={adminPlanSelectValue(u.product, u.plan)}
                           onChange={(e) => updateUserProductAccess(u, { plan: e.target.value as ProductPlan })}
                           className="px-2 py-1 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-slate-600"
                         >
-                          <option value="free">free</option>
-                          <option value="pro">pro</option>
+                          {adminPlanSelectOptions(u.product).map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
                         </select>
                       </td>
                       <td className="px-6 py-4">
@@ -269,9 +271,10 @@ export function AdminTab({
                   </div>
                   <p className="text-xs text-slate-500">{u.email}</p>
                   <div className="grid grid-cols-2 gap-2">
-                    <select value={u.plan} onChange={(e) => updateUserProductAccess(u, { plan: e.target.value as ProductPlan })} className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-600">
-                      <option value="free">free</option>
-                      <option value="pro">pro</option>
+                    <select value={adminPlanSelectValue(u.product, u.plan)} onChange={(e) => updateUserProductAccess(u, { plan: e.target.value as ProductPlan })} className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-600">
+                      {adminPlanSelectOptions(u.product).map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
                     </select>
                     <select value={u.product_role} onChange={(e) => updateUserProductAccess(u, { product_role: e.target.value })} className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-600">
                       <option value="student">student</option>

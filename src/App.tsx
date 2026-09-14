@@ -93,6 +93,7 @@ import type {
 import { DEFAULT_PRODUCT, ACADEMY_DISABLED_TABS } from './app/constants';
 import { AcademySidebar } from './features/shell/AcademySidebar';
 import { BottomNav } from './features/shell/BottomNav';
+import { couponCodeFromSearch, rememberCouponCode } from './features/coupons/couponUtils';
 import { AcademyPrefsSync } from './theme/AcademyPrefsSync';
 import { applyAcademyPrefsToProfile } from './theme/academyAccount';
 import { ClinicalPageRoute } from './features/clinical/ClinicalPageRoute';
@@ -123,6 +124,10 @@ const ConfigTab = lazy(() =>
 
 export default function App() {
   const navigate = useNavigate();
+  useEffect(() => {
+    const sharedCode = couponCodeFromSearch(window.location.search);
+    if (sharedCode) rememberCouponCode(sharedCode);
+  }, []);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'agenda' | 'pacientes' | 'estudos' | 'financeiro' | 'documentos' | 'prontuario' | 'configuracoes' | 'admin' | 'portal' | 'inteligencia' | 'academy'>('dashboard');
   const [patients, setPatients] = useState<Patient[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);

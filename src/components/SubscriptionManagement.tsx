@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CreditCard, CheckCircle2, AlertCircle, ChevronRight, Shield, Clock, X, Zap } from '../icons';
+import { CouponApplyField } from '../features/coupons/CouponApplyField';
+import {
+  couponCodeFromSearch,
+  parseMoney,
+  recalledCouponCode,
+  rememberCouponCode,
+} from '../features/coupons/couponUtils';
+import type { CouponPreview } from '../features/coupons/types';
 
 interface SubscriptionPlan {
   id: number;
@@ -79,6 +87,11 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [plansError, setPlansError] = useState<string | null>(null);
+  const [couponPreview, setCouponPreview] = useState<CouponPreview | null>(null);
+  const [initialCouponCode] = useState(() => (
+    couponCodeFromSearch(typeof window !== 'undefined' ? window.location.search : '')
+    || recalledCouponCode()
+  ));
 
   const fetchSubscription = useCallback(async () => {
     try {
@@ -130,6 +143,10 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
     reloadSubscriptionData();
   }, [reloadSubscriptionData]);
 
+  useEffect(() => {
+    if (initialCouponCode) rememberCouponCode(initialCouponCode);
+  }, [initialCouponCode]);
+
   const redirectToCheckout = (initPoint: string) => {
     window.location.href = initPoint;
   };
@@ -141,7 +158,11 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
       const res = await apiFetch('/api/subscriptions/create', {
         method: 'POST',
         product,
-        body: JSON.stringify({ product, plan_id: planId }),
+        body: JSON.stringify({
+          product,
+          plan_id: planId,
+          ...(couponPreview?.code ? { coupon_code: couponPreview.code } : {}),
+        }),
       });
       const data = await res.json();
       if (res.ok && data.init_point) {
@@ -220,6 +241,11 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
   const isStalePending = isPending && isFree && !isRecentPendingCheckout(subscription);
   const hasSubscriptionCard = isProActive || isPending;
   const paidPlan = plans.find(p => p.plan !== 'free');
+  const planAmount = paidPlan ? parseMoney(paidPlan.amount) : null;
+  const chargedAmount = couponPreview?.valid && couponPreview.discounted_amount != null
+    ? couponPreview.discounted_amount
+    : planAmount;
+  const showCouponField = product === 'academy' && Boolean(paidPlan);
   const statusInfo = subscription && hasSubscriptionCard
     ? STATUS_MAP[subscription.status] || STATUS_MAP.pending
     : null;
@@ -359,10 +385,26 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
             neo ? (
               <div className="space-y-4">
                 <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
-                  {formatCurrency(paidPlan.amount)} por mês
+                  {chargedAmount != null ? formatCurrency(chargedAmount) : formatCurrency(paidPlan.amount)} por mês
                 </p>
+                {couponPreview?.valid && planAmount != null && chargedAmount != null && chargedAmount < planAmount && (
+                  <p className="text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">
+                    De {formatCurrency(planAmount)} com o cupom {couponPreview.code}.
+                  </p>
+                )}
                 {paidPlan.description && (
                   <p className="text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">{paidPlan.description}</p>
+                )}
+                {showCouponField && (
+                  <CouponApplyField
+                    apiFetch={apiFetch}
+                    product={product}
+                    planId={paidPlan.id}
+                    originalAmount={planAmount}
+                    neo={neo}
+                    initialCode={initialCouponCode}
+                    onChange={setCouponPreview}
+                  />
                 )}
                 <button
                   onClick={() => handleCreateSubscription(paidPlan.id)}
@@ -384,11 +426,29 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
                   </div>
                   <div>
                     <p className="text-sm font-bold text-slate-800">{paidPlan.name}</p>
-                    <p className="text-xs text-slate-500">{formatCurrency(paidPlan.amount)}/mês</p>
+                    <p className="text-xs text-slate-500">
+                      {chargedAmount != null ? formatCurrency(chargedAmount) : formatCurrency(paidPlan.amount)}/mês
+                      {couponPreview?.valid && planAmount != null && chargedAmount != null && chargedAmount < planAmount && (
+                        <span className="ml-2 line-through text-slate-400">{formatCurrency(planAmount)}</span>
+                      )}
+                    </p>
                   </div>
                 </div>
                 {paidPlan.description && (
                   <p className="text-xs text-slate-500 mb-3">{paidPlan.description}</p>
+                )}
+                {showCouponField && (
+                  <div className="mb-3">
+                    <CouponApplyField
+                      apiFetch={apiFetch}
+                      product={product}
+                      planId={paidPlan.id}
+                      originalAmount={planAmount}
+                      neo={neo}
+                      initialCode={initialCouponCode}
+                      onChange={setCouponPreview}
+                    />
+                  </div>
                 )}
                 <button
                   onClick={() => handleCreateSubscription(paidPlan.id)}
@@ -420,6 +480,17 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
                   )}
                 </div>
               </div>
+              {showCouponField && !showFreeUpgrade && (
+                <CouponApplyField
+                  apiFetch={apiFetch}
+                  product={product}
+                  planId={paidPlan.id}
+                  originalAmount={planAmount}
+                  neo={neo}
+                  initialCode={initialCouponCode}
+                  onChange={setCouponPreview}
+                />
+              )}
               <button
                 onClick={() => handleCreateSubscription(paidPlan.id)}
                 disabled={createLoading}

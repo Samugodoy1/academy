@@ -65,6 +65,7 @@ import {
   Sparkle        as PhSparkle,
   Stethoscope    as PhStethoscope,
   Tag            as PhTag,
+  Ticket         as PhTicket,
   Target         as PhTarget,
   ThumbsUp       as PhThumbsUp,
   Trash          as PhTrash,
@@ -189,6 +190,7 @@ export const User          = fill(PhUser);
 export const ThumbsUp      = fill(PhThumbsUp);
 export const Stethoscope   = fill(PhStethoscope);
 export const Tag           = fill(PhTag);
+export const Ticket        = fill(PhTicket);
 export const Target        = fill(PhTarget);
 export const Rocket        = fill(PhRocket);
 export const MoreHorizontal = fill(PhDotsThree);

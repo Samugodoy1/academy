@@ -2,6 +2,7 @@ import React from 'react';
 import { Search, Clock, CheckCircle2, Trash2 } from '../../icons';
 import AdminEngagement from '../../components/AdminEngagement';
 import { DEFAULT_PRODUCT } from '../../app/constants';
+import { AmbassadorCouponsPanel } from './AmbassadorCouponsPanel';
 import type {
   Product,
   ProductAccess,
@@ -51,7 +52,11 @@ export function AdminTab({
     <div className="page-shell space-y-8">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Admin geral</h2>
-        <p className="text-sm text-slate-500">Aprovacao por produto, plano, papel de acesso e engajamento</p>
+        <p className="text-sm text-slate-500">Aprovacao por produto, plano, papel de acesso, cupons de embaixador e engajamento</p>
+      </div>
+
+      <div className="bg-white p-4 md:p-8 rounded-3xl border border-slate-100 shadow-sm">
+        <AmbassadorCouponsPanel apiFetch={apiFetch} />
       </div>
 
       <div className="bg-white p-4 md:p-8 rounded-3xl border border-slate-100 shadow-sm">

@@ -1,0 +1,9 @@
+import type { ExerciseSeed } from '../types';
+
+const facts: Array<[string,string,string,string]> = [["Síncope costuma apresentar palidez, sudorese e perda transitória de consciência.","Posicionar, proteger vias aéreas e monitorar são medidas iniciais importantes.","é sempre anafilaxia","deve-se manter o paciente sentado"],["Anafilaxia pode cursar com comprometimento respiratório e circulatório.","É uma emergência que exige tratamento imediato conforme protocolo.","é apenas ansiedade","não afeta respiração"],["Hipoglicemia pode causar sudorese, tremor e alteração de comportamento.","Em paciente consciente, carboidrato de ação rápida é uma medida inicial habitual.","sempre causa febre","não altera comportamento"],["Dor torácica suspeita exige interromper o atendimento e avaliar sinais vitais.","Persistência ou sinais de gravidade demandam acionamento de emergência.","deve-se continuar o procedimento","é sempre odontogênica"],["Convulsão exige proteger o paciente contra trauma.","Não se deve colocar objetos na boca durante a crise.","segurar a língua com instrumentos","forçar a abertura da boca"],["Reconhecer e acionar o serviço de emergência faz parte da resposta a quadros graves.","Tempo é crítico em emergências médicas.","esperar sempre a crise passar","dispensar o paciente sem avaliação"]];
+const make = (): ExerciseSeed[] => facts.flatMap(([statement, explanation, wrong, correct], i) => [
+  { id:'urg-' + String(i+1).padStart(2,'0') + 'a', kind:'choice', difficulty:2, prompt:'Qual afirmação está correta?', options:[correct, wrong, 'As duas estão corretas apenas em laboratório', 'Não há relação clínica'], answer:0, explanation },
+  { id:'urg-' + String(i+1).padStart(2,'0') + 'b', kind:'boolean', difficulty:1, prompt:'Verdadeiro ou falso?', statement, answer:true, explanation },
+]);
+
+export const URG_EXERCISES: ExerciseSeed[] = make();

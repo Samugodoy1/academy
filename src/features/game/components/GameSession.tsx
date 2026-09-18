@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Check, Clock, Heart, X, Zap } from '../../../icons';
-import { CharacterSay, hostFor, pickLine } from '../characters';
+import { CharacterAvatar, CharacterSay, hostFor, pickLine } from '../characters';
 import { checkAnswer, describeAnswer, exerciseSpeech } from '../engine';
 import { feedback } from '../sound';
 import type { Answer, Exercise, LessonOutcome, LessonPlan } from '../types';
@@ -45,6 +45,7 @@ export const GameSession: React.FC<GameSessionProps> = ({
   const [attempts, setAttempts] = useState<Record<string, number>>({});
   const [combo, setCombo] = useState(0);
   const [bestCombo, setBestCombo] = useState(0);
+  const [comboMilestone, setComboMilestone] = useState<number | null>(null);
   const [heartsLost, setHeartsLost] = useState(0);
   const [confirmQuit, setConfirmQuit] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(timeLimitSec ?? 0);
@@ -53,6 +54,7 @@ export const GameSession: React.FC<GameSessionProps> = ({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const current = queue[cursor] ?? null;
+  const comboMilestoneFor = (value: number) => [3, 6, 10, 15, 20].includes(value) ? value : null;
   const progress = total > 0 ? Math.min(1, resolved.length / total) : 0;
 
   const buildOutcome = useCallback(
@@ -90,6 +92,12 @@ export const GameSession: React.FC<GameSessionProps> = ({
 
   const finishRef = useRef(finish);
   finishRef.current = finish;
+
+  useEffect(() => {
+    if (comboMilestone === null) return undefined;
+    const timer = window.setTimeout(() => setComboMilestone(null), comboMilestone >= 10 ? 1100 : 850);
+    return () => window.clearTimeout(timer);
+  }, [comboMilestone]);
 
   // Rapid fire mode: the clock, not the exercise count, ends the round.
   useEffect(() => {
@@ -136,6 +144,11 @@ export const GameSession: React.FC<GameSessionProps> = ({
         const nextCombo = combo + 1;
         setCombo(nextCombo);
         setBestCombo(best => Math.max(best, nextCombo));
+        const milestone = comboMilestoneFor(nextCombo);
+        if (milestone) {
+          setComboMilestone(milestone);
+          feedback('complete', soundOn);
+        }
         setResolved(list => (list.includes(current.id) ? list : [...list, current.id]));
         if (tries === 1 && !missed.includes(current.id)) {
           setMastered(list => (list.includes(current.id) ? list : [...list, current.id]));
@@ -332,6 +345,19 @@ export const GameSession: React.FC<GameSessionProps> = ({
           />
         </div>
       </div>
+
+      {comboMilestone !== null && (
+        <div className="pointer-events-none fixed inset-0 z-[205] flex items-center justify-center px-5">
+          <div className="game-pop w-full max-w-[360px] rounded-[30px] bg-[var(--neo)] px-6 py-7 text-center text-white shadow-2xl">
+            <CharacterAvatar id={host.id} mood="cheer" size={104} className="mx-auto" />
+            <p className="mt-3 text-[13px] font-semibold uppercase tracking-[0.1em] text-white/70">Combo</p>
+            <p className="mt-1 text-[58px] font-semibold leading-none tracking-[-0.04em]">x{comboMilestone}</p>
+            <p className="mt-2 text-[16px] font-medium text-white/90">
+              {comboMilestone >= 10 ? 'Você entrou no modo clínica.' : comboMilestone >= 6 ? 'Seis seguidos. Não para agora.' : 'Acertou em sequência. Continua.'}
+            </p>
+          </div>
+        </div>
+      )}
 
       <footer
         className={`game-sheet border-t px-5 pb-[max(16px,env(safe-area-inset-bottom))] pt-4 sm:px-6 ${

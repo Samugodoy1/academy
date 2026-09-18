@@ -9,7 +9,17 @@ export type StudyKey =
   | 'endodontia'
   | 'cirurgia'
   | 'protese'
-  | 'odontopediatria';
+  | 'odontopediatria'
+  | 'anatomia-aplicada'
+  | 'farmacologia'
+  | 'patologia-oral'
+  | 'urgencias-medicas'
+  | 'biosseguranca'
+  | 'materiais-dentarios'
+  | 'oclusao'
+  | 'implantodontia'
+  | 'ortodontia'
+  | 'odontogeriatria';
 
 export const mapProcedureToTopic = (procedure: string | null | undefined): StudyKey | null => {
   if (!procedure) return null;
@@ -25,6 +35,16 @@ export const mapProcedureToTopic = (procedure: string | null | undefined): Study
   if (lower.includes('extra') || lower.includes('siso') || lower.includes('cirurg') || lower.includes('implant') || lower.includes('exodontia')) return 'cirurgia';
   if (lower.includes('protese') || lower.includes('provisor') || lower.includes('moldagem') || lower.includes('coroa') || lower.includes('ciment')) return 'protese';
   if (lower.includes('pediatr') || lower.includes('crianca') || lower.includes('deciduo') || lower.includes('infantil') || lower.includes('art')) return 'odontopediatria';
+  if (lower.includes('anatom')) return 'anatomia-aplicada';
+  if (lower.includes('farmac')) return 'farmacologia';
+  if (lower.includes('patolog') || lower.includes('lesao oral') || lower.includes('estomat')) return 'patologia-oral';
+  if (lower.includes('urgenc') || lower.includes('emergenc') || lower.includes('sincope') || lower.includes('anafil')) return 'urgencias-medicas';
+  if (lower.includes('biosseg') || lower.includes('esteriliz') || lower.includes('autoclave') || lower.includes('perfurocort')) return 'biosseguranca';
+  if (lower.includes('material dent') || lower.includes('ionomero') || lower.includes('alginato') || lower.includes('silicone de adicao')) return 'materiais-dentarios';
+  if (lower.includes('oclus') || lower.includes('brux')) return 'oclusao';
+  if (lower.includes('implant')) return 'implantodontia';
+  if (lower.includes('ortodont')) return 'ortodontia';
+  if (lower.includes('geriatr') || lower.includes('idoso') || lower.includes('polifarm')) return 'odontogeriatria';
   return null;
 };
 
@@ -40,4 +60,14 @@ export const STUDY_TOPIC_LABELS: Record<StudyKey, string> = {
   cirurgia: 'Cirurgia',
   protese: 'Prótese',
   odontopediatria: 'Odontopediatria',
+  'anatomia-aplicada': 'Anatomia aplicada',
+  farmacologia: 'Farmacologia',
+  'patologia-oral': 'Patologia oral',
+  'urgencias-medicas': 'Urgências médicas',
+  biosseguranca: 'Biossegurança',
+  'materiais-dentarios': 'Materiais dentários',
+  oclusao: 'Oclusão',
+  implantodontia: 'Implantodontia',
+  ortodontia: 'Ortodontia',
+  odontogeriatria: 'Odontogeriatria',
 };

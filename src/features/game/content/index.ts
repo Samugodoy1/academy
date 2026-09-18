@@ -13,16 +13,16 @@ import { PREVENTIVA_EXERCISES } from './preventiva';
 import { PROTESE_EXERCISES } from './protese';
 import { RADIOLOGIA_EXERCISES } from './radiologia';
 import { EXPANDED_EXERCISES } from './expanded';
-import { ANATOMIA_APLICADA_EXERCISES } from './anatomia-aplicada';
-import { FARMACOLOGIA_EXERCISES } from './farmacologia';
-import { PATOLOGIA_ORAL_EXERCISES } from './patologia-oral';
-import { URGENCIAS_MEDICAS_EXERCISES } from './urgencias-medicas';
-import { BIOSSEGURANCA_EXERCISES } from './biosseguranca';
-import { MATERIAIS_DENTARIOS_EXERCISES } from './materiais-dentarios';
-import { OCLUSAO_EXERCISES } from './oclusao';
-import { IMPLANTODONTIA_EXERCISES } from './implantodontia';
-import { ORTODONTIA_EXERCISES } from './ortodontia';
-import { ODONTOGERIATRIA_EXERCISES } from './odontogeriatria';
+import { ANAT_EXERCISES } from './anatomia-aplicada';
+import { FARM_EXERCISES } from './farmacologia';
+import { PAT_EXERCISES } from './patologia-oral';
+import { URG_EXERCISES } from './urgencias-medicas';
+import { BIO_EXERCISES } from './biosseguranca';
+import { MAT_EXERCISES } from './materiais-dentarios';
+import { OCL_EXERCISES } from './oclusao';
+import { IMPL_EXERCISES } from './implantodontia';
+import { ORTO_EXERCISES } from './ortodontia';
+import { GERI_EXERCISES } from './odontogeriatria';
 
 const stamp = (topic: StudyKey, seeds: ExerciseSeed[]): Exercise[] =>
   seeds.map(seed => ({ ...seed, topic }) as Exercise);
@@ -111,61 +111,61 @@ const UNIT_SEEDS: UnitSeed[] = [
     topic: 'anatomia-aplicada',
     title: 'Anatomia aplicada',
     tagline: 'Reconhecer estruturas antes de tocar nelas.',
-    exercises: ANATOMIA_APLICADA_EXERCISES,
+    exercises: ANAT_EXERCISES,
   },
   {
     topic: 'farmacologia',
     title: 'Farmacologia',
     tagline: 'Escolher e orientar medicamentos com critério.',
-    exercises: FARMACOLOGIA_EXERCISES,
+    exercises: FARM_EXERCISES,
   },
   {
     topic: 'patologia-oral',
     title: 'Patologia oral',
     tagline: 'Reconhecer sinais que não podem passar batidos.',
-    exercises: PATOLOGIA_ORAL_EXERCISES,
+    exercises: PAT_EXERCISES,
   },
   {
     topic: 'urgencias-medicas',
     title: 'Urgências médicas',
     tagline: 'Reconhecer o quadro e agir sem improviso.',
-    exercises: URGENCIAS_MEDICAS_EXERCISES,
+    exercises: URG_EXERCISES,
   },
   {
     topic: 'biosseguranca',
     title: 'Biossegurança',
     tagline: 'Controlar risco antes, durante e depois do atendimento.',
-    exercises: BIOSSEGURANCA_EXERCISES,
+    exercises: BIO_EXERCISES,
   },
   {
     topic: 'materiais-dentarios',
     title: 'Materiais dentários',
     tagline: 'Entender o material antes de pedir desempenho dele.',
-    exercises: MATERIAIS_DENTARIOS_EXERCISES,
+    exercises: MAT_EXERCISES,
   },
   {
     topic: 'oclusao',
     title: 'Oclusão',
     tagline: 'Ler contatos, movimentos e função.',
-    exercises: OCLUSAO_EXERCISES,
+    exercises: OCL_EXERCISES,
   },
   {
     topic: 'implantodontia',
     title: 'Implantodontia',
     tagline: 'Planejar o implante antes de pensar na broca.',
-    exercises: IMPLANTODONTIA_EXERCISES,
+    exercises: IMPL_EXERCISES,
   },
   {
     topic: 'ortodontia',
     title: 'Ortodontia',
     tagline: 'Entender crescimento, relação e movimento dentário.',
-    exercises: ORTODONTIA_EXERCISES,
+    exercises: ORTO_EXERCISES,
   },
   {
     topic: 'odontogeriatria',
     title: 'Odontogeriatria',
     tagline: 'Adaptar o cuidado à pessoa, não só ao dente.',
-    exercises: ODONTOGERIATRIA_EXERCISES,
+    exercises: GERI_EXERCISES,
   },
 ];
 

@@ -1,0 +1,9 @@
+import type { ExerciseSeed } from '../types';
+
+const facts: Array<[string,string,string,string]> = [["Lesão branca que não se desprende à raspagem merece avaliação clínica.","Persistência e características clínicas orientam investigação.","toda lesão branca é candidíase","sempre desaparece sozinha"],["Lesão ulcerada persistente sem causa evidente deve ser investigada.","Úlcera traumática costuma ter causa identificável e evolução compatível.","nunca precisa de avaliação","é sempre afta"],["Aumento de volume pode ter origem inflamatória, cística ou neoplásica.","Exame clínico e exames complementares definem o caminho diagnóstico.","tem sempre origem infecciosa","é sempre normal"],["Linfonodos cervicais devem ser avaliados no exame de cabeça e pescoço.","Tamanho, consistência, mobilidade e sensibilidade ajudam na caracterização.","não têm relação com a região oral","são avaliados apenas em crianças"],["Assimetria facial pode ser um achado clínico relevante.","A comparação bilateral ajuda a identificar aumento de volume ou alterações estruturais.","é sempre variação normal","não deve ser registrada"],["Lesões pigmentadas devem ser descritas quanto a cor, forma, tamanho e evolução.","Mudanças clínicas aumentam a necessidade de investigação.","basta registrar 'mancha'","tamanho nunca importa"]];
+const make = (): ExerciseSeed[] => facts.flatMap(([statement, explanation, wrong, correct], i) => [
+  { id:'pat-' + String(i+1).padStart(2,'0') + 'a', kind:'choice', difficulty:2, prompt:'Qual afirmação está correta?', options:[correct, wrong, 'As duas estão corretas apenas em laboratório', 'Não há relação clínica'], answer:0, explanation },
+  { id:'pat-' + String(i+1).padStart(2,'0') + 'b', kind:'boolean', difficulty:1, prompt:'Verdadeiro ou falso?', statement, answer:true, explanation },
+]);
+
+export const PAT_EXERCISES: ExerciseSeed[] = make();

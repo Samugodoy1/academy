@@ -1,0 +1,9 @@
+import type { ExerciseSeed } from '../types';
+
+const facts: Array<[string,string,string,string]> = [["O nervo alveolar inferior entra no forame mandibular.","O nervo alveolar inferior percorre o canal mandibular após entrar pelo forame mandibular.","forame mentual","forame infraorbitário"],["O nervo mentual emerge pelo forame mentual.","O nervo mentual fornece sensibilidade a lábio inferior e região mentual.","canal incisivo","forame mandibular"],["O seio maxilar está intimamente relacionado às raízes de molares superiores.","Essa relação explica o risco de comunicação buco-sinusal em algumas exodontias.","raízes dos incisivos inferiores","canal mandibular"],["O nervo lingual está medial ao ramo mandibular na região posterior.","Sua proximidade exige atenção em procedimentos próximos aos terceiros molares inferiores.","nervo facial dentro do canal mandibular","nervo óptico"],["O forame infraorbitário está relacionado à saída do nervo infraorbitário.","A referência é importante em anestesia e avaliação de trauma facial.","forame mentual","forame mandibular"],["A artéria facial cruza a região mandibular anterior ao masseter.","Conhecer o trajeto vascular ajuda no planejamento de procedimentos e controle de sangramento.","artéria radial no punho","artéria oftálmica na órbita"]];
+const make = (): ExerciseSeed[] => facts.flatMap(([statement, explanation, wrong, correct], i) => [
+  { id:'anat-' + String(i+1).padStart(2,'0') + 'a', kind:'choice', difficulty:2, prompt:'Qual afirmação está correta?', options:[correct, wrong, 'As duas estão corretas apenas em laboratório', 'Não há relação clínica'], answer:0, explanation },
+  { id:'anat-' + String(i+1).padStart(2,'0') + 'b', kind:'boolean', difficulty:1, prompt:'Verdadeiro ou falso?', statement, answer:true, explanation },
+]);
+
+export const ANAT_EXERCISES: ExerciseSeed[] = make();

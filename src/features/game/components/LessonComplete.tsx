@@ -111,6 +111,15 @@ export const LessonComplete: React.FC<LessonCompleteProps> = ({
               Missão concluída · {quest.title} · +{quest.gems} cristais
             </p>
           ))}
+          {reward.challengeCompleted && reward.challengeDays && (
+            <div className="game-pop flex items-center gap-3 rounded-[20px] bg-[var(--neo)] px-4 py-4 text-white">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15"><Zap size={20} /></span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[16px] font-semibold">Desafio de {reward.challengeDays} dias concluído!</p>
+                <p className="mt-0.5 text-[13px] text-white/80">+{reward.challengeGems} cristais. Você manteve o compromisso.</p>
+              </div>
+            </div>
+          )}
           {reward.goalReached && (
             <p className="rounded-[18px] bg-[var(--neo-wash)] px-4 py-3 text-[15px] text-[var(--neo-ink)]">
               Meta do dia batida. Amanhã a ofensiva continua.

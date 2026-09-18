@@ -74,6 +74,7 @@ export const ColaGame: React.FC<ColaGameProps> = ({
     purchaseFreeze,
     purchaseHearts,
     purchaseStreakRepair,
+    chooseChallenge,
   } = useGameState(plan ?? 'free');
 
   const [running, setRunning] = useState<RunningLesson | null>(null);
@@ -342,6 +343,7 @@ export const ColaGame: React.FC<ColaGameProps> = ({
           limits={limits}
           onBuyFreeze={purchaseFreeze}
           onRepair={purchaseStreakRepair}
+          onStartChallenge={chooseChallenge}
         />
       )}
 

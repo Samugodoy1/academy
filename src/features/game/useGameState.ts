@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { limitsFor, type GamePlan } from './plan';
+import type { ChallengeDays } from './types';
 import {
   applyDailyGoal,
   buyFreeze,
@@ -8,6 +9,7 @@ import {
   refreshState,
   registerFailedLesson,
   registerLessonResult,
+  startChallenge,
   repairStreak,
   spendHeart,
   startLesson,
@@ -116,6 +118,13 @@ export function useGameState(plan: GamePlan = 'free') {
     commit(repairStreak(stateRef.current));
   }, [commit]);
 
+  const chooseChallenge = useCallback(
+    (days: ChallengeDays) => {
+      commit(startChallenge(stateRef.current, days, new Date()));
+    },
+    [commit]
+  );
+
   return {
     state,
     limits,
@@ -129,5 +138,6 @@ export function useGameState(plan: GamePlan = 'free') {
     purchaseFreeze,
     purchaseHearts,
     purchaseStreakRepair,
+    chooseChallenge,
   };
 }

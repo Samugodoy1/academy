@@ -126,6 +126,17 @@ export interface LostStreak {
   day: string;
 }
 
+export type ChallengeDays = 7 | 14 | 30 | 50;
+
+export interface AcademyChallenge {
+  days: ChallengeDays;
+  rewardGems: number;
+  startedDay: string;
+  progress: number;
+  lastCountedDay: string | null;
+  completed: boolean;
+}
+
 export interface GameState {
   version: 2;
   xp: number;
@@ -162,6 +173,8 @@ export interface GameState {
   quests: Quest[];
   /** Trail lessons started today, checked against the free plan cap. */
   dayLessons: number;
+  /** One self-chosen consistency challenge at a time. */
+  challenge: AcademyChallenge | null;
 }
 
 export interface LessonOutcome {
@@ -194,4 +207,7 @@ export interface LessonReward {
   /** Streak milestone reached now (3, 7, 14 …), or 0. */
   milestone: number;
   levelUp: number | null;
+  challengeCompleted: boolean;
+  challengeDays: ChallengeDays | null;
+  challengeGems: number;
 }

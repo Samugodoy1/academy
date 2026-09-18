@@ -1,0 +1,9 @@
+import type { ExerciseSeed } from '../types';
+
+const facts: Array<[string,string,string,string]> = [["Planejamento tridimensional ajuda a avaliar posição do implante e estruturas anatômicas.","A posição proteticamente orientada é central no planejamento.","dispensa avaliação óssea","torna anatomia irrelevante"],["Osseointegração depende de estabilidade e interação adequada entre implante e tecido.","Carga e condições locais influenciam o resultado.","ocorre instantaneamente","não depende do tecido ósseo"],["Controle de biofilme é importante para manutenção peri-implantar.","Higiene e acompanhamento fazem parte do tratamento.","é desnecessário após instalação","implante é imune à inflamação"],["Nervo alveolar inferior deve ser considerado no planejamento posterior mandibular.","A posição do canal limita opções e exige avaliação por imagem quando indicada.","não tem relação com implantes","é encontrado no maxilar"],["Seio maxilar pode limitar a disponibilidade óssea posterior da maxila.","O planejamento deve considerar altura e anatomia do seio.","é irrelevante em molares superiores","fica na mandíbula"],["Prótese sobre implante deve ser planejada junto ao posicionamento cirúrgico.","O planejamento reverso integra função, estética e cirurgia.","cirurgia deve ignorar a prótese","prótese é decidida só depois da instalação"]];
+const make = (): ExerciseSeed[] => facts.flatMap(([statement, explanation, wrong, correct], i) => [
+  { id:'impl-' + String(i+1).padStart(2,'0') + 'a', kind:'choice', difficulty:2, prompt:'Qual afirmação está correta?', options:[correct, wrong, 'As duas estão corretas apenas em laboratório', 'Não há relação clínica'], answer:0, explanation },
+  { id:'impl-' + String(i+1).padStart(2,'0') + 'b', kind:'boolean', difficulty:1, prompt:'Verdadeiro ou falso?', statement, answer:true, explanation },
+]);
+
+export const IMPL_EXERCISES: ExerciseSeed[] = make();

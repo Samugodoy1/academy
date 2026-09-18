@@ -1,0 +1,9 @@
+import type { ExerciseSeed } from '../types';
+
+const facts: Array<[string,string,string,string]> = [["Ionômero de vidro apresenta adesão química ao tecido dental.","Também pode liberar flúor, dependendo da formulação.","não adere ao dente","é exclusivamente metálico"],["Resina composta depende de fotoativação adequada quando fotopolimerizável.","Tempo e intensidade de luz influenciam a polimerização.","não precisa de luz","cura apenas por água"],["Silicone de adição é usado em moldagens de alta precisão.","A técnica e o controle de umidade continuam sendo importantes.","serve apenas para restauração direta","não registra detalhes"],["Alginato é um material de moldagem irreversível.","É usado com frequência para modelos de estudo e procedimentos que não exigem a mesma precisão de elastômeros.","é um cimento definitivo","é reversível após presa"],["Cimento resinoso pode ser indicado para diferentes restaurações indiretas.","A indicação depende do substrato, material restaurador e protocolo adesivo.","é indicado para todo caso","não depende do material"],["Materiais odontológicos têm propriedades mecânicas diferentes.","Resistência, módulo e desgaste influenciam a indicação clínica.","todos se comportam igual","propriedades não importam"]];
+const make = (): ExerciseSeed[] => facts.flatMap(([statement, explanation, wrong, correct], i) => [
+  { id:'mat-' + String(i+1).padStart(2,'0') + 'a', kind:'choice', difficulty:2, prompt:'Qual afirmação está correta?', options:[correct, wrong, 'As duas estão corretas apenas em laboratório', 'Não há relação clínica'], answer:0, explanation },
+  { id:'mat-' + String(i+1).padStart(2,'0') + 'b', kind:'boolean', difficulty:1, prompt:'Verdadeiro ou falso?', statement, answer:true, explanation },
+]);
+
+export const MAT_EXERCISES: ExerciseSeed[] = make();

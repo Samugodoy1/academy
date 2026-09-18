@@ -32,7 +32,8 @@ export const mapProcedureToTopic = (procedure: string | null | undefined): Study
   if (lower.includes('profilax') || lower.includes('fluor') || lower.includes('selante') || lower.includes('prevent') || lower.includes('biofilme')) return 'preventiva';
   if (lower.includes('endo') || lower.includes('canal') || lower.includes('pulpar') || lower.includes('tratamento endodontico')) return 'endodontia';
   if (lower.includes('restaura') || lower.includes('resin') || lower.includes('clareamento') || lower.includes('facet') || lower.includes('lente') || lower.includes('dentistic')) return 'dentistica';
-  if (lower.includes('extra') || lower.includes('siso') || lower.includes('cirurg') || lower.includes('implant') || lower.includes('exodontia')) return 'cirurgia';
+  if (lower.includes('implant')) return 'implantodontia';
+  if (lower.includes('extra') || lower.includes('siso') || lower.includes('cirurg') || lower.includes('exodontia')) return 'cirurgia';
   if (lower.includes('protese') || lower.includes('provisor') || lower.includes('moldagem') || lower.includes('coroa') || lower.includes('ciment')) return 'protese';
   if (lower.includes('pediatr') || lower.includes('crianca') || lower.includes('deciduo') || lower.includes('infantil') || lower.includes('art')) return 'odontopediatria';
   if (lower.includes('anatom')) return 'anatomia-aplicada';

@@ -12,9 +12,9 @@ export const REVIEW_SIZE = 8;
 export const BLITZ_SIZE = 20;
 export const BLITZ_SECONDS = 60;
 
-// ── Deterministic randomness ──────────────────────────────────────────
-// Lessons must look shuffled but stay identical if the student closes and
-// reopens the same node, so every shuffle is seeded by the lesson id.
+// ── Seeded randomness ─────────────────────────────────────────────────
+// The seed is regenerated when a lesson is opened, so replaying the same node
+// can surface a different set and a different answer order.
 
 export function hashSeed(value: string): number {
   let hash = 2166136261;
@@ -121,6 +121,48 @@ export function describeAnswer(exercise: Exercise): string {
 
 // ── Lesson building ───────────────────────────────────────────────────
 
+function randomLessonSeed(topic: string, index: number): string {
+  return `${topic}:${index}:${Date.now()}:${Math.random()}`;
+}
+
+function randomizeExercise(exercise: Exercise, random: () => number): Exercise {
+  if (exercise.kind === 'choice') {
+    const entries = exercise.options.map((option, index) => ({ option, index }));
+    const shuffled = shuffle(entries, random);
+    return {
+      ...exercise,
+      options: shuffled.map(entry => entry.option),
+      answer: shuffled.findIndex(entry => entry.index === exercise.answer),
+    };
+  }
+  if (exercise.kind === 'multi') {
+    const entries = exercise.options.map((option, index) => ({ option, index }));
+    const shuffled = shuffle(entries, random);
+    const indexMap = new Map(shuffled.map((entry, nextIndex) => [entry.index, nextIndex]));
+    return {
+      ...exercise,
+      options: shuffled.map(entry => entry.option),
+      answers: exercise.answers.map(index => indexMap.get(index) ?? index),
+    };
+  }
+  if (exercise.kind === 'blank') {
+    return { ...exercise, bank: shuffle(exercise.bank, random) };
+  }
+  return exercise;
+}
+
+function selectLessonExercises(pool: Exercise[], index: number, seed: string): Exercise[] {
+  if (pool.length <= LESSON_SIZE) return shuffleWithSeed(pool, seed).map(exercise =>
+    randomizeExercise(exercise, createRandom(hashSeed(`${seed}:${exercise.id}`)))
+  );
+  const random = createRandom(hashSeed(seed));
+  const shuffled = shuffle(pool, random);
+  const start = (index * LESSON_SIZE) % shuffled.length;
+  const selected = Array.from({ length: LESSON_SIZE }, (_, offset) => shuffled[(start + offset) % shuffled.length]);
+  return shuffle(selected, random).map(exercise => randomizeExercise(exercise, random));
+}
+
+
 export function countLessons(exerciseCount: number): number {
   return Math.max(1, Math.ceil(exerciseCount / LESSON_SIZE));
 }
@@ -134,10 +176,7 @@ function planId(kind: LessonKind, topic: string | null, index: number) {
   return `${kind}:${topic ?? 'geral'}:${index}`;
 }
 
-export function buildLesson(unit: GameUnit, index: number): LessonPlan {
-  const start = index * LESSON_SIZE;
-  const slice = unit.exercises.slice(start, start + LESSON_SIZE);
-  const exercises = slice.length > 0 ? slice : unit.exercises.slice(0, LESSON_SIZE);
+export function buildLesson(unit: GameUnit, index: number, seed = randomLessonSeed(unit.topic, index)): LessonPlan {
   const id = planId('lesson', unit.topic, index);
   return {
     id,
@@ -145,21 +184,23 @@ export function buildLesson(unit: GameUnit, index: number): LessonPlan {
     kind: 'lesson',
     index,
     title: `${unit.title} · Lição ${index + 1}`,
-    exercises: shuffleWithSeed(exercises, id),
+    exercises: selectLessonExercises(unit.exercises, index, seed),
   };
 }
 
-export function buildUnitReview(unit: GameUnit, round = 0): LessonPlan {
+export function buildUnitReview(unit: GameUnit, round = 0, seed = randomLessonSeed(unit.topic, round)): LessonPlan {
   const id = planId('review', unit.topic, round);
-  const pool = shuffleWithSeed(unit.exercises, id);
+  const pool = shuffleWithSeed(unit.exercises, seed);
   const hardFirst = [...pool].sort((a, b) => (b.difficulty ?? 2) - (a.difficulty ?? 2));
+  const selected = hardFirst.slice(0, Math.min(REVIEW_SIZE, hardFirst.length));
+  const random = createRandom(hashSeed(`${seed}:review`));
   return {
     id,
     topic: unit.topic,
     kind: 'review',
     index: unit.lessons,
     title: `${unit.title} · Prova do box`,
-    exercises: shuffleWithSeed(hardFirst.slice(0, REVIEW_SIZE), `${id}:final`),
+    exercises: shuffle(selected, random).map(exercise => randomizeExercise(exercise, random)),
   };
 }
 

@@ -179,6 +179,16 @@ export const HOST_BY_TOPIC: Record<StudyKey, CharacterId> = {
   cirurgia: 'val',
   protese: 'zaira',
   odontopediatria: 'duda',
+  'anatomia-aplicada': 'val',
+  farmacologia: 'kaio',
+  'patologia-oral': 'zaira',
+  'urgencias-medicas': 'nina',
+  biosseguranca: 'teo',
+  'materiais-dentarios': 'duda',
+  oclusao: 'val',
+  implantodontia: 'zaira',
+  ortodontia: 'kaio',
+  odontogeriatria: 'duda',
 };
 
 /** Quem fala pelo jogo fora de um tema: revisão, relâmpago, ofensiva, atalho. */

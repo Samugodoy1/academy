@@ -1,0 +1,9 @@
+import type { ExerciseSeed } from '../types';
+
+const facts: Array<[string,string,string,string]> = [["Higienização das mãos é uma medida central de prevenção de infecção.","Deve ocorrer nos momentos indicados antes e depois do contato clínico.","é dispensável com luvas","serve apenas no fim do dia"],["Luvas não substituem higienização das mãos.","As mãos devem ser higienizadas nos momentos apropriados mesmo com uso de luvas.","luvas tornam higiene desnecessária","luvas esterilizam as mãos"],["Instrumentais críticos precisam de esterilização após limpeza adequada.","A esterilização é necessária para itens que penetram tecidos ou entram em contato com sangue.","apenas lavagem com água","somente desinfecção de baixo nível"],["Perfurocortantes devem ser descartados em recipiente apropriado.","Reencapar agulhas aumenta risco de acidente quando feito de forma insegura.","no lixo comum","em saco plástico fino"],["Barreiras de superfície ajudam a controlar contaminação em áreas de difícil limpeza.","A troca correta entre pacientes reduz contaminação cruzada.","aumentam contaminação","substituem esterilização"],["Acidente com material biológico deve ser comunicado e avaliado imediatamente.","A avaliação precoce permite medidas pós-exposição quando indicadas.","deve ser escondido","pode esperar vários meses"]];
+const make = (): ExerciseSeed[] => facts.flatMap(([statement, explanation, wrong, correct], i) => [
+  { id:'bio-' + String(i+1).padStart(2,'0') + 'a', kind:'choice', difficulty:2, prompt:'Qual afirmação está correta?', options:[correct, wrong, 'As duas estão corretas apenas em laboratório', 'Não há relação clínica'], answer:0, explanation },
+  { id:'bio-' + String(i+1).padStart(2,'0') + 'b', kind:'boolean', difficulty:1, prompt:'Verdadeiro ou falso?', statement, answer:true, explanation },
+]);
+
+export const BIO_EXERCISES: ExerciseSeed[] = make();

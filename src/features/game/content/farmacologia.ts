@@ -1,0 +1,9 @@
+import type { ExerciseSeed } from '../types';
+
+const facts: Array<[string,string,string,string]> = [["Analgésicos tratam dor, mas não removem a causa odontogênica.","Controle da causa continua sendo necessário quando existe infecção ou lesão estrutural.","substituem o tratamento","curam toda infecção"],["Anti-inflamatórios não esteroides podem aumentar risco gastrointestinal em pacientes suscetíveis.","História médica e uso concomitante de medicamentos devem ser considerados.","sempre são isentos de risco","não interagem com outros fármacos"],["Paracetamol exige atenção à dose total diária.","Excesso pode causar toxicidade hepática.","pode ser usado sem limite","não é absorvido por via oral"],["Antibiótico deve ter indicação clínica adequada.","Uso desnecessário favorece eventos adversos e resistência bacteriana.","é obrigatório em toda restauração","substitui drenagem"],["Alergia medicamentosa verdadeira deve ser diferenciada de efeito adverso.","História detalhada ajuda a evitar rótulos incorretos e escolhas inseguras.","todo efeito adverso é alergia","alergia nunca importa"],["Interações medicamentosas devem ser consideradas na prescrição.","Anticoagulantes, sedativos e outros fármacos podem alterar a conduta.","não precisam ser investigadas","só importam em hospitais"]];
+const make = (): ExerciseSeed[] => facts.flatMap(([statement, explanation, wrong, correct], i) => [
+  { id:'farm-' + String(i+1).padStart(2,'0') + 'a', kind:'choice', difficulty:2, prompt:'Qual afirmação está correta?', options:[correct, wrong, 'As duas estão corretas apenas em laboratório', 'Não há relação clínica'], answer:0, explanation },
+  { id:'farm-' + String(i+1).padStart(2,'0') + 'b', kind:'boolean', difficulty:1, prompt:'Verdadeiro ou falso?', statement, answer:true, explanation },
+]);
+
+export const FARM_EXERCISES: ExerciseSeed[] = make();

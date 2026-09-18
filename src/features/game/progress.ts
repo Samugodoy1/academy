@@ -9,7 +9,7 @@ import {
   rememberDay,
   resolveStreak,
 } from './streak';
-import type { GameState, LessonOutcome, LessonReward, Quest, UnitState } from './types';
+import type { AcademyChallenge, ChallengeDays, GameState, LessonOutcome, LessonReward, Quest, UnitState } from './types';
 
 export const GAME_STORAGE_KEY = 'academy_cola_game_v1';
 
@@ -27,6 +27,34 @@ export const HEART_REFILL_COST = 40;
 export const STREAK_REPAIR_COST = 80;
 /** Bonus for closing the daily goal, on top of the quest that tracks it. */
 export const GOAL_GEMS = 10;
+
+export const CHALLENGE_REWARDS: Record<ChallengeDays, number> = {
+  7: 35,
+  14: 140,
+  30: 210,
+  50: 350,
+};
+
+export function startChallenge(
+  state: GameState,
+  days: ChallengeDays,
+  now: Date = new Date()
+): GameState {
+  const today = dayKeyOf(now);
+  const alreadyStudiedToday = state.lastDay === today;
+  const progress = alreadyStudiedToday ? 1 : 0;
+  return {
+    ...state,
+    challenge: {
+      days,
+      rewardGems: CHALLENGE_REWARDS[days],
+      startedDay: today,
+      progress,
+      lastCountedDay: alreadyStudiedToday ? today : null,
+      completed: false,
+    },
+  };
+}
 
 export { dayKeyOf };
 
@@ -59,6 +87,7 @@ export function createInitialState(now: Date = new Date()): GameState {
     milestone: 0,
     quests: rollQuests(dayKey, DEFAULT_DAILY_GOAL),
     dayLessons: 0,
+    challenge: null,
   };
 }
 
@@ -226,11 +255,30 @@ export function registerLessonResult(
   const dayXp = rolled.dayXp + xp;
   const goalReached = dayXp >= rolled.dailyGoal && rolled.dayXp < rolled.dailyGoal;
   const quest = applyQuestProgress(rolled.quests, outcome, xp);
+
+  let challenge: AcademyChallenge | null = rolled.challenge;
+  let challengeCompleted = false;
+  let challengeGems = 0;
+  if (challenge && !challenge.completed && challenge.lastCountedDay !== today) {
+    const progress = Math.min(challenge.days, challenge.progress + 1);
+    const completed = progress >= challenge.days;
+    challenge = {
+      ...challenge,
+      progress,
+      lastCountedDay: today,
+      completed,
+    };
+    if (completed) {
+      challengeCompleted = true;
+      challengeGems = challenge.rewardGems;
+    }
+  }
+
   const gems =
     lessonGems(outcome) +
     quest.gems +
     (goalReached ? GOAL_GEMS : 0) +
-    (milestone > 0 ? milestoneGems(milestone) : 0);
+    (milestone > 0 ? milestoneGems(milestone) : 0) + challengeGems;
 
   const previousLevel = levelOf(rolled.xp).level;
   const nextXp = rolled.xp + xp;
@@ -257,6 +305,7 @@ export function registerLessonResult(
     lessonsDone: rolled.lessonsDone + 1,
     perfectLessons: rolled.perfectLessons + (perfect ? 1 : 0),
     bestCombo: Math.max(rolled.bestCombo, outcome.bestCombo),
+    challenge,
   };
 
   return {
@@ -274,6 +323,9 @@ export function registerLessonResult(
       questsDone: quest.completed,
       milestone,
       levelUp: nextLevel > previousLevel ? nextLevel : null,
+      challengeCompleted,
+      challengeDays: challengeCompleted ? challenge?.days ?? null : null,
+      challengeGems,
     },
   };
 }
@@ -419,6 +471,17 @@ export function sanitizeState(raw: unknown, now: Date = new Date()): GameState {
     milestone: Math.max(0, Number(value.milestone) || 0),
     quests: sanitizeQuests(value.quests, dayKey, dailyGoal),
     dayLessons: Math.max(0, Number(value.dayLessons) || 0),
+    challenge:
+      value.challenge && typeof value.challenge === 'object' && [7, 14, 30, 50].includes(Number(value.challenge.days))
+        ? {
+            days: Number(value.challenge.days) as ChallengeDays,
+            rewardGems: CHALLENGE_REWARDS[Number(value.challenge.days) as ChallengeDays],
+            startedDay: typeof value.challenge.startedDay === 'string' ? value.challenge.startedDay : dayKey,
+            progress: Math.min(Number(value.challenge.days), Math.max(0, Number(value.challenge.progress) || 0)),
+            lastCountedDay: typeof value.challenge.lastCountedDay === 'string' ? value.challenge.lastCountedDay : null,
+            completed: value.challenge.completed === true,
+          }
+        : null,
   };
 }
 

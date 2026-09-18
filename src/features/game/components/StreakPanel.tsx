@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Flame, Gem, Restore, Shield } from '../../../icons';
+import { Check, Flame, Gem, Restore, Shield, Trophy } from '../../../icons';
 import { FREEZE_COST, STREAK_REPAIR_COST } from '../progress';
 import type { PlanLimits } from '../plan';
 import {
@@ -10,13 +10,14 @@ import {
   weekStrip,
   type DayCell,
 } from '../streak';
-import type { GameState } from '../types';
+import type { ChallengeDays, GameState } from '../types';
 
 interface StreakPanelProps {
   state: GameState;
   limits: PlanLimits;
   onBuyFreeze: () => void;
   onRepair: () => void;
+  onStartChallenge: (days: ChallengeDays) => void;
 }
 
 const CELL_STYLE: Record<DayCell['status'], string> = {
@@ -39,6 +40,14 @@ export const StreakPanel: React.FC<StreakPanelProps> = ({
   const repairable = canRepairStreak(state);
   const upcoming = nextMilestone(state.streak);
   const canBuyFreeze = state.gems >= FREEZE_COST && state.freezes < limits.maxFreezes;
+
+  const challenge = state.challenge;
+  const challengeOptions: Array<{ days: ChallengeDays; reward: number; label: string }> = [
+    { days: 7, reward: 35, label: 'Começando a criar ritmo' },
+    { days: 14, reward: 140, label: 'Construindo consistência' },
+    { days: 30, reward: 210, label: 'Ganhando repertório' },
+    { days: 50, reward: 350, label: 'Mente clínica' },
+  ];
 
   const headline = (() => {
     if (repairable && state.lostStreak) {
@@ -127,17 +136,46 @@ export const StreakPanel: React.FC<StreakPanelProps> = ({
           {state.freezes} de {limits.maxFreezes} {state.freezes === 1 ? 'protetor' : 'protetores'}
         </span>
         {state.freezes < limits.maxFreezes && (
-          <button
-            type="button"
-            disabled={!canBuyFreeze}
-            onClick={onBuyFreeze}
-            className={`flex items-center gap-1.5 text-[13px] font-medium text-[var(--neo)] ${
-              canBuyFreeze ? '' : 'opacity-50'
-            }`}
-          >
-            Comprar por {FREEZE_COST}
-            <Gem size={13} />
+          <button type="button" disabled={!canBuyFreeze} onClick={onBuyFreeze} className={canBuyFreeze ? 'flex items-center gap-1.5 text-[13px] font-medium text-[var(--neo)]' : 'flex items-center gap-1.5 text-[13px] font-medium text-[var(--neo)] opacity-50'}>
+            Comprar por {FREEZE_COST} <Gem size={13} />
           </button>
+        )}
+      </div>
+
+      <div className="mt-2 border-t border-black/[0.05] pt-4">
+        <div className="flex items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[var(--neo)]"><Trophy size={19} /></span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[16px] font-semibold text-[var(--neo-ink)]">Desafio de ofensiva</p>
+            <p className="mt-0.5 text-[13px] leading-snug text-[var(--neo-gray)]">Escolha uma meta e transforme seus próximos dias em compromisso.</p>
+          </div>
+        </div>
+
+        {challenge ? (
+          <div className="mt-3 rounded-[18px] bg-white px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[15px] font-semibold text-[var(--neo-ink)]">{challenge.completed ? 'Desafio concluído!' : challenge.days + ' dias de ofensiva'}</p>
+                <p className="mt-0.5 text-[13px] text-[var(--neo-gray)]">{challenge.completed ? '+' + challenge.rewardGems + ' cristais conquistados' : challenge.progress + '/' + challenge.days + ' dias · +' + challenge.rewardGems + ' cristais'}</p>
+              </div>
+              <span className="text-[12px] font-semibold text-[var(--neo)]">{challenge.completed ? '✓' : Math.round((challenge.progress / challenge.days) * 100) + '%'}</span>
+            </div>
+            {!challenge.completed && (
+              <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#f0f0f2]">
+                <span className="block h-full rounded-full bg-[var(--neo)] transition-[width] duration-500" style={{ width: Math.round((challenge.progress / challenge.days) * 100) + '%' }} />
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {challengeOptions.map(option => (
+              <button key={option.days} type="button" onClick={() => onStartChallenge(option.days)} className="rounded-[18px] bg-white px-3 py-3 text-left transition-transform active:scale-[0.98]">
+                <span className="block text-[19px] font-semibold tabular-nums text-[var(--neo-ink)]">{option.days} dias</span>
+                <span className="mt-0.5 block text-[12px] leading-snug text-[var(--neo-gray)]">{option.label}</span>
+                <span className="mt-2 flex items-center gap-1 text-[12px] font-semibold text-[#0a84ff]">+{option.reward} <Gem size={11} /></span>
+              </button>
+            ))}
+          </div>
         )}
       </div>
     </section>

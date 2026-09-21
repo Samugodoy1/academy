@@ -692,6 +692,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       openPatientRecord={openPatientRecord}
       setIsPatientModalOpen={setIsPatientModalOpen}
       openAppointmentModal={openAppointmentModal}
+      openCola={openGame}
       onDismissOnboarding={onDismissOnboarding}
       onDismissWelcome={onDismissWelcome}
     >
@@ -702,6 +703,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         totalAppointmentsCount={usableAppointments.length}
         onboardingDismissed={user?.onboarding_done ?? false}
         openPatientRecord={openPatientRecord}
+        openCola={openGame}
       />
 
       <header className="flex items-start justify-between gap-3">

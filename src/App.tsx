@@ -52,6 +52,8 @@ import { Odontogram } from './components/Odontogram';
 import { TermsPage, PrivacyPage } from './components/LegalPages';
 import { NovaEvolucao } from './components/NovaEvolucao';
 import { AcademyDashboard } from './components/AcademyDashboard';
+import { AcademyToast } from './components/AcademyToast';
+import { NOTICE, noticeDurationMs, type AcademyNotice } from './components/academyNotices';
 import { AcademyWordmark } from './components/AcademyWordmark';
 import { DuoButton } from './components/DuoButton';
 import { DataLoadingSkeleton } from './components/DataLoadingSkeleton';
@@ -578,15 +580,21 @@ export default function App() {
   const [profilePassword, setProfilePassword] = useState('');
   const [isProfileEditing, setIsProfileEditing] = useState(false);
   const [showAcademyUpgradeModal, setShowAcademyUpgradeModal] = useState(false);
-  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error', celebration?: boolean, onUndo?: () => void, actionLabel?: string, onAction?: () => void } | null>(null);
+  const [notification, setNotification] = useState<AcademyNotice | null>(null);
   const [confirmation, setConfirmation] = useState<{ message: string, onConfirm: () => void } | null>(null);
   const [guideDismissedUntil, setGuideDismissedUntil] = useState<string | null>(null);
   const notificationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showNotification = (message: string, type: 'success' | 'error' = 'success', celebration = false, onUndo?: () => void, actionLabel?: string, onAction?: () => void) => {
     if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
-    setNotification({ message, type, celebration, onUndo, actionLabel, onAction });
-    notificationTimerRef.current = setTimeout(() => setNotification(null), onUndo || onAction ? 8000 : celebration ? 5500 : 3000);
+    const next: AcademyNotice = { message, type, celebration, onUndo, actionLabel, onAction };
+    setNotification(next);
+    notificationTimerRef.current = setTimeout(() => setNotification(null), noticeDurationMs(next));
+  };
+
+  const dismissNotification = () => {
+    if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
+    setNotification(null);
   };
 
   // ─── Implicit Onboarding: milestone tracking ─────────────────────────
@@ -748,7 +756,7 @@ export default function App() {
         body: JSON.stringify(applyAcademyPrefsToProfile({ ...profileDraft, password: profilePassword } as Record<string, unknown>)),
       });
       if (res.ok) {
-        showNotification('Perfil atualizado com sucesso!');
+        showNotification(NOTICE.profileUpdated);
         setProfilePassword('');
         setIsProfileEditing(false);
         setProfile(profileDraft);
@@ -790,7 +798,7 @@ export default function App() {
       if (res.ok) {
         const data = await res.json();
         setProfile(prev => prev ? { ...prev, photo_url: data.url } : null);
-        showNotification('Foto de perfil atualizada!');
+        showNotification(NOTICE.profilePhoto);
       } else {
         showNotification('Erro ao carregar foto de perfil.', 'error');
       }
@@ -817,7 +825,7 @@ export default function App() {
         // Refresh patient data
         openPatientRecord(selectedPatient.id);
         fetchData(); // Refresh list
-        showNotification('Foto do paciente atualizada!');
+        showNotification(NOTICE.patientPhoto);
       } else {
         showNotification('Erro ao carregar foto do paciente.', 'error');
       }
@@ -1738,16 +1746,16 @@ export default function App() {
           navigate('/dashboard');
           const firstPatientId = newAppointment.patient_id ? Number(newAppointment.patient_id) : patients[0]?.id;
           showNotification(
-            '🎉 Primeiro atendimento agendado! Agora abra o caso clínico.',
+            NOTICE.firstAppointment,
             'success',
             true,
             undefined,
-            firstPatientId ? 'Abrir caso clínico' : undefined,
+            firstPatientId ? 'Abrir prontuário' : undefined,
             firstPatientId ? () => openPatientRecord(firstPatientId) : undefined
           );
         } else {
           showNotification(
-            isReschedule ? 'Reagendamento salvo com sucesso!' : 'Atendimento agendado com sucesso!',
+            isReschedule ? NOTICE.appointmentRescheduled : NOTICE.appointmentCreated,
             'success',
             false
           );
@@ -1792,15 +1800,15 @@ export default function App() {
           setActiveTab('dashboard');
           navigate('/dashboard');
           showNotification(
-            '🎉 Primeiro caso cadastrado! Próximo passo: agendar atendimento.',
+            NOTICE.firstPatient,
             'success',
             true,
             undefined,
-            'Agendar atendimento',
+            'Marcar box',
             () => openAppointmentModal({ patientId: data.id, patientName: createdName })
           );
         } else {
-          showNotification('Paciente cadastrado com sucesso!', 'success', false);
+          showNotification(NOTICE.patientCreated, 'success', false);
         }
       } else {
         const data = await res.json();
@@ -1948,11 +1956,11 @@ export default function App() {
       navigate(`/prontuario/${id}`);
       if (wasFirstRecord) {
         showNotification(
-          '🎉 Caso clínico aberto! Explore o prontuário. Volte ao Início para concluir.',
+          NOTICE.firstRecord,
           'success',
           true,
           undefined,
-          'Ir para Início',
+          'Hoje',
           () => { setActiveTab('dashboard'); navigate('/dashboard'); }
         );
       }
@@ -1982,7 +1990,7 @@ export default function App() {
           return p;
         }));
         setSelectedPatient(prev => prev?.id === patientId ? { ...prev, anamnesis: savedAnamnesis } : prev);
-        showNotification('Anamnese salva com sucesso!');
+        showNotification(NOTICE.anamnesisSaved);
       } else {
         const data = await res.json();
         showNotification(data.error || 'Erro ao salvar anamnese', 'error');
@@ -2076,8 +2084,8 @@ export default function App() {
           openPatientRecord(patientId);
         }
         showNotification(evolutionData.appointment_id
-          ? 'Atendimento fechado. Evolução salva no prontuário.'
-          : 'Registro clínico salvo!');
+          ? NOTICE.evolutionClosed
+          : NOTICE.evolutionSaved);
       } else {
         showNotification(data.error || 'Erro ao registrar evolução', 'error');
       }
@@ -2192,7 +2200,7 @@ export default function App() {
       });
       if (res.ok) {
         setPatients(prev => prev.map(p => p.id === updatedPatient.id ? updatedPatient : p));
-        showNotification('Dados do paciente atualizados!');
+        showNotification(NOTICE.patientUpdated);
       } else {
         const data = await res.json();
         showNotification(data.error || 'Erro ao atualizar paciente', 'error');
@@ -4093,59 +4101,7 @@ export default function App() {
 
             <AnimatePresence>
               {notification && (
-                <motion.div
-                  initial={{ opacity: 0, y: 50, scale: notification.celebration ? 0.9 : 1 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 50 }}
-                  transition={notification.celebration ? { type: 'spring', stiffness: 300, damping: 20 } : undefined}
-                  className={`fixed z-[100] flex items-center gap-3 border ${notification.celebration
-                      ? 'bottom-12 left-1/2 -translate-x-1/2 px-8 py-5 rounded-[24px] shadow-[0_20px_60px_rgba(0,0,0,0.15)] bg-white border-primary/20'
-                      : 'bottom-8 right-8 px-6 py-4 rounded-2xl shadow-2xl'
-                    } ${!notification.celebration && notification.type === 'success'
-                      ? 'bg-primary border-primary/20 text-white'
-                      : !notification.celebration
-                        ? 'bg-rose-600 border-rose-500 text-white'
-                        : ''
-                    }`}
-                >
-                  {notification.celebration ? (
-                    <>
-                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
-                        <CheckCircle size={22} className="text-primary" />
-                      </div>
-                      <span className="font-bold text-[15px] text-slate-800">{notification.message}</span>
-                      {notification.onAction && notification.actionLabel && (
-                        <button
-                          onClick={() => {
-                            notification.onAction?.();
-                            setNotification(null);
-                            if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
-                          }}
-                          className="shrink-0 ml-1 px-4 py-2 bg-primary text-white text-[13px] font-bold rounded-xl hover:opacity-90 transition-all"
-                        >
-                          {notification.actionLabel}
-                        </button>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      {notification.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
-                      <span className="font-bold text-sm">{notification.message}</span>
-                      {notification.onUndo && (
-                        <button
-                          onClick={() => {
-                            notification.onUndo?.();
-                            setNotification(null);
-                            if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
-                          }}
-                          className="ml-1 px-3 py-1 text-sm font-bold rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
-                        >
-                          Desfazer
-                        </button>
-                      )}
-                    </>
-                  )}
-                </motion.div>
+                <AcademyToast notice={notification} onDismiss={dismissNotification} />
               )}
             </AnimatePresence>
 

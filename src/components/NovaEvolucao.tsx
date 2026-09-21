@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Check, Activity, MapPin, Zap, Info, FlaskConical, Lock, Palette, Calendar, User, FileText, ArrowRight } from '../icons';
 import { useNavigate } from 'react-router-dom';
+import { AcademyToast } from './AcademyToast';
+import { NOTICE } from './academyNotices';
 import { formatAppointmentDate, formatAppointmentTime } from '../utils/dateUtils';
 import { generateEvolutionDraft } from '../utils/evolutionDraft';
 import type { BoxGuideProcedure } from '../data/boxGuides';
@@ -452,22 +454,12 @@ export const NovaEvolucao: React.FC<NovaEvolucaoProps> = ({
       {/* ── Success Toast ── */}
       <AnimatePresence>
         {saved && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ type: 'spring', damping: 22, stiffness: 300 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/95 backdrop-blur-xl text-white px-6 py-3.5 rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.3)] flex items-center gap-2.5 z-[60]"
-          >
-            <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
-              <Check size={11} className="text-white" />
-            </div>
-            <span className="text-[13px] font-semibold">
-              {isClosingAppointment
-                ? 'Atendimento fechado. A evolução ficou salva no prontuário.'
-                : 'Registro salvo no prontuário.'}
-            </span>
-          </motion.div>
+          <AcademyToast
+            notice={{
+              message: isClosingAppointment ? NOTICE.evolutionClosed : NOTICE.evolutionSaved,
+            }}
+            onDismiss={() => {}}
+          />
         )}
       </AnimatePresence>
     </div>

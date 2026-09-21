@@ -470,6 +470,15 @@ html[data-theme="dark"] {
     box-shadow: 0 10px 36px rgba(29, 29, 31, 0.08);
   }
 
+  .academy-banner {
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--sys-elevated) 78%, transparent);
+    -webkit-backdrop-filter: saturate(180%) blur(28px);
+    backdrop-filter: saturate(180%) blur(28px);
+    border: 1px solid var(--sys-hairline);
+    box-shadow: 0 10px 30px rgba(29, 29, 31, 0.1);
+  }
+
   .neo-control-card {
     background: #ffffff;
     border-radius: 24px;

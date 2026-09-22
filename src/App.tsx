@@ -624,7 +624,8 @@ export default function App() {
     // Study tabs are the destination for someone in the basic cycle; do not nag about the chair there.
     if (activeTab === 'base' || activeTab === 'estudos') return null;
     if (patients.length === 0) {
-      if (academyStage === 'pre-clinico') return null;
+      // Only push the first patient once we know the student is in the clinic; the home asks otherwise.
+      if (academyStage !== 'clinico') return null;
       if (activeTab === 'pacientes') return null; // already there
       return {
         message: 'Comece cadastrando seu primeiro caso clinico',

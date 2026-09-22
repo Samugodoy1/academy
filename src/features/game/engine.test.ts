@@ -171,7 +171,15 @@ describe('montagem das lições', () => {
     expect(first.exercises.length).toBe(LESSON_SIZE);
   });
 
-  it('prioriza conceitos ainda não vistos na lição seguinte', () => {
+  it('equilibra os seis formatos em cada lição', () => {
+    const expectedKinds = new Set(['choice', 'multi', 'boolean', 'order', 'match', 'blank']);
+    for (const gameUnit of GAME_UNITS) {
+      const lesson = buildLesson(gameUnit, 0, `formats:${gameUnit.topic}`);
+      expect(new Set(lesson.exercises.map(exercise => exercise.kind))).toEqual(expectedKinds);
+    }
+  });
+
+  it('maximiza conceitos novos sem perder o equilíbrio de formatos', () => {
     const first = buildLesson(unit, 0, 'first');
     const memory = Object.fromEntries(
       first.exercises.map(exercise => [
@@ -181,7 +189,10 @@ describe('montagem das lições', () => {
     ) satisfies Record<string, ExerciseMemory>;
     const second = buildLesson(unit, 1, { seed: 'second', memory, now: 200 });
     const firstConcepts = new Set(first.exercises.map(exercise => exercise.conceptId));
-    expect(second.exercises.some(exercise => firstConcepts.has(exercise.conceptId))).toBe(false);
+    const repeated = second.exercises.filter(exercise =>
+      firstConcepts.has(exercise.conceptId)
+    );
+    expect(repeated.length).toBeLessThanOrEqual(2);
   });
 
   it('monta a prova do box com os exercícios mais difíceis', () => {
@@ -254,6 +265,12 @@ describe('montagem das lições', () => {
     expect(new Set(practice.exercises.map(exercise => exercise.conceptId)).size).toBe(
       REVIEW_SIZE
     );
+    const kindCounts = practice.exercises.reduce<Record<string, number>>((counts, exercise) => {
+      counts[exercise.kind] = (counts[exercise.kind] ?? 0) + 1;
+      return counts;
+    }, {});
+    expect(Object.keys(kindCounts)).toHaveLength(6);
+    expect(Math.max(...Object.values(kindCounts)) - Math.min(...Object.values(kindCounts))).toBeLessThanOrEqual(1);
   });
 
   it('embaralha de forma determinística', () => {

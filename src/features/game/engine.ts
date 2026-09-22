@@ -180,6 +180,14 @@ function randomizeExercise(
 }
 
 const conceptIdOf = (exercise: Exercise) => exercise.conceptId ?? exercise.id;
+const EXERCISE_KIND_CYCLE: Exercise['kind'][] = [
+  'choice',
+  'multi',
+  'boolean',
+  'order',
+  'match',
+  'blank',
+];
 
 function selectLessonExercises(
   pool: Exercise[],
@@ -221,11 +229,42 @@ function selectLessonExercises(
         b.weakness - a.weakness ||
         a.difficultyDistance - b.difficultyDistance ||
         a.tie - b.tie
-    )
-    .slice(0, Math.min(size, groups.size));
+    );
 
-  const selected = ranked.map(group => {
-    const variant = [...group.variants]
+  const targetKinds = Array.from(
+    { length: Math.min(size, groups.size) },
+    (_, offset) =>
+      EXERCISE_KIND_CYCLE[(hashSeed(options.seed) + offset) % EXERCISE_KIND_CYCLE.length]
+  );
+  const remaining = [...ranked];
+  const orderedTargets = targetKinds
+    .map((kind, order) => ({
+      kind,
+      order,
+      availability: ranked.filter(group =>
+        group.variants.some(variant => variant.kind === kind)
+      ).length,
+    }))
+    .sort((a, b) => a.availability - b.availability || a.order - b.order);
+  const balanced = orderedTargets.map(({ kind }) => {
+    const authoredIndex = remaining.findIndex(group =>
+      group.variants.some(
+        variant => variant.id === group.conceptId && variant.kind === kind
+      )
+    );
+    const compatibleIndex = remaining.findIndex(group =>
+      group.variants.some(variant => variant.kind === kind)
+    );
+    const groupIndex = authoredIndex >= 0 ? authoredIndex : compatibleIndex;
+    const [group] = remaining.splice(groupIndex >= 0 ? groupIndex : 0, 1);
+    return { group, kind };
+  });
+
+  const selected = balanced.map(({ group, kind }) => {
+    const candidates = group.variants.some(variant => variant.kind === kind)
+      ? group.variants.filter(variant => variant.kind === kind)
+      : group.variants;
+    const variant = [...candidates]
       .map(exercise => ({
         exercise,
         memory: options.memory[exercise.id],

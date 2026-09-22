@@ -1,9 +1,78 @@
 import type { ExerciseSeed } from '../types';
 
-const facts: Array<[string,string,string,string]> = [["Movimento ortodôntico depende de remodelação do ligamento periodontal e osso.","Forças aplicadas produzem resposta biológica dos tecidos.","move o dente apenas por desgaste","não envolve osso"],["Overjet descreve a relação horizontal entre incisivos superiores e inferiores.","É diferente de overbite, que descreve a relação vertical.","é sempre vertical","mede apenas a linha média"],["Overbite descreve a sobreposição vertical dos incisivos.","A avaliação faz parte da análise da relação anterior.","é uma medida exclusivamente horizontal","é sinônimo de overjet"],["Retenção é necessária após movimentação ortodôntica.","Os tecidos precisam se adaptar e há risco de recidiva.","não é necessária","serve apenas para estética"],["Crescimento facial influencia o planejamento ortodôntico.","Idade e padrão de crescimento podem modificar a conduta.","crescimento não interfere","todos crescem da mesma forma"],["Higiene oral é essencial durante tratamento ortodôntico fixo.","Brackets podem aumentar retenção de biofilme.","é irrelevante","apenas o ortodontista precisa higienizar"]];
-const make = (): ExerciseSeed[] => facts.flatMap(([statement, explanation, wrong, correct], i) => [
-  { id:'orto-' + String(i+1).padStart(2,'0') + 'a', kind:'choice', difficulty:2, prompt:'Qual afirmação está correta?', options:[correct, wrong, 'As duas estão corretas apenas em laboratório', 'Não há relação clínica'], answer:0, explanation },
-  { id:'orto-' + String(i+1).padStart(2,'0') + 'b', kind:'boolean', difficulty:1, prompt:'Verdadeiro ou falso?', statement, answer:true, explanation },
-]);
-
-export const ORTO_EXERCISES: ExerciseSeed[] = make();
+export const ORTO_EXERCISES: ExerciseSeed[] = [
+  {
+    id: 'orto-01',
+    kind: 'multi',
+    difficulty: 2,
+    prompt: 'Quais tecidos participam diretamente da resposta ao movimento ortodôntico?',
+    options: [
+      'Ligamento periodontal.',
+      'Osso alveolar.',
+      'Tecidos vasculares e celulares associados à remodelação.',
+      'Somente o esmalte, por desgaste da face proximal.',
+    ],
+    answers: [0, 1, 2],
+    explanation: 'Forças controladas alteram o ambiente do ligamento periodontal e desencadeiam remodelação óssea; o movimento não ocorre por desgaste dentário.',
+  },
+  {
+    id: 'orto-02',
+    kind: 'choice',
+    difficulty: 1,
+    prompt: 'O que o overjet descreve?',
+    options: [
+      'A relação horizontal entre os incisivos superiores e inferiores.',
+      'A sobreposição vertical dos incisivos.',
+      'O desvio da linha média posterior.',
+      'A distância entre os primeiros molares no sentido transversal.',
+    ],
+    answer: 0,
+    explanation: 'Overjet é a relação horizontal anterior e pode ser positivo, reduzido ou reverso; overbite descreve a dimensão vertical.',
+  },
+  {
+    id: 'orto-03',
+    kind: 'boolean',
+    difficulty: 1,
+    prompt: 'Avalie a definição de overbite.',
+    statement: 'Overbite é uma medida exclusivamente horizontal e sinônimo de overjet.',
+    answer: false,
+    explanation: 'Overbite descreve a sobreposição vertical dos incisivos e deve ser avaliado separadamente do overjet.',
+  },
+  {
+    id: 'orto-04',
+    kind: 'choice',
+    difficulty: 2,
+    prompt: 'Por que a contenção é indicada após a fase ativa do tratamento ortodôntico?',
+    options: [
+      'Porque tecidos e oclusão precisam se adaptar e os dentes permanecem sujeitos à recidiva e a mudanças ao longo da vida.',
+      'Apenas para melhorar a cor dos dentes.',
+      'Porque todo movimento ortodôntico desaparece em 24 horas sem contenção.',
+      'Somente para pacientes que usaram aparelho removível.',
+    ],
+    answer: 0,
+    explanation: 'O protocolo e a duração são individualizados; retenção prolongada ou permanente pode ser indicada para manter o resultado.',
+  },
+  {
+    id: 'orto-05',
+    kind: 'boolean',
+    difficulty: 2,
+    prompt: 'Avalie a influência do crescimento facial.',
+    statement: 'Idade, estágio de maturação e padrão de crescimento podem modificar objetivos, oportunidade e resposta ao tratamento ortodôntico.',
+    answer: true,
+    explanation: 'Pacientes não apresentam o mesmo potencial nem a mesma direção de crescimento; o planejamento deve integrar maturação esquelética e padrão facial.',
+  },
+  {
+    id: 'orto-06',
+    kind: 'multi',
+    difficulty: 2,
+    prompt: 'Quais medidas ajudam a controlar o biofilme durante o tratamento ortodôntico fixo?',
+    options: [
+      'Higienizar cuidadosamente ao redor de brackets, fios e margem gengival.',
+      'Usar recursos interproximais indicados e dentifrício fluoretado.',
+      'Manter acompanhamento e prevenção individualizados conforme o risco.',
+      'Delegar toda a higiene ao ortodontista nas consultas.',
+    ],
+    answers: [0, 1, 2],
+    explanation: 'Aparelhos fixos aumentam nichos de retenção. Autocuidado, orientação profissional e controle de risco reduzem gengivite e lesões de mancha branca.',
+  },
+];

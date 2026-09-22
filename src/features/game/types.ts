@@ -2,6 +2,11 @@ import type { StudyKey } from '../../utils/studyTopics';
 
 export type ExerciseKind = 'choice' | 'multi' | 'boolean' | 'order' | 'match' | 'blank';
 
+export interface ScientificReference {
+  label: string;
+  url: string;
+}
+
 interface ExerciseCommon {
   id: string;
   topic: StudyKey;
@@ -9,6 +14,8 @@ interface ExerciseCommon {
   prompt: string;
   /** Shown in the feedback sheet, right after answering. */
   explanation: string;
+  /** Scientific guideline or consensus displayed with every correction. */
+  references: ScientificReference[];
   /** 1 = aquecimento, 2 = clínica do dia a dia, 3 = pega do professor. */
   difficulty?: 1 | 2 | 3;
 }
@@ -65,12 +72,12 @@ export type Exercise =
 
 /** Exercise as written in the content files, before the topic is stamped on it. */
 export type ExerciseSeed =
-  | Omit<ChoiceExercise, 'topic'>
-  | Omit<MultiExercise, 'topic'>
-  | Omit<BooleanExercise, 'topic'>
-  | Omit<OrderExercise, 'topic'>
-  | Omit<MatchExercise, 'topic'>
-  | Omit<BlankExercise, 'topic'>;
+  | Omit<ChoiceExercise, 'topic' | 'references'>
+  | Omit<MultiExercise, 'topic' | 'references'>
+  | Omit<BooleanExercise, 'topic' | 'references'>
+  | Omit<OrderExercise, 'topic' | 'references'>
+  | Omit<MatchExercise, 'topic' | 'references'>
+  | Omit<BlankExercise, 'topic' | 'references'>;
 
 export type Answer =
   | { kind: 'choice'; index: number }

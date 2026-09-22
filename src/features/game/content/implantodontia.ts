@@ -1,9 +1,78 @@
 import type { ExerciseSeed } from '../types';
 
-const facts: Array<[string,string,string,string]> = [["Planejamento tridimensional ajuda a avaliar posição do implante e estruturas anatômicas.","A posição proteticamente orientada é central no planejamento.","dispensa avaliação óssea","torna anatomia irrelevante"],["Osseointegração depende de estabilidade e interação adequada entre implante e tecido.","Carga e condições locais influenciam o resultado.","ocorre instantaneamente","não depende do tecido ósseo"],["Controle de biofilme é importante para manutenção peri-implantar.","Higiene e acompanhamento fazem parte do tratamento.","é desnecessário após instalação","implante é imune à inflamação"],["Nervo alveolar inferior deve ser considerado no planejamento posterior mandibular.","A posição do canal limita opções e exige avaliação por imagem quando indicada.","não tem relação com implantes","é encontrado no maxilar"],["Seio maxilar pode limitar a disponibilidade óssea posterior da maxila.","O planejamento deve considerar altura e anatomia do seio.","é irrelevante em molares superiores","fica na mandíbula"],["Prótese sobre implante deve ser planejada junto ao posicionamento cirúrgico.","O planejamento reverso integra função, estética e cirurgia.","cirurgia deve ignorar a prótese","prótese é decidida só depois da instalação"]];
-const make = (): ExerciseSeed[] => facts.flatMap(([statement, explanation, wrong, correct], i) => [
-  { id:'impl-' + String(i+1).padStart(2,'0') + 'a', kind:'choice', difficulty:2, prompt:'Qual afirmação está correta?', options:[correct, wrong, 'As duas estão corretas apenas em laboratório', 'Não há relação clínica'], answer:0, explanation },
-  { id:'impl-' + String(i+1).padStart(2,'0') + 'b', kind:'boolean', difficulty:1, prompt:'Verdadeiro ou falso?', statement, answer:true, explanation },
-]);
-
-export const IMPL_EXERCISES: ExerciseSeed[] = make();
+export const IMPL_EXERCISES: ExerciseSeed[] = [
+  {
+    id: 'impl-01',
+    kind: 'multi',
+    difficulty: 3,
+    prompt: 'Quais princípios se aplicam ao planejamento por imagem de implantes?',
+    options: [
+      'A posição proposta deve ser relacionada ao volume ósseo e às estruturas anatômicas.',
+      'A aquisição tridimensional deve ser clinicamente justificada e otimizada quanto a campo e exposição.',
+      'A imagem elimina a necessidade de exame clínico e planejamento protético.',
+      'O planejamento deve partir do resultado protético pretendido.',
+    ],
+    answers: [0, 1, 3],
+    explanation: 'Imagem, exame clínico e planejamento reverso são complementares. A radiação deve ser justificada e limitada ao necessário para responder à questão clínica.',
+  },
+  {
+    id: 'impl-02',
+    kind: 'choice',
+    difficulty: 2,
+    prompt: 'Qual alternativa define corretamente osseointegração?',
+    options: [
+      'Conexão estrutural e funcional direta entre osso vivo e a superfície do implante.',
+      'Fixação instantânea produzida apenas pelo torque de inserção.',
+      'Formação de uma cápsula fibrosa espessa ao redor do implante.',
+      'União que independe da vascularização e das condições do leito ósseo.',
+    ],
+    answer: 0,
+    explanation: 'Estabilidade inicial suficiente, biocompatibilidade, técnica, controle de micromovimento e condições locais e sistêmicas influenciam a formação e manutenção dessa interface.',
+  },
+  {
+    id: 'impl-03',
+    kind: 'boolean',
+    difficulty: 1,
+    prompt: 'Avalie a manutenção peri-implantar.',
+    statement: 'Após a osseointegração, o implante torna-se imune à inflamação induzida por biofilme.',
+    answer: false,
+    explanation: 'Mucosite e peri-implantite podem ocorrer. Higiene, controle de fatores de risco e manutenção profissional individualizada integram o tratamento.',
+  },
+  {
+    id: 'impl-04',
+    kind: 'choice',
+    difficulty: 3,
+    prompt: 'No planejamento de um implante na mandíbula posterior, qual avaliação anatômica é essencial?',
+    options: [
+      'Localizar o canal mandibular e considerar variações, limites da imagem e margem de segurança apropriada.',
+      'Presumir que o nervo alveolar inferior está sempre no centro do rebordo.',
+      'Procurar o nervo alveolar inferior no interior do seio maxilar.',
+      'Ignorar a imagem se houver altura óssea aparente ao exame visual.',
+    ],
+    answer: 0,
+    explanation: 'A posição do canal e variações como bifurcações ou extensão anterior influenciam o comprimento, a posição e a segurança do procedimento.',
+  },
+  {
+    id: 'impl-05',
+    kind: 'boolean',
+    difficulty: 2,
+    prompt: 'Avalie a anatomia da maxila posterior.',
+    statement: 'A pneumatização e a anatomia do seio maxilar podem limitar a altura óssea disponível para implantes posteriores.',
+    answer: true,
+    explanation: 'Altura e largura do rebordo, anatomia sinusal, saúde do seio e necessidade de aumento devem ser avaliadas individualmente.',
+  },
+  {
+    id: 'impl-06',
+    kind: 'multi',
+    difficulty: 2,
+    prompt: 'Quais elementos pertencem ao planejamento reverso em implantodontia?',
+    options: [
+      'Posição e contorno da futura prótese.',
+      'Exigências funcionais, fonéticas e estéticas.',
+      'Acesso para higiene e possibilidade de manutenção.',
+      'Escolha da posição cirúrgica sem considerar a reabilitação.',
+    ],
+    answers: [0, 1, 2],
+    explanation: 'O posicionamento tridimensional do implante deve viabilizar uma prótese funcional, higienizável e biologicamente compatível, respeitando a anatomia.',
+  },
+];

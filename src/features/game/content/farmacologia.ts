@@ -1,9 +1,78 @@
 import type { ExerciseSeed } from '../types';
 
-const facts: Array<[string,string,string,string]> = [["Analgésicos tratam dor, mas não removem a causa odontogênica.","Controle da causa continua sendo necessário quando existe infecção ou lesão estrutural.","substituem o tratamento","curam toda infecção"],["Anti-inflamatórios não esteroides podem aumentar risco gastrointestinal em pacientes suscetíveis.","História médica e uso concomitante de medicamentos devem ser considerados.","sempre são isentos de risco","não interagem com outros fármacos"],["Paracetamol exige atenção à dose total diária.","Excesso pode causar toxicidade hepática.","pode ser usado sem limite","não é absorvido por via oral"],["Antibiótico deve ter indicação clínica adequada.","Uso desnecessário favorece eventos adversos e resistência bacteriana.","é obrigatório em toda restauração","substitui drenagem"],["Alergia medicamentosa verdadeira deve ser diferenciada de efeito adverso.","História detalhada ajuda a evitar rótulos incorretos e escolhas inseguras.","todo efeito adverso é alergia","alergia nunca importa"],["Interações medicamentosas devem ser consideradas na prescrição.","Anticoagulantes, sedativos e outros fármacos podem alterar a conduta.","não precisam ser investigadas","só importam em hospitais"]];
-const make = (): ExerciseSeed[] => facts.flatMap(([statement, explanation, wrong, correct], i) => [
-  { id:'farm-' + String(i+1).padStart(2,'0') + 'a', kind:'choice', difficulty:2, prompt:'Qual afirmação está correta?', options:[correct, wrong, 'As duas estão corretas apenas em laboratório', 'Não há relação clínica'], answer:0, explanation },
-  { id:'farm-' + String(i+1).padStart(2,'0') + 'b', kind:'boolean', difficulty:1, prompt:'Verdadeiro ou falso?', statement, answer:true, explanation },
-]);
-
-export const FARM_EXERCISES: ExerciseSeed[] = make();
+export const FARM_EXERCISES: ExerciseSeed[] = [
+  {
+    id: 'farm-01',
+    kind: 'boolean',
+    difficulty: 1,
+    prompt: 'Avalie o papel dos analgésicos.',
+    statement: 'Analgésicos podem controlar a dor, mas não substituem o tratamento da causa odontogênica.',
+    answer: true,
+    explanation: 'O alívio farmacológico é temporário quando existe uma causa estrutural ou infecciosa que exige tratamento odontológico definitivo.',
+  },
+  {
+    id: 'farm-02',
+    kind: 'multi',
+    difficulty: 2,
+    prompt: 'Antes de prescrever um anti-inflamatório não esteroide, quais fatores devem ser investigados?',
+    options: [
+      'História de úlcera ou sangramento gastrointestinal.',
+      'Doença renal e risco cardiovascular.',
+      'Uso de anticoagulantes, antiagregantes ou outros medicamentos que interajam.',
+      'Apenas a intensidade da dor, pois os antecedentes não alteram o risco.',
+    ],
+    answers: [0, 1, 2],
+    explanation: 'AINEs podem aumentar riscos gastrointestinal, renal, cardiovascular e hemorrágico; indicação, dose e duração devem considerar o perfil individual.',
+  },
+  {
+    id: 'farm-03',
+    kind: 'choice',
+    difficulty: 2,
+    prompt: 'Qual orientação reduz o risco de toxicidade por paracetamol?',
+    options: [
+      'Somar o paracetamol presente em todos os medicamentos usados e individualizar o limite diário.',
+      'Considerar apenas a dose do medicamento prescrito pelo dentista.',
+      'Usar livremente porque o fármaco não apresenta toxicidade hepática.',
+      'Dobrar a dose sempre que a dor persistir após a primeira tomada.',
+    ],
+    answer: 0,
+    explanation: 'Produtos combinados também podem conter paracetamol. Idade, peso, função hepática, consumo de álcool e outros riscos modificam o limite seguro.',
+  },
+  {
+    id: 'farm-04',
+    kind: 'boolean',
+    difficulty: 2,
+    prompt: 'Avalie a indicação de antibióticos.',
+    statement: 'Antibióticos substituem drenagem e tratamento odontológico local quando existe uma fonte de infecção acessível.',
+    answer: false,
+    explanation: 'O controle da fonte é prioritário. Antibióticos são reservados às indicações clínicas apropriadas, como disseminação ou comprometimento sistêmico, conforme diretriz.',
+  },
+  {
+    id: 'farm-05',
+    kind: 'choice',
+    difficulty: 2,
+    prompt: 'Um paciente relata “alergia” após ter apresentado náusea com um medicamento. Qual é a conduta mais segura?',
+    options: [
+      'Investigar fármaco, sintomas, tempo de início, gravidade e tratamento recebido antes de classificar a reação.',
+      'Registrar anafilaxia sem obter outros detalhes.',
+      'Desconsiderar o relato porque náusea nunca tem relevância clínica.',
+      'Concluir que todo efeito adverso é uma reação alérgica mediada imunologicamente.',
+    ],
+    answer: 0,
+    explanation: 'Efeito adverso e alergia verdadeira não são sinônimos. Uma história detalhada evita tanto reexposição perigosa quanto rótulos incorretos.',
+  },
+  {
+    id: 'farm-06',
+    kind: 'multi',
+    difficulty: 3,
+    prompt: 'Quais condutas fazem parte de uma prescrição odontológica segura diante de polifarmácia?',
+    options: [
+      'Realizar conciliação dos medicamentos, incluindo produtos sem receita e fitoterápicos.',
+      'Avaliar interações e efeitos aditivos, como sangramento ou sedação.',
+      'Suspender anticoagulantes automaticamente antes de qualquer procedimento.',
+      'Contatar o prescritor quando uma alteração do tratamento crônico puder ser necessária.',
+    ],
+    answers: [0, 1, 3],
+    explanation: 'Medicamentos crônicos não devem ser suspensos automaticamente. A decisão depende do procedimento, do risco individual e, quando necessário, de coordenação com o prescritor.',
+  },
+];

@@ -12,7 +12,6 @@ import { PERIODONTIA_EXERCISES } from './periodontia';
 import { PREVENTIVA_EXERCISES } from './preventiva';
 import { PROTESE_EXERCISES } from './protese';
 import { RADIOLOGIA_EXERCISES } from './radiologia';
-import { EXPANDED_EXERCISES } from './expanded';
 import { ANAT_EXERCISES } from './anatomia-aplicada';
 import { FARM_EXERCISES } from './farmacologia';
 import { PAT_EXERCISES } from './patologia-oral';
@@ -23,14 +22,10 @@ import { OCL_EXERCISES } from './oclusao';
 import { IMPL_EXERCISES } from './implantodontia';
 import { ORTO_EXERCISES } from './ortodontia';
 import { GERI_EXERCISES } from './odontogeriatria';
+import { REFERENCES_BY_TOPIC } from './references';
 
 const stamp = (topic: StudyKey, seeds: ExerciseSeed[]): Exercise[] =>
-  seeds.map(seed => ({ ...seed, topic }) as Exercise);
-
-const withExpanded = (topic: StudyKey, seeds: ExerciseSeed[]): ExerciseSeed[] => [
-  ...seeds,
-  ...(EXPANDED_EXERCISES[topic] ?? []),
-];
+  seeds.map(seed => ({ ...seed, topic, references: REFERENCES_BY_TOPIC[topic] }) as Exercise);
 
 interface UnitSeed {
   topic: StudyKey;
@@ -45,67 +40,67 @@ const UNIT_SEEDS: UnitSeed[] = [
     topic: 'exame-clinico',
     title: 'Exame clínico',
     tagline: 'Ouvir, examinar e transformar achado em plano.',
-    exercises: withExpanded('exame-clinico', EXAME_CLINICO_EXERCISES),
+    exercises: EXAME_CLINICO_EXERCISES,
   },
   {
     topic: 'radiologia',
     title: 'Radiologia',
     tagline: 'Pedir a tomada certa e ler sem pular etapa.',
-    exercises: withExpanded('radiologia', RADIOLOGIA_EXERCISES),
+    exercises: RADIOLOGIA_EXERCISES,
   },
   {
     topic: 'anestesia',
     title: 'Anestesia',
     tagline: 'Dose, técnica e o que fazer quando falha.',
-    exercises: withExpanded('anestesia', ANESTESIA_EXERCISES),
+    exercises: ANESTESIA_EXERCISES,
   },
   {
     topic: 'isolamento',
     title: 'Isolamento',
     tagline: 'Campo seco, grampo estável e paciente seguro.',
-    exercises: withExpanded('isolamento', ISOLAMENTO_EXERCISES),
+    exercises: ISOLAMENTO_EXERCISES,
   },
   {
     topic: 'preventiva',
     title: 'Preventiva',
     tagline: 'Risco de cárie, flúor e mudança de hábito.',
-    exercises: withExpanded('preventiva', PREVENTIVA_EXERCISES),
+    exercises: PREVENTIVA_EXERCISES,
   },
   {
     topic: 'periodontia',
     title: 'Periodontia',
     tagline: 'Sondar, diagnosticar e manter o resultado.',
-    exercises: withExpanded('periodontia', PERIODONTIA_EXERCISES),
+    exercises: PERIODONTIA_EXERCISES,
   },
   {
     topic: 'dentistica',
     title: 'Dentística',
     tagline: 'Adesão previsível, contato e oclusão.',
-    exercises: withExpanded('dentistica', DENTISTICA_EXERCISES),
+    exercises: DENTISTICA_EXERCISES,
   },
   {
     topic: 'endodontia',
     title: 'Endodontia',
     tagline: 'Do diagnóstico da dor ao preparo do canal.',
-    exercises: withExpanded('endodontia', ENDODONTIA_EXERCISES),
+    exercises: ENDODONTIA_EXERCISES,
   },
   {
     topic: 'cirurgia',
     title: 'Cirurgia',
     tagline: 'Planejar, luxar com técnica e dar alta segura.',
-    exercises: withExpanded('cirurgia', CIRURGIA_EXERCISES),
+    exercises: CIRURGIA_EXERCISES,
   },
   {
     topic: 'protese',
     title: 'Prótese',
     tagline: 'Preparo, moldagem e provisório que funciona.',
-    exercises: withExpanded('protese', PROTESE_EXERCISES),
+    exercises: PROTESE_EXERCISES,
   },
   {
     topic: 'odontopediatria',
     title: 'Odontopediatria',
     tagline: 'Manejo, prevenção e conduta conservadora.',
-    exercises: withExpanded('odontopediatria', ODONTOPEDIATRIA_EXERCISES),
+    exercises: ODONTOPEDIATRIA_EXERCISES,
   },
   {
     topic: 'anatomia-aplicada',

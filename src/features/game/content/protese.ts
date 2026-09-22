@@ -15,7 +15,7 @@ export const PROTESE_EXERCISES: ExerciseSeed[] = [
     ],
     answer: 1,
     explanation:
-      'O técnico não adivinha a margem. Término incompleto vira coroa desadaptada, infiltração e cárie secundária.',
+      'O término precisa estar registrado sem defeitos para permitir uma peça adaptada. A área não deve ser reconstruída por estimativa no laboratório.',
   },
   {
     id: 'prot-02',
@@ -38,26 +38,26 @@ export const PROTESE_EXERCISES: ExerciseSeed[] = [
     kind: 'blank',
     difficulty: 2,
     prompt: 'Complete a frase',
-    sentence: 'Antes de moldar um término subgengival é necessário fazer o ___ gengival.',
+    sentence: 'Quando o sulco impede a visualização e o registro do término, indica-se o ___ gengival.',
     answer: 'afastamento',
     bank: ['afastamento', 'condicionamento', 'polimento', 'selamento'],
     explanation:
-      'Fio afastador (ou outra técnica) expõe a margem e controla o fluido do sulco. Sem isso, o material não copia o término.',
+      'Fio afastador ou outra técnica pode expor a margem e controlar o fluido sulcular. A necessidade depende da posição do término, da saúde do tecido e do método de moldagem ou escaneamento.',
   },
   {
     id: 'prot-04',
     kind: 'order',
     difficulty: 2,
-    prompt: 'Ordene a sequência protética',
+    prompt: 'Em um caso que exige condicionamento gengival com provisório, organize a sequência',
     steps: [
       'Planejamento e avaliação do remanescente',
       'Preparo dentário com término definido',
-      'Afastamento gengival e moldagem',
-      'Confecção e ajuste do provisório',
+      'Confecção e ajuste inicial do provisório',
+      'Condicionamento tecidual, afastamento e moldagem definitiva',
       'Prova e cimentação da peça definitiva',
     ],
     explanation:
-      'Cada etapa depende da anterior. Preparo sem planejamento é desgaste irreversível feito no escuro.',
+      'O fluxo varia conforme o caso. Quando o provisório é usado para condicionar tecidos, a moldagem definitiva ocorre depois de margens, contorno e saúde gengival estarem adequados.',
   },
   {
     id: 'prot-05',
@@ -73,7 +73,7 @@ export const PROTESE_EXERCISES: ExerciseSeed[] = [
     ],
     answer: 1,
     explanation:
-      'Ajustar oclusão faz parte da instalação. Contato alto sobrecarrega o periodonto e costuma voltar como urgência.',
+      'O contato prematuro pode causar desconforto, sobrecarga e falha do provisório. A oclusão deve ser verificada e ajustada na instalação.',
   },
   {
     id: 'prot-06',
@@ -81,13 +81,16 @@ export const PROTESE_EXERCISES: ExerciseSeed[] = [
     difficulty: 3,
     prompt: 'Relacione o conceito com a definição',
     pairs: [
-      { left: 'MIC', right: 'Máxima intercuspidação habitual' },
-      { left: 'Relação cêntrica', right: 'Posição condilar de referência' },
+      { left: 'Máxima intercuspidação', right: 'Intercuspidação completa dos dentes antagonistas' },
+      {
+        left: 'Relação cêntrica',
+        right: 'Relação maxilomandibular reproduzível e independente de contato dentário',
+      },
       { left: 'Guia anterior', right: 'Desoclusão dos posteriores na protrusão' },
       { left: 'Espaço funcional livre', right: 'Diferença entre repouso e oclusão' },
     ],
     explanation:
-      'Esses quatro conceitos aparecem em toda avaliação oclusal. Sem eles, o ajuste vira tentativa e erro com carbono.',
+      'A máxima intercuspidação é definida pelos contatos dentários, independentemente da posição condilar. A relação cêntrica é uma referência maxilomandibular e não depende do contato dos dentes.',
   },
   {
     id: 'prot-07',
@@ -97,7 +100,7 @@ export const PROTESE_EXERCISES: ExerciseSeed[] = [
     statement: 'A saúde periodontal deve estar controlada antes do preparo protético.',
     answer: true,
     explanation:
-      'Gengiva inflamada sangra, muda de posição após o tratamento e inviabiliza tanto a moldagem quanto a margem da peça.',
+      'Inflamação gengival pode causar sangramento e alteração de contorno, prejudicando o registro e a adaptação marginal.',
   },
   {
     id: 'prot-08',
@@ -107,24 +110,24 @@ export const PROTESE_EXERCISES: ExerciseSeed[] = [
     scenario: 'Na prova da coroa metalocerâmica, o contato proximal está tão apertado que a peça não assenta.',
     options: [
       'Forçar a cimentação para que ela assente com o tempo',
-      'Ajustar o contato proximal com ponta adequada até assentar e conferir a adaptação marginal',
+      'Verificar o ajuste interno e ajustar o contato da peça até obter assentamento completo',
       'Desgastar o dente vizinho',
       'Cimentar assim mesmo e ajustar na próxima consulta',
     ],
     answer: 1,
     explanation:
-      'Peça que não assenta deixa margem aberta e oclusão alta. Ajusta-se a peça, não o dente vizinho hígido.',
+      'Interferência interna ou contato proximal excessivo pode impedir o assentamento. Após o ajuste, a superfície deve ser acabada adequadamente e a adaptação marginal e a oclusão devem ser reavaliadas.',
   },
   {
     id: 'prot-09',
     kind: 'blank',
     difficulty: 2,
     prompt: 'Complete a frase',
-    sentence: 'O término em ___ é o preparo com degrau arredondado bastante usado em coroas cerâmicas.',
+    sentence: 'O término em ___ apresenta concavidade cervical e pode ser indicado para materiais específicos.',
     answer: 'chanfro',
     bank: ['chanfro', 'lâmina de faca', 'ombro reto', 'bisel'],
     explanation:
-      'O chanfro dá espessura suficiente à cerâmica na cervical e é fácil de identificar na moldagem e no modelo.',
+      'A profundidade e o desenho do chanfro dependem do material restaurador. Cerâmicas também podem exigir chanfro profundo ou ombro arredondado conforme espessura e orientação do fabricante.',
   },
   {
     id: 'prot-10',
@@ -140,7 +143,7 @@ export const PROTESE_EXERCISES: ExerciseSeed[] = [
     ],
     answers: [0, 1, 2, 4],
     explanation:
-      'Avalie o molde com boa luz e lupa se possível, antes de dispensar o paciente. Refazer na hora custa muito menos.',
+      'O molde deve ser avaliado antes da liberação do paciente. Defeitos no término impedem a reprodução confiável da margem.',
   },
   {
     id: 'prot-11',
@@ -156,7 +159,7 @@ export const PROTESE_EXERCISES: ExerciseSeed[] = [
     ],
     answer: 1,
     explanation:
-      'Provisório mal contornado, com excesso ou sem polimento, retém biofilme. Corrigir o provisório resolve a inflamação na origem.',
+      'Contorno inadequado, excesso ou superfície rugosa podem reter biofilme. O provisório deve ser corrigido e a resposta gengival acompanhada.',
   },
   {
     id: 'prot-12',
@@ -164,13 +167,14 @@ export const PROTESE_EXERCISES: ExerciseSeed[] = [
     difficulty: 3,
     prompt: 'Ordene a instalação da peça definitiva',
     steps: [
-      'Prova em boca e avaliação da adaptação marginal',
-      'Conferência do contato proximal',
-      'Ajuste oclusal em MIC e nos movimentos excursivos',
+      'Prova em boca e avaliação do ajuste interno',
+      'Conferência do contato proximal e do assentamento completo',
+      'Avaliação da adaptação marginal',
+      'Ajuste oclusal em máxima intercuspidação e nos movimentos excursivos',
       'Limpeza e cimentação conforme o material',
-      'Remoção de excessos de cimento e orientação final',
+      'Remoção de excessos, verificação final e orientação',
     ],
     explanation:
-      'Excesso de cimento subgengival é causa frequente de inflamação persistente meses depois da entrega.',
+      'Contato proximal excessivo pode impedir o assentamento e simular desadaptação marginal. Após a cimentação, todo excesso deve ser removido para proteger os tecidos periodontais.',
   },
 ];

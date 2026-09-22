@@ -1,9 +1,78 @@
 import type { ExerciseSeed } from '../types';
 
-const facts: Array<[string,string,string,string]> = [["Polifarmácia aumenta a necessidade de revisar medicamentos na consulta.","Interações e efeitos adversos podem influenciar a saúde oral.","dispensa anamnese","não altera risco"],["Xerostomia é comum em idosos que usam vários medicamentos.","Redução salivar pode aumentar cárie e desconforto.","protege contra cárie","não afeta mucosas"],["Raiz exposta aumenta risco de cárie radicular.","Recessão gengival e menor proteção radicular exigem prevenção individualizada.","diminui risco","não tem relação com cárie"],["Capacidade funcional deve ser considerada ao orientar higiene.","Nem todo paciente consegue executar a mesma técnica sozinho.","é irrelevante","deve-se usar sempre a mesma orientação"],["Próteses removíveis precisam de higiene e acompanhamento.","Biofilme e uso contínuo inadequado podem causar inflamação e lesões.","não precisam de limpeza","podem permanecer sempre na boca"],["Alterações cognitivas podem exigir adaptação da comunicação e apoio do cuidador.","O objetivo é manter autonomia e segurança dentro das possibilidades.","devem ser ignoradas","impedem qualquer tratamento"]];
-const make = (): ExerciseSeed[] => facts.flatMap(([statement, explanation, wrong, correct], i) => [
-  { id:'geri-' + String(i+1).padStart(2,'0') + 'a', kind:'choice', difficulty:2, prompt:'Qual afirmação está correta?', options:[correct, wrong, 'As duas estão corretas apenas em laboratório', 'Não há relação clínica'], answer:0, explanation },
-  { id:'geri-' + String(i+1).padStart(2,'0') + 'b', kind:'boolean', difficulty:1, prompt:'Verdadeiro ou falso?', statement, answer:true, explanation },
-]);
-
-export const GERI_EXERCISES: ExerciseSeed[] = make();
+export const GERI_EXERCISES: ExerciseSeed[] = [
+  {
+    id: 'geri-01',
+    kind: 'multi',
+    difficulty: 2,
+    prompt: 'Por que a lista completa de medicamentos deve ser revisada na consulta do paciente idoso?',
+    options: [
+      'Para identificar interações com medicamentos odontológicos.',
+      'Para reconhecer efeitos orais, risco de sangramento e sedação.',
+      'Para coordenar possíveis alterações com o prescritor, sem suspender tratamentos automaticamente.',
+      'Porque a polifarmácia elimina a necessidade de anamnese clínica.',
+    ],
+    answers: [0, 1, 2],
+    explanation: 'Medicamentos prescritos, isentos de receita e fitoterápicos podem modificar a saúde oral e a segurança do atendimento.',
+  },
+  {
+    id: 'geri-02',
+    kind: 'choice',
+    difficulty: 2,
+    prompt: 'Qual alternativa diferencia corretamente xerostomia e hipossalivação?',
+    options: [
+      'Xerostomia é sensação subjetiva de boca seca; hipossalivação é redução objetiva do fluxo salivar, e uma pode ocorrer sem a outra.',
+      'São sinônimos obrigatórios e só podem ser diagnosticados por radiografia.',
+      'Xerostomia é aumento de saliva causado exclusivamente pelo envelhecimento.',
+      'Hipossalivação não influencia cárie, mucosa ou retenção de próteses.',
+    ],
+    answer: 0,
+    explanation: 'Medicamentos são causa frequente. A hipossalivação aumenta risco de cárie, inclusive radicular, enquanto xerostomia afeta conforto e função.',
+  },
+  {
+    id: 'geri-03',
+    kind: 'boolean',
+    difficulty: 1,
+    prompt: 'Avalie o risco de cárie radicular.',
+    statement: 'Exposição radicular, biofilme, dieta cariogênica e redução salivar podem aumentar o risco de cárie de raiz.',
+    answer: true,
+    explanation: 'A prevenção deve ser individualizada e pode incluir higiene assistida, controle dietético, fluoretos e acompanhamento segundo o risco.',
+  },
+  {
+    id: 'geri-04',
+    kind: 'multi',
+    difficulty: 2,
+    prompt: 'Quais fatores devem orientar a adaptação das instruções de higiene oral?',
+    options: [
+      'Destreza manual, visão e capacidade de compreender e executar a técnica.',
+      'Grau de dependência e disponibilidade de apoio.',
+      'Preferências, rotina e recursos do paciente.',
+      'A exigência de usar a mesma técnica para todas as pessoas.',
+    ],
+    answers: [0, 1, 2],
+    explanation: 'Escovas adaptadas ou elétricas, recursos interproximais e apoio de cuidador podem ser necessários, preservando a participação do paciente.',
+  },
+  {
+    id: 'geri-05',
+    kind: 'choice',
+    difficulty: 2,
+    prompt: 'Qual orientação é mais adequada para uma prótese removível?',
+    options: [
+      'Higienizar prótese e tecidos orais diariamente, removê-la durante o sono em regra e realizar acompanhamento periódico.',
+      'Mantê-la continuamente na boca para impedir qualquer alteração do rebordo.',
+      'Usar dentifrício muito abrasivo para remover desgaste e riscos.',
+      'Procurar avaliação apenas quando a prótese quebrar.',
+    ],
+    answer: 0,
+    explanation: 'Uso contínuo e biofilme favorecem estomatite protética e trauma. Armazenamento e produtos de limpeza devem seguir o material e a orientação profissional.',
+  },
+  {
+    id: 'geri-06',
+    kind: 'boolean',
+    difficulty: 3,
+    prompt: 'Avalie o cuidado de uma pessoa com alteração cognitiva.',
+    statement: 'A presença de alteração cognitiva impede qualquer tratamento odontológico e transfere automaticamente todas as decisões ao cuidador.',
+    answer: false,
+    explanation: 'É necessário avaliar capacidade decisória, adaptar a comunicação e usar decisão apoiada quando indicada, preservando autonomia, preferências, consentimento e segurança.',
+  },
+];

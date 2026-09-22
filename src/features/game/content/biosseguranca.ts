@@ -1,9 +1,78 @@
 import type { ExerciseSeed } from '../types';
 
-const facts: Array<[string,string,string,string]> = [["Higienização das mãos é uma medida central de prevenção de infecção.","Deve ocorrer nos momentos indicados antes e depois do contato clínico.","é dispensável com luvas","serve apenas no fim do dia"],["Luvas não substituem higienização das mãos.","As mãos devem ser higienizadas nos momentos apropriados mesmo com uso de luvas.","luvas tornam higiene desnecessária","luvas esterilizam as mãos"],["Instrumentais críticos precisam de esterilização após limpeza adequada.","A esterilização é necessária para itens que penetram tecidos ou entram em contato com sangue.","apenas lavagem com água","somente desinfecção de baixo nível"],["Perfurocortantes devem ser descartados em recipiente apropriado.","Reencapar agulhas aumenta risco de acidente quando feito de forma insegura.","no lixo comum","em saco plástico fino"],["Barreiras de superfície ajudam a controlar contaminação em áreas de difícil limpeza.","A troca correta entre pacientes reduz contaminação cruzada.","aumentam contaminação","substituem esterilização"],["Acidente com material biológico deve ser comunicado e avaliado imediatamente.","A avaliação precoce permite medidas pós-exposição quando indicadas.","deve ser escondido","pode esperar vários meses"]];
-const make = (): ExerciseSeed[] => facts.flatMap(([statement, explanation, wrong, correct], i) => [
-  { id:'bio-' + String(i+1).padStart(2,'0') + 'a', kind:'choice', difficulty:2, prompt:'Qual afirmação está correta?', options:[correct, wrong, 'As duas estão corretas apenas em laboratório', 'Não há relação clínica'], answer:0, explanation },
-  { id:'bio-' + String(i+1).padStart(2,'0') + 'b', kind:'boolean', difficulty:1, prompt:'Verdadeiro ou falso?', statement, answer:true, explanation },
-]);
-
-export const BIO_EXERCISES: ExerciseSeed[] = make();
+export const BIO_EXERCISES: ExerciseSeed[] = [
+  {
+    id: 'bio-01',
+    kind: 'boolean',
+    difficulty: 1,
+    prompt: 'Avalie a higienização das mãos no atendimento odontológico.',
+    statement: 'A higienização deve ocorrer antes e depois do contato clínico e antes de calçar e após retirar as luvas, nos momentos indicados.',
+    answer: true,
+    explanation: 'Luvas podem apresentar defeitos ou contaminar as mãos durante a remoção; por isso, não substituem a higienização.',
+  },
+  {
+    id: 'bio-02',
+    kind: 'boolean',
+    difficulty: 1,
+    prompt: 'Avalie o efeito das luvas.',
+    statement: 'Calçar luvas esteriliza as mãos e elimina a necessidade de higienizá-las.',
+    answer: false,
+    explanation: 'Luvas são uma barreira de proteção, não um método de higienização ou esterilização das mãos.',
+  },
+  {
+    id: 'bio-03',
+    kind: 'choice',
+    difficulty: 2,
+    prompt: 'Qual processamento é exigido para um instrumental reutilizável que penetra tecido mole ou osso?',
+    options: [
+      'Limpeza adequada, inspeção, preparo e esterilização compatível com o artigo e as instruções do fabricante.',
+      'Apenas enxágue em água corrente.',
+      'Somente desinfecção de baixo nível.',
+      'Fricção com álcool sem limpeza prévia.',
+    ],
+    answer: 0,
+    explanation: 'Artigos críticos devem ser esterilizados após limpeza. O processo precisa ser monitorado e seguir as instruções do instrumental, da embalagem e do equipamento.',
+  },
+  {
+    id: 'bio-04',
+    kind: 'choice',
+    difficulty: 2,
+    prompt: 'Qual é a conduta correta após usar uma agulha odontológica?',
+    options: [
+      'Não reencapar nem desconectar manualmente; descartá-la pelo próprio usuário em coletor apropriado próximo ao local.',
+      'Reencapar com as duas mãos antes de levar a agulha para outra sala.',
+      'Desconectar manualmente e descartar a agulha no lixo comum.',
+      'Guardar a agulha usada na bandeja até o fim do turno.',
+    ],
+    answer: 0,
+    explanation: 'A NR-32 veda reencape e desconexão manual. O coletor deve ser rígido, resistente à punctura, corretamente posicionado e não ultrapassar o limite de preenchimento.',
+  },
+  {
+    id: 'bio-05',
+    kind: 'multi',
+    difficulty: 2,
+    prompt: 'Sobre barreiras em superfícies clínicas, selecione as afirmações corretas.',
+    options: [
+      'São úteis em superfícies de contato clínico difíceis de limpar.',
+      'Devem ser trocadas entre pacientes e sempre que estiverem visivelmente sujas ou danificadas.',
+      'Substituem o processamento de instrumentais críticos.',
+      'A superfície deve ser limpa e desinfetada quando a barreira for comprometida ou conforme o protocolo aplicável.',
+    ],
+    answers: [0, 1, 3],
+    explanation: 'Barreiras reduzem contaminação de superfícies, mas não substituem limpeza, desinfecção ou esterilização quando esses processos são indicados.',
+  },
+  {
+    id: 'bio-06',
+    kind: 'multi',
+    difficulty: 3,
+    prompt: 'Após exposição ocupacional a sangue, quais medidas imediatas são apropriadas?',
+    options: [
+      'Lavar pele ou ferimento com água e sabão e irrigar mucosas com água ou solução salina.',
+      'Comunicar, documentar e procurar avaliação urgente para HIV e hepatites B e C.',
+      'Espremer o ferimento e aplicar substância cáustica para desinfetar.',
+      'Iniciar PEP para HIV, quando indicada, o mais cedo possível e no máximo em 72 horas.',
+    ],
+    answers: [0, 1, 3],
+    explanation: 'Não se recomenda espremer nem usar irritantes. A avaliação precoce permite definir PEP para HIV, manejo da hepatite B e seguimento para hepatite C.',
+  },
+];

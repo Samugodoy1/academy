@@ -14,7 +14,7 @@ export const ISOLAMENTO_EXERCISES: ExerciseSeed[] = [
     ],
     answer: 1,
     explanation:
-      'É item de segurança: se o grampo escapar, o fio evita aspiração ou deglutição. Nunca é opcional.',
+      'O fio permite recuperar o grampo se ele se soltar durante a prova, instalação ou remoção, reduzindo o risco de deglutição ou aspiração.',
   },
   {
     id: 'isol-02',
@@ -24,7 +24,7 @@ export const ISOLAMENTO_EXERCISES: ExerciseSeed[] = [
     statement: 'Endodontia pode ser realizada sem isolamento absoluto quando o paciente colabora.',
     answer: false,
     explanation:
-      'Isolamento absoluto em endodontia não se negocia: protege contra aspiração de instrumentos, contaminação salivar e extravasamento de irrigante.',
+      'O isolamento absoluto é o padrão de cuidado no tratamento endodôntico não cirúrgico. Ele reduz contaminação salivar e protege contra instrumentos e irrigantes.',
   },
   {
     id: 'isol-03',
@@ -32,14 +32,14 @@ export const ISOLAMENTO_EXERCISES: ExerciseSeed[] = [
     difficulty: 2,
     prompt: 'Ordene a montagem do isolamento',
     steps: [
-      'Selecionar e testar o grampo no dente',
-      'Amarrar o fio dental de segurança no grampo',
+      'Selecionar o grampo de acordo com a anatomia cervical',
+      'Amarrar o fio dental de segurança e testar o grampo no dente',
       'Perfurar o lençol conforme os dentes a isolar',
       'Levar o conjunto e passar os contatos com fio dental',
       'Inverter a borracha no sulco e conferir a vedação',
     ],
     explanation:
-      'Testar o grampo antes evita descobrir instabilidade com o campo já montado — que é quando o acidente acontece.',
+      'O fio deve estar preso ao grampo antes de qualquer prova intraoral. A estabilidade é verificada antes da instalação definitiva do campo.',
   },
   {
     id: 'isol-04',
@@ -55,7 +55,7 @@ export const ISOLAMENTO_EXERCISES: ExerciseSeed[] = [
     ],
     answer: 1,
     explanation:
-      'Vazamento cervical contamina a margem e compromete a adesão. Corrigir o campo é mais rápido do que refazer a restauração daqui a seis meses.',
+      'A entrada de umidade pode comprometer o procedimento adesivo. A causa deve ser corrigida por inversão, amarrilho, ajuste do grampo ou material de vedação compatível antes de prosseguir.',
   },
   {
     id: 'isol-05',
@@ -69,13 +69,13 @@ export const ISOLAMENTO_EXERCISES: ExerciseSeed[] = [
       { left: 'Barreira gengival fotopolimerizável', right: 'Selar vazamentos cervicais' },
     ],
     explanation:
-      'Saber o nome e a função do instrumental é o mínimo para pedir o material certo no box sem travar o atendimento.',
+      'Conhecer a função de cada instrumento permite selecionar e utilizar o material com segurança.',
   },
   {
     id: 'isol-06',
     kind: 'multi',
     difficulty: 2,
-    prompt: 'Selecione as indicações claras de isolamento absoluto',
+    prompt: 'Selecione os procedimentos em que o isolamento absoluto é obrigatório ou frequentemente preferível',
     options: [
       'Tratamento endodôntico',
       'Restauração adesiva',
@@ -85,18 +85,18 @@ export const ISOLAMENTO_EXERCISES: ExerciseSeed[] = [
     ],
     answers: [0, 1, 2, 4],
     explanation:
-      'Sempre que houver adesão, irrigante ou risco de aspiração. Anamnese, obviamente, não precisa de campo operatório.',
+      'Na endodontia, o isolamento absoluto é padrão de cuidado. Em restaurações adesivas, cimentações e selantes, ele costuma oferecer controle de umidade e segurança, mas a indicação depende do acesso, do material e da possibilidade de isolamento efetivo.',
   },
   {
     id: 'isol-07',
     kind: 'blank',
     difficulty: 2,
     prompt: 'Complete a frase',
-    sentence: 'A ___ da borracha no sulco gengival é o que garante a vedação cervical.',
+    sentence: 'A ___ da borracha no sulco gengival contribui para a vedação cervical.',
     answer: 'inversão',
     bank: ['inversão', 'perfuração', 'tração', 'fotoativação'],
     explanation:
-      'Inversão com instrumento rombo e jato de ar (mais amarrilho quando necessário) é o detalhe que separa campo seco de campo "quase seco".',
+      'A inversão adapta a borracha ao sulco. Instrumento rombo, fio dental, jato de ar e amarrilho podem auxiliar sem lesar os tecidos.',
   },
   {
     id: 'isol-08',
@@ -106,13 +106,13 @@ export const ISOLAMENTO_EXERCISES: ExerciseSeed[] = [
     scenario: 'Molar inferior parcialmente erupcionado, com pouca altura de coroa clínica.',
     options: [
       'Grampo de incisivo, por ser menor',
-      'Grampo com aletas retentivas próprio para molar, testado quanto à estabilidade',
+      'Grampo para molar com mordentes retentivos direcionados apicalmente, testado quanto à estabilidade',
       'Qualquer grampo, desde que fique preso na gengiva',
       'Nenhum: usar apenas isolamento relativo com algodão',
     ],
     answer: 1,
     explanation:
-      'O grampo é escolhido pela anatomia cervical, grau de erupção e retenção. Grampo apoiado em gengiva causa dor e sangramento — e escapa.',
+      'O grampo é escolhido pela anatomia cervical, pelo grau de erupção e pela estabilidade. Os mordentes devem apoiar o dente sem traumatizar desnecessariamente o tecido gengival.',
   },
   {
     id: 'isol-09',
@@ -128,16 +128,16 @@ export const ISOLAMENTO_EXERCISES: ExerciseSeed[] = [
     id: 'isol-10',
     kind: 'choice',
     difficulty: 2,
-    prompt: 'O lençol rasgou ao passar o contato proximal. O que fazer?',
+    prompt: 'O lençol rasgou e o defeito comprometeu a vedação cervical. O que fazer?',
     options: [
-      'Continuar: um rasgo pequeno não atrapalha',
-      'Refazer a perfuração ou trocar o lençol antes de iniciar',
+      'Continuar, pois a vedação não influencia o procedimento',
+      'Reposicionar e vedar adequadamente ou substituir o lençol antes de iniciar',
       'Colar o rasgo com adesivo dentinário',
       'Trocar para isolamento relativo',
     ],
     answer: 1,
     explanation:
-      'Rasgo na cervical vira porta de entrada de saliva justamente onde a margem é mais crítica. Refazer custa dois minutos.',
+      'Quando o rasgo permite entrada de fluido, o campo deve ser corrigido. Um defeito distante da área operatória pode ser manejado de outra forma se a vedação e a segurança permanecerem adequadas.',
   },
   {
     id: 'isol-11',
@@ -163,6 +163,6 @@ export const ISOLAMENTO_EXERCISES: ExerciseSeed[] = [
       'Inspecionar sulcos e conferir se nenhum fragmento ficou',
     ],
     explanation:
-      'Cortar os septos antes de remover o grampo evita deixar borracha presa entre os dentes — causa silenciosa de inflamação gengival.',
+      'Após a remoção, é necessário inspecionar a borracha e os espaços interproximais para confirmar que nenhum fragmento permaneceu retido.',
   },
 ];

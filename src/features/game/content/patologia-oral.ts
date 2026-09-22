@@ -1,9 +1,78 @@
 import type { ExerciseSeed } from '../types';
 
-const facts: Array<[string,string,string,string]> = [["Lesão branca que não se desprende à raspagem merece avaliação clínica.","Persistência e características clínicas orientam investigação.","toda lesão branca é candidíase","sempre desaparece sozinha"],["Lesão ulcerada persistente sem causa evidente deve ser investigada.","Úlcera traumática costuma ter causa identificável e evolução compatível.","nunca precisa de avaliação","é sempre afta"],["Aumento de volume pode ter origem inflamatória, cística ou neoplásica.","Exame clínico e exames complementares definem o caminho diagnóstico.","tem sempre origem infecciosa","é sempre normal"],["Linfonodos cervicais devem ser avaliados no exame de cabeça e pescoço.","Tamanho, consistência, mobilidade e sensibilidade ajudam na caracterização.","não têm relação com a região oral","são avaliados apenas em crianças"],["Assimetria facial pode ser um achado clínico relevante.","A comparação bilateral ajuda a identificar aumento de volume ou alterações estruturais.","é sempre variação normal","não deve ser registrada"],["Lesões pigmentadas devem ser descritas quanto a cor, forma, tamanho e evolução.","Mudanças clínicas aumentam a necessidade de investigação.","basta registrar 'mancha'","tamanho nunca importa"]];
-const make = (): ExerciseSeed[] => facts.flatMap(([statement, explanation, wrong, correct], i) => [
-  { id:'pat-' + String(i+1).padStart(2,'0') + 'a', kind:'choice', difficulty:2, prompt:'Qual afirmação está correta?', options:[correct, wrong, 'As duas estão corretas apenas em laboratório', 'Não há relação clínica'], answer:0, explanation },
-  { id:'pat-' + String(i+1).padStart(2,'0') + 'b', kind:'boolean', difficulty:1, prompt:'Verdadeiro ou falso?', statement, answer:true, explanation },
-]);
-
-export const PAT_EXERCISES: ExerciseSeed[] = make();
+export const PAT_EXERCISES: ExerciseSeed[] = [
+  {
+    id: 'pat-01',
+    kind: 'choice',
+    difficulty: 2,
+    prompt: 'Qual é a interpretação correta de uma placa branca oral que não se desprende à raspagem?',
+    options: [
+      'Ela requer descrição clínica e diagnóstico diferencial; a ausência de raspagem não define sozinha a causa.',
+      'Ela confirma candidíase pseudomembranosa.',
+      'Ela é sempre uma variação normal sem necessidade de acompanhamento.',
+      'Ela confirma malignidade e dispensa biópsia.',
+    ],
+    answer: 0,
+    explanation: 'Lesões brancas não removíveis incluem alterações reacionais, imunomediadas e potencialmente malignas. História, localização, aspecto e persistência orientam investigação.',
+  },
+  {
+    id: 'pat-02',
+    kind: 'boolean',
+    difficulty: 2,
+    prompt: 'Avalie a conduta diante de uma úlcera oral.',
+    statement: 'Uma úlcera indolor pode ser observada indefinidamente, mesmo sem causa evidente e sem cicatrização.',
+    answer: false,
+    explanation: 'Úlcera inexplicada, suspeita ou que não cicatriza após remoção de possível trauma em cerca de 2–3 semanas deve ser encaminhada para investigação e possível biópsia.',
+  },
+  {
+    id: 'pat-03',
+    kind: 'multi',
+    difficulty: 2,
+    prompt: 'Quais grupos de doenças podem produzir aumento de volume na região oral ou maxilofacial?',
+    options: [
+      'Processos inflamatórios ou infecciosos.',
+      'Cistos e outras lesões odontogênicas.',
+      'Neoplasias benignas ou malignas.',
+      'Somente variações anatômicas normais.',
+    ],
+    answers: [0, 1, 2],
+    explanation: 'Aumento de volume é um sinal, não um diagnóstico. Duração, consistência, limites, sintomas, imagem e, quando indicada, análise histopatológica definem a investigação.',
+  },
+  {
+    id: 'pat-04',
+    kind: 'choice',
+    difficulty: 2,
+    prompt: 'Quais características devem ser registradas ao examinar linfonodos cervicais?',
+    options: [
+      'Localização, tamanho, consistência, mobilidade ou fixação e sensibilidade.',
+      'Somente presença ou ausência de dor.',
+      'Apenas a cor da pele sobrejacente.',
+      'Somente o número de dentes cariados.',
+    ],
+    answer: 0,
+    explanation: 'A caracterização sistemática dos linfonodos integra o exame de cabeça e pescoço e ajuda a direcionar o diagnóstico e o encaminhamento.',
+  },
+  {
+    id: 'pat-05',
+    kind: 'boolean',
+    difficulty: 1,
+    prompt: 'Avalie o exame facial.',
+    statement: 'A comparação bilateral pode revelar assimetria causada por aumento de volume ou alteração estrutural e o achado deve ser registrado.',
+    answer: true,
+    explanation: 'Alguma assimetria fisiológica é comum, mas uma diferença nova ou pronunciada pode ser clinicamente relevante e deve ser contextualizada.',
+  },
+  {
+    id: 'pat-06',
+    kind: 'multi',
+    difficulty: 3,
+    prompt: 'Quais achados em uma lesão pigmentada oral aumentam a necessidade de avaliação especializada?',
+    options: [
+      'Lesão nova ou sem diagnóstico clínico seguro.',
+      'Assimetria, limites irregulares ou variação de cor.',
+      'Crescimento, ulceração ou sangramento.',
+      'Ausência de mudança percebida pelo paciente, que exclui malignidade.',
+    ],
+    answers: [0, 1, 2],
+    explanation: 'Localização, distribuição, cor, tamanho, limites, superfície e evolução devem ser documentados. Estabilidade relatada isoladamente não exclui doença relevante nem eventual biópsia.',
+  },
+];

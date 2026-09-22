@@ -6,7 +6,8 @@ export const PREVENTIVA_EXERCISES: ExerciseSeed[] = [
     kind: 'choice',
     difficulty: 2,
     prompt: 'O que significa esse achado?',
-    scenario: 'Mancha branca opaca e rugosa na cervical do 13, sem cavitação.',
+    scenario:
+      'Após limpeza e secagem, observa-se mancha branca opaca e rugosa na cervical do 13, em área de acúmulo de biofilme e sem cavitação.',
     options: [
       'Lesão de cárie ativa não cavitada',
       'Lesão inativa, apenas cicatriz',
@@ -15,7 +16,7 @@ export const PREVENTIVA_EXERCISES: ExerciseSeed[] = [
     ],
     answer: 0,
     explanation:
-      'Opaca e rugosa = atividade. Brilhante e lisa = inativa. Lesão ativa não cavitada trata-se com biofilme, flúor e dieta, não com broca.',
+      'Opacidade, rugosidade e localização em área de estagnação de biofilme sustentam atividade. A avaliação deve integrar limpeza, secagem, textura, brilho e localização. Lesões ativas não cavitadas são manejadas inicialmente com controle de biofilme, fluoreto e dieta.',
   },
   {
     id: 'prev-02',
@@ -25,7 +26,7 @@ export const PREVENTIVA_EXERCISES: ExerciseSeed[] = [
     statement: 'Toda mancha branca precisa ser restaurada.',
     answer: false,
     explanation:
-      'Mancha branca sem cavitação é lesão inicial e pode remineralizar. Restaurar aqui é perder estrutura sadia sem tratar a causa.',
+      'Uma lesão não cavitada pode ser inativada com medidas não restauradoras. A decisão depende da atividade, do risco de cárie e da possibilidade de controle do biofilme.',
   },
   {
     id: 'prev-03',
@@ -48,11 +49,11 @@ export const PREVENTIVA_EXERCISES: ExerciseSeed[] = [
     kind: 'blank',
     difficulty: 2,
     prompt: 'Complete a frase',
-    sentence: 'O que mais determina o risco de cárie é a ___ de consumo de açúcar.',
+    sentence: 'Maior ___ de exposição a açúcares livres aumenta o tempo de desafio cariogênico.',
     answer: 'frequência',
     bank: ['frequência', 'quantidade', 'marca', 'temperatura'],
     explanation:
-      'Cada exposição derruba o pH por um tempo. Muitas exposições ao dia mantêm o esmalte em desmineralização quase contínua.',
+      'A frequência é um componente importante, mas o risco de cárie é multifatorial e também envolve quantidade de açúcares livres, biofilme, saliva, fluoreto e fatores sociais e comportamentais.',
   },
   {
     id: 'prev-05',
@@ -67,7 +68,7 @@ export const PREVENTIVA_EXERCISES: ExerciseSeed[] = [
     ],
     answer: 1,
     explanation:
-      'Selante protege sulco retentivo em paciente de risco — sobretudo molar recém-erupcionado. Em campo contaminado, falha precocemente.',
+      'O selante pode proteger fóssulas e fissuras suscetíveis, especialmente em dentes recém-erupcionados e pacientes com risco de cárie. Contaminação durante a aplicação aumenta o risco de perda de retenção.',
   },
   {
     id: 'prev-06',
@@ -91,22 +92,22 @@ export const PREVENTIVA_EXERCISES: ExerciseSeed[] = [
     statement: 'Profilaxia isolada, sem orientação, tem efeito duradouro na prevenção.',
     answer: false,
     explanation:
-      'O biofilme se reorganiza em horas. Sem mudança de hábito, a limpeza profissional é só um recomeço do mesmo ciclo.',
+      'A remoção profissional isolada tem efeito transitório. Prevenção duradoura exige autocuidado, uso de dentifrício fluoretado e acompanhamento conforme o risco.',
   },
   {
     id: 'prev-08',
     kind: 'order',
     difficulty: 2,
-    prompt: 'Ordene a consulta preventiva',
+    prompt: 'Em um paciente com biofilme e cálculo supragengival, organize uma sequência possível',
     steps: [
       'Avaliar risco de cárie e hábitos',
       'Evidenciar e mostrar o biofilme ao paciente',
       'Remover biofilme e cálculo supragengival',
-      'Aplicar flúor conforme risco e idade',
+      'Aplicar fluoreto profissional se indicado pelo risco e pela idade',
       'Combinar uma meta de higiene e o retorno',
     ],
     explanation:
-      'Mostrar o biofilme evidenciado muda o comportamento muito mais do que falar "escove melhor".',
+      'A sequência deve ser adaptada aos achados. Evidenciar o biofilme pode auxiliar a orientação, e a aplicação profissional de fluoreto depende do risco individual.',
   },
   {
     id: 'prev-09',
@@ -122,7 +123,7 @@ export const PREVENTIVA_EXERCISES: ExerciseSeed[] = [
     ],
     answer: 1,
     explanation:
-      'O verniz precisa de tempo em contato com o esmalte. Siga sempre a bula do produto e o protocolo da disciplina.',
+      'As orientações após o verniz variam entre produtos. Devem ser seguidas as instruções do fabricante e o protocolo clínico adotado.',
   },
   {
     id: 'prev-10',
@@ -133,7 +134,7 @@ export const PREVENTIVA_EXERCISES: ExerciseSeed[] = [
     answer: 'remineralização',
     bank: ['remineralização', 'esfoliação', 'erosão', 'calcificação pulpar'],
     explanation:
-      'O flúor desloca o equilíbrio para a remineralização e forma fluorapatita, mais resistente ao ácido.',
+      'O fluoreto reduz a desmineralização e favorece a remineralização, além de formar reservatórios superficiais que disponibilizam fluoreto durante novos desafios ácidos.',
   },
   {
     id: 'prev-11',
@@ -144,13 +145,13 @@ export const PREVENTIVA_EXERCISES: ExerciseSeed[] = [
       'Paciente adulto com xerostomia por medicamento contínuo e três lesões cervicais ativas.',
     options: [
       'Restaurar as três lesões e liberar',
-      'Controlar a doença: flúor de alta concentração, saliva artificial, dieta e reavaliação — depois restaurar',
+      'Revisar causas, estimular ou substituir saliva, indicar fluoreto conforme o risco e restaurar quando necessário',
       'Suspender o medicamento do paciente',
       'Indicar apenas enxaguante com álcool',
     ],
     answer: 1,
     explanation:
-      'Sem tratar a causa (pouca saliva + dieta), as restaurações falham na margem. Enxaguante com álcool ainda piora a xerostomia.',
+      'O manejo inclui revisar medicamentos com o prescritor quando pertinente, estimular o fluxo residual, aliviar sintomas, controlar dieta e usar fluoreto adequado ao risco. Lesões cavitadas ou não higienizáveis podem exigir restauração em paralelo; produtos com álcool podem agravar o desconforto.',
   },
   {
     id: 'prev-12',
@@ -166,6 +167,6 @@ export const PREVENTIVA_EXERCISES: ExerciseSeed[] = [
     ],
     answers: [0, 1, 2, 4],
     explanation:
-      'Orientação eficaz é demonstrada, individualizada e com meta pequena. Promessa de cura definitiva quebra a confiança na primeira recidiva.',
+      'A orientação deve ser demonstrada, individualizada e acompanhada de uma meta viável. Não se deve prometer ausência definitiva de novas lesões.',
   },
 ];

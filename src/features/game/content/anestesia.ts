@@ -15,17 +15,18 @@ export const ANESTESIA_EXERCISES: ExerciseSeed[] = [
     ],
     answer: 1,
     explanation:
-      'A cortical mandibular posterior é espessa: infiltrativa não alcança bem a polpa. O bloqueio do alveolar inferior é a técnica de escolha, e o lingual costuma vir junto.',
+      'O bloqueio do nervo alveolar inferior é uma técnica previsível para anestesia pulpar de molares inferiores, e o nervo lingual costuma ser anestesiado durante a retirada da agulha. Técnicas complementares podem ser necessárias.',
   },
   {
     id: 'anest-02',
     kind: 'boolean',
     difficulty: 1,
     prompt: 'Verdadeiro ou falso?',
-    statement: 'Aspirar antes de injetar é opcional quando a técnica é infiltrativa.',
-    answer: false,
+    statement:
+      'A aspiração cuidadosa é recomendada antes da deposição do anestésico, inclusive em técnicas infiltrativas.',
+    answer: true,
     explanation:
-      'Aspiração é sempre obrigatória. Injeção intravascular de anestésico com vasoconstritor pode causar taquicardia, tremor e reação sistêmica.',
+      'A aspiração reduz, mas não elimina, o risco de injeção intravascular. Em bloqueios e regiões vascularizadas, pode ser necessário aspirar em mais de um plano e durante a deposição.',
   },
   {
     id: 'anest-03',
@@ -36,7 +37,7 @@ export const ANESTESIA_EXERCISES: ExerciseSeed[] = [
     answer: '36',
     bank: ['36', '18', '54', '20'],
     explanation:
-      '2% = 20 mg/ml. 20 × 1,8 = 36 mg por tubete. Guardar esse número é o que permite calcular dose máxima na hora.',
+      'Uma solução a 2% contém 20 mg/ml. Assim, 20 × 1,8 = 36 mg por tubete, valor usado no cálculo da dose total.',
   },
   {
     id: 'anest-04',
@@ -53,7 +54,7 @@ export const ANESTESIA_EXERCISES: ExerciseSeed[] = [
     ],
     answer: 1,
     explanation:
-      'Quadro clássico de lipotimia (reação vasovagal), muito mais comum que alergia. Deite o paciente, eleve as pernas, monitore sinais vitais e não rotule como alergia.',
+      'O quadro é compatível com síncope vasovagal, e não demonstra alergia ao anestésico. Deve-se interromper o procedimento, posicionar o paciente, avaliar vias aéreas e monitorar sinais vitais.',
   },
   {
     id: 'anest-05',
@@ -68,7 +69,7 @@ export const ANESTESIA_EXERCISES: ExerciseSeed[] = [
       'Aguardar a latência e testar a região',
     ],
     explanation:
-      'Injeção lenta (cerca de 1 ml por minuto) reduz dor e risco de reação. Testar antes de começar evita a pior cena: o paciente sentir no meio do procedimento.',
+      'A injeção lenta reduz desconforto e picos sistêmicos. Após a latência apropriada, a região deve ser testada antes do início do procedimento.',
   },
   {
     id: 'anest-06',
@@ -79,27 +80,27 @@ export const ANESTESIA_EXERCISES: ExerciseSeed[] = [
       { left: 'Rafe pterigomandibular', right: 'Bloqueio do alveolar inferior' },
       { left: 'Forame palatino maior', right: 'Anestesia do palato posterior' },
       { left: 'Fundo de sulco vestibular', right: 'Infiltrativa supraperiosteal' },
-      { left: 'Forame mentual', right: 'Anestesia de pré-molares inferiores e lábio' },
+      { left: 'Forame mentual', right: 'Anestesia de lábio e tecidos moles vestibulares' },
     ],
     explanation:
-      'Referência anatômica errada é a causa número um de falha anestésica. Antes de repetir o tubete, revise o ponto de punção.',
+      'O bloqueio mentual não produz anestesia pulpar previsível. Para a polpa de pré-molares e dentes anteriores inferiores, considera-se o bloqueio incisivo ou outra técnica apropriada.',
   },
   {
     id: 'anest-07',
     kind: 'choice',
     difficulty: 3,
-    prompt: 'Qual sal você prefere?',
+    prompt: 'Como planejar a anestesia local?',
     scenario:
       'Paciente cardiopata controlado, com orientação médica de limitar vasoconstritor adrenérgico, precisa de restauração de 40 minutos.',
     options: [
-      'Lidocaína 2% com epinefrina 1:50.000',
-      'Mepivacaína 3% sem vasoconstritor ou prilocaína com felipressina, conforme orientação',
+      'Usar lidocaína com epinefrina 1:50.000 sem limitar o número de tubetes',
+      'Avaliar a condição cardiovascular e usar a menor dose eficaz, limitando a epinefrina conforme o plano médico',
       'Articaína 4% com epinefrina 1:100.000 em dose dobrada',
       'Anestesia tópica apenas',
     ],
     answer: 1,
     explanation:
-      'Em restrição a vasoconstritor adrenérgico, a escolha recai sobre mepivacaína 3% sem vasoconstritor ou prilocaína com felipressina — sempre confirmando com o professor e a orientação médica.',
+      'Vasoconstritores raramente são absolutamente contraindicados em cardiopatia controlada. Quando houver necessidade de cautela, a dose de epinefrina em adultos costuma ser limitada a 0,04 mg, com injeção lenta e aspiração repetida. Soluções sem vasoconstritor ou com outros vasoconstritores também exigem avaliação individual.',
   },
   {
     id: 'anest-08',
@@ -109,14 +110,15 @@ export const ANESTESIA_EXERCISES: ExerciseSeed[] = [
     statement: 'Tecido inflamado e com pH ácido reduz a eficácia do anestésico local.',
     answer: true,
     explanation:
-      'Em meio ácido, menos moléculas ficam na forma não ionizada capaz de atravessar a membrana. Por isso a anestesia falha com mais frequência em abscessos e pulpites.',
+      'Em tecido infectado e ácido, há menos anestésico na forma capaz de atravessar a membrana. Falhas em pulpites também envolvem sensibilização neural, anatomia e técnica, não apenas o pH.',
   },
   {
     id: 'anest-09',
     kind: 'choice',
     difficulty: 2,
     prompt: 'O bloqueio falhou. E agora?',
-    scenario: 'Você bloqueou o alveolar inferior, esperou 5 minutos e o paciente ainda sente o 36.',
+    scenario:
+      'Você bloqueou o alveolar inferior, aguardou 12 minutos e o teste pulpar ainda provoca resposta dolorosa no 36.',
     options: [
       'Repetir mais dois tubetes na mesma hora, sem reavaliar',
       'Reavaliar referências, tempo de latência e inflamação e complementar com técnica adequada',
@@ -125,7 +127,7 @@ export const ANESTESIA_EXERCISES: ExerciseSeed[] = [
     ],
     answer: 1,
     explanation:
-      'Falha se investiga antes de repetir: técnica, anatomia, latência e inflamação local. Complementos (infiltrativa, intraligamentar, intrapulpar) são escolhidos com critério e supervisão.',
+      'Antes de repetir a dose, deve-se rever técnica, referências anatômicas, latência, dose já administrada e condição pulpar. A técnica complementar é escolhida conforme o procedimento e o diagnóstico.',
   },
   {
     id: 'anest-10',
@@ -152,7 +154,7 @@ export const ANESTESIA_EXERCISES: ExerciseSeed[] = [
     answer: 'sangramento',
     bank: ['sangramento', 'edema', 'trismo', 'pH'],
     explanation:
-      'Vasoconstritor reduz absorção sistêmica (mais segurança), prolonga a duração e melhora a visibilidade por diminuir o sangramento.',
+      'O vasoconstritor pode reduzir a absorção sistêmica do anestésico, prolongar o efeito e diminuir o sangramento. Sua dose e o risco cardiovascular devem ser considerados para cada paciente.',
   },
   {
     id: 'anest-12',
@@ -162,12 +164,12 @@ export const ANESTESIA_EXERCISES: ExerciseSeed[] = [
     scenario: 'Criança de 20 kg, lidocaína 2% com epinefrina, dose máxima de 4,4 mg/kg.',
     options: [
       '1 tubete padrão, como no adulto',
-      '88 mg no total, ou aproximadamente 2,4 tubetes',
+      'Máximo teórico de 88 mg, equivalente a cerca de 2,4 tubetes de 1,8 ml',
       '4 tubetes, porque criança metaboliza rápido',
       'Não é possível calcular sem exame de sangue',
     ],
     answer: 1,
     explanation:
-      '20 kg × 4,4 mg/kg = 88 mg. Cada tubete tem 36 mg, então o limite fica em torno de 2,4 tubetes. Em criança, a dose se calcula antes — nunca durante.',
+      '20 kg × 4,4 mg/kg = 88 mg. Como cada tubete contém 36 mg, 88 ÷ 36 = 2,44 tubetes. Esse é um teto calculado, não uma dose-alvo; deve-se usar a menor dose eficaz e contabilizar todo anestésico administrado.',
   },
 ];

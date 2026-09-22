@@ -1,9 +1,78 @@
 import type { ExerciseSeed } from '../types';
 
-const facts: Array<[string,string,string,string]> = [["Máxima intercuspidação é uma posição determinada pelo encaixe dentário.","Ela não é sinônimo de relação cêntrica.","é sempre igual à relação cêntrica","depende apenas da ATM"],["Guia anterior pode contribuir para desoclusão posterior em excursões.","O contato anterior influencia a dinâmica mandibular.","atua apenas em repouso","não participa de movimentos excursivos"],["Contato prematuro pode alterar a distribuição de forças.","A avaliação clínica deve considerar sintomas, função e contexto.","sempre causa necrose","nunca precisa ser ajustado"],["Bruxismo envolve atividade repetitiva dos músculos mastigatórios.","A avaliação deve considerar história, sinais e sintomas.","é definido apenas por desgaste","ocorre somente durante o dia"],["Dimensão vertical deve ser avaliada dentro do planejamento protético.","Alterações indiscriminadas podem comprometer função e estética.","não tem relação com prótese","é definida apenas por uma fotografia"],["Articulador é uma ferramenta de análise e não substitui exame clínico.","O instrumento deve ser interpretado dentro do diagnóstico.","substitui a anamnese","diagnostica sozinho"]];
-const make = (): ExerciseSeed[] => facts.flatMap(([statement, explanation, wrong, correct], i) => [
-  { id:'ocl-' + String(i+1).padStart(2,'0') + 'a', kind:'choice', difficulty:2, prompt:'Qual afirmação está correta?', options:[correct, wrong, 'As duas estão corretas apenas em laboratório', 'Não há relação clínica'], answer:0, explanation },
-  { id:'ocl-' + String(i+1).padStart(2,'0') + 'b', kind:'boolean', difficulty:1, prompt:'Verdadeiro ou falso?', statement, answer:true, explanation },
-]);
-
-export const OCL_EXERCISES: ExerciseSeed[] = make();
+export const OCL_EXERCISES: ExerciseSeed[] = [
+  {
+    id: 'ocl-01',
+    kind: 'choice',
+    difficulty: 1,
+    prompt: 'Qual afirmação diferencia máxima intercuspidação e relação cêntrica?',
+    options: [
+      'A máxima intercuspidação é determinada pelo encaixe dentário; a relação cêntrica é uma referência articular independente do contato dental.',
+      'As duas expressões designam obrigatoriamente a mesma posição.',
+      'A máxima intercuspidação depende apenas da posição dos côndilos.',
+      'A relação cêntrica é definida pela maior quantidade de contatos dentários.',
+    ],
+    answer: 0,
+    explanation: 'As posições podem coincidir ou não. Máxima intercuspidação é uma relação dentária, enquanto relação cêntrica é uma relação maxilomandibular de referência.',
+  },
+  {
+    id: 'ocl-02',
+    kind: 'boolean',
+    difficulty: 2,
+    prompt: 'Avalie a função da guia anterior.',
+    statement: 'Durante movimentos excursivos, a guia anterior pode contribuir para a desoclusão dos dentes posteriores.',
+    answer: true,
+    explanation: 'O efeito depende da anatomia, do movimento e do esquema oclusal; não significa que exista uma configuração única adequada a todos.',
+  },
+  {
+    id: 'ocl-03',
+    kind: 'multi',
+    difficulty: 3,
+    prompt: 'Sobre contatos oclusais e ajuste, selecione as afirmações corretas.',
+    options: [
+      'Um contato pode modificar a distribuição de forças.',
+      'A presença isolada de um contato não comprova que ele cause dor ou DTM.',
+      'Ajuste oclusal irreversível deve ser feito preventivamente em todo contato marcado.',
+      'Sintomas, função, diagnóstico e alternativas conservadoras devem ser considerados antes de intervir.',
+    ],
+    answers: [0, 1, 3],
+    explanation: 'Marcas oclusais precisam ser interpretadas clinicamente. Não há base para atribuir automaticamente DTM a uma interferência nem para ajuste irreversível indiscriminado.',
+  },
+  {
+    id: 'ocl-04',
+    kind: 'choice',
+    difficulty: 3,
+    prompt: 'Qual alternativa descreve adequadamente o bruxismo?',
+    options: [
+      'Bruxismo do sono e em vigília são atividades musculares distintas e, em pessoas saudáveis, representam comportamento que pode atuar como fator de risco.',
+      'É diagnosticado exclusivamente pela presença de desgaste dentário.',
+      'Ocorre somente durante o sono e sempre constitui doença.',
+      'É definido apenas pelo apertamento com contato dentário.',
+    ],
+    answer: 0,
+    explanation: 'No sono, a atividade pode ser rítmica ou não rítmica; em vigília, pode envolver contato repetitivo ou sustentado, travamento ou projeção mandibular.',
+  },
+  {
+    id: 'ocl-05',
+    kind: 'boolean',
+    difficulty: 2,
+    prompt: 'Avalie a dimensão vertical no planejamento protético.',
+    statement: 'A dimensão vertical de oclusão pode ser definida com segurança usando apenas uma fotografia frontal.',
+    answer: false,
+    explanation: 'Sua avaliação integra história, suporte dentário e protético, espaço funcional, fonética, estética, conforto e adaptação; alterações exigem planejamento individual.',
+  },
+  {
+    id: 'ocl-06',
+    kind: 'multi',
+    difficulty: 2,
+    prompt: 'Quais afirmações sobre articuladores são corretas?',
+    options: [
+      'Podem auxiliar na análise de relações dentárias e simulação de movimentos.',
+      'A precisão depende do registro, da montagem e das limitações do aparelho.',
+      'Substituem anamnese, exame clínico e diagnóstico funcional.',
+      'Seus achados devem ser interpretados junto ao restante do diagnóstico.',
+    ],
+    answers: [0, 1, 3],
+    explanation: 'O articulador é uma ferramenta complementar. Ele não reproduz integralmente a biologia do paciente nem diagnostica sozinho.',
+  },
+];

@@ -16,17 +16,17 @@ export const ENDODONTIA_EXERCISES: ExerciseSeed[] = [
     ],
     answer: 1,
     explanation:
-      'Dor espontânea, noturna e prolongada após o estímulo é o padrão da pulpite irreversível. Confirme com testes de vitalidade, percussão e imagem.',
+      'Dor espontânea e resposta prolongada ao frio são compatíveis com pulpite irreversível sintomática. O diagnóstico deve combinar história, testes de sensibilidade pulpar, exame apical e imagem.',
   },
   {
     id: 'endo-02',
     kind: 'boolean',
     difficulty: 1,
     prompt: 'Verdadeiro ou falso?',
-    statement: 'Pode-se instrumentar o canal a seco quando a irrigação atrapalha a visão.',
-    answer: false,
+    statement: 'A instrumentação deve ocorrer com irrigação adequada e renovada durante o preparo.',
+    answer: true,
     explanation:
-      'Nunca. A irrigação é feita a cada troca de lima: remove debris, lubrifica e desinfeta. Canal seco fratura instrumento e empurra conteúdo para o ápice.',
+      'A irrigação auxilia na remoção de detritos, lubrificação e redução microbiana. Volume, frequência e técnica devem seguir um protocolo seguro, sem pressão apical excessiva.',
   },
   {
     id: 'endo-03',
@@ -39,10 +39,10 @@ export const ENDODONTIA_EXERCISES: ExerciseSeed[] = [
       'Acesso e localização dos canais',
       'Odontometria (comprimento de trabalho)',
       'Preparo químico-mecânico',
-      'Medicação intracanal e selamento provisório',
+      'Irrigação final e obturação, ou medicação e selamento se a sessão não puder ser concluída',
     ],
     explanation:
-      'Essa sequência é o esqueleto de qualquer sessão. Trocar a ordem (acessar antes de isolar, por exemplo) é onde o acidente acontece.',
+      'O isolamento precede o acesso. Quando o preparo pode ser concluído adequadamente, a obturação em sessão única é uma opção; medicação intracanal e provisório são usados quando houver indicação de tratamento em mais de uma sessão.',
   },
   {
     id: 'endo-04',
@@ -69,7 +69,7 @@ export const ENDODONTIA_EXERCISES: ExerciseSeed[] = [
     ],
     answer: 1,
     explanation:
-      'Refazer acesso só remove estrutura sadia e enfraquece o dente. Confirme os dados registrados e siga o preparo.',
+      'Sob isolamento, remove-se o provisório e reavaliam-se sintomas, anatomia, permeabilidade e comprimento de trabalho. O acesso só deve ser ampliado quando isso for necessário para localizar ou instrumentar os canais com segurança.',
   },
   {
     id: 'endo-06',
@@ -77,13 +77,16 @@ export const ENDODONTIA_EXERCISES: ExerciseSeed[] = [
     difficulty: 3,
     prompt: 'Relacione o termo com o significado',
     pairs: [
-      { left: 'Patência apical', right: 'Foramen livre de debris' },
-      { left: 'Glide path', right: 'Caminho inicial liso até o comprimento' },
-      { left: 'Comprimento de trabalho', right: 'Limite apical do preparo' },
-      { left: 'Smear layer', right: 'Camada de raspas na parede do canal' },
+      {
+        left: 'Patência apical',
+        right: 'Passagem passiva de lima fina pelo forame sem ampliá-lo',
+      },
+      { left: 'Glide path', right: 'Trajeto inicial reproduzível para a instrumentação' },
+      { left: 'Comprimento de trabalho', right: 'Limite planejado do preparo e da obturação' },
+      { left: 'Smear layer', right: 'Camada de resíduos aderida à parede do canal' },
     ],
     explanation:
-      'Dominar o vocabulário é o que permite acompanhar o professor no box sem perder o raciocínio.',
+      'Esses conceitos orientam o preparo. A patência não deve ser confundida com ampliação deliberada do forame.',
   },
   {
     id: 'endo-07',
@@ -99,7 +102,7 @@ export const ENDODONTIA_EXERCISES: ExerciseSeed[] = [
     ],
     answers: [0, 1, 2, 4],
     explanation:
-      'A próxima sessão (às vezes com outro aluno) depende inteiramente desse registro. Sem CT anotado, tudo recomeça.',
+      'O registro permite continuidade segura entre sessões e deve documentar medidas, substâncias, intercorrências e selamento realizado.',
   },
   {
     id: 'endo-08',
@@ -121,10 +124,11 @@ export const ENDODONTIA_EXERCISES: ExerciseSeed[] = [
     kind: 'boolean',
     difficulty: 2,
     prompt: 'Verdadeiro ou falso?',
-    statement: 'A odontometria pode ser feita apenas com o localizador foraminal, sem conferência radiográfica.',
-    answer: false,
+    statement:
+      'A leitura do localizador foraminal deve ser interpretada com os dados clínicos e a imagem indicada para o caso.',
+    answer: true,
     explanation:
-      'O localizador é preciso, mas a confirmação radiográfica segue como padrão na clínica escola. Os dois métodos se complementam.',
+      'O localizador eletrônico é útil para estabelecer o comprimento de trabalho, enquanto a radiografia informa anatomia e relação apical. A necessidade e o momento da imagem devem seguir o caso e o protocolo institucional.',
   },
   {
     id: 'endo-10',
@@ -134,13 +138,13 @@ export const ENDODONTIA_EXERCISES: ExerciseSeed[] = [
     scenario: 'Necrose pulpar com abscesso periapical agudo, edema localizado e dor intensa no 45.',
     options: [
       'Só prescrever antibiótico e remarcar',
-      'Acesso, drenagem via canal, preparo inicial e medicação intracanal',
+      'Desbridar e drenar pelo canal quando possível, incisar coleção flutuante se indicada e definir o tratamento',
       'Exodontia imediata',
       'Apenas analgésico e bolsa de gelo',
     ],
     answer: 1,
     explanation:
-      'O tratamento da urgência endodôntica é drenar e desinfetar. Antibiótico entra quando há sinais sistêmicos ou disseminação, não como substituto do procedimento.',
+      'O controle local da fonte inclui desbridamento e drenagem; edema flutuante pode exigir incisão. Antibiótico não substitui o procedimento e é reservado, em geral, para disseminação, sinais sistêmicos ou comprometimento do hospedeiro.',
   },
   {
     id: 'endo-11',
@@ -151,7 +155,7 @@ export const ENDODONTIA_EXERCISES: ExerciseSeed[] = [
     answer: 'hidróxido',
     bank: ['hidróxido', 'sulfato', 'fosfato', 'carbonato'],
     explanation:
-      'O hidróxido de cálcio mantém pH alcalino no interior do canal, dificultando a sobrevivência bacteriana entre as sessões.',
+      'Quando há indicação de medicação entre sessões, o hidróxido de cálcio é uma opção frequente por sua ação antimicrobiana. Ele não é necessário quando o caso pode ser adequadamente concluído em sessão única.',
   },
   {
     id: 'endo-12',
@@ -168,6 +172,6 @@ export const ENDODONTIA_EXERCISES: ExerciseSeed[] = [
     ],
     answer: 1,
     explanation:
-      'Dor súbita e edema rápido durante a irrigação sugerem extravasamento. Interrompa, comunique o professor e siga o protocolo: analgesia, acompanhamento e orientação ao paciente.',
+      'Dor súbita e edema rápido sugerem extravasamento. Deve-se interromper a irrigação, aspirar sem nova pressão, avaliar via aérea e extensão, controlar a dor, documentar e acompanhar. Edema progressivo, disfagia, dispneia ou comprometimento ocular exigem atendimento de urgência.',
   },
 ];

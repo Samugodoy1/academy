@@ -1,9 +1,78 @@
 import type { ExerciseSeed } from '../types';
 
-const facts: Array<[string,string,string,string]> = [["Síncope costuma apresentar palidez, sudorese e perda transitória de consciência.","Posicionar, proteger vias aéreas e monitorar são medidas iniciais importantes.","é sempre anafilaxia","deve-se manter o paciente sentado"],["Anafilaxia pode cursar com comprometimento respiratório e circulatório.","É uma emergência que exige tratamento imediato conforme protocolo.","é apenas ansiedade","não afeta respiração"],["Hipoglicemia pode causar sudorese, tremor e alteração de comportamento.","Em paciente consciente, carboidrato de ação rápida é uma medida inicial habitual.","sempre causa febre","não altera comportamento"],["Dor torácica suspeita exige interromper o atendimento e avaliar sinais vitais.","Persistência ou sinais de gravidade demandam acionamento de emergência.","deve-se continuar o procedimento","é sempre odontogênica"],["Convulsão exige proteger o paciente contra trauma.","Não se deve colocar objetos na boca durante a crise.","segurar a língua com instrumentos","forçar a abertura da boca"],["Reconhecer e acionar o serviço de emergência faz parte da resposta a quadros graves.","Tempo é crítico em emergências médicas.","esperar sempre a crise passar","dispensar o paciente sem avaliação"]];
-const make = (): ExerciseSeed[] => facts.flatMap(([statement, explanation, wrong, correct], i) => [
-  { id:'urg-' + String(i+1).padStart(2,'0') + 'a', kind:'choice', difficulty:2, prompt:'Qual afirmação está correta?', options:[correct, wrong, 'As duas estão corretas apenas em laboratório', 'Não há relação clínica'], answer:0, explanation },
-  { id:'urg-' + String(i+1).padStart(2,'0') + 'b', kind:'boolean', difficulty:1, prompt:'Verdadeiro ou falso?', statement, answer:true, explanation },
-]);
-
-export const URG_EXERCISES: ExerciseSeed[] = make();
+export const URG_EXERCISES: ExerciseSeed[] = [
+  {
+    id: 'urg-01',
+    kind: 'boolean',
+    difficulty: 2,
+    prompt: 'Avalie a conduta inicial diante de provável síncope.',
+    statement: 'Deve-se interromper o atendimento, colocar o paciente em decúbito dorsal com pernas elevadas quando não houver contraindicação, avaliar ABC e monitorar sinais vitais.',
+    answer: true,
+    explanation: 'Palidez, sudorese e perda breve de consciência são compatíveis com síncope. Recuperação ausente ou atípica exige considerar outras causas e acionar emergência.',
+  },
+  {
+    id: 'urg-02',
+    kind: 'choice',
+    difficulty: 3,
+    prompt: 'Um paciente apresenta início súbito de dispneia, sibilância, urticária e hipotensão após receber um medicamento. Qual é a conduta prioritária?',
+    options: [
+      'Acionar emergência e administrar imediatamente adrenalina 1 mg/mL por via intramuscular na face anterolateral da coxa.',
+      'Administrar apenas anti-histamínico oral e aguardar.',
+      'Manter o procedimento odontológico até confirmar a causa.',
+      'Aplicar adrenalina intravenosa em bolus como primeira medida de rotina.',
+    ],
+    answer: 0,
+    explanation: 'Na anafilaxia, adrenalina IM é primeira linha: 0,01 mg/kg, máximo de 0,5 mg por dose, repetível em 5–15 minutos conforme resposta e protocolo. Anti-histamínicos não a substituem.',
+  },
+  {
+    id: 'urg-03',
+    kind: 'multi',
+    difficulty: 3,
+    prompt: 'Selecione as condutas corretas diante de suspeita de hipoglicemia.',
+    options: [
+      'Se o paciente estiver consciente e puder deglutir, oferecer 15–20 g de carboidrato de absorção rápida.',
+      'Reavaliar clinicamente e, quando disponível, verificar novamente a glicemia após cerca de 15 minutos.',
+      'Dar líquido açucarado por via oral mesmo ao paciente inconsciente.',
+      'Se não puder deglutir, acionar emergência e usar glucagon ou glicose intravenosa apenas conforme treinamento e protocolo.',
+    ],
+    answers: [0, 1, 3],
+    explanation: 'Sudorese, tremor e alteração comportamental são possíveis sinais. Nada deve ser oferecido por via oral quando a deglutição não é segura.',
+  },
+  {
+    id: 'urg-04',
+    kind: 'choice',
+    difficulty: 3,
+    prompt: 'Durante o atendimento, um paciente desenvolve dor torácica nova, opressiva e acompanhada de sudorese. Qual é a melhor resposta inicial?',
+    options: [
+      'Interromper o atendimento, avaliar ABC e sinais vitais e acionar precocemente o serviço de emergência.',
+      'Concluir o procedimento antes de avaliar a dor.',
+      'Presumir origem odontogênica se o paciente também tiver dor dentária.',
+      'Administrar nitrato sem verificar indicação ou contraindicações.',
+    ],
+    answer: 0,
+    explanation: 'O quadro pode representar síndrome coronariana aguda. Aspirina mastigável e nitrato só cabem conforme protocolo, indicação e contraindicações; não se deve atrasar o acionamento.',
+  },
+  {
+    id: 'urg-05',
+    kind: 'boolean',
+    difficulty: 2,
+    prompt: 'Avalie a conduta durante uma convulsão.',
+    statement: 'É recomendado forçar a abertura da boca e colocar um objeto entre os dentes para impedir que o paciente engula a língua.',
+    answer: false,
+    explanation: 'Afaste objetos, proteja a cabeça, não restrinja movimentos, não coloque nada na boca e cronometre a crise. Após a crise, avalie ABC e posicione lateralmente quando apropriado.',
+  },
+  {
+    id: 'urg-06',
+    kind: 'multi',
+    difficulty: 3,
+    prompt: 'Em quais situações relacionadas a uma convulsão o serviço de emergência deve ser acionado?',
+    options: [
+      'Crise com duração de 5 minutos ou mais.',
+      'Crises repetidas sem recuperação da consciência.',
+      'Primeira crise, gestação, trauma importante ou dificuldade respiratória.',
+      'Toda contração muscular breve em paciente plenamente consciente, sem avaliação adicional.',
+    ],
+    answers: [0, 1, 2],
+    explanation: 'Reconhecimento, proteção e acionamento oportuno são essenciais. O contexto e a recuperação do paciente determinam a necessidade de suporte avançado.',
+  },
+];

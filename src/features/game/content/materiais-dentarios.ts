@@ -1,9 +1,78 @@
 import type { ExerciseSeed } from '../types';
 
-const facts: Array<[string,string,string,string]> = [["Ionômero de vidro apresenta adesão química ao tecido dental.","Também pode liberar flúor, dependendo da formulação.","não adere ao dente","é exclusivamente metálico"],["Resina composta depende de fotoativação adequada quando fotopolimerizável.","Tempo e intensidade de luz influenciam a polimerização.","não precisa de luz","cura apenas por água"],["Silicone de adição é usado em moldagens de alta precisão.","A técnica e o controle de umidade continuam sendo importantes.","serve apenas para restauração direta","não registra detalhes"],["Alginato é um material de moldagem irreversível.","É usado com frequência para modelos de estudo e procedimentos que não exigem a mesma precisão de elastômeros.","é um cimento definitivo","é reversível após presa"],["Cimento resinoso pode ser indicado para diferentes restaurações indiretas.","A indicação depende do substrato, material restaurador e protocolo adesivo.","é indicado para todo caso","não depende do material"],["Materiais odontológicos têm propriedades mecânicas diferentes.","Resistência, módulo e desgaste influenciam a indicação clínica.","todos se comportam igual","propriedades não importam"]];
-const make = (): ExerciseSeed[] => facts.flatMap(([statement, explanation, wrong, correct], i) => [
-  { id:'mat-' + String(i+1).padStart(2,'0') + 'a', kind:'choice', difficulty:2, prompt:'Qual afirmação está correta?', options:[correct, wrong, 'As duas estão corretas apenas em laboratório', 'Não há relação clínica'], answer:0, explanation },
-  { id:'mat-' + String(i+1).padStart(2,'0') + 'b', kind:'boolean', difficulty:1, prompt:'Verdadeiro ou falso?', statement, answer:true, explanation },
-]);
-
-export const MAT_EXERCISES: ExerciseSeed[] = make();
+export const MAT_EXERCISES: ExerciseSeed[] = [
+  {
+    id: 'mat-01',
+    kind: 'boolean',
+    difficulty: 1,
+    prompt: 'Avalie uma propriedade do cimento de ionômero de vidro.',
+    statement: 'O ionômero de vidro pode aderir quimicamente ao tecido dental e liberar flúor, com comportamento dependente da formulação.',
+    answer: true,
+    explanation: 'A reação ácido-base permite interação com o tecido dental. Propriedades mecânicas e liberação de flúor variam entre categorias e produtos.',
+  },
+  {
+    id: 'mat-02',
+    kind: 'multi',
+    difficulty: 3,
+    prompt: 'Quais fatores influenciam a fotoativação de uma resina composta fotopolimerizável?',
+    options: [
+      'Irradiância e tempo de exposição.',
+      'Compatibilidade entre o espectro da luz e o fotoiniciador.',
+      'Distância da fonte, espessura do incremento, cor e translucidez.',
+      'Somente a temperatura da água usada no enxágue.',
+    ],
+    answers: [0, 1, 2],
+    explanation: 'A exposição radiante e a chegada de luz em espectro adequado ao material influenciam a conversão; técnica e geometria clínica também importam.',
+  },
+  {
+    id: 'mat-03',
+    kind: 'choice',
+    difficulty: 2,
+    prompt: 'Qual afirmação descreve corretamente o silicone de adição?',
+    options: [
+      'É um elastômero de moldagem de alta precisão, cujo desempenho depende de manipulação e controle do campo.',
+      'É um cimento metálico usado apenas em restaurações diretas.',
+      'Não registra detalhes e é indicado somente para modelos preliminares.',
+      'Após a presa, retorna ao estado fluido com aquecimento clínico.',
+    ],
+    answer: 0,
+    explanation: 'Silicones de adição apresentam boa reprodução e estabilidade dimensional, mas umidade, deslocamento tecidual, proporção e técnica afetam o resultado.',
+  },
+  {
+    id: 'mat-04',
+    kind: 'boolean',
+    difficulty: 2,
+    prompt: 'Avalie o comportamento do alginato.',
+    statement: 'O alginato é um hidrocoloide reversível e pode voltar ao estado fluido após a presa.',
+    answer: false,
+    explanation: 'O alginato é irreversível e tem estabilidade dimensional limitada. Deve ser desinfetado e vazado no intervalo recomendado para reduzir sinérese e embebição.',
+  },
+  {
+    id: 'mat-05',
+    kind: 'choice',
+    difficulty: 3,
+    prompt: 'O que determina a seleção de um cimento resinoso para uma restauração indireta?',
+    options: [
+      'Substrato dental, material e espessura da restauração, retenção e compatibilidade do protocolo adesivo e de polimerização.',
+      'Apenas a cor da embalagem do cimento.',
+      'Uma indicação universal, igual para toda restauração indireta.',
+      'Somente a preferência do laboratório, sem considerar o dente.',
+    ],
+    answer: 0,
+    explanation: 'Cerâmicas vítreas, óxidos cerâmicos, compósitos e diferentes substratos exigem tratamentos e mecanismos de cura compatíveis.',
+  },
+  {
+    id: 'mat-06',
+    kind: 'multi',
+    difficulty: 2,
+    prompt: 'Quais propriedades podem alterar a indicação clínica de um material odontológico?',
+    options: [
+      'Resistência e tenacidade à fratura.',
+      'Módulo de elasticidade.',
+      'Desgaste e estabilidade química.',
+      'Somente o nome comercial.',
+    ],
+    answers: [0, 1, 2],
+    explanation: 'Materiais respondem de modo distinto a carga, deformação, fadiga, desgaste e ambiente oral; a seleção deve relacionar propriedades à situação clínica.',
+  },
+];

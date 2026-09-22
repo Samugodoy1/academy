@@ -6,32 +6,33 @@ export const PERIODONTIA_EXERCISES: ExerciseSeed[] = [
     kind: 'choice',
     difficulty: 1,
     prompt: 'Qual é o diagnóstico?',
-    scenario: 'Gengiva vermelha, edemaciada, sangrando à sondagem, profundidade de 3 mm e sem perda de inserção.',
+    scenario:
+      'Em periodonto intacto, há profundidade de sondagem de até 3 mm, sem perda de inserção, e sangramento em 18% dos sítios.',
     options: ['Gengivite', 'Periodontite estágio III', 'Abscesso periodontal', 'Recessão gengival'],
     answer: 0,
     explanation:
-      'Inflamação sem perda de inserção é gengivite — e é reversível com controle de biofilme.',
+      'Em periodonto intacto, sangramento à sondagem em pelo menos 10% dos sítios e profundidade de até 3 mm é compatível com gengivite. Sua extensão é classificada pela porcentagem de sítios afetados.',
   },
   {
     id: 'perio-02',
     kind: 'boolean',
     difficulty: 2,
     prompt: 'Verdadeiro ou falso?',
-    statement: 'A diferença central entre gengivite e periodontite é a perda de inserção.',
-    answer: true,
+    statement: 'Qualquer sítio com perda de inserção confirma o diagnóstico de periodontite.',
+    answer: false,
     explanation:
-      'Gengivite: inflamação reversível, sem perda. Periodontite: perda de inserção e de osso, com necessidade de raspagem e manutenção permanente.',
+      'A perda de inserção pode resultar de recessão traumática, cárie cervical, lesão endodôntica ou fratura. O diagnóstico de periodontite exige distribuição compatível em múltiplos dentes e exclusão dessas causas.',
   },
   {
     id: 'perio-03',
     kind: 'blank',
     difficulty: 1,
     prompt: 'Complete a frase',
-    sentence: 'Um sulco gengival saudável tem até ___ mm de profundidade de sondagem.',
-    answer: '3',
-    bank: ['3', '5', '7', '10'],
+    sentence: 'Em periodonto intacto, saúde gengival requer sangramento à sondagem abaixo de ___% dos sítios.',
+    answer: '10',
+    bank: ['10', '20', '30', '50'],
     explanation:
-      'Até cerca de 3 mm, sem sangramento, é compatível com saúde. Acima disso, investigue perda de inserção antes de chamar de "bolsa".',
+      'A definição combina sangramento em menos de 10% dos sítios com profundidade de sondagem de até 3 mm. Profundidade isolada não estabelece doença.',
   },
   {
     id: 'perio-04',
@@ -41,13 +42,13 @@ export const PERIODONTIA_EXERCISES: ExerciseSeed[] = [
     scenario: 'Paciente com cálculo subgengival detectado na sondagem em molares inferiores.',
     options: [
       'Sim, o polimento remove o cálculo',
-      'Não: é necessária raspagem e alisamento radicular',
+      'Não: é necessária instrumentação subgengival dos sítios afetados',
       'Sim, desde que use pasta abrasiva',
       'Não, o caso é cirúrgico de imediato',
     ],
     answer: 1,
     explanation:
-      'Polimento não alcança depósito subgengival. Sem raspagem, a causa permanece e a inflamação volta em poucos dias.',
+      'O polimento supragengival não remove depósitos subgengivais. A instrumentação deve ser dirigida aos sítios diagnosticados e acompanhada de controle de biofilme.',
   },
   {
     id: 'perio-05',
@@ -63,7 +64,7 @@ export const PERIODONTIA_EXERCISES: ExerciseSeed[] = [
     ],
     answers: [0, 1, 2, 4],
     explanation:
-      'Sem esses dados não existe comparação na reavaliação — e a evolução do caso vira impressão pessoal.',
+      'Esses dados permitem comparar medidas na reavaliação e documentar objetivamente a resposta ao tratamento.',
   },
   {
     id: 'perio-06',
@@ -73,12 +74,12 @@ export const PERIODONTIA_EXERCISES: ExerciseSeed[] = [
     steps: [
       'Diagnóstico e periodontograma completo',
       'Orientação de higiene e controle de biofilme',
-      'Raspagem e alisamento radicular por quadrante',
+      'Instrumentação subgengival conforme os sítios e o plano',
       'Reavaliação após a cicatrização',
       'Manutenção periódica',
     ],
     explanation:
-      'Sem instruir higiene antes, a raspagem trabalha contra o biofilme que continua se formando todos os dias.',
+      'O tratamento é realizado por etapas e individualizado. A instrumentação pode ocorrer em uma ou mais sessões, sem obrigação de divisão por quadrantes.',
   },
   {
     id: 'perio-07',
@@ -86,24 +87,24 @@ export const PERIODONTIA_EXERCISES: ExerciseSeed[] = [
     difficulty: 3,
     prompt: 'Relacione o achado com o significado',
     pairs: [
-      { left: 'Sangramento à sondagem', right: 'Inflamação ativa' },
-      { left: 'Perda de inserção', right: 'Periodontite' },
+      { left: 'Sangramento à sondagem', right: 'Sinal clínico de inflamação' },
+      { left: 'Perda de inserção em padrão compatível', right: 'Critério para periodontite' },
       { left: 'Furca grau II', right: 'Perda óssea horizontal parcial entre raízes' },
       { left: 'Mobilidade grau III', right: 'Deslocamento horizontal e vertical do dente' },
     ],
     explanation:
-      'Traduzir achado em significado é o que permite explicar o prognóstico para o paciente com segurança.',
+      'Sangramento não demonstra progressão ativa, e perda de inserção exige exclusão de causas não periodontais. Furca e mobilidade devem ser classificadas pelo sistema adotado.',
   },
   {
     id: 'perio-08',
     kind: 'blank',
     difficulty: 2,
     prompt: 'Complete a frase',
-    sentence: 'A reavaliação periodontal costuma ser feita cerca de ___ dias após a raspagem.',
-    answer: '30 a 45',
-    bank: ['30 a 45', '2 a 3', '180 a 200', '365'],
+    sentence: 'A reavaliação periodontal costuma ocorrer cerca de ___ semanas após a instrumentação.',
+    answer: '4 a 8',
+    bank: ['4 a 8', '1', '20 a 24', '52'],
     explanation:
-      'Esse é o tempo médio de cicatrização dos tecidos. Confirme sempre o protocolo da sua disciplina.',
+      'O intervalo permite resolução inicial dos tecidos e avaliação da resposta. Ele pode variar conforme extensão da doença, procedimento e protocolo clínico.',
   },
   {
     id: 'perio-09',
@@ -126,10 +127,11 @@ export const PERIODONTIA_EXERCISES: ExerciseSeed[] = [
     kind: 'boolean',
     difficulty: 2,
     prompt: 'Verdadeiro ou falso?',
-    statement: 'Tabagismo mascara o sangramento gengival e piora a resposta ao tratamento.',
+    statement:
+      'O tabagismo pode reduzir sinais clínicos de inflamação e está associado a pior resposta periodontal.',
     answer: true,
     explanation:
-      'A vasoconstrição reduz o sangramento visível, então a doença parece mais leve do que é — e a cicatrização responde pior.',
+      'Fumantes podem apresentar menos sangramento apesar de maior destruição periodontal. Os efeitos envolvem alterações vasculares, inflamatórias, imunológicas e de cicatrização.',
   },
   {
     id: 'perio-11',
@@ -160,6 +162,6 @@ export const PERIODONTIA_EXERCISES: ExerciseSeed[] = [
     ],
     answers: [0, 1, 3, 4],
     explanation:
-      'O tratamento básico resolve boa parte dos casos. Persistência de bolsa, furca avançada e necessidade cirúrgica são o momento de compartilhar o caso.',
+      'Bolsas residuais profundas, furca avançada, mobilidade progressiva e necessidade cirúrgica podem exigir experiência ou recursos especializados.',
   },
 ];

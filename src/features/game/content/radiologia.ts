@@ -21,10 +21,10 @@ export const RADIOLOGIA_EXERCISES: ExerciseSeed[] = [
       { left: 'Periapical', right: 'Lesão periapical e endodontia' },
       { left: 'Bite-wing', right: 'Cárie proximal e crista óssea' },
       { left: 'Panorâmica', right: 'Visão geral e terceiros molares' },
-      { left: 'Oclusal', right: 'Extensão vestíbulo-lingual de lesões' },
+      { left: 'Oclusal', right: 'Localização em conjunto com outra incidência' },
     ],
     explanation:
-      'Cada imagem responde uma pergunta clínica. Pedir a tomada errada custa dose de radiação e não resolve a dúvida.',
+      'Cada imagem deve responder a uma pergunta clínica. A radiografia oclusal pode auxiliar na localização, mas a extensão tridimensional pode exigir incidências complementares ou tomografia quando justificada.',
   },
   {
     id: 'radio-03',
@@ -47,10 +47,11 @@ export const RADIOLOGIA_EXERCISES: ExerciseSeed[] = [
     kind: 'boolean',
     difficulty: 1,
     prompt: 'Verdadeiro ou falso?',
-    statement: 'Sobreposição proximal invalida a avaliação de cárie interproximal.',
+    statement:
+      'Se a sobreposição impedir a avaliação da superfície proximal de interesse, a imagem não responde à pergunta clínica.',
     answer: true,
     explanation:
-      'Se os contatos estão sobrepostos, a lesão proximal fica escondida. A imagem precisa ser refeita com a angulação horizontal corrigida.',
+      'A sobreposição pode ocultar uma lesão proximal. A repetição só é indicada quando a região necessária não puder ser interpretada e o benefício diagnóstico justificar uma nova exposição.',
   },
   {
     id: 'radio-05',
@@ -65,14 +66,14 @@ export const RADIOLOGIA_EXERCISES: ExerciseSeed[] = [
       'Descrever o achado e correlacionar com a clínica',
     ],
     explanation:
-      'Leitura sistemática impede o erro clássico: enxergar só a lesão óbvia e perder o resto da imagem.',
+      'A leitura sistemática reduz o risco de concentrar a análise em um único achado e omitir outras regiões da imagem.',
   },
   {
     id: 'radio-06',
     kind: 'blank',
     difficulty: 2,
     prompt: 'Complete a frase',
-    sentence: 'Uma imagem escura, que deixa passar mais radiação, é chamada de ___.',
+    sentence: 'Uma área escura associada a menor atenuação dos raios X é chamada de ___.',
     answer: 'radiolúcida',
     bank: ['radiolúcida', 'radiopaca', 'isodensa', 'esclerótica'],
     explanation:
@@ -86,7 +87,7 @@ export const RADIOLOGIA_EXERCISES: ExerciseSeed[] = [
     options: ['Localização', 'Limites', 'Densidade', 'Nome comercial do aparelho', 'Relação com estruturas vizinhas'],
     answers: [0, 1, 2, 4],
     explanation:
-      'Localização, tamanho, limites, densidade e relação com dentes e estruturas. Sem isso, o laudo vira "manchinha escura".',
+      'Uma descrição útil inclui localização, tamanho, limites, densidade e relação com dentes e estruturas vizinhas.',
   },
   {
     id: 'radio-08',
@@ -97,30 +98,31 @@ export const RADIOLOGIA_EXERCISES: ExerciseSeed[] = [
       'Gestante no segundo trimestre com dor intensa no 36 e suspeita de lesão periapical.',
     options: [
       'Nenhuma radiografia pode ser feita durante a gestação',
-      'Fazer a periapical necessária com avental de chumbo e protetor de tireoide',
+      'Fazer a periapical justificada, com técnica e parâmetros de exposição otimizados',
       'Fazer panorâmica para ver tudo de uma vez',
       'Adiar o diagnóstico para depois do parto',
     ],
     answer: 1,
     explanation:
-      'Gestação não contraindica radiografia necessária: com proteção adequada e tomada direcionada, a dose é mínima. Deixar a infecção evoluir é o risco maior.',
+      'A gestação não contraindica uma radiografia necessária. Deve-se limitar o campo, usar receptor e parâmetros apropriados e evitar repetições. A blindagem rotineira não é recomendada por diretrizes atuais, mas a regulamentação local deve ser observada.',
   },
   {
     id: 'radio-09',
     kind: 'boolean',
     difficulty: 2,
     prompt: 'Verdadeiro ou falso?',
-    statement: 'Radiografia substitui o teste de vitalidade pulpar.',
+    statement: 'Radiografia substitui os testes clínicos de sensibilidade pulpar.',
     answer: false,
     explanation:
-      'A imagem não mostra se a polpa está viva. Necrose pulpar pode existir sem nenhuma alteração periapical visível.',
+      'A imagem não determina a resposta neural nem o fluxo sanguíneo da polpa. O diagnóstico pulpar combina história, testes de sensibilidade, exame clínico e imagem.',
   },
   {
     id: 'radio-10',
     kind: 'choice',
     difficulty: 2,
     prompt: 'O que fazer com esta imagem?',
-    scenario: 'A periapical do 21 ficou com o ápice cortado, mas a coroa está nítida.',
+    scenario:
+      'Em uma avaliação endodôntica do 21, a radiografia periapical ficou com o ápice cortado, embora a coroa esteja nítida.',
     options: [
       'Aceitar, porque a coroa está boa',
       'Repetir a tomada: o ápice é justamente a área de interesse',
@@ -129,7 +131,7 @@ export const RADIOLOGIA_EXERCISES: ExerciseSeed[] = [
     ],
     answer: 1,
     explanation:
-      'A imagem precisa responder à pergunta clínica. Se o ápice foi cortado em um caso endodôntico, a tomada não serve — repita com o posicionador correto.',
+      'A região apical é necessária para a avaliação endodôntica. Nesse contexto, a repetição é justificada e deve corrigir o posicionamento para evitar nova exposição inadequada.',
   },
   {
     id: 'radio-11',
@@ -140,7 +142,7 @@ export const RADIOLOGIA_EXERCISES: ExerciseSeed[] = [
     answer: 'ALARA',
     bank: ['ALARA', 'ALADA', 'ASEPSE', 'ADA'],
     explanation:
-      'ALARA (As Low As Reasonably Achievable): toda tomada precisa de justificativa clínica, colimação e proteção adequadas.',
+      'ALARA significa manter a exposição tão baixa quanto razoavelmente possível. A proteção efetiva inclui justificativa, otimização dos parâmetros, colimação e posicionamento correto.',
   },
   {
     id: 'radio-12',
@@ -150,11 +152,11 @@ export const RADIOLOGIA_EXERCISES: ExerciseSeed[] = [
     steps: [
       'Definir a pergunta clínica',
       'Escolher a tomada e o posicionador',
-      'Colocar avental de chumbo e protetor de tireoide',
+      'Selecionar receptor, colimação e parâmetros de exposição apropriados',
       'Posicionar receptor e cabeçote e expor',
       'Avaliar a qualidade antes de dispensar o paciente',
     ],
     explanation:
-      'Conferir a imagem antes de o paciente sair evita a segunda exposição desnecessária em outro dia — e a consulta perdida.',
+      'A imagem deve ser conferida antes da liberação para verificar se responde à pergunta clínica. Blindagem não deve ser tratada como requisito universal; devem ser seguidas as normas locais vigentes.',
   },
 ];

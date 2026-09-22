@@ -11,17 +11,18 @@ export const ODONTOPEDIATRIA_EXERCISES: ExerciseSeed[] = [
     options: ['Dizer-mostrar-fazer', 'Controle de voz', 'Distração', 'Reforço negativo'],
     answer: 0,
     explanation:
-      'Dizer-mostrar-fazer é a base do manejo infantil: reduz o desconhecido, que é o que mais gera medo.',
+      'Dizer-mostrar-fazer familiariza a criança com o procedimento e pode reduzir ansiedade relacionada ao desconhecido.',
   },
   {
     id: 'odped-02',
     kind: 'boolean',
     difficulty: 1,
     prompt: 'Verdadeiro ou falso?',
-    statement: 'Em criança, a dose do anestésico é sempre calculada pelo peso.',
+    statement:
+      'Em crianças, a dose máxima do anestésico deve considerar o peso, o limite absoluto e a condição clínica.',
     answer: true,
     explanation:
-      'Nada de "um tubete padrão". Peso × dose máxima em mg/kg, calculado antes da consulta, nunca durante.',
+      'O cálculo em mg/kg evita uma dose padronizada inadequada, mas representa um teto. Devem-se considerar massa corporal, condição médica, limite absoluto e a menor dose eficaz.',
   },
   {
     id: 'odped-03',
@@ -31,14 +32,14 @@ export const ODONTOPEDIATRIA_EXERCISES: ExerciseSeed[] = [
     scenario:
       'Molar decíduo com cárie extensa, mobilidade e sucessor permanente já próximo na radiografia.',
     options: [
-      'Tratamento endodôntico completo do decíduo',
-      'Avaliar a cronologia de esfoliação: se está próxima, controlar dor e infecção e discutir com o professor',
+      'Realizar tratamento endodôntico independentemente da reabsorção e da restaurabilidade',
+      'Avaliar restaurabilidade, infecção e reabsorção; extrair se não restaurável ou próximo da esfoliação',
       'Restaurar com resina e liberar',
       'Ignorar, porque vai cair sozinho de qualquer forma',
     ],
     answer: 1,
     explanation:
-      'Tratamento invasivo em dente prestes a esfoliar raramente se justifica — mas abandonar dor e infecção também não é conduta.',
+      'A decisão depende de sintomas, infecção, restaurabilidade, reabsorção radicular e tempo até a esfoliação. Um dente não restaurável ou com infecção e esfoliação próxima pode exigir extração; um dente funcional por mais tempo pode receber terapia pulpar e restauração quando indicadas.',
   },
   {
     id: 'odped-04',
@@ -49,22 +50,22 @@ export const ODONTOPEDIATRIA_EXERCISES: ExerciseSeed[] = [
     answer: '20',
     bank: ['20', '24', '28', '32'],
     explanation:
-      'São 20 decíduos (5 por hemiarco) contra 32 permanentes. Saber isso de cabeça agiliza o odontograma infantil.',
+      'A dentição decídua completa possui 20 dentes, distribuídos em cinco por hemiarco.',
   },
   {
     id: 'odped-05',
     kind: 'choice',
     difficulty: 2,
-    prompt: 'A criança não colabora de jeito nenhum. E agora?',
+    prompt: 'A criança não tolera um procedimento eletivo apesar das técnicas comunicativas. Qual é a conduta?',
     options: [
-      'Contenção física para terminar tudo hoje',
-      'Encurtar a consulta, resolver o essencial e replanejar as próximas',
+      'Usar contenção sem consentimento para concluir todo o tratamento',
+      'Interromper com segurança, reavaliar urgência e planejar adaptação, sedação ou encaminhamento',
       'Dispensar sem nenhuma orientação',
       'Repetir o mesmo procedimento até dar certo',
     ],
     answer: 1,
     explanation:
-      'Forçar o atendimento compromete todas as consultas seguintes. Ganhar confiança é parte do tratamento, não perda de tempo.',
+      'Em tratamento eletivo, pode-se adiar ou usar medidas provisórias após avaliar risco e benefício. Estabilização protetora é reservada a situações selecionadas, com indicação, consentimento, técnica segura e documentação.',
   },
   {
     id: 'odped-06',
@@ -72,29 +73,39 @@ export const ODONTOPEDIATRIA_EXERCISES: ExerciseSeed[] = [
     difficulty: 3,
     prompt: 'Relacione o procedimento com a indicação',
     pairs: [
-      { left: 'ART', right: 'Remoção de dentina infectada com instrumento manual e ionômero' },
-      { left: 'Selante', right: 'Fóssulas e fissuras retentivas em risco' },
-      { left: 'Pulpotomia', right: 'Polpa coronária comprometida e radicular vital' },
-      { left: 'Mantenedor de espaço', right: 'Perda precoce de decíduo' },
+      {
+        left: 'ART',
+        right: 'Lesão cavitada acessível quando a abordagem manual com ionômero é apropriada',
+      },
+      { left: 'Selante', right: 'Fóssulas e fissuras com risco ou lesão não cavitada' },
+      {
+        left: 'Pulpotomia',
+        right: 'Polpa radicular vital e saudável após remoção da polpa coronária',
+      },
+      {
+        left: 'Mantenedor de espaço',
+        right: 'Perda precoce com risco individual de redução do espaço',
+      },
     ],
     explanation:
-      'Odontopediatria é conservadora por princípio: preservar estrutura, guiar erupção e manter a criança tranquila.',
+      'A indicação depende do diagnóstico, da restaurabilidade, da cronologia de erupção e da cooperação. Nenhum desses procedimentos é indicado apenas pela idade.',
   },
   {
     id: 'odped-07',
     kind: 'multi',
     difficulty: 2,
-    prompt: 'Selecione o que precisa ser combinado com o responsável',
+    prompt: 'Selecione o que deve ser abordado no planejamento com a criança e o responsável',
     options: [
       'Consentimento informado registrado',
+      'Assentimento da criança quando ela puder participar',
       'Orientação de dieta e higiene',
       'Explicação do que será feito hoje',
       'Nota da prova do aluno',
       'Sinais de alerta e como retornar',
     ],
-    answers: [0, 1, 2, 4],
+    answers: [0, 1, 2, 3, 5],
     explanation:
-      'O responsável é corresponsável pelo tratamento. Se ele não entende o plano, a adesão em casa não acontece.',
+      'O responsável fornece consentimento, e a criança deve participar da decisão de modo compatível com sua maturidade. Plano, autocuidado, riscos e acesso ao retorno precisam ser compreendidos.',
   },
   {
     id: 'odped-08',
@@ -104,7 +115,7 @@ export const ODONTOPEDIATRIA_EXERCISES: ExerciseSeed[] = [
     statement: 'Cárie em dente decíduo não precisa de tratamento porque o dente vai cair.',
     answer: false,
     explanation:
-      'Cárie em decíduo causa dor, infecção, perda de espaço e afeta o germe do permanente. É doença, e doença se trata.',
+      'Cárie em dente decíduo pode causar dor, infecção, perda de espaço e, em casos graves, afetar o sucessor permanente. A intervenção é escolhida conforme atividade, extensão e risco.',
   },
   {
     id: 'odped-09',
@@ -114,13 +125,13 @@ export const ODONTOPEDIATRIA_EXERCISES: ExerciseSeed[] = [
     scenario: 'Criança de 8 anos chega com avulsão do incisivo central permanente há 30 minutos, dente em leite.',
     options: [
       'Descartar o dente e planejar prótese',
-      'Reimplantar o quanto antes, com contenção e acompanhamento',
+      'Manusear pela coroa, reimplantar rapidamente e seguir protocolo de contenção e acompanhamento',
       'Lavar o dente escovando a raiz antes de reimplantar',
       'Aguardar 24 horas para avaliar',
     ],
     answer: 1,
     explanation:
-      'Tempo extra-alveolar é o que define o prognóstico. Nunca esfregue a raiz: o ligamento periodontal aderido é o que permite a reinserção.',
+      'O tempo extra-alveolar e o meio de armazenamento influenciam o prognóstico. O dente deve ser segurado pela coroa e, se sujo, enxaguado suavemente sem esfregar a raiz; após reimplante, indicam-se contenção flexível, avaliação de tétano e antibiótico conforme protocolo e acompanhamento pulpar.',
   },
   {
     id: 'odped-10',
@@ -131,11 +142,11 @@ export const ODONTOPEDIATRIA_EXERCISES: ExerciseSeed[] = [
       'Acolher criança e responsável',
       'Anamnese com o responsável',
       'Exame clínico adaptado à idade',
-      'Procedimento curto e possível para hoje',
+      'Procedimento preventivo ou terapêutico curto, se necessário e tolerado',
       'Reforço positivo e combinação do retorno',
     ],
     explanation:
-      'Terminar com reforço positivo faz a criança voltar querendo. Essa é a diferença entre paciente colaborador e paciente com trauma.',
+      'A primeira consulta deve priorizar avaliação, prevenção e construção de confiança. Um procedimento não é obrigatório quando não houver necessidade ou tolerância.',
   },
   {
     id: 'odped-11',
@@ -146,7 +157,7 @@ export const ODONTOPEDIATRIA_EXERCISES: ExerciseSeed[] = [
     answer: 'mantenedor',
     bank: ['mantenedor', 'expansor', 'contentor', 'levantador'],
     explanation:
-      'Sem mantenedor, os dentes vizinhos migram e o sucessor perde espaço para erupcionar — o que vira problema ortodôntico depois.',
+      'A indicação depende do dente perdido, idade, estágio de erupção, espaço existente e oclusão. Nem toda perda precoce exige mantenedor.',
   },
   {
     id: 'odped-12',
@@ -156,12 +167,12 @@ export const ODONTOPEDIATRIA_EXERCISES: ExerciseSeed[] = [
     scenario: 'Mãe de criança de 4 anos pergunta como escovar os dentes do filho.',
     options: [
       'Deixar a criança escovar sozinha, sem supervisão',
-      'Escovação supervisionada pelo adulto, com dentifrício fluoretado em quantidade adequada à idade',
+      'Escovação pelo adulto, duas vezes ao dia, com uma ervilha de dentifrício fluoretado',
       'Usar apenas água até os 7 anos',
       'Escovar uma vez por semana',
     ],
     answer: 1,
     explanation:
-      'Até por volta dos 7-8 anos a criança não tem coordenação para uma escovação eficiente. Supervisão do adulto e quantidade correta de dentifrício são essenciais.',
+      'Aos 4 anos, recomenda-se dentifrício com pelo menos 1.000 ppm de fluoreto em quantidade do tamanho de uma ervilha, com um adulto realizando ou completando a escovação e reduzindo a deglutição.',
   },
 ];

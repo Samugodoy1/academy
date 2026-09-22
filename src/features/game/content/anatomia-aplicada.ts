@@ -1,9 +1,73 @@
 import type { ExerciseSeed } from '../types';
 
-const facts: Array<[string,string,string,string]> = [["O nervo alveolar inferior entra no forame mandibular.","O nervo alveolar inferior percorre o canal mandibular após entrar pelo forame mandibular.","forame mentual","forame infraorbitário"],["O nervo mentual emerge pelo forame mentual.","O nervo mentual fornece sensibilidade a lábio inferior e região mentual.","canal incisivo","forame mandibular"],["O seio maxilar está intimamente relacionado às raízes de molares superiores.","Essa relação explica o risco de comunicação buco-sinusal em algumas exodontias.","raízes dos incisivos inferiores","canal mandibular"],["O nervo lingual está medial ao ramo mandibular na região posterior.","Sua proximidade exige atenção em procedimentos próximos aos terceiros molares inferiores.","nervo facial dentro do canal mandibular","nervo óptico"],["O forame infraorbitário está relacionado à saída do nervo infraorbitário.","A referência é importante em anestesia e avaliação de trauma facial.","forame mentual","forame mandibular"],["A artéria facial cruza a região mandibular anterior ao masseter.","Conhecer o trajeto vascular ajuda no planejamento de procedimentos e controle de sangramento.","artéria radial no punho","artéria oftálmica na órbita"]];
-const make = (): ExerciseSeed[] => facts.flatMap(([statement, explanation, wrong, correct], i) => [
-  { id:'anat-' + String(i+1).padStart(2,'0') + 'a', kind:'choice', difficulty:2, prompt:'Qual afirmação está correta?', options:[correct, wrong, 'As duas estão corretas apenas em laboratório', 'Não há relação clínica'], answer:0, explanation },
-  { id:'anat-' + String(i+1).padStart(2,'0') + 'b', kind:'boolean', difficulty:1, prompt:'Verdadeiro ou falso?', statement, answer:true, explanation },
-]);
-
-export const ANAT_EXERCISES: ExerciseSeed[] = make();
+export const ANAT_EXERCISES: ExerciseSeed[] = [
+  {
+    id: 'anat-01',
+    kind: 'choice',
+    difficulty: 1,
+    prompt: 'Por onde o nervo alveolar inferior entra na mandíbula antes de percorrer o canal mandibular?',
+    options: ['Forame mandibular', 'Forame mentual', 'Forame infraorbitário', 'Canal incisivo'],
+    answer: 0,
+    explanation: 'O nervo alveolar inferior entra pelo forame mandibular, na face medial do ramo, e segue pelo canal mandibular.',
+  },
+  {
+    id: 'anat-02',
+    kind: 'boolean',
+    difficulty: 2,
+    prompt: 'Avalie a distribuição sensitiva do nervo mentual.',
+    statement: 'O nervo mentual emerge pelo forame mentual e inerva exclusivamente os dentes incisivos inferiores.',
+    answer: false,
+    explanation: 'O nervo mentual fornece sensibilidade principalmente ao lábio inferior, ao mento e à mucosa vestibular adjacente; a inervação pulpar anterior segue pelo ramo incisivo.',
+  },
+  {
+    id: 'anat-03',
+    kind: 'multi',
+    difficulty: 2,
+    prompt: 'Quais afirmações descrevem corretamente a relação entre dentes posteriores superiores e seio maxilar?',
+    options: [
+      'A proximidade entre o assoalho do seio e os ápices dentários varia entre indivíduos.',
+      'Molares superiores apresentam relação frequente, mas pré-molares também podem estar próximos.',
+      'Toda exodontia de molar superior produz comunicação oroantral.',
+      'A avaliação clínica e radiográfica ajuda a estimar o risco cirúrgico.',
+    ],
+    answers: [0, 1, 3],
+    explanation: 'A relação é variável e pode envolver molares e pré-molares. Proximidade anatômica aumenta o risco, mas não torna a comunicação oroantral inevitável.',
+  },
+  {
+    id: 'anat-04',
+    kind: 'choice',
+    difficulty: 3,
+    prompt: 'Qual descrição explica o risco de lesão do nervo lingual na cirurgia de terceiro molar inferior?',
+    options: [
+      'Seu trajeto nos tecidos linguais pode ficar muito próximo da cortical e da crista alveolar.',
+      'Ele percorre o interior do canal mandibular junto ao nervo alveolar inferior.',
+      'Ele emerge pelo forame mentual antes de chegar à língua.',
+      'Ele atravessa o seio maxilar junto às raízes dos molares.',
+    ],
+    answer: 0,
+    explanation: 'Na região do terceiro molar, o nervo lingual tem posição variável e pode estar junto à cortical lingual, ao nível ou até acima da crista alveolar.',
+  },
+  {
+    id: 'anat-05',
+    kind: 'boolean',
+    difficulty: 1,
+    prompt: 'Avalie a referência anatômica.',
+    statement: 'O forame infraorbitário é a região de emergência do nervo infraorbitário na face.',
+    answer: true,
+    explanation: 'O nervo infraorbitário emerge pelo forame infraorbitário, referência relevante para anestesia regional e avaliação de trauma facial.',
+  },
+  {
+    id: 'anat-06',
+    kind: 'multi',
+    difficulty: 2,
+    prompt: 'Sobre a artéria facial na borda mandibular, selecione as afirmações corretas.',
+    options: [
+      'Ela cruza a borda inferior da mandíbula imediatamente anterior à inserção do masseter.',
+      'Seu pulso pode ser palpado nessa região em algumas pessoas.',
+      'Ela percorre normalmente o interior do canal mandibular.',
+      'Conhecer seu trajeto auxilia no planejamento e no controle de sangramento.',
+    ],
+    answers: [0, 1, 3],
+    explanation: 'A artéria facial contorna a borda inferior mandibular à frente do masseter; não percorre o canal mandibular.',
+  },
+];

@@ -237,11 +237,26 @@ function selectLessonExercises(
       EXERCISE_KIND_CYCLE[(hashSeed(options.seed) + offset) % EXERCISE_KIND_CYCLE.length]
   );
   const remaining = [...ranked];
-  const balanced = targetKinds.map(kind => {
-    const matchingIndex = remaining.findIndex(group =>
+  const orderedTargets = targetKinds
+    .map((kind, order) => ({
+      kind,
+      order,
+      availability: ranked.filter(group =>
+        group.variants.some(variant => variant.kind === kind)
+      ).length,
+    }))
+    .sort((a, b) => a.availability - b.availability || a.order - b.order);
+  const balanced = orderedTargets.map(({ kind }) => {
+    const authoredIndex = remaining.findIndex(group =>
+      group.variants.some(
+        variant => variant.id === group.conceptId && variant.kind === kind
+      )
+    );
+    const compatibleIndex = remaining.findIndex(group =>
       group.variants.some(variant => variant.kind === kind)
     );
-    const [group] = remaining.splice(matchingIndex >= 0 ? matchingIndex : 0, 1);
+    const groupIndex = authoredIndex >= 0 ? authoredIndex : compatibleIndex;
+    const [group] = remaining.splice(groupIndex >= 0 ? groupIndex : 0, 1);
     return { group, kind };
   });
 

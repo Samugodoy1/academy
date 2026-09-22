@@ -9,6 +9,7 @@ import {
   buildBlitzLesson,
   buildLesson,
   buildMistakesLesson,
+  buildPersonalizedLesson,
   buildUnitReview,
   levelOf,
 } from '../engine';
@@ -120,8 +121,10 @@ export const ColaGame: React.FC<ColaGameProps> = ({
       }
       const lessonPlan =
         selection.kind === 'review'
-          ? buildUnitReview(unit, getUnitState(state, unit.topic).crowns)
-          : buildLesson(unit, selection.index);
+          ? buildUnitReview(unit, getUnitState(state, unit.topic).crowns, {
+              memory: state.exerciseMemory,
+            })
+          : buildLesson(unit, selection.index, { memory: state.exerciseMemory });
       beginLesson();
       setRunning({ plan: lessonPlan, useHearts: true });
     },
@@ -154,15 +157,33 @@ export const ColaGame: React.FC<ColaGameProps> = ({
       const lessonPlan = buildMistakesLesson(
         ALL_EXERCISES,
         ids && ids.length > 0 ? ids : state.mistakes,
-        `mistakes-${Date.now()}`
+        { seed: `mistakes-${Date.now()}`, memory: state.exerciseMemory }
       );
       if (!lessonPlan) return;
       setNoHearts(false);
       setResult(null);
       setRunning({ plan: lessonPlan, useHearts: false });
     },
-    [state.mistakes]
+    [state.exerciseMemory, state.mistakes]
   );
+
+  const startPersonalizedPractice = useCallback(() => {
+    if (!canStartLesson(state, new Date(), limits)) {
+      setPlanBlock('dailyLessons');
+      return;
+    }
+    if (!limits.infiniteHearts && state.hearts <= 0) {
+      setNoHearts(true);
+      return;
+    }
+    beginLesson();
+    setRunning({
+      plan: buildPersonalizedLesson(ALL_EXERCISES, {
+        memory: state.exerciseMemory,
+      }),
+      useHearts: true,
+    });
+  }, [beginLesson, limits, state]);
 
   const startBlitz = useCallback(() => {
     if (!limits.blitz) {
@@ -172,11 +193,14 @@ export const ColaGame: React.FC<ColaGameProps> = ({
     setNoHearts(false);
     setResult(null);
     setRunning({
-      plan: buildBlitzLesson(ALL_EXERCISES, `blitz-${Date.now()}`),
+      plan: buildBlitzLesson(ALL_EXERCISES, {
+        seed: `blitz-${Date.now()}`,
+        memory: state.exerciseMemory,
+      }),
       useHearts: false,
       timeLimitSec: BLITZ_SECONDS,
     });
-  }, [limits.blitz]);
+  }, [limits.blitz, state.exerciseMemory]);
 
   const handleFinish = useCallback(
     (outcome: LessonOutcome, reason: 'complete' | 'failed') => {
@@ -467,6 +491,7 @@ export const ColaGame: React.FC<ColaGameProps> = ({
         spotlightTopic={spotlightTopic}
         spotlightLabel={spotlightLabel}
         onStart={startTrailNode}
+        onStartPractice={startPersonalizedPractice}
         onOpenStudy={onOpenStudy}
       />
 

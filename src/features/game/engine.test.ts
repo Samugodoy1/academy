@@ -6,6 +6,7 @@ import {
   buildBlitzLesson,
   buildLesson,
   buildMistakesLesson,
+  buildPersonalizedLesson,
   buildUnitReview,
   checkAnswer,
   comboBonus,
@@ -15,7 +16,7 @@ import {
   shuffleWithSeed,
 } from './engine';
 import { ALL_EXERCISES, GAME_UNITS } from './content';
-import type { Exercise, LessonOutcome } from './types';
+import type { Exercise, ExerciseMemory, GameUnit, LessonOutcome } from './types';
 
 const unit = GAME_UNITS[0];
 const references = [{ label: 'Referência', url: 'https://example.com/reference' }];
@@ -41,6 +42,11 @@ describe('conteúdo do jogo', () => {
       expect(gameUnit.exercises.length).toBeGreaterThanOrEqual(LESSON_SIZE);
       expect(gameUnit.lessons).toBe(countLessons(gameUnit.exercises.length));
     }
+  });
+
+  it('expande o banco revisado para centenas de variações seguras', () => {
+    expect(ALL_EXERCISES.length).toBeGreaterThan(500);
+    expect(GAME_UNITS.every(gameUnit => gameUnit.lessons >= 3)).toBe(true);
   });
 
   it('não repete ids de exercício', () => {
@@ -159,27 +165,32 @@ describe('checkAnswer', () => {
 
 describe('montagem das lições', () => {
   it('gera a mesma lição para o mesmo nó', () => {
-    const first = buildLesson(unit, 0);
-    const second = buildLesson(unit, 0);
+    const first = buildLesson(unit, 0, 'fixed-seed');
+    const second = buildLesson(unit, 0, 'fixed-seed');
     expect(first.exercises.map(e => e.id)).toEqual(second.exercises.map(e => e.id));
     expect(first.exercises.length).toBe(LESSON_SIZE);
   });
 
-  it('não repete exercícios entre as lições de uma unidade', () => {
-    for (const gameUnit of GAME_UNITS) {
-      const seen = new Set<string>();
-      for (let index = 0; index < gameUnit.lessons; index += 1) {
-        const ids = buildLesson(gameUnit, index).exercises.map(exercise => exercise.id);
-        expect(ids.some(id => seen.has(id))).toBe(false);
-        ids.forEach(id => seen.add(id));
-      }
-    }
+  it('prioriza conceitos ainda não vistos na lição seguinte', () => {
+    const first = buildLesson(unit, 0, 'first');
+    const memory = Object.fromEntries(
+      first.exercises.map(exercise => [
+        exercise.id,
+        { attempts: 1, correct: 1, streak: 1, lastSeenAt: 100, dueAt: 9999999999999 },
+      ])
+    ) satisfies Record<string, ExerciseMemory>;
+    const second = buildLesson(unit, 1, { seed: 'second', memory, now: 200 });
+    const firstConcepts = new Set(first.exercises.map(exercise => exercise.conceptId));
+    expect(second.exercises.some(exercise => firstConcepts.has(exercise.conceptId))).toBe(false);
   });
 
   it('monta a prova do box com os exercícios mais difíceis', () => {
-    const review = buildUnitReview(unit);
+    const review = buildUnitReview(unit, 0, 'review-seed');
     expect(review.kind).toBe('review');
-    expect(review.exercises.length).toBe(Math.min(REVIEW_SIZE, unit.exercises.length));
+    expect(review.exercises.length).toBe(Math.min(REVIEW_SIZE, 12));
+    expect(new Set(review.exercises.map(exercise => exercise.conceptId)).size).toBe(
+      review.exercises.length
+    );
   });
 
   it('monta a revisão de erros a partir dos ids salvos', () => {
@@ -193,6 +204,46 @@ describe('montagem das lições', () => {
     const blitz = buildBlitzLesson(ALL_EXERCISES, 'seed');
     expect(blitz.exercises.length).toBe(BLITZ_SIZE);
     expect(blitz.exercises.every(e => e.kind === 'choice' || e.kind === 'boolean')).toBe(true);
+  });
+
+  it('muda a posição da resposta quando a mesma questão reaparece', () => {
+    const rotatingUnit: GameUnit = {
+      topic: 'anestesia',
+      title: 'Teste',
+      tagline: 'Teste',
+      lessons: 1,
+      exercises: [
+        {
+          ...choice,
+          conceptId: choice.id,
+        },
+      ],
+    };
+    const first = buildLesson(rotatingUnit, 0, {
+      seed: 'rotation',
+      memory: {},
+    }).exercises[0];
+    const second = buildLesson(rotatingUnit, 0, {
+      seed: 'rotation',
+      memory: {
+        [choice.id]: { attempts: 1, correct: 1, streak: 1, lastSeenAt: 1, dueAt: 2 },
+      },
+    }).exercises[0];
+    expect(first.kind).toBe('choice');
+    expect(second.kind).toBe('choice');
+    if (first.kind === 'choice' && second.kind === 'choice') {
+      expect(first.answer).not.toBe(second.answer);
+      expect(first.options[first.answer]).toBe(second.options[second.answer]);
+    }
+  });
+
+  it('gera prática personalizada contínua sem repetir conceitos na rodada', () => {
+    const practice = buildPersonalizedLesson(ALL_EXERCISES, 'practice-seed');
+    expect(practice.kind).toBe('practice');
+    expect(practice.exercises).toHaveLength(REVIEW_SIZE);
+    expect(new Set(practice.exercises.map(exercise => exercise.conceptId)).size).toBe(
+      REVIEW_SIZE
+    );
   });
 
   it('embaralha de forma determinística', () => {

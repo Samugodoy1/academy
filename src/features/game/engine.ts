@@ -1,6 +1,7 @@
 import type {
   Answer,
   Exercise,
+  ExerciseMemory,
   GameUnit,
   LessonKind,
   LessonOutcome,
@@ -13,8 +14,8 @@ export const BLITZ_SIZE = 20;
 export const BLITZ_SECONDS = 60;
 
 // ── Seeded randomness ─────────────────────────────────────────────────
-// A unit uses one stable shuffle. Consecutive lesson nodes therefore consume
-// disjoint slices instead of drawing again from a newly shuffled pool.
+// Seeds make a generated session reproducible for tests while production uses
+// a fresh seed. Long-term repetition is controlled by the learner memory.
 
 export function hashSeed(value: string): number {
   let hash = 2166136261;
@@ -123,16 +124,43 @@ export function describeAnswer(exercise: Exercise): string {
 
 // ── Lesson building ───────────────────────────────────────────────────
 
-const unitSeed = (topic: string): string => `unit:${topic}:v3`;
+export interface LessonBuildOptions {
+  seed?: string;
+  memory?: Record<string, ExerciseMemory>;
+  now?: number;
+}
 
-function randomizeExercise(exercise: Exercise, random: () => number): Exercise {
+const lessonOptions = (
+  value: string | LessonBuildOptions | undefined,
+  fallbackSeed: string
+): Required<LessonBuildOptions> => {
+  const options = typeof value === 'string' ? { seed: value } : value ?? {};
+  return {
+    seed: options.seed ?? fallbackSeed,
+    memory: options.memory ?? {},
+    now: options.now ?? Date.now(),
+  };
+};
+
+function randomizeExercise(
+  exercise: Exercise,
+  random: () => number,
+  appearance = 0
+): Exercise {
   if (exercise.kind === 'choice') {
     const entries = exercise.options.map((option, index) => ({ option, index }));
-    const shuffled = shuffle(entries, random);
+    const correct = entries[exercise.answer];
+    const distractors = shuffle(
+      entries.filter(entry => entry.index !== exercise.answer),
+      random
+    );
+    const answer = (hashSeed(exercise.id) + appearance) % entries.length;
+    const shuffled = [...distractors];
+    shuffled.splice(answer, 0, correct);
     return {
       ...exercise,
       options: shuffled.map(entry => entry.option),
-      answer: shuffled.findIndex(entry => entry.index === exercise.answer),
+      answer,
     };
   }
   if (exercise.kind === 'multi') {
@@ -151,14 +179,72 @@ function randomizeExercise(exercise: Exercise, random: () => number): Exercise {
   return exercise;
 }
 
-function selectLessonExercises(pool: Exercise[], index: number, seed: string): Exercise[] {
-  const ordered = shuffleWithSeed(pool, `${seed}:order`);
-  const start = index * LESSON_SIZE;
-  const selected = ordered.slice(start, start + LESSON_SIZE);
-  const random = createRandom(hashSeed(`${seed}:lesson:${index}`));
-  return shuffle(selected, random).map(exercise =>
-    randomizeExercise(exercise, createRandom(hashSeed(`${seed}:${index}:${exercise.id}`)))
-  );
+const conceptIdOf = (exercise: Exercise) => exercise.conceptId ?? exercise.id;
+
+function selectLessonExercises(
+  pool: Exercise[],
+  index: number,
+  size: number,
+  options: Required<LessonBuildOptions>
+): Exercise[] {
+  const random = createRandom(hashSeed(options.seed));
+  const groups = new Map<string, Exercise[]>();
+  for (const exercise of pool) {
+    const conceptId = conceptIdOf(exercise);
+    groups.set(conceptId, [...(groups.get(conceptId) ?? []), exercise]);
+  }
+
+  const targetDifficulty = index < 2 ? 1 : index < 5 ? 2 : 3;
+  const ranked = [...groups.entries()]
+    .map(([conceptId, variants]) => {
+      const memories = variants
+        .map(variant => options.memory[variant.id])
+        .filter((memory): memory is ExerciseMemory => Boolean(memory));
+      const attempts = memories.reduce((sum, memory) => sum + memory.attempts, 0);
+      const correct = memories.reduce((sum, memory) => sum + memory.correct, 0);
+      const overdue = memories.filter(memory => memory.dueAt <= options.now).length;
+      const difficulty = variants[0]?.difficulty ?? 2;
+      return {
+        conceptId,
+        variants,
+        attempts,
+        weakness: attempts === 0 ? 1 : 1 - correct / attempts,
+        overdue,
+        difficultyDistance: Math.abs(difficulty - targetDifficulty),
+        tie: random(),
+      };
+    })
+    .sort(
+      (a, b) =>
+        a.attempts - b.attempts ||
+        b.overdue - a.overdue ||
+        b.weakness - a.weakness ||
+        a.difficultyDistance - b.difficultyDistance ||
+        a.tie - b.tie
+    )
+    .slice(0, Math.min(size, groups.size));
+
+  const selected = ranked.map(group => {
+    const variant = [...group.variants]
+      .map(exercise => ({
+        exercise,
+        memory: options.memory[exercise.id],
+        tie: random(),
+      }))
+      .sort(
+        (a, b) =>
+          (a.memory?.attempts ?? 0) - (b.memory?.attempts ?? 0) ||
+          (a.memory?.lastSeenAt ?? 0) - (b.memory?.lastSeenAt ?? 0) ||
+          a.tie - b.tie
+      )[0].exercise;
+    return randomizeExercise(
+      variant,
+      createRandom(hashSeed(`${options.seed}:${variant.id}`)),
+      options.memory[variant.id]?.attempts ?? 0
+    );
+  });
+
+  return shuffle(selected, random);
 }
 
 
@@ -175,7 +261,15 @@ function planId(kind: LessonKind, topic: string | null, index: number) {
   return `${kind}:${topic ?? 'geral'}:${index}`;
 }
 
-export function buildLesson(unit: GameUnit, index: number, seed = unitSeed(unit.topic)): LessonPlan {
+export function buildLesson(
+  unit: GameUnit,
+  index: number,
+  buildOptions?: string | LessonBuildOptions
+): LessonPlan {
+  const options = lessonOptions(
+    buildOptions,
+    `${unit.topic}:${index}:${Date.now()}:${Math.random()}`
+  );
   const id = planId('lesson', unit.topic, index);
   return {
     id,
@@ -183,27 +277,54 @@ export function buildLesson(unit: GameUnit, index: number, seed = unitSeed(unit.
     kind: 'lesson',
     index,
     title: `${unit.title} · Lição ${index + 1}`,
-    exercises: selectLessonExercises(unit.exercises, index, seed),
+    exercises: selectLessonExercises(unit.exercises, index, LESSON_SIZE, options),
   };
 }
 
-export function buildUnitReview(unit: GameUnit, round = 0, seed = `${unitSeed(unit.topic)}:review:${round}`): LessonPlan {
+export function buildUnitReview(
+  unit: GameUnit,
+  round = 0,
+  buildOptions?: string | LessonBuildOptions
+): LessonPlan {
+  const options = lessonOptions(
+    buildOptions,
+    `${unit.topic}:review:${round}:${Date.now()}:${Math.random()}`
+  );
   const id = planId('review', unit.topic, round);
-  const pool = shuffleWithSeed(unit.exercises, seed);
-  const hardFirst = [...pool].sort((a, b) => (b.difficulty ?? 2) - (a.difficulty ?? 2));
-  const selected = hardFirst.slice(0, Math.min(REVIEW_SIZE, hardFirst.length));
-  const random = createRandom(hashSeed(`${seed}:review`));
   return {
     id,
     topic: unit.topic,
     kind: 'review',
     index: unit.lessons,
     title: `${unit.title} · Prova do box`,
-    exercises: shuffle(selected, random).map(exercise => randomizeExercise(exercise, random)),
+    exercises: selectLessonExercises(unit.exercises, 99, REVIEW_SIZE, options),
   };
 }
 
-export function buildMistakesLesson(pool: Exercise[], ids: string[], seed = 'mistakes'): LessonPlan | null {
+export function buildPersonalizedLesson(
+  pool: Exercise[],
+  buildOptions?: string | LessonBuildOptions
+): LessonPlan {
+  const options = lessonOptions(
+    buildOptions,
+    `practice:${Date.now()}:${Math.random()}`
+  );
+  return {
+    id: planId('practice', null, options.now),
+    topic: null,
+    kind: 'practice',
+    index: 0,
+    title: 'Prática personalizada',
+    exercises: selectLessonExercises(pool, 99, REVIEW_SIZE, options),
+  };
+}
+
+export function buildMistakesLesson(
+  pool: Exercise[],
+  ids: string[],
+  buildOptions: string | LessonBuildOptions = 'mistakes'
+): LessonPlan | null {
+  const options = lessonOptions(buildOptions, `mistakes:${Date.now()}`);
   const byId = new Map(pool.map(exercise => [exercise.id, exercise]));
   const exercises = ids
     .map(id => byId.get(id))
@@ -216,20 +337,39 @@ export function buildMistakesLesson(pool: Exercise[], ids: string[], seed = 'mis
     kind: 'mistakes',
     index: 0,
     title: 'Revisão dos erros',
-    exercises: shuffleWithSeed(exercises, seed),
+    exercises: shuffleWithSeed(exercises, options.seed).map(exercise =>
+      randomizeExercise(
+        exercise,
+        createRandom(hashSeed(`${options.seed}:${exercise.id}`)),
+        options.memory[exercise.id]?.attempts ?? 0
+      )
+    ),
   };
 }
 
-export function buildBlitzLesson(pool: Exercise[], seed: string): LessonPlan {
+export function buildBlitzLesson(
+  pool: Exercise[],
+  buildOptions: string | LessonBuildOptions
+): LessonPlan {
+  const options = lessonOptions(buildOptions, `blitz:${Date.now()}`);
   // Rapid fire only uses formats that can be answered with a single tap.
   const quick = pool.filter(exercise => exercise.kind === 'choice' || exercise.kind === 'boolean');
+  const selected = shuffleWithSeed(quick.length > 0 ? quick : pool, options.seed)
+    .slice(0, BLITZ_SIZE)
+    .map(exercise =>
+      randomizeExercise(
+        exercise,
+        createRandom(hashSeed(`${options.seed}:${exercise.id}`)),
+        options.memory[exercise.id]?.attempts ?? 0
+      )
+    );
   return {
     id: planId('blitz', null, 0),
     topic: null,
     kind: 'blitz',
     index: 0,
     title: 'Desafio relâmpago',
-    exercises: shuffleWithSeed(quick.length > 0 ? quick : pool, seed).slice(0, BLITZ_SIZE),
+    exercises: selected,
   };
 }
 
@@ -238,6 +378,7 @@ export function buildBlitzLesson(pool: Exercise[], seed: string): LessonPlan {
 const KIND_BASE: Record<LessonKind, number> = {
   lesson: 10,
   review: 20,
+  practice: 12,
   mistakes: 8,
   blitz: 12,
 };

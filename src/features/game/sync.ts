@@ -9,7 +9,7 @@ import {
 import type { GameState } from './types';
 
 export interface GameStatePayload {
-  version: 2;
+  version: 3;
   updatedAt: number;
   state: GameState;
 }
@@ -104,7 +104,7 @@ export async function putAcademyGame(state: GameState): Promise<boolean> {
   if (!currentUserId()) return false;
   try {
     const payload: GameStatePayload = {
-      version: 2,
+      version: 3,
       updatedAt: Date.now(),
       state,
     };

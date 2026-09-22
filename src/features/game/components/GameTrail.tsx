@@ -17,6 +17,7 @@ interface GameTrailProps {
   spotlightTopic?: StudyKey | null;
   spotlightLabel?: string | null;
   onStart: (selection: TrailSelection) => void;
+  onStartPractice: () => void;
   onOpenStudy?: (topic: StudyKey) => void;
 }
 
@@ -33,7 +34,8 @@ function isUnitUnlocked(
   if (spotlightTopic === unit.topic) return true;
   if (getUnitState(state, unit.topic).lessons > 0) return true;
   const previous = GAME_UNITS[unitIndex - 1];
-  return getUnitState(state, previous.topic).lessons >= previous.lessons;
+  const previousProgress = getUnitState(state, previous.topic);
+  return previousProgress.crowns > 0 || previousProgress.lessons >= previous.lessons;
 }
 
 const CrownRow: React.FC<{ crowns: number }> = ({ crowns }) => (
@@ -51,6 +53,7 @@ export const GameTrail: React.FC<GameTrailProps> = ({
   spotlightTopic,
   spotlightLabel,
   onStart,
+  onStartPractice,
   onOpenStudy,
 }) => {
   const [selected, setSelected] = useState<string | null>(null);
@@ -64,6 +67,9 @@ export const GameTrail: React.FC<GameTrailProps> = ({
       })),
     [spotlightTopic, state]
   );
+  const dueCount = Object.values(state.exerciseMemory).filter(
+    memory => memory.attempts > 0 && memory.dueAt <= Date.now()
+  ).length;
 
   return (
     <div className="space-y-10">
@@ -244,6 +250,35 @@ export const GameTrail: React.FC<GameTrailProps> = ({
           </section>
         );
       })}
+
+      <section className="rounded-[28px] bg-[var(--neo-wash)] px-5 py-6 text-center">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--neo)] text-white">
+          <Trophy size={26} />
+        </span>
+        <p className="mt-3 text-[12px] font-semibold uppercase tracking-[0.08em] text-[var(--neo)]">
+          Trilha contínua
+        </p>
+        <h3 className="mt-1 text-[22px] font-semibold tracking-[-0.02em] text-[var(--neo-ink)]">
+          Prática personalizada
+        </h3>
+        <p className="mx-auto mt-2 max-w-[420px] text-[14px] leading-snug text-[var(--neo-gray)]">
+          Uma nova lição a cada rodada, misturando pontos fracos, erros e conteúdos no momento
+          certo de revisar. Esta etapa nunca termina.
+        </p>
+        <p className="mt-3 text-[13px] font-medium text-[var(--neo)]">
+          {dueCount > 0
+            ? `${dueCount} ${dueCount === 1 ? 'questão pronta' : 'questões prontas'} para revisão`
+            : 'O próximo treino prioriza conteúdo ainda não visto'}
+        </p>
+        <button
+          type="button"
+          onClick={onStartPractice}
+          className="game-cta mx-auto mt-5 max-w-[320px]"
+        >
+          <Play size={15} />
+          Começar nova rodada
+        </button>
+      </section>
     </div>
   );
 };

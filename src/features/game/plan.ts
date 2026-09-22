@@ -15,7 +15,7 @@ export interface PlanLimits {
 }
 
 export const FREE_LIMITS: PlanLimits = {
-  dailyLessons: 5,
+  dailyLessons: 1,
   heartRegenMs: 20 * 60 * 1000,
   infiniteHearts: false,
   maxFreezes: 1,
@@ -46,8 +46,8 @@ export type PlanBlock = 'dailyLessons' | 'blitz' | 'hearts';
 
 export const BLOCK_COPY: Record<PlanBlock, { title: string; body: string }> = {
   dailyLessons: {
-    title: 'Você já treinou bastante hoje',
-    body: 'O plano Free libera 5 lições por dia. Amanhã a trilha abre de novo — ou passe para o Student e siga agora.',
+    title: 'Lição gratuita concluída',
+    body: 'O plano Free libera 1 lição de trilha por dia. Amanhã a próxima abre — ou passe para o Student e continue agora.',
   },
   blitz: {
     title: 'Desafio relâmpago é do Student',

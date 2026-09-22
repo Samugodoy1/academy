@@ -13,8 +13,8 @@ export const BLITZ_SIZE = 20;
 export const BLITZ_SECONDS = 60;
 
 // ── Seeded randomness ─────────────────────────────────────────────────
-// The seed is regenerated when a lesson is opened, so replaying the same node
-// can surface a different set and a different answer order.
+// A unit uses one stable shuffle. Consecutive lesson nodes therefore consume
+// disjoint slices instead of drawing again from a newly shuffled pool.
 
 export function hashSeed(value: string): number {
   let hash = 2166136261;
@@ -92,11 +92,13 @@ export function checkAnswer(exercise: Exercise, answer: Answer): boolean {
 
 /** The part of an exercise a character can read out loud, when there is one. */
 export function exerciseSpeech(exercise: Exercise): string | null {
-  if (exercise.kind === 'boolean') return exercise.statement;
+  if (exercise.kind === 'boolean') return `${exercise.prompt} ${exercise.statement}`;
+  if (exercise.kind === 'blank') return `${exercise.prompt}: ${exercise.sentence}`;
   if (exercise.kind === 'choice' || exercise.kind === 'multi' || exercise.kind === 'order') {
-    return exercise.scenario ?? null;
+    return exercise.scenario ? `${exercise.scenario} ${exercise.prompt}` : exercise.prompt;
   }
-  return null;
+  if (exercise.kind === 'match') return exercise.prompt;
+  return exercise.prompt;
 }
 
 /** Human readable correct answer, used by the feedback sheet when the student misses. */
@@ -121,9 +123,7 @@ export function describeAnswer(exercise: Exercise): string {
 
 // ── Lesson building ───────────────────────────────────────────────────
 
-function randomLessonSeed(topic: string, index: number): string {
-  return `${topic}:${index}:${Date.now()}:${Math.random()}`;
-}
+const unitSeed = (topic: string): string => `unit:${topic}:v3`;
 
 function randomizeExercise(exercise: Exercise, random: () => number): Exercise {
   if (exercise.kind === 'choice') {
@@ -152,14 +152,13 @@ function randomizeExercise(exercise: Exercise, random: () => number): Exercise {
 }
 
 function selectLessonExercises(pool: Exercise[], index: number, seed: string): Exercise[] {
-  if (pool.length <= LESSON_SIZE) return shuffleWithSeed(pool, seed).map(exercise =>
-    randomizeExercise(exercise, createRandom(hashSeed(`${seed}:${exercise.id}`)))
+  const ordered = shuffleWithSeed(pool, `${seed}:order`);
+  const start = index * LESSON_SIZE;
+  const selected = ordered.slice(start, start + LESSON_SIZE);
+  const random = createRandom(hashSeed(`${seed}:lesson:${index}`));
+  return shuffle(selected, random).map(exercise =>
+    randomizeExercise(exercise, createRandom(hashSeed(`${seed}:${index}:${exercise.id}`)))
   );
-  const random = createRandom(hashSeed(seed));
-  const shuffled = shuffle(pool, random);
-  const start = (index * LESSON_SIZE) % shuffled.length;
-  const selected = Array.from({ length: LESSON_SIZE }, (_, offset) => shuffled[(start + offset) % shuffled.length]);
-  return shuffle(selected, random).map(exercise => randomizeExercise(exercise, random));
 }
 
 
@@ -176,7 +175,7 @@ function planId(kind: LessonKind, topic: string | null, index: number) {
   return `${kind}:${topic ?? 'geral'}:${index}`;
 }
 
-export function buildLesson(unit: GameUnit, index: number, seed = randomLessonSeed(unit.topic, index)): LessonPlan {
+export function buildLesson(unit: GameUnit, index: number, seed = unitSeed(unit.topic)): LessonPlan {
   const id = planId('lesson', unit.topic, index);
   return {
     id,
@@ -188,7 +187,7 @@ export function buildLesson(unit: GameUnit, index: number, seed = randomLessonSe
   };
 }
 
-export function buildUnitReview(unit: GameUnit, round = 0, seed = randomLessonSeed(unit.topic, round)): LessonPlan {
+export function buildUnitReview(unit: GameUnit, round = 0, seed = `${unitSeed(unit.topic)}:review:${round}`): LessonPlan {
   const id = planId('review', unit.topic, round);
   const pool = shuffleWithSeed(unit.exercises, seed);
   const hardFirst = [...pool].sort((a, b) => (b.difficulty ?? 2) - (a.difficulty ?? 2));

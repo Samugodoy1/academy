@@ -234,30 +234,14 @@ export const GameSession: React.FC<GameSessionProps> = ({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [answer, checked, current, handleContinue, submit]);
 
-  // The instruction above the question would read twice for formats whose
-  // prompt is already "Complete a frase" or "Verdadeiro ou falso".
-  const kickerLabel = useMemo(() => {
-    if (!current) return '';
-    const label = EXERCISE_KIND_LABEL[current.kind];
-    const firstWord = (value: string) =>
-      value
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z ]/g, '')
-        .trim()
-        .split(' ')[0];
-    return firstWord(label) === firstWord(current.prompt) ? plan.title : label;
-  }, [current, plan.title]);
-
   // Quem apresenta o caso: o dono da unidade. Em revisão e relâmpago, os temas
   // se misturam e a turma vai se revezando exercício a exercício.
   const host = useMemo(() => hostFor(current?.topic), [current?.topic]);
 
   const speech = useMemo(() => {
     if (!current) return '';
-    return exerciseSpeech(current) ?? pickLine(host.lines.intro, `${current.id}:${host.id}`);
-  }, [current, host]);
+    return exerciseSpeech(current) ?? current.prompt;
+  }, [current]);
 
   const feedbackCopy = useMemo(() => {
     if (!checked || !current) return null;
@@ -312,7 +296,7 @@ export const GameSession: React.FC<GameSessionProps> = ({
         <div className="mx-auto w-full max-w-[620px]">
           <div className="mb-4 flex items-center justify-between gap-3">
             <p className="text-[13px] font-medium uppercase tracking-[0.06em] text-[var(--neo-gray)]">
-              {kickerLabel}
+              {plan.title}
             </p>
             {combo >= 2 && (
               <span className="game-pop flex items-center gap-1 rounded-full bg-[var(--neo-wash)] px-3 py-1 text-[13px] font-semibold text-[var(--neo)]">
@@ -323,7 +307,7 @@ export const GameSession: React.FC<GameSessionProps> = ({
           </div>
 
           <h2 className="mb-5 text-[24px] font-semibold leading-[1.15] tracking-[-0.02em] text-[var(--neo-ink)] sm:text-[28px]">
-            {current.prompt}
+            {EXERCISE_KIND_LABEL[current.kind]}
           </h2>
 
           <CharacterSay
@@ -394,6 +378,20 @@ export const GameSession: React.FC<GameSessionProps> = ({
                   >
                     {feedbackCopy.detail}
                   </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px]">
+                    <span className="font-medium opacity-70">Referência científica:</span>
+                    {current.references.map(reference => (
+                      <a
+                        key={reference.url}
+                        href={reference.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-medium underline underline-offset-2"
+                      >
+                        {reference.label}
+                      </a>
+                    ))}
+                  </div>
                 </div>
               </div>
               <button

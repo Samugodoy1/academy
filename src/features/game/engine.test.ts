@@ -18,6 +18,7 @@ import { ALL_EXERCISES, GAME_UNITS } from './content';
 import type { Exercise, LessonOutcome } from './types';
 
 const unit = GAME_UNITS[0];
+const references = [{ label: 'Referência', url: 'https://example.com/reference' }];
 
 const outcome = (partial: Partial<LessonOutcome> = {}): LessonOutcome => ({
   topic: 'anestesia',
@@ -68,6 +69,8 @@ describe('conteúdo do jogo', () => {
         expect(exercise.bank).toContain(exercise.answer);
       }
       expect(exercise.explanation.length).toBeGreaterThan(20);
+      expect(exercise.references.length).toBeGreaterThan(0);
+      expect(exercise.references.every(reference => reference.url.startsWith('https://'))).toBe(true);
     }
   });
 });
@@ -79,6 +82,7 @@ describe('checkAnswer', () => {
     kind: 'choice',
     prompt: 'p',
     explanation: 'e',
+    references,
     options: ['a', 'b'],
     answer: 1,
   };
@@ -95,6 +99,7 @@ describe('checkAnswer', () => {
       kind: 'multi',
       prompt: 'p',
       explanation: 'e',
+      references,
       options: ['a', 'b', 'c'],
       answers: [0, 2],
     };
@@ -110,6 +115,7 @@ describe('checkAnswer', () => {
       kind: 'order',
       prompt: 'p',
       explanation: 'e',
+      references,
       steps: ['um', 'dois', 'três'],
     };
     expect(checkAnswer(order, { kind: 'order', steps: ['um', 'dois', 'três'] })).toBe(true);
@@ -123,6 +129,7 @@ describe('checkAnswer', () => {
       kind: 'blank',
       prompt: 'p',
       explanation: 'e',
+      references,
       sentence: 'a ___ b',
       answer: 'Remineralização',
       bank: ['Remineralização'],
@@ -138,6 +145,7 @@ describe('checkAnswer', () => {
       kind: 'match',
       prompt: 'p',
       explanation: 'e',
+      references,
       pairs: [{ left: 'a', right: '1' }],
     };
     expect(checkAnswer(match, { kind: 'match', mistakes: 0 })).toBe(true);
@@ -157,10 +165,15 @@ describe('montagem das lições', () => {
     expect(first.exercises.length).toBe(LESSON_SIZE);
   });
 
-  it('usa exercícios diferentes em lições diferentes', () => {
-    const first = new Set(buildLesson(unit, 0).exercises.map(e => e.id));
-    const second = buildLesson(unit, 1).exercises.map(e => e.id);
-    expect(second.some(id => first.has(id))).toBe(false);
+  it('não repete exercícios entre as lições de uma unidade', () => {
+    for (const gameUnit of GAME_UNITS) {
+      const seen = new Set<string>();
+      for (let index = 0; index < gameUnit.lessons; index += 1) {
+        const ids = buildLesson(gameUnit, index).exercises.map(exercise => exercise.id);
+        expect(ids.some(id => seen.has(id))).toBe(false);
+        ids.forEach(id => seen.add(id));
+      }
+    }
   });
 
   it('monta a prova do box com os exercícios mais difíceis', () => {

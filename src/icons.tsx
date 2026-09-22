@@ -94,6 +94,11 @@ import {
   Diamond        as PhDiamond,
   Gift           as PhGift,
   ArrowClockwise as PhArrowClockwise,
+  GraduationCap  as PhGraduationCap,
+  Brain          as PhBrain,
+  TreeStructure  as PhTreeStructure,
+  Books          as PhBooks,
+  Quotes         as PhQuotes,
 } from '@phosphor-icons/react';
 
 // ─── Prop types ──────────────────────────────────────────────────────────────
@@ -223,3 +228,11 @@ export const SoundOff      = fill(PhSpeakerSlash);
 export const Gem           = fill(PhDiamond);
 export const Gift          = fill(PhGift);
 export const Restore       = bold(PhArrowClockwise);
+
+// ─── Ciclo básico ─────────────────────────────────────────────────────────────
+
+export const GraduationCap = fill(PhGraduationCap);
+export const Brain         = fill(PhBrain);
+export const TreeStructure = fill(PhTreeStructure);
+export const Books         = fill(PhBooks);
+export const Quotes        = fill(PhQuotes);

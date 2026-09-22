@@ -41,6 +41,21 @@ export function persistAcademyStage(stage: AcademyStage | null) {
  * Returns null when the text does not carry a usable number.
  */
 export function inferAcademyStageFromPeriod(period?: string | null): AcademyStage | null {
+  const parsed = parseAcademicPeriod(period);
+  if (!parsed) return null;
+  if (parsed.unit === 'ano') {
+    return parsed.value <= LAST_PRE_CLINICAL_YEAR ? 'pre-clinico' : 'clinico';
+  }
+  return parsed.value <= LAST_PRE_CLINICAL_PERIOD ? 'pre-clinico' : 'clinico';
+}
+
+export interface ParsedAcademicPeriod {
+  value: number;
+  unit: 'periodo' | 'ano';
+}
+
+/** "3º período" → { value: 3, unit: 'periodo' }; "2º ano" → { value: 2, unit: 'ano' }. */
+export function parseAcademicPeriod(period?: string | null): ParsedAcademicPeriod | null {
   const text = String(period || '')
     .toLowerCase()
     .normalize('NFD')
@@ -51,11 +66,14 @@ export function inferAcademyStageFromPeriod(period?: string | null): AcademyStag
   if (!match) return null;
   const value = Number(match[1]);
   if (!Number.isFinite(value) || value <= 0) return null;
+  return { value, unit: /\bano\b/.test(text) ? 'ano' : 'periodo' };
+}
 
-  if (/\bano\b/.test(text)) {
-    return value <= LAST_PRE_CLINICAL_YEAR ? 'pre-clinico' : 'clinico';
-  }
-  return value <= LAST_PRE_CLINICAL_PERIOD ? 'pre-clinico' : 'clinico';
+/** Semester number for the profile text, converting years to their first semester. */
+export function academicSemester(period?: string | null): number | null {
+  const parsed = parseAcademicPeriod(period);
+  if (!parsed) return null;
+  return parsed.unit === 'ano' ? parsed.value * 2 - 1 : parsed.value;
 }
 
 export interface ResolveAcademyStageInput {

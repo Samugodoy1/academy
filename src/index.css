@@ -610,9 +610,9 @@ html[data-theme="dark"] {
   .neo-dock {
     pointer-events: auto;
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     align-items: center;
-    width: min(420px, 100%);
+    width: min(480px, 100%);
     padding: 10px 12px 8px;
     border-radius: 32px;
     background: rgba(255, 255, 255, 0.78);
@@ -908,6 +908,162 @@ html[data-theme="dark"] {
     letter-spacing: -0.011em;
   }
 
+}
+
+/* ── Ciclo básico: mapa mental ──────────────────────────────────────── */
+/* Root → branches → leaves, drawn with hairlines. Phones stack the root  */
+/* above the branches; wide screens put the root to the left.             */
+
+:root {
+  --mindmap-line: #d2d2d7;
+  --mindmap-gap: 28px;
+}
+
+@layer utilities {
+  .mindmap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .mindmap-root {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    padding-bottom: var(--mindmap-gap);
+  }
+
+  .mindmap-root::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 1px;
+    height: var(--mindmap-gap);
+    background: var(--mindmap-line);
+  }
+
+  .mindmap-root-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 22px;
+    border-radius: 980px;
+    background: var(--neo);
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    text-align: center;
+  }
+
+  .mindmap-branches {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0 0 0 var(--mindmap-gap);
+    list-style: none;
+  }
+
+  .mindmap-branch {
+    position: relative;
+  }
+
+  /* vertical spine: continuous through the middle rows, half-height at the ends */
+  .mindmap-branch::before {
+    content: '';
+    position: absolute;
+    left: calc(-1 * var(--mindmap-gap) / 2);
+    top: 0;
+    bottom: -12px;
+    width: 1px;
+    background: var(--mindmap-line);
+  }
+
+  .mindmap-branch:first-child::before {
+    top: 24px;
+  }
+
+  .mindmap-branch:last-child::before {
+    bottom: auto;
+    height: 24px;
+  }
+
+  .mindmap-branch:only-child::before {
+    display: none;
+  }
+
+  /* elbow into each branch */
+  .mindmap-branch::after {
+    content: '';
+    position: absolute;
+    left: calc(-1 * var(--mindmap-gap) / 2);
+    top: 24px;
+    width: calc(var(--mindmap-gap) / 2);
+    height: 1px;
+    background: var(--mindmap-line);
+  }
+
+  .mindmap-card {
+    overflow: hidden;
+    border-radius: 22px;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+  }
+
+  @media (min-width: 64rem) {
+    .mindmap {
+      flex-direction: row;
+      align-items: center;
+      gap: 0;
+    }
+
+    .mindmap-root {
+      padding-bottom: 0;
+      padding-right: var(--mindmap-gap);
+    }
+
+    .mindmap-root::after {
+      left: auto;
+      right: 0;
+      top: 50%;
+      bottom: auto;
+      width: var(--mindmap-gap);
+      height: 1px;
+    }
+
+    .mindmap-branches {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+}
+
+/* on phones, join the root's stem to the branch spine */
+@media (max-width: 63.99rem) {
+  .mindmap-branches {
+    padding-left: var(--mindmap-gap);
+  }
+
+  .mindmap-root::after {
+    left: 50%;
+  }
+
+  .mindmap-branches::after {
+    content: '';
+    position: absolute;
+    left: calc(var(--mindmap-gap) / 2);
+    right: 50%;
+    top: 0;
+    height: 1px;
+    background: var(--mindmap-line);
+  }
+
+  .mindmap-branch:first-child::before {
+    top: 0;
+  }
 }
 
 /* ── Cola game ──────────────────────────────────────────────────────── */

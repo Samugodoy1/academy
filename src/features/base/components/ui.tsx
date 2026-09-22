@@ -3,15 +3,11 @@ import { ArrowUpRight, ChevronRight, Lock } from '../../../icons';
 import type { BaseReference } from '../types';
 import { referenceHref } from '../references';
 
-export function BaseSection({
-  kicker,
-  action,
-  children,
-}: {
+export const BaseSection: React.FC<{
   kicker: string;
   action?: React.ReactNode;
   children: React.ReactNode;
-}) {
+}> = ({ kicker, action, children }) => {
   return (
     <section className="space-y-3">
       <div className="flex items-baseline justify-between gap-3 px-1">
@@ -21,27 +17,20 @@ export function BaseSection({
       {children}
     </section>
   );
-}
+};
 
 export function GroupedList({ children }: { children: React.ReactNode }) {
   return <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">{children}</div>;
 }
 
-export function ListRow({
-  title,
-  meta,
-  trailing,
-  locked = false,
-  done = false,
-  onClick,
-}: {
+export const ListRow: React.FC<{
   title: string;
   meta?: string;
   trailing?: React.ReactNode;
   locked?: boolean;
   done?: boolean;
   onClick: () => void;
-}) {
+}> = ({ title, meta, trailing, locked = false, done = false, onClick }) => {
   return (
     <button
       type="button"
@@ -71,7 +60,7 @@ export function ListRow({
       )}
     </button>
   );
-}
+};
 
 export function ProgressBar({ value, className = '' }: { value: number; className?: string }) {
   const pct = Math.max(0, Math.min(100, Math.round(value * 100)));

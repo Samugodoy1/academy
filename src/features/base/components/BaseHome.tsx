@@ -5,33 +5,44 @@ import { BASE_DISCIPLINES, disciplinesByPeriod, STUDY_METHOD_TIPS, totalMinutes 
 import { BASE_STUDENT_PERKS, countLessons, countUnlockedLessons, type BasePlan } from '../plan';
 import { countAllDone, countDone, type BaseContinueSuggestion, type BaseProgress } from '../progress';
 import { referenceHref, referenceShortCitation } from '../references';
+import { unlockedDueCards, type ReviewState } from '../session/review';
+import type { SessionProgress } from '../session/sessionProgress';
+import { CompetenciesPanel } from './CompetenciesPanel';
 import { BaseSection, GroupedList, ListRow, ProgressBar } from './ui';
 
 interface BaseHomeProps {
   plan: BasePlan;
   progress: BaseProgress;
+  review: ReviewState;
+  sessionProgress: SessionProgress;
   suggestion: BaseContinueSuggestion | null;
   /** Semester the student is in, when the profile says so. Highlights that shelf. */
   currentSemester?: number | null;
   onOpenDiscipline: (discipline: BaseDiscipline) => void;
   onOpenLesson: (discipline: BaseDiscipline, lessonIndex: number) => void;
+  onOpenReview: () => void;
+  onOpenMix: () => void;
   onOpenCola: () => void;
   onUpgrade?: () => void;
 }
 
 const SUGGESTION_KICKER: Record<BaseContinueSuggestion['reason'], string> = {
-  resume: 'Continuar de onde parou',
-  next: 'Próximo resumo',
+  resume: 'Continuar a sessão',
+  next: 'Próxima sessão',
   start: 'Comece por aqui',
 };
 
 export function BaseHome({
   plan,
   progress,
+  review,
+  sessionProgress,
   suggestion,
   currentSemester,
   onOpenDiscipline,
   onOpenLesson,
+  onOpenReview,
+  onOpenMix,
   onOpenCola,
   onUpgrade,
 }: BaseHomeProps) {
@@ -39,16 +50,17 @@ export function BaseHome({
   const done = countAllDone(progress, BASE_DISCIPLINES);
   const unlocked = countUnlockedLessons(plan, BASE_DISCIPLINES);
   const groups = disciplinesByPeriod();
+  const dueReview = unlockedDueCards(review, plan).length;
 
   return (
     <div className="page-shell space-y-10">
       <header>
         <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">Estudos · Ciclo básico</p>
         <h1 className="mt-2 max-w-[18ch] text-[28px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)] sm:text-[34px]">
-          {done === 0 ? 'A base que sustenta a clínica.' : `${done} de ${total} resumos lidos.`}
+          {done === 0 ? 'Estude como vai cair na prova.' : `${done} de ${total} tópicos dominados.`}
         </h1>
         <p className="mt-3 max-w-[38ch] text-[17px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
-          Resumos e mapas mentais do 1º ao 4º período. Cada afirmação com o artigo que a sustenta.
+          Sessão com chute, gesto ativo e revisão espaçada. O resumo fica como referência — com DOI.
         </p>
       </header>
 
@@ -69,8 +81,8 @@ export function BaseHome({
               </p>
               <p className="mt-3 text-[15px] leading-snug text-white/90">{suggestion.lesson.summary}</p>
               <p className="mt-4 flex items-center justify-between text-[15px] text-white/90">
-                <span>{suggestion.lesson.minutes} min de leitura</span>
-                <span>Ler ›</span>
+                <span>{suggestion.lesson.minutes} min · sessão guiada</span>
+                <span>Iniciar ›</span>
               </p>
             </button>
           ) : (
@@ -92,10 +104,33 @@ export function BaseHome({
             </div>
           )}
 
+          <div className="grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={onOpenReview}
+              className="rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left ios-press-gentle"
+            >
+              <p className="text-[15px] font-semibold text-[var(--neo-ink)]">Revisão</p>
+              <p className="mt-1 text-[14px] text-[var(--neo-gray)]">
+                {dueReview === 0 ? 'Fila vazia hoje' : `${dueReview} ${dueReview === 1 ? 'cartão' : 'cartões'} vencidos`}
+              </p>
+            </button>
+            <button
+              type="button"
+              onClick={onOpenMix}
+              className="rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left ios-press-gentle"
+            >
+              <p className="text-[15px] font-semibold text-[var(--neo-ink)]">Mistura</p>
+              <p className="mt-1 text-[14px] text-[var(--neo-gray)]">Perguntas cruzando disciplinas</p>
+            </button>
+          </div>
+
+          <CompetenciesPanel session={sessionProgress} review={review} />
+
           <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-4">
             <div className="flex items-baseline justify-between gap-3">
               <p className="text-[15px] font-semibold tracking-[-0.011em] text-[var(--neo-ink)]">
-                {done} de {total} resumos
+                {done} de {total} tópicos
               </p>
               <p className="text-[13px] text-[var(--neo-gray)]">
                 {plan === 'free' ? `${unlocked} abertos no Free` : `${BASE_DISCIPLINES.length} disciplinas`}

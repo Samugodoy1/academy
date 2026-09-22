@@ -41,7 +41,7 @@ export function LessonView({
         <BackLink label={discipline.title} onClick={onBack} />
         <div>
           <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">
-            Resumo {lessonIndex + 1} de {discipline.lessons.length} · {lesson.minutes} min
+            Referência · {lessonIndex + 1} de {discipline.lessons.length} · {lesson.minutes} min
           </p>
           <h1 className="mt-2 max-w-[20ch] text-[28px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)] sm:text-[34px]">
             {lesson.title}

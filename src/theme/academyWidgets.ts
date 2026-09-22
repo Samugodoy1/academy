@@ -7,6 +7,7 @@ export const ACADEMY_WIDGET_KINDS = [
   'pacientes',
   'agenda',
   'estudos',
+  'base',
   'agendar',
   'photo',
   'note',
@@ -32,6 +33,7 @@ export const UNIQUE_WIDGET_KINDS: AcademyWidgetKind[] = [
   'pacientes',
   'agenda',
   'estudos',
+  'base',
   'agendar',
 ];
 
@@ -47,6 +49,7 @@ export const WIDGET_CATALOG: Array<{
   { kind: 'pacientes', label: 'Casos', hint: 'Sua lista', defaultSize: 'sm' },
   { kind: 'agenda', label: 'Agenda', hint: 'Os boxes', defaultSize: 'sm' },
   { kind: 'estudos', label: 'Cola', hint: 'Antes de sentar', defaultSize: 'sm' },
+  { kind: 'base', label: 'Estudos', hint: 'Ciclo básico', defaultSize: 'sm' },
   { kind: 'agendar', label: 'Encaixar', hint: 'Marca um horário', defaultSize: 'sm' },
   { kind: 'photo', label: 'Foto', hint: 'Uma foto sua', defaultSize: 'sm' },
   { kind: 'note', label: 'Recado', hint: 'Lembrete do box', defaultSize: 'sm' },

@@ -1,8 +1,9 @@
 import React from 'react';
-import { BookOpen, Calendar, CalendarPlus, House, Users } from '@phosphor-icons/react';
+import { BookOpen, Calendar, CalendarPlus, GraduationCap, House, Users } from '@phosphor-icons/react';
 
 const DOCK = [
   { id: 'dashboard', label: 'Hoje', icon: House },
+  { id: 'base', label: 'Estudos', icon: GraduationCap },
   { id: 'pacientes', label: 'Casos', icon: Users },
   { id: 'agenda', label: 'Agenda', icon: Calendar },
   { id: 'estudos', label: 'Cola', icon: BookOpen },

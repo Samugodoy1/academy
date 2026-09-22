@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Check, Clock, Heart, X, Zap } from '../../../icons';
+import { BookOpen, Check, Clock, Heart, X, Zap } from '../../../icons';
 import { CharacterAvatar, CharacterSay, hostFor, pickLine } from '../characters';
 import { checkAnswer, describeAnswer, exerciseSpeech } from '../engine';
 import { feedback } from '../sound';
@@ -238,24 +238,29 @@ export const GameSession: React.FC<GameSessionProps> = ({
   // se misturam e a turma vai se revezando exercício a exercício.
   const host = useMemo(() => hostFor(current?.topic), [current?.topic]);
 
+  // Nos formatos em que o enunciado já é o próprio exercício (lacuna), o
+  // personagem solta uma fala curta em vez de repetir o texto.
   const speech = useMemo(() => {
     if (!current) return '';
-    return exerciseSpeech(current) ?? current.prompt;
-  }, [current]);
+    return exerciseSpeech(current) ?? pickLine(host.lines.intro, current.id);
+  }, [current, host.lines.intro]);
 
   const feedbackCopy = useMemo(() => {
     if (!checked || !current) return null;
     const seed = `${current.id}:${resolved.length}`;
     if (checked.correct) {
-      return { title: pickLine(host.lines.right, seed), detail: current.explanation };
+      return { title: pickLine(host.lines.right, seed), answer: null, detail: current.explanation };
     }
     return {
       title: pickLine(host.lines.wrong, seed),
-      detail: `Resposta: ${describeAnswer(current)}. ${current.explanation}`,
+      answer: describeAnswer(current),
+      detail: current.explanation,
     };
   }, [checked, current, host, resolved.length]);
 
   if (!current) return null;
+
+  const isRepeat = (attempts[current.id] ?? 0) > 0 || missed.includes(current.id);
 
   return (
     <div className="fixed inset-0 z-[200] flex flex-col bg-white">
@@ -269,7 +274,11 @@ export const GameSession: React.FC<GameSessionProps> = ({
           <X size={20} />
         </button>
         <div className="game-bar flex-1">
-          <div className="game-bar-fill" style={{ width: `${Math.round(progress * 100)}%` }} />
+          <div
+            key={resolved.length}
+            className={`game-bar-fill ${resolved.length > 0 ? 'game-bar-bump' : ''}`}
+            style={{ width: `${Math.round(progress * 100)}%` }}
+          />
         </div>
         {timeLimitSec ? (
           <span
@@ -281,8 +290,13 @@ export const GameSession: React.FC<GameSessionProps> = ({
             {formatClock(secondsLeft)}
           </span>
         ) : useHearts ? (
-          <span className="flex shrink-0 items-center gap-1.5 text-[15px] font-semibold tabular-nums text-[var(--game-wrong)]">
-            <Heart size={18} />
+          <span
+            key={hearts}
+            className={`flex shrink-0 items-center gap-1.5 text-[16px] font-bold tabular-nums text-[var(--game-wrong)] ${
+              heartsLost > 0 ? 'game-heart-pop' : ''
+            }`}
+          >
+            <Heart size={20} />
             {hearts}
           </span>
         ) : (
@@ -292,21 +306,25 @@ export const GameSession: React.FC<GameSessionProps> = ({
         )}
       </header>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 pb-40 pt-4 sm:px-6">
-        <div className="mx-auto w-full max-w-[620px]">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <p className="text-[13px] font-medium uppercase tracking-[0.06em] text-[var(--neo-gray)]">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 pb-44 pt-3 sm:px-6">
+        <div key={`${current.id}-${attempts[current.id] ?? 0}`} className="game-slide mx-auto w-full max-w-[620px]">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <span className="rounded-full bg-[#f5f5f7] px-3 py-1 text-[12px] font-semibold text-[var(--neo-gray)]">
               {plan.title}
-            </p>
-            {combo >= 2 && (
-              <span className="game-pop flex items-center gap-1 rounded-full bg-[var(--neo-wash)] px-3 py-1 text-[13px] font-semibold text-[var(--neo)]">
+            </span>
+            {combo >= 2 ? (
+              <span className="game-pop flex items-center gap-1 rounded-full bg-[#fff3d6] px-3 py-1 text-[13px] font-bold text-[#b57a00]">
                 <Zap size={13} />
                 Combo x{combo}
               </span>
-            )}
+            ) : isRepeat ? (
+              <span className="game-pop rounded-full bg-[var(--game-wrong-wash)] px-3 py-1 text-[12px] font-semibold text-[var(--game-wrong-ink)]">
+                Erro anterior · de novo
+              </span>
+            ) : null}
           </div>
 
-          <h2 className="mb-5 text-[24px] font-semibold leading-[1.15] tracking-[-0.02em] text-[var(--neo-ink)] sm:text-[28px]">
+          <h2 className="mb-4 text-[24px] font-bold leading-[1.15] tracking-[-0.02em] text-[var(--neo-ink)] sm:text-[28px]">
             {EXERCISE_KIND_LABEL[current.kind]}
           </h2>
 
@@ -314,8 +332,8 @@ export const GameSession: React.FC<GameSessionProps> = ({
             className="mb-6"
             character={host}
             text={speech}
-            size={72}
-            mood={checked ? (checked.correct ? 'happy' : 'sad') : 'idle'}
+            size={80}
+            mood={checked ? (checked.correct ? 'cheer' : 'sad') : 'idle'}
           />
 
           <ExerciseView
@@ -354,40 +372,48 @@ export const GameSession: React.FC<GameSessionProps> = ({
       >
         <div className="mx-auto w-full max-w-[620px]">
           {checked && feedbackCopy ? (
-            <div className="space-y-3">
+            <div key={`${current.id}-${checked.correct}`} className="game-sheet space-y-3">
               <div className="flex items-start gap-3">
                 <span
-                  className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white ${
-                    checked.correct ? 'bg-[var(--game-right)]' : 'bg-[var(--game-wrong)]'
+                  className={`game-pop mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ${
+                    checked.correct ? 'text-[var(--game-right)]' : 'text-[var(--game-wrong)]'
                   }`}
                 >
-                  {checked.correct ? <Check size={16} /> : <X size={16} />}
+                  {checked.correct ? <Check size={26} /> : <X size={26} />}
                 </span>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p
-                    className={`text-[17px] font-semibold tracking-[-0.016em] ${
+                    className={`text-[21px] font-bold leading-tight tracking-[-0.02em] ${
                       checked.correct ? 'text-[var(--game-right-ink)]' : 'text-[var(--game-wrong-ink)]'
                     }`}
                   >
                     {feedbackCopy.title}
                   </p>
+                  {feedbackCopy.answer && (
+                    <p className="mt-1.5 text-[15px] leading-snug text-[var(--game-wrong-ink)]">
+                      <span className="font-bold">Resposta correta: </span>
+                      {feedbackCopy.answer}
+                    </p>
+                  )}
                   <p
-                    className={`mt-1 text-[14px] leading-snug ${
+                    className={`mt-1.5 text-[14px] leading-snug ${
                       checked.correct ? 'text-[var(--game-right-ink)]' : 'text-[var(--game-wrong-ink)]'
                     }`}
                   >
                     {feedbackCopy.detail}
                   </p>
-                  <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px]">
-                    <span className="font-medium opacity-70">Referência científica:</span>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
                     {current.references.map(reference => (
                       <a
                         key={reference.url}
                         href={reference.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="font-medium underline underline-offset-2"
+                        className={`inline-flex items-center gap-1 rounded-full bg-white/70 px-2.5 py-1 text-[12px] font-semibold ${
+                          checked.correct ? 'text-[var(--game-right-ink)]' : 'text-[var(--game-wrong-ink)]'
+                        }`}
                       >
+                        <BookOpen size={12} />
                         {reference.label}
                       </a>
                     ))}

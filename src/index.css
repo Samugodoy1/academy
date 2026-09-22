@@ -1070,14 +1070,17 @@ html[data-theme="dark"] {
     box-shadow: 0 2px 0 var(--game-line-shadow);
   }
 
-  .game-node-open {
-    background: var(--neo);
-    box-shadow: 0 6px 0 color-mix(in srgb, var(--neo) 68%, #1d1d1f);
+  /* Nodes take the colour of the unit host via --node, like Duolingo units. */
+  .game-node-open,
+  .game-node-done {
+    --node-shadow: color-mix(in srgb, var(--node, var(--neo)) 68%, #1d1d1f);
+    --node-ring: color-mix(in srgb, var(--node, var(--neo)) 18%, #ffffff);
+    background: var(--node, var(--neo));
+    box-shadow: 0 6px 0 var(--node-shadow);
   }
 
   .game-node-done {
-    background: var(--game-right);
-    box-shadow: 0 6px 0 color-mix(in srgb, var(--game-right) 68%, #1d1d1f);
+    opacity: 0.92;
   }
 
   .game-node-crown {
@@ -1103,10 +1106,27 @@ html[data-theme="dark"] {
   }
 
   .game-bar-fill {
+    position: relative;
     height: 100%;
     border-radius: 999px;
     background: var(--neo);
     transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Duolingo-style highlight strip along the top of the fill. */
+  .game-bar-fill::after {
+    content: '';
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.35);
+  }
+
+  .game-bar-bump {
+    animation: gameBarBump 0.45s cubic-bezier(0.22, 1.4, 0.36, 1) both;
   }
 
   .game-bar-thin {
@@ -1127,6 +1147,84 @@ html[data-theme="dark"] {
 
   .game-shake {
     animation: gameShake 0.36s ease-in-out both;
+  }
+
+  .game-bounce {
+    animation: gameBounce 0.5s cubic-bezier(0.22, 1.4, 0.36, 1) both;
+  }
+
+  .game-slide {
+    animation: gameSlideIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .game-heart-pop {
+    animation: gameHeartPop 0.5s cubic-bezier(0.22, 1.4, 0.36, 1) both;
+  }
+
+  .game-float {
+    animation: gameFloat 1.6s ease-in-out infinite;
+  }
+
+  /* Speech-bubble tooltip over the current trail node. */
+  .game-tooltip {
+    position: relative;
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 12px;
+    border: 2px solid var(--game-line);
+    background: #ffffff;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: 0 3px 0 var(--game-line-shadow);
+  }
+
+  .game-tooltip::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -8px;
+    width: 12px;
+    height: 12px;
+    transform: translateX(-50%) rotate(45deg);
+    background: #ffffff;
+    border-right: 2px solid var(--game-line);
+    border-bottom: 2px solid var(--game-line);
+  }
+
+  /* Results screen: coloured cards with a label strip, Duolingo style. */
+  .game-stat {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    border-radius: 18px;
+    border: 2px solid var(--stat, var(--neo));
+    background: #ffffff;
+    text-align: center;
+  }
+
+  .game-stat-label {
+    padding: 5px 4px;
+    background: var(--stat, var(--neo));
+    color: #ffffff;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .game-stat-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 6px;
+    color: var(--stat, var(--neo));
+    font-size: 21px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
   }
 }
 
@@ -1167,8 +1265,48 @@ html[data-theme="dark"] {
 }
 
 @keyframes gameNodeBreath {
-  0%, 100% { box-shadow: 0 6px 0 color-mix(in srgb, var(--neo) 68%, #1d1d1f); }
-  50% { box-shadow: 0 6px 0 color-mix(in srgb, var(--neo) 68%, #1d1d1f), 0 0 0 10px var(--neo-wash); }
+  0%, 100% { box-shadow: 0 6px 0 var(--node-shadow, color-mix(in srgb, var(--neo) 68%, #1d1d1f)); }
+  50% {
+    box-shadow: 0 6px 0 var(--node-shadow, color-mix(in srgb, var(--neo) 68%, #1d1d1f)),
+      0 0 0 10px var(--node-ring, var(--neo-wash));
+  }
+}
+
+@keyframes gameBounce {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.06); }
+  70% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+@keyframes gameSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes gameBarBump {
+  0% { transform: scaleY(1); }
+  40% { transform: scaleY(1.35); }
+  100% { transform: scaleY(1); }
+}
+
+@keyframes gameHeartPop {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.4); }
+  60% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+@keyframes gameFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
 
 @keyframes gameFaceIdle {
@@ -1194,6 +1332,11 @@ html[data-theme="dark"] {
   .game-sheet,
   .game-pop,
   .game-shake,
+  .game-bounce,
+  .game-slide,
+  .game-bar-bump,
+  .game-heart-pop,
+  .game-float,
   .game-node-current,
   .game-face-idle,
   .game-face-bounce,

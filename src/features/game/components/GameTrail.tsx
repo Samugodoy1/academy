@@ -82,69 +82,47 @@ export const GameTrail: React.FC<GameTrailProps> = ({
           { kind: 'review' as const, index: unit.lessons },
         ];
 
+        const accent = unlocked ? host.accent : '#c7c7cc';
+        const accentStyle = { '--node': accent, '--unit': accent } as React.CSSProperties;
+
         return (
-          <section key={unit.topic} className="space-y-4">
+          <section key={unit.topic} className="space-y-4" style={accentStyle}>
             <div
-              className={`rounded-[24px] px-5 py-4 ${
-                isSpotlight ? 'bg-[var(--neo)] text-white' : 'bg-[#f5f5f7] text-[var(--neo-ink)]'
-              }`}
+              className={`rounded-[24px] px-5 py-4 text-white ${unlocked ? '' : 'opacity-80'}`}
+              style={{
+                background: accent,
+                boxShadow: `0 4px 0 color-mix(in srgb, ${accent} 70%, #1d1d1f)`,
+              }}
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="flex min-w-0 gap-3">
-                  <CharacterAvatar
-                    id={host.id}
-                    mood={unlocked ? 'happy' : 'idle'}
-                    size={56}
-                    className={unlocked ? '' : 'opacity-45 grayscale'}
-                  />
-                  <div className="min-w-0">
-                    {isSpotlight && spotlightLabel && (
-                      <p className="text-[12px] font-medium uppercase tracking-[0.05em] text-white/80">
-                        {spotlightLabel}
-                      </p>
-                    )}
-                    <h3 className="text-[20px] font-semibold leading-[1.15] tracking-[-0.02em]">
-                      {unit.title}
-                    </h3>
-                    <p
-                      className={`mt-1 text-[14px] leading-snug ${
-                        isSpotlight ? 'text-white/85' : 'text-[var(--neo-gray)]'
-                      }`}
-                    >
-                      {unit.tagline}
-                    </p>
-                    <p
-                      className={`mt-2 text-[13px] leading-snug ${
-                        isSpotlight ? 'text-white/75' : 'text-[var(--neo-gray)]'
-                      }`}
-                    >
-                      Com {host.name}, {host.role}
-                    </p>
-                  </div>
+                <div className="min-w-0">
+                  <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-white/80">
+                    {isSpotlight && spotlightLabel
+                      ? spotlightLabel
+                      : `Unidade ${GAME_UNITS.indexOf(unit) + 1}`}
+                  </p>
+                  <h3 className="mt-0.5 text-[22px] font-bold leading-[1.1] tracking-[-0.02em]">
+                    {unit.title}
+                  </h3>
+                  <p className="mt-1 text-[14px] leading-snug text-white/90">{unit.tagline}</p>
                 </div>
                 {unlocked ? (
                   <CrownRow crowns={progress.crowns} />
                 ) : (
-                  <Lock size={16} className="mt-1 shrink-0 text-[var(--neo-gray)]" />
+                  <Lock size={18} className="mt-1 shrink-0 text-white/80" />
                 )}
               </div>
               <div className="mt-3 flex items-center justify-between gap-3">
-                <p
-                  className={`text-[13px] tabular-nums ${
-                    isSpotlight ? 'text-white/85' : 'text-[var(--neo-gray)]'
-                  }`}
-                >
+                <p className="text-[13px] font-semibold tabular-nums text-white/90">
                   {unlocked
-                    ? `${done}/${unit.lessons} lições`
+                    ? `${done}/${unit.lessons} lições · ${unit.exercises.length} questões`
                     : 'Termine a unidade anterior para abrir'}
                 </p>
-                {onOpenStudy && (
+                {onOpenStudy && unlocked && (
                   <button
                     type="button"
                     onClick={() => onOpenStudy(unit.topic)}
-                    className={`flex items-center gap-1.5 text-[13px] font-medium ${
-                      isSpotlight ? 'text-white' : 'text-[var(--neo)]'
-                    }`}
+                    className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-[13px] font-bold text-white"
                   >
                     <BookOpen size={14} />
                     Ler a cola
@@ -153,7 +131,7 @@ export const GameTrail: React.FC<GameTrailProps> = ({
               </div>
             </div>
 
-            <div className="space-y-3 py-1">
+            <div className="relative space-y-3 py-2">
               {nodes.map((node, nodeIndex) => {
                 const key = `${unit.topic}:${node.kind}:${node.index}`;
                 const isDone = node.kind === 'lesson' ? node.index < progress.lessons : progress.crowns > 0;
@@ -166,65 +144,95 @@ export const GameTrail: React.FC<GameTrailProps> = ({
                 const isLocked = !unlocked || (!isDone && !isCurrent);
                 const offset = OFFSETS[nodeIndex % OFFSETS.length];
                 const isOpen = selected === key;
+                // O anfitrião fica sentado ao lado da trilha, no lado oposto à curva.
+                const showHost = nodeIndex === 1;
 
                 return (
                   <div key={key} className="flex flex-col items-center">
-                    <button
-                      type="button"
-                      style={{ transform: `translateX(${offset}px)` }}
-                      aria-label={
-                        node.kind === 'review'
-                          ? `Prova do box de ${unit.title}`
-                          : `${unit.title}, lição ${node.index + 1}`
-                      }
-                      onClick={() => {
-                        if (isLocked) {
-                          setSelected(isOpen ? null : key);
-                          return;
-                        }
-                        setSelected(isOpen ? null : key);
-                      }}
-                      className={`game-node ${
-                        isLocked
-                          ? 'game-node-locked'
-                          : node.kind === 'review'
-                            ? isDone
-                              ? 'game-node-crown'
-                              : 'game-node-open'
-                            : isDone
-                              ? 'game-node-done'
-                              : 'game-node-open'
-                      } ${isCurrent ? 'game-node-current' : ''}`}
-                    >
-                      {isLocked ? (
-                        <Lock size={22} />
-                      ) : node.kind === 'review' ? (
-                        <Trophy size={26} />
-                      ) : isDone ? (
-                        <Check size={26} />
-                      ) : (
-                        <Star size={26} />
+                    <div className="relative flex w-full items-center justify-center" style={{ minHeight: isCurrent ? 118 : 74 }}>
+                      {showHost && (
+                        <div
+                          className="pointer-events-none absolute"
+                          style={{ left: '50%', transform: `translateX(${offset > 0 ? -150 : 70}px)` }}
+                          aria-hidden
+                        >
+                          <CharacterAvatar
+                            id={host.id}
+                            mood={unlocked ? 'happy' : 'idle'}
+                            size={84}
+                            className={unlocked ? 'game-face-idle' : 'opacity-45 grayscale'}
+                          />
+                        </div>
                       )}
-                    </button>
+                      <div
+                        className="flex flex-col items-center"
+                        style={{ transform: `translateX(${offset}px)` }}
+                      >
+                        {isCurrent && (
+                          <span
+                            className="game-tooltip game-float mb-3"
+                            style={{ color: accent, borderColor: accent }}
+                          >
+                            {node.kind === 'review' ? 'Prova' : 'Começar'}
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          aria-label={
+                            node.kind === 'review'
+                              ? `Prova do box de ${unit.title}`
+                              : `${unit.title}, lição ${node.index + 1}`
+                          }
+                          onClick={() => setSelected(isOpen ? null : key)}
+                          className={`game-node ${
+                            isLocked
+                              ? 'game-node-locked'
+                              : node.kind === 'review'
+                                ? isDone
+                                  ? 'game-node-crown'
+                                  : 'game-node-open'
+                                : isDone
+                                  ? 'game-node-done'
+                                  : 'game-node-open'
+                          } ${isCurrent ? 'game-node-current' : ''}`}
+                        >
+                          {isLocked ? (
+                            <Lock size={22} />
+                          ) : node.kind === 'review' ? (
+                            <Trophy size={26} />
+                          ) : isDone ? (
+                            <Check size={28} />
+                          ) : (
+                            <Star size={28} />
+                          )}
+                        </button>
+                      </div>
+                    </div>
 
                     {isOpen && (
-                      <div className="game-pop mt-3 w-full max-w-[420px] rounded-[22px] border-2 border-[var(--game-line)] bg-white p-4">
-                        <p className="text-[16px] font-semibold tracking-[-0.016em] text-[var(--neo-ink)]">
+                      <div
+                        className="game-pop mt-2 w-full max-w-[420px] rounded-[22px] p-4 text-white"
+                        style={{
+                          background: isLocked ? '#e5e5ea' : accent,
+                          color: isLocked ? 'var(--neo-gray)' : '#ffffff',
+                        }}
+                      >
+                        <p className="text-[17px] font-bold tracking-[-0.016em]">
                           {node.kind === 'review'
                             ? `Prova do box · ${unit.title}`
                             : `Lição ${node.index + 1} · ${unit.title}`}
                         </p>
-                        <p className="mt-1 text-[14px] leading-snug text-[var(--neo-gray)]">
+                        <p className={`mt-1 text-[14px] leading-snug ${isLocked ? '' : 'text-white/90'}`}>
                           {isLocked
                             ? 'Conclua a etapa anterior para liberar.'
                             : node.kind === 'review'
                               ? 'Oito perguntas misturadas. Passe e leve uma coroa.'
                               : isDone
-                                ? 'Já concluída. Refazer não custa vidas extras de propósito — só reforça.'
+                                ? 'Já concluída. Refazer só reforça o que você aprendeu.'
                                 : 'Seis perguntas rápidas sobre o tema.'}
                         </p>
                         {!isLocked && (
-                          <p className="mt-3 text-[13px] leading-snug text-[var(--neo-gray)]">
+                          <p className="mt-3 text-[13px] leading-snug text-white/85">
                             {host.name}: “{host.lines.trail}”
                           </p>
                         )}
@@ -235,7 +243,8 @@ export const GameTrail: React.FC<GameTrailProps> = ({
                               setSelected(null);
                               onStart({ topic: unit.topic, index: node.index, kind: node.kind });
                             }}
-                            className="game-cta mt-4"
+                            className="game-cta game-cta-ghost mt-4"
+                            style={{ color: accent }}
                           >
                             <Play size={15} />
                             {isDone ? 'Treinar de novo' : 'Começar'}

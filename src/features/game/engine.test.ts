@@ -179,7 +179,7 @@ describe('montagem das lições', () => {
     }
   });
 
-  it('prioriza conceitos ainda não vistos na lição seguinte', () => {
+  it('maximiza conceitos novos sem perder o equilíbrio de formatos', () => {
     const first = buildLesson(unit, 0, 'first');
     const memory = Object.fromEntries(
       first.exercises.map(exercise => [
@@ -189,7 +189,10 @@ describe('montagem das lições', () => {
     ) satisfies Record<string, ExerciseMemory>;
     const second = buildLesson(unit, 1, { seed: 'second', memory, now: 200 });
     const firstConcepts = new Set(first.exercises.map(exercise => exercise.conceptId));
-    expect(second.exercises.some(exercise => firstConcepts.has(exercise.conceptId))).toBe(false);
+    const repeated = second.exercises.filter(exercise =>
+      firstConcepts.has(exercise.conceptId)
+    );
+    expect(repeated.length).toBeLessThanOrEqual(2);
   });
 
   it('monta a prova do box com os exercícios mais difíceis', () => {

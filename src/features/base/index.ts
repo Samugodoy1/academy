@@ -1,4 +1,5 @@
 export { BaseTab } from './components/BaseTab';
+export { BaseContinueCard } from './components/BaseContinueCard';
 export { BASE_DISCIPLINES, getDiscipline, PERIOD_LABEL } from './content';
 export { handOffToBase, handOffToCola, type BaseView } from './handoff';
 export { BASE_STUDENT_PERKS, countLessons, countUnlockedLessons } from './plan';

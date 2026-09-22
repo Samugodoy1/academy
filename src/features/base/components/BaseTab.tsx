@@ -43,6 +43,14 @@ export const BaseTab: React.FC<BaseTabProps> = ({ plan, academicPeriod, setActiv
     persistBaseProgress(progress);
   }, [progress]);
 
+  const openLessonId =
+    view.kind === 'lesson' ? getDiscipline(view.disciplineId)?.lessons[view.lessonIndex]?.id ?? null : null;
+
+  useEffect(() => {
+    if (!openLessonId) return;
+    setProgress(previous => markLessonOpened(previous, openLessonId));
+  }, [openLessonId]);
+
   const canOpenLesson = useCallback((lessonIndex: number) => isLessonUnlocked(plan, lessonIndex), [plan]);
 
   const suggestion = useMemo(
@@ -59,7 +67,6 @@ export const BaseTab: React.FC<BaseTabProps> = ({ plan, academicPeriod, setActiv
       setLock({ block: 'lesson', subject: lesson.title });
       return;
     }
-    setProgress(previous => markLessonOpened(previous, lesson.id));
     setView({ kind: 'lesson', disciplineId: discipline.id, lessonIndex });
   };
 

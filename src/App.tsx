@@ -101,6 +101,8 @@ import { applyAcademyPrefsToProfile } from './theme/academyAccount';
 import { ClinicalPageRoute } from './features/clinical/ClinicalPageRoute';
 import { LegacyClinicalRedirect } from './features/clinical/LegacyClinicalRedirect';
 import { UpgradeLimitModal } from './features/modals/UpgradeLimitModal';
+import { useAcademyStage } from './theme/AcademyStageProvider';
+import { resolveAcademyStage } from './theme/academyStage';
 import { ForgotPassword } from './features/auth/ForgotPassword';
 import { GoogleSignInButton } from './features/auth/GoogleSignInButton';
 import { ResetPassword } from './features/auth/ResetPassword';
@@ -582,6 +584,12 @@ export default function App() {
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [profilePassword, setProfilePassword] = useState('');
   const [isProfileEditing, setIsProfileEditing] = useState(false);
+  const { stored: storedAcademyStage } = useAcademyStage();
+  const academyStage = resolveAcademyStage({
+    stored: storedAcademyStage,
+    academicPeriod: profile?.academic_period,
+    patientCount: patients.length,
+  });
   const [showAcademyUpgradeModal, setShowAcademyUpgradeModal] = useState(false);
   const [academyUpgradeReason, setAcademyUpgradeReason] = useState<'casos' | 'estudos'>('casos');
   const openAcademyUpgrade = (reason: 'casos' | 'estudos') => {
@@ -613,7 +621,10 @@ export default function App() {
   const getGuideStep = (): { message: string; action: string; tab?: string; onClick?: () => void } | null => {
     if (guideDismissedUntil === activeTab) return null;
     if (!user || loading) return null;
+    // Study tabs are the destination for someone in the basic cycle; do not nag about the chair there.
+    if (activeTab === 'base' || activeTab === 'estudos') return null;
     if (patients.length === 0) {
+      if (academyStage === 'pre-clinico') return null;
       if (activeTab === 'pacientes') return null; // already there
       return {
         message: 'Comece cadastrando seu primeiro caso clinico',

@@ -15,6 +15,11 @@ export const ACADEMY_TOUR: TourSlide[] = [
     body: 'Casos, box, prontuário e a Cola — o ritmo do atendimento, pensado para quem está na graduação.',
   },
   {
+    kicker: 'Estudos',
+    title: 'Do 1º período à cadeira.',
+    body: 'Resumos e mapas mentais do ciclo básico, cada um com o artigo que o sustenta. Antes de ter paciente, já tem Academy.',
+  },
+  {
     kicker: 'Clínica',
     title: 'O caso vive no Academy.',
     body: 'Cadastre o paciente, marque o box e abra o prontuário. Anamnese, odontograma e evolução no mesmo lugar.',

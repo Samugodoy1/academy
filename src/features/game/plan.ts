@@ -40,6 +40,7 @@ export const STUDENT_PERKS = [
   'Vidas infinitas: erra e continua',
   'Desafio relâmpago liberado',
   'Dois protetores de ofensiva',
+  'Ciclo básico inteiro nos Estudos',
 ] as const;
 
 export type PlanBlock = 'dailyLessons' | 'blitz' | 'hearts';

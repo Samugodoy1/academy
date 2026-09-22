@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { lazy, Suspense, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, ChevronRight, Clock } from '../icons';
 import { AcademyActivationCard, AcademyOnboarding } from './AcademyOnboarding';
@@ -17,6 +17,13 @@ import { DataLoadingSkeleton } from './DataLoadingSkeleton';
 import { studentGreeting } from '../theme/academyWidgets';
 import { ColaShortcut } from '../features/game/ColaShortcut';
 import type { GamePlan } from '../features/game/plan';
+import { useResolvedAcademyStage } from '../theme/AcademyStageProvider';
+import { STAGE_LABEL } from '../theme/academyStage';
+import { AcademyStageControl } from './AcademyStageControl';
+
+const BaseContinueCard = lazy(() =>
+  import('../features/base').then(m => ({ default: m.BaseContinueCard }))
+);
 
 const STUDY_TOPIC_STORAGE_KEY = 'academy_study_topic';
 const STUDY_MODE_STORAGE_KEY = 'academy_study_mode';
@@ -416,6 +423,11 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   institution,
   gamePlan,
 }) => {
+  const { stage, setStage, isPreClinical } = useResolvedAcademyStage({
+    academicPeriod,
+    patientCount: patients.length,
+  });
+
   const usableAppointments = useMemo(() => {
     return appointments
       .filter(app => app.status !== 'CANCELLED')
@@ -553,6 +565,19 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       };
     }
 
+    if (patients.length === 0 && isPreClinical) {
+      return {
+        kind: 'study',
+        eyebrow: 'Ciclo básico',
+        title: 'Antes da cadeira, a base.',
+        subtitle: 'Resumos e mapas mentais com referência. A clínica chega depois.',
+        actionLabel: 'Abrir Estudos',
+        patient: null,
+        appointment: null,
+        action: () => setActiveTab('base')
+      };
+    }
+
     if (patients.length === 0) {
       return {
         kind: 'start',
@@ -632,7 +657,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   const nextClinicalStep = useMemo(() => suggestNextClinicalStep(skillCounts), [skillCounts]);
 
   const studySuggestion = useMemo(() => {
-    if (focus.kind === 'evolution' || focus.kind === 'start') return null;
+    if (focus.kind === 'evolution' || focus.kind === 'start' || focus.kind === 'study') return null;
 
     const refresh = getStudyRefreshSuggestion(todayContext);
     if (refresh) {
@@ -674,7 +699,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   const academicLine = [academicPeriod, institution].filter(Boolean).join(' · ');
   const homeHeadline = focus.appointment && (focus.kind === 'today' || focus.kind === 'next') && focusPatientName
     ? `Bora. ${firstName(focusPatientName)} te espera.`
-    : smartMessage;
+    : focus.kind === 'study'
+      ? focus.title
+      : smartMessage;
 
   if (loading) {
     return (
@@ -693,6 +720,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       setIsPatientModalOpen={setIsPatientModalOpen}
       openAppointmentModal={openAppointmentModal}
       openCola={openGame}
+      openBase={() => setActiveTab('base')}
+      stage={stage}
+      onChooseStage={setStage}
       onDismissOnboarding={onDismissOnboarding}
       onDismissWelcome={onDismissWelcome}
     >
@@ -718,7 +748,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           )}
         </div>
         <span className="neo-pill !px-3.5 !py-1.5 !text-[13px] shrink-0">
-          {patients.length} {patients.length === 1 ? 'paciente' : 'pacientes'}
+          {isPreClinical && patients.length === 0
+            ? STAGE_LABEL['pre-clinico']
+            : `${patients.length} ${patients.length === 1 ? 'paciente' : 'pacientes'}`}
         </span>
       </header>
 
@@ -749,6 +781,23 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
                 {focus.actionLabel} ›
               </p>
             </button>
+          ) : focus.kind === 'study' ? (
+            <div className="space-y-3">
+              <Suspense fallback={<div className="h-[196px] rounded-[28px] bg-[var(--neo-soft)]" />}>
+                <BaseContinueCard plan={gamePlan ?? 'free'} onOpen={() => setActiveTab('base')} />
+              </Suspense>
+              <button
+                type="button"
+                onClick={() => setIsPatientModalOpen(true)}
+                className="flex w-full items-center justify-between gap-4 rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left"
+              >
+                <span className="min-w-0">
+                  <span className="block text-[15px] tracking-[-0.011em] text-[var(--neo-ink)]">Já tem paciente?</span>
+                  <span className="block text-[13px] text-[var(--neo-gray)]">Cadastre e a home vira clínica.</span>
+                </span>
+                <span className="neo-link shrink-0 text-[15px]">Cadastrar ›</span>
+              </button>
+            </div>
           ) : (
             <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
               <p className="text-[13px] text-[var(--neo-gray)]">Agenda</p>
@@ -794,6 +843,17 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         </div>
 
         <div className="space-y-8 desktop:col-span-5">
+          {stage === null && patients.length === 0 && (
+            <HomeSection kicker="Onde você está no curso?">
+              <div className="rounded-[24px] bg-[#f5f5f7] px-4 py-4">
+                <AcademyStageControl value={null} onChange={setStage} />
+                <p className="mt-3 px-1 text-[13px] leading-snug text-[var(--neo-gray)]">
+                  No ciclo básico a home começa pelos Estudos. Na clínica, pelo caso.
+                </p>
+              </div>
+            </HomeSection>
+          )}
+
           {pendingRows.length > 0 && (
             <HomeSection kicker="Pra fechar">
               <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
@@ -853,6 +913,24 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
                   );
                 })}
               </div>
+            </HomeSection>
+          )}
+
+          {focus.kind === 'study' && (
+            <HomeSection kicker="Estudos">
+              <button
+                type="button"
+                onClick={() => setActiveTab('base')}
+                className="flex w-full items-center gap-4 rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left"
+              >
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[15px] font-semibold tracking-[-0.011em] text-[var(--neo-ink)]">Ciclo básico</span>
+                  <span className="block text-[13px] text-[var(--neo-gray)]">
+                    Do 1º ao 4º período · resumos, mapas mentais e referências
+                  </span>
+                </span>
+                <ChevronRight size={16} className="shrink-0 text-[#C6C6C8]" />
+              </button>
             </HomeSection>
           )}
 

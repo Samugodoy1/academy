@@ -4,6 +4,9 @@ import { Camera, ChevronRight, LogOut, UserCog } from '../../icons';
 import { AcademyNeoPicker } from '../../components/AcademyNeoPicker';
 import { SubscriptionManagement } from '../../components/SubscriptionManagement';
 import { studentGreeting } from '../../theme/academyWidgets';
+import { useResolvedAcademyStage } from '../../theme/AcademyStageProvider';
+import { STAGE_LABEL } from '../../theme/academyStage';
+import { AcademyStageControl } from '../../components/AcademyStageControl';
 import {
   isAcademyStudentPlan,
   studentAcademicLine,
@@ -116,6 +119,7 @@ export function AcademyAccount({
   const schoolLine = studentSchoolLine(profile.institution, profile.current_discipline);
   const headline = studentIdentityHeadline(profile.academic_period);
   const isStudent = isAcademyStudentPlan(currentPlan);
+  const { stage, stored: storedStage, setStage } = useResolvedAcademyStage({ academicPeriod: profile.academic_period });
   const academyAccess = profile.product_accesses?.find(access => access.product === 'academy');
   const approval = String(academyAccess?.approval_status || '').toLowerCase();
   const waitingAccess = Boolean(approval) && !['approved', 'aprovado', 'active', 'ativo'].includes(approval);
@@ -327,6 +331,23 @@ export function AcademyAccount({
 
           <section className="space-y-3">
             <h2 className="px-1 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
+              Fase do curso
+            </h2>
+            <div className="rounded-[24px] bg-[#f5f5f7] px-4 py-4">
+              <AcademyStageControl value={stage} onChange={setStage} />
+              <p className="mt-3 px-1 text-[13px] leading-snug text-[var(--neo-gray)]">
+                {stage === 'pre-clinico'
+                  ? 'A home começa pelos Estudos do ciclo básico. Quando tiver paciente, troque para a clínica.'
+                  : stage === 'clinico'
+                    ? 'A home começa pelo caso e pelo box. Os Estudos continuam na aba ao lado.'
+                    : 'Escolha para a home saber por onde começar.'}
+                {!storedStage && stage && ` Sugerido pelo seu período: ${STAGE_LABEL[stage].toLowerCase()}.`}
+              </p>
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="px-1 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
               O plano
             </h2>
             {isStudent ? (
@@ -346,10 +367,12 @@ export function AcademyAccount({
                   Free
                 </p>
                 <p className="mt-2 text-[26px] font-semibold leading-[1.05] tracking-[-0.025em]">
-                  Três casos. O box já começou.
+                  {stage === 'pre-clinico' ? 'A estante inteira do ciclo básico.' : 'Três casos. O box já começou.'}
                 </p>
                 <p className="mt-2 text-[15px] tracking-[-0.011em] text-white/85">
-                  No Student a evolução, a agenda e o prontuário seguem no semestre.
+                  {stage === 'pre-clinico'
+                    ? 'No Student todos os resumos e mapas mentais abrem, e a Cola perde o limite diário.'
+                    : 'No Student a evolução, a agenda e o prontuário seguem no semestre.'}
                 </p>
                 <p className="mt-4 text-[15px] text-white/90">Mudar para Student ›</p>
               </button>

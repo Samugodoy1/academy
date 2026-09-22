@@ -101,6 +101,8 @@ import { applyAcademyPrefsToProfile } from './theme/academyAccount';
 import { ClinicalPageRoute } from './features/clinical/ClinicalPageRoute';
 import { LegacyClinicalRedirect } from './features/clinical/LegacyClinicalRedirect';
 import { UpgradeLimitModal } from './features/modals/UpgradeLimitModal';
+import { useAcademyStage } from './theme/AcademyStageProvider';
+import { resolveAcademyStage } from './theme/academyStage';
 import { ForgotPassword } from './features/auth/ForgotPassword';
 import { GoogleSignInButton } from './features/auth/GoogleSignInButton';
 import { ResetPassword } from './features/auth/ResetPassword';
@@ -110,6 +112,9 @@ import { AppProvider } from './app/AppProvider';
 
 const AcademyEstudos = lazy(() =>
   import('./components/AcademyEstudos').then(m => ({ default: m.AcademyEstudos }))
+);
+const BaseTab = lazy(() =>
+  import('./features/base').then(m => ({ default: m.BaseTab }))
 );
 const AgendaTab = lazy(() =>
   import('./features/agenda/AgendaTab').then(m => ({ default: m.AgendaTab }))
@@ -130,7 +135,7 @@ export default function App() {
     const sharedCode = couponCodeFromSearch(window.location.search);
     if (sharedCode) rememberCouponCode(sharedCode);
   }, []);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'agenda' | 'pacientes' | 'estudos' | 'financeiro' | 'documentos' | 'prontuario' | 'configuracoes' | 'admin' | 'portal' | 'inteligencia' | 'academy'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'agenda' | 'pacientes' | 'estudos' | 'base' | 'financeiro' | 'documentos' | 'prontuario' | 'configuracoes' | 'admin' | 'portal' | 'inteligencia' | 'academy'>('dashboard');
   const [patients, setPatients] = useState<Patient[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -579,7 +584,18 @@ export default function App() {
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [profilePassword, setProfilePassword] = useState('');
   const [isProfileEditing, setIsProfileEditing] = useState(false);
+  const { stored: storedAcademyStage } = useAcademyStage();
+  const academyStage = resolveAcademyStage({
+    stored: storedAcademyStage,
+    academicPeriod: profile?.academic_period,
+    patientCount: patients.length,
+  });
   const [showAcademyUpgradeModal, setShowAcademyUpgradeModal] = useState(false);
+  const [academyUpgradeReason, setAcademyUpgradeReason] = useState<'casos' | 'estudos'>('casos');
+  const openAcademyUpgrade = (reason: 'casos' | 'estudos') => {
+    setAcademyUpgradeReason(reason);
+    setShowAcademyUpgradeModal(true);
+  };
   const [notification, setNotification] = useState<AcademyNotice | null>(null);
   const [confirmation, setConfirmation] = useState<{ message: string, onConfirm: () => void } | null>(null);
   const [guideDismissedUntil, setGuideDismissedUntil] = useState<string | null>(null);
@@ -605,7 +621,11 @@ export default function App() {
   const getGuideStep = (): { message: string; action: string; tab?: string; onClick?: () => void } | null => {
     if (guideDismissedUntil === activeTab) return null;
     if (!user || loading) return null;
+    // Study tabs are the destination for someone in the basic cycle; do not nag about the chair there.
+    if (activeTab === 'base' || activeTab === 'estudos') return null;
     if (patients.length === 0) {
+      // Only push the first patient once we know the student is in the clinic; the home asks otherwise.
+      if (academyStage !== 'clinico') return null;
       if (activeTab === 'pacientes') return null; // already there
       return {
         message: 'Comece cadastrando seu primeiro caso clinico',
@@ -2723,7 +2743,20 @@ export default function App() {
                           setActiveTab={setActiveTab}
                           openPatientRecord={openPatientRecord}
                           plan={(getProductAccess(getCurrentProduct())?.plan || 'free') === 'free' ? 'free' : 'student'}
-                          onUpgrade={() => setShowAcademyUpgradeModal(true)}
+                          onUpgrade={() => openAcademyUpgrade('estudos')}
+                        />
+                      </Suspense>
+                    </ErrorBoundary>
+                  )}
+
+                  {activeTab === 'base' && !searchTerm && (
+                    <ErrorBoundary fallbackTitle="Não foi possível carregar o Ciclo básico">
+                      <Suspense fallback={<DataLoadingSkeleton rows={6} className="mt-10" />}>
+                        <BaseTab
+                          plan={(getProductAccess(getCurrentProduct())?.plan || 'free') === 'free' ? 'free' : 'student'}
+                          academicPeriod={profile?.academic_period}
+                          setActiveTab={setActiveTab}
+                          onUpgrade={() => openAcademyUpgrade('estudos')}
                         />
                       </Suspense>
                     </ErrorBoundary>
@@ -2850,7 +2883,7 @@ export default function App() {
                             setProfileDraft={setProfileDraft}
                             setProfilePassword={setProfilePassword}
                             fetchProfile={fetchProfile}
-                            setShowAcademyUpgradeModal={setShowAcademyUpgradeModal}
+                            setShowAcademyUpgradeModal={(open: boolean) => (open ? openAcademyUpgrade('casos') : setShowAcademyUpgradeModal(false))}
                             setActiveTab={setActiveTab}
                             handleLogout={handleLogout}
                           />
@@ -4117,13 +4150,18 @@ export default function App() {
                     <div className="p-6">
                       <p className="text-[13px] font-normal text-sys-muted mb-2 text-center">Academy Free</p>
                       <h3 className="text-[22px] font-semibold text-sys-text mb-2 text-center leading-[1.05] tracking-[-0.025em]">
-                        O box já tem os primeiros casos.
+                        {academyUpgradeReason === 'estudos' ? 'A estante inteira, do 1º período à clínica.' : 'O box já tem os primeiros casos.'}
                       </h3>
                       <p className="text-[15px] font-normal text-sys-muted leading-relaxed mb-4 text-center">
-                        Você organizou 3 casos. No Student a evolução, a agenda e o prontuário seguem no semestre.
+                        {academyUpgradeReason === 'estudos'
+                          ? 'O Free mostra o formato. No Student todos os resumos, mapas mentais e a Cola sem limite acompanham você até a cadeira.'
+                          : 'Você organizou 3 casos. No Student a evolução, a agenda e o prontuário seguem no semestre.'}
                       </p>
                       <div className="space-y-2">
-                        {['Casos ilimitados', 'Agenda acadêmica sem limite', 'Evoluções e modo box completos'].map((item) => (
+                        {(academyUpgradeReason === 'estudos'
+                          ? ['Todos os resumos e mapas do ciclo básico', 'Cola e treino sem limite diário', 'Casos, agenda e prontuário sem limite']
+                          : ['Casos ilimitados', 'Agenda acadêmica sem limite', 'Evoluções e modo box completos']
+                        ).map((item) => (
                           <div key={item} className="flex items-center gap-3 rounded-2xl bg-primary/5 px-3 py-2.5 text-[13px] font-semibold text-slate-700">
                             <CheckCircle2 size={16} className="text-primary shrink-0" />
                             <span>{item}</span>

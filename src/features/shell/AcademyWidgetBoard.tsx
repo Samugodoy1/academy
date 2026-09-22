@@ -122,6 +122,7 @@ export function AcademyWidgetBoard({
     else if (widget.kind === 'pacientes') onGo('pacientes');
     else if (widget.kind === 'agenda') onGo('agenda');
     else if (widget.kind === 'estudos') onGo('estudos');
+    else if (widget.kind === 'base') onGo('base');
     else if (widget.kind === 'agendar') onSchedule?.();
     else if (widget.kind === 'photo' && !widget.photo) openPhotoPicker(widget.id);
   };
@@ -365,6 +366,17 @@ function WidgetFace({
         <span className="text-[12px] text-[var(--neo)]">Antes</span>
         <span className="mt-auto block text-[26px] font-semibold leading-[0.95] tracking-[-0.04em] text-[var(--neo-ink)]">
           Cola
+        </span>
+      </button>
+    );
+  }
+
+  if (widget.kind === 'base') {
+    return (
+      <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-neo`}>
+        <span className="text-[12px] text-white/80">Ciclo básico</span>
+        <span className="mt-auto block text-[26px] font-semibold leading-[0.95] tracking-[-0.04em] text-white">
+          Estudos
         </span>
       </button>
     );

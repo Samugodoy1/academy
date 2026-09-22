@@ -1,7 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check } from '../icons';
 import { CharacterAvatar, GUIDE_ID } from '../features/game/characters';
+import { AcademyStageControl } from './AcademyStageControl';
+import type { AcademyStage } from '../theme/academyStage';
 import {
   ACADEMY_TOUR,
   readColaOpened,
@@ -17,6 +19,10 @@ interface AcademyOnboardingProps {
   setIsPatientModalOpen: (open: boolean) => void;
   openAppointmentModal: () => void;
   openCola: () => void;
+  openBase?: () => void;
+  /** Resolved stage; null means we still have to ask. */
+  stage?: AcademyStage | null;
+  onChooseStage?: (stage: AcademyStage) => void;
   onDismissOnboarding: () => void;
   onDismissWelcome: () => void;
   children: React.ReactNode;
@@ -45,6 +51,9 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
   setIsPatientModalOpen,
   openAppointmentModal,
   openCola,
+  openBase,
+  stage = null,
+  onChooseStage,
   onDismissOnboarding,
   onDismissWelcome,
   children,
@@ -59,6 +68,18 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
   const [tourIndex, setTourIndex] = useState(0);
   const wasInOnboarding = useRef(!activationComplete);
   const showOnboarding = !onboardingDismissed && (!activationComplete || wasInOnboarding.current);
+  const [stageChoice, setStageChoice] = useState<AcademyStage | null>(stage);
+  const askStage = Boolean(onChooseStage) && stage === null && !hasPatients && !hasAppointments;
+  // Someone in the basic cycle has no box to set up: the checklist is not for them yet.
+  const basicCycleFirst = stage === 'pre-clinico' && !hasPatients;
+
+  useEffect(() => {
+    if (basicCycleFirst && !onboardingDismissed && welcomeSeen) {
+      setOnboardingDismissed(true);
+      onDismissOnboarding();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [basicCycleFirst, onboardingDismissed, welcomeSeen]);
 
   const firstPatient = patients[0];
   const firstName = firstNameOf(user);
@@ -191,11 +212,61 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
               onDismissWelcome();
             }}
           >
-            {last ? 'Montar o box' : 'Continuar'}
+            {last ? (askStage ? 'Começar' : 'Montar o box') : 'Continuar'}
           </button>
         </div>
       </section>
     );
+  }
+
+  if (askStage && !onboardingDismissed) {
+    return (
+      <section className="page-shell">
+        <div className="mx-auto flex min-h-[72vh] max-w-[440px] flex-col">
+          <div className="flex items-center justify-between pt-2">
+            <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">Uma pergunta</p>
+            <button
+              type="button"
+              className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]"
+              onClick={skipToAcademy}
+            >
+              Pular
+            </button>
+          </div>
+          <div className="flex-1 pt-8">
+            <CharacterAvatar id={GUIDE_ID} mood="idle" size={88} />
+            <h1 className="mt-6 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)] sm:text-[40px]">
+              Onde você está no curso?
+            </h1>
+            <p className="mt-4 max-w-[32ch] text-[17px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
+              A home muda com a resposta. Dá pra trocar depois em Conta.
+            </p>
+            <div className="mt-10">
+              <AcademyStageControl value={stageChoice} onChange={setStageChoice} size="cards" />
+            </div>
+          </div>
+          <button
+            type="button"
+            className="neo-pill w-full disabled:opacity-40"
+            disabled={!stageChoice}
+            onClick={() => {
+              if (!stageChoice) return;
+              onChooseStage?.(stageChoice);
+              if (stageChoice === 'pre-clinico') {
+                finishOnboarding();
+                openBase?.();
+              }
+            }}
+          >
+            {stageChoice === 'pre-clinico' ? 'Abrir Estudos' : stageChoice === 'clinico' ? 'Montar o box' : 'Continuar'}
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  if (basicCycleFirst) {
+    return <>{children}</>;
   }
 
   if (showOnboarding) {

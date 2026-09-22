@@ -8,14 +8,29 @@ export function isAcademyNavId(value: string): value is AcademyNavId {
   return DEFAULT_ORDER.includes(value as AcademyNavId);
 }
 
+/**
+ * Merges a saved order with the current catalogue. Tabs the student never saw
+ * (added after they saved) slot in at their default position instead of being
+ * pushed after "Conta", so a new tab shows up where it was designed to live.
+ */
+export function mergeAcademyNavOrder(saved: readonly string[]): AcademyNavId[] {
+  const known = saved.filter(isAcademyNavId).filter((id, index, list) => list.indexOf(id) === index);
+  const result: AcademyNavId[] = [...known];
+  DEFAULT_ORDER.forEach((id, defaultIndex) => {
+    if (result.includes(id)) return;
+    const predecessor = DEFAULT_ORDER.slice(0, defaultIndex).reverse().find(candidate => result.includes(candidate));
+    const at = predecessor ? result.indexOf(predecessor) + 1 : 0;
+    result.splice(at, 0, id);
+  });
+  return result;
+}
+
 export function readAcademyNavOrder(): AcademyNavId[] {
   if (typeof localStorage === 'undefined') return [...DEFAULT_ORDER];
   try {
     const raw = JSON.parse(localStorage.getItem(ACADEMY_NAV_ORDER_KEY) || '[]');
     if (!Array.isArray(raw)) return [...DEFAULT_ORDER];
-    const known = raw.filter(isAcademyNavId);
-    const missing = DEFAULT_ORDER.filter(id => !known.includes(id));
-    return [...known, ...missing];
+    return mergeAcademyNavOrder(raw);
   } catch {
     return [...DEFAULT_ORDER];
   }

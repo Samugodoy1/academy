@@ -93,8 +93,10 @@ export function checkAnswer(exercise: Exercise, answer: Answer): boolean {
 
 /** The part of an exercise a character can read out loud, when there is one. */
 export function exerciseSpeech(exercise: Exercise): string | null {
-  if (exercise.kind === 'boolean') return `${exercise.prompt} ${exercise.statement}`;
-  if (exercise.kind === 'blank') return `${exercise.prompt}: ${exercise.sentence}`;
+  // The title already says "true or false?" and the blank sentence is the
+  // exercise itself, so the character does not repeat them.
+  if (exercise.kind === 'boolean') return exercise.statement;
+  if (exercise.kind === 'blank') return null;
   if (exercise.kind === 'choice' || exercise.kind === 'multi' || exercise.kind === 'order') {
     return exercise.scenario ? `${exercise.scenario} ${exercise.prompt}` : exercise.prompt;
   }
@@ -179,16 +181,25 @@ function randomizeExercise(
   return exercise;
 }
 
-const conceptIdOf = (exercise: Exercise) => exercise.conceptId ?? exercise.id;
-const EXERCISE_KIND_CYCLE: Exercise['kind'][] = [
-  'choice',
-  'multi',
-  'boolean',
-  'order',
-  'match',
-  'blank',
-];
+/** Formats answered with a single tap, good for opening a lesson. */
+const QUICK_KINDS = new Set<Exercise['kind']>(['choice', 'boolean', 'blank']);
 
+interface RankedExercise {
+  exercise: Exercise;
+  seen: boolean;
+  overdue: boolean;
+  weakness: number;
+  lastSeenAt: number;
+  difficultyDistance: number;
+  tie: number;
+}
+
+/**
+ * Picks the exercises of one session the way a spaced-repetition app does:
+ * never-seen items first (easy ones in early lessons, hard ones in the review),
+ * then whatever is due for review, weakest and oldest first. A soft cap per
+ * format keeps every lesson varied without dragging stale items back in.
+ */
 function selectLessonExercises(
   pool: Exercise[],
   index: number,
@@ -196,145 +207,74 @@ function selectLessonExercises(
   options: Required<LessonBuildOptions>
 ): Exercise[] {
   const random = createRandom(hashSeed(options.seed));
-  const groups = new Map<string, Exercise[]>();
-  for (const exercise of pool) {
-    const conceptId = conceptIdOf(exercise);
-    groups.set(conceptId, [...(groups.get(conceptId) ?? []), exercise]);
-  }
+  const targetDifficulty = index < 2 ? 1 : index < 4 ? 2 : 3;
 
-  const targetDifficulty = index < 2 ? 1 : index < 5 ? 2 : 3;
-  const ranked = [...groups.entries()]
-    .map(([conceptId, variants]) => {
-      const memories = variants
-        .map(variant => options.memory[variant.id])
-        .filter((memory): memory is ExerciseMemory => Boolean(memory));
-      const attempts = memories.reduce((sum, memory) => sum + memory.attempts, 0);
-      const correct = memories.reduce((sum, memory) => sum + memory.correct, 0);
-      const overdue = memories.filter(memory => memory.dueAt <= options.now).length;
-      const lastSeenAt = memories.reduce(
-        (latest, memory) => Math.max(latest, memory.lastSeenAt),
-        0
-      );
-      const difficulty = variants[0]?.difficulty ?? 2;
+  const ranked: RankedExercise[] = pool
+    .map(exercise => {
+      const memory: ExerciseMemory | undefined = options.memory[exercise.id];
+      const attempts = memory?.attempts ?? 0;
       return {
-        conceptId,
-        variants,
-        attempts,
-        weakness: attempts === 0 ? 1 : 1 - correct / attempts,
-        overdue,
-        lastSeenAt,
-        difficultyDistance: Math.abs(difficulty - targetDifficulty),
+        exercise,
+        seen: attempts > 0,
+        overdue: Boolean(memory && memory.dueAt <= options.now),
+        weakness: attempts === 0 ? 1 : 1 - (memory?.correct ?? 0) / attempts,
+        lastSeenAt: memory?.lastSeenAt ?? 0,
+        difficultyDistance: Math.abs((exercise.difficulty ?? 2) - targetDifficulty),
         tie: random(),
       };
     })
-    .sort(
-      (a, b) =>
-        a.attempts - b.attempts ||
-        a.lastSeenAt - b.lastSeenAt ||
-        b.overdue - a.overdue ||
+    .sort((a, b) => {
+      if (a.seen !== b.seen) return a.seen ? 1 : -1;
+      if (!a.seen) return a.difficultyDistance - b.difficultyDistance || a.tie - b.tie;
+      if (a.overdue !== b.overdue) return a.overdue ? -1 : 1;
+      return (
         b.weakness - a.weakness ||
+        a.lastSeenAt - b.lastSeenAt ||
         a.difficultyDistance - b.difficultyDistance ||
         a.tie - b.tie
-    );
+      );
+    });
 
-  const targetKinds = Array.from(
-    { length: Math.min(size, groups.size) },
-    (_, offset) =>
-      EXERCISE_KIND_CYCLE[(hashSeed(options.seed) + offset) % EXERCISE_KIND_CYCLE.length]
+  const cap = Math.max(1, Math.ceil(size / 3));
+  const counts: Partial<Record<Exercise['kind'], number>> = {};
+  const selected: RankedExercise[] = [];
+  const deferred: RankedExercise[] = [];
+  for (const entry of ranked) {
+    if (selected.length >= size) break;
+    const kind = entry.exercise.kind;
+    if ((counts[kind] ?? 0) >= cap) {
+      deferred.push(entry);
+      continue;
+    }
+    counts[kind] = (counts[kind] ?? 0) + 1;
+    selected.push(entry);
+  }
+  for (const entry of deferred) {
+    if (selected.length >= size) break;
+    selected.push(entry);
+  }
+
+  const session = shuffle(selected, random).map(({ exercise }) =>
+    randomizeExercise(
+      exercise,
+      createRandom(hashSeed(`${options.seed}:${exercise.id}`)),
+      options.memory[exercise.id]?.attempts ?? 0
+    )
   );
-  const remaining = [...ranked];
-  const formatAttempts = EXERCISE_KIND_CYCLE.reduce<Record<Exercise['kind'], number>>(
-    (totals, kind) => {
-      totals[kind] = pool
-        .filter(exercise => exercise.kind === kind)
-        .reduce(
-          (sum, exercise) => sum + (options.memory[exercise.id]?.attempts ?? 0),
-          0
-        );
-      return totals;
-    },
-    { choice: 0, multi: 0, boolean: 0, order: 0, match: 0, blank: 0 }
-  );
-  const sessionKindCounts: Record<Exercise['kind'], number> = {
-    choice: 0,
-    multi: 0,
-    boolean: 0,
-    order: 0,
-    match: 0,
-    blank: 0,
-  };
-  const orderedTargets = targetKinds
-    .map((kind, order) => ({
-      kind,
-      order,
-      availability: ranked.filter(group =>
-        group.variants.some(variant => variant.kind === kind)
-      ).length,
-    }))
-    .sort((a, b) => a.availability - b.availability || a.order - b.order);
-  const balanced = orderedTargets.map(({ kind }) => {
-    const compatibleIndex = remaining.findIndex(group =>
-      group.variants.some(variant => variant.kind === kind)
-    );
-    const best = remaining[0];
-    const compatible = compatibleIndex >= 0 ? remaining[compatibleIndex] : null;
-    const groupIndex =
-      compatible &&
-      compatible.attempts === best.attempts &&
-      compatible.lastSeenAt === best.lastSeenAt
-        ? compatibleIndex
-        : 0;
-    const [group] = remaining.splice(groupIndex >= 0 ? groupIndex : 0, 1);
-    const availableKinds = [...new Set(group.variants.map(variant => variant.kind))];
-    const selectedKind = availableKinds
-      .map(candidate => ({
-        kind: candidate,
-        variantAttempts: Math.min(
-          ...group.variants
-            .filter(variant => variant.kind === candidate)
-            .map(variant => options.memory[variant.id]?.attempts ?? 0)
-        ),
-      }))
-      .sort(
-        (a, b) =>
-          a.variantAttempts - b.variantAttempts ||
-          sessionKindCounts[a.kind] - sessionKindCounts[b.kind] ||
-          Number(a.kind !== kind) - Number(b.kind !== kind) ||
-          formatAttempts[a.kind] - formatAttempts[b.kind]
-      )[0].kind;
-    sessionKindCounts[selectedKind] += 1;
-    return { group, kind: selectedKind };
-  });
-
-  const selected = balanced.map(({ group, kind }) => {
-    const candidates = group.variants.some(variant => variant.kind === kind)
-      ? group.variants.filter(variant => variant.kind === kind)
-      : group.variants;
-    const variant = [...candidates]
-      .map(exercise => ({
-        exercise,
-        memory: options.memory[exercise.id],
-        tie: random(),
-      }))
-      .sort(
-        (a, b) =>
-          (a.memory?.attempts ?? 0) - (b.memory?.attempts ?? 0) ||
-          (a.memory?.lastSeenAt ?? 0) - (b.memory?.lastSeenAt ?? 0) ||
-          a.tie - b.tie
-      )[0].exercise;
-    return randomizeExercise(
-      variant,
-      createRandom(hashSeed(`${options.seed}:${variant.id}`)),
-      options.memory[variant.id]?.attempts ?? 0
-    );
-  });
-
-  return shuffle(selected, random);
+  const opener = session.findIndex(exercise => QUICK_KINDS.has(exercise.kind));
+  if (opener > 0) {
+    const [first] = session.splice(opener, 1);
+    session.unshift(first);
+  }
+  return session;
 }
 
-
+/**
+ * Nodes per unit. Slightly more slots than items, so every question shows up
+ * at least once and the ones the student struggled with come back.
+ */
 export function countLessons(exerciseCount: number): number {
-  return Math.max(1, Math.ceil(exerciseCount / LESSON_SIZE));
+  return Math.max(3, Math.ceil(exerciseCount / 5));
 }
 
 /** Total nodes of a unit on the trail: every lesson plus the closing review. */

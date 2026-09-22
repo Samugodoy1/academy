@@ -1,177 +1,190 @@
 import type { ExerciseSeed } from '../types';
+import { choice, gap, multi, order, pairs, truth } from './authoring';
 
 export const EXAME_CLINICO_EXERCISES: ExerciseSeed[] = [
-  {
-    id: 'exame-01',
-    kind: 'choice',
-    difficulty: 1,
-    prompt: 'Qual é a primeira conduta mais adequada?',
-    scenario: 'A paciente senta na cadeira e diz: "dói quando tomo água gelada, mas passa rápido".',
-    options: [
-      'Registrar a queixa nas palavras da paciente e investigar início, duração, intensidade e fatores associados',
-      'Anotar "sensibilidade" e já pedir panorâmica',
-      'Começar a restauração do dente mais escurecido',
-      'Prescrever analgésico e remarcar',
+  choice(
+    'exame-01',
+    'Como registrar a queixa principal?',
+    ['Com as palavras do paciente', 'Com o diagnóstico provável', 'Só com o número do dente', 'Depois da radiografia'],
+    'A queixa principal é o motivo da consulta, nas palavras de quem sente. O diagnóstico vem depois do exame.',
+    { difficulty: 1 }
+  ),
+  truth(
+    'exame-02',
+    'Sinal é o que o paciente relata.',
+    false,
+    'Sinal é o que você observa, palpa ou mede. Sintoma é o que o paciente conta.'
+  ),
+  gap(
+    'exame-03',
+    'Sintoma é o que o paciente ___.',
+    'relata',
+    ['observa', 'mede', 'prescreve'],
+    'Sintoma é subjetivo: dor, ardência, "sensação de dente alto". Sinal é objetivo: edema, fístula, mobilidade.',
+    1
+  ),
+  choice(
+    'exame-04',
+    'Qual é a hipótese mais provável?',
+    ['Pulpite reversível', 'Pulpite irreversível', 'Necrose pulpar', 'Abscesso apical agudo'],
+    'Dor provocada, curta e que cessa ao retirar o estímulo é o padrão da pulpite reversível.',
+    { scenario: '"Dói quando tomo água gelada, mas passa em segundos."', difficulty: 1 }
+  ),
+  choice(
+    'exame-05',
+    'Qual é a hipótese mais provável?',
+    ['Pulpite irreversível sintomática', 'Pulpite reversível', 'Hipersensibilidade dentinária', 'Gengivite'],
+    'Dor espontânea, prolongada após o frio e que acorda o paciente aponta para inflamação pulpar irreversível.',
+    { scenario: 'Dor espontânea no 36, que dura minutos após o frio e acordou o paciente à noite.' }
+  ),
+  choice(
+    'exame-06',
+    'O que esse conjunto de achados sugere?',
+    ['Necrose pulpar com periodontite apical', 'Pulpite reversível', 'Dente hígido', 'Trauma oclusal isolado'],
+    'Sem resposta ao frio, a polpa provavelmente está necrosada. A dor à percussão mostra que a inflamação chegou ao ápice.',
+    { scenario: 'Dente 21 não responde ao frio e dói à percussão vertical.', difficulty: 3 }
+  ),
+  truth(
+    'exame-07',
+    'O teste de frio mede o fluxo sanguíneo da polpa.',
+    false,
+    'O frio testa a resposta das fibras nervosas, não a circulação. Por isso pode falhar em dentes traumatizados ou imaturos.',
+    2
+  ),
+  pairs(
+    'exame-08',
+    'Relacione o teste ao que ele investiga',
+    [
+      ['Teste de frio', 'Sensibilidade pulpar'],
+      ['Percussão vertical', 'Tecidos periapicais'],
+      ['Sondagem', 'Profundidade do sulco ou bolsa'],
+      ['Palpação apical', 'Dor ou volume no fundo de sulco'],
     ],
-    answer: 0,
-    explanation:
-      'A queixa principal deve ser caracterizada antes do exame e dos testes dirigidos. Início, duração, intensidade, localização, fatores desencadeantes e fatores de alívio ajudam a formular hipóteses diagnósticas.',
-  },
-  {
-    id: 'exame-02',
-    kind: 'order',
-    difficulty: 2,
-    prompt: 'Em uma consulta inicial sem urgência, organize uma sequência clínica possível',
-    steps: [
-      'Anamnese e queixa principal',
-      'Exame extraoral (face, linfonodos, ATM)',
-      'Exame intraoral de tecidos moles',
-      'Exame dos dentes e do periodonto',
-      'Testes e exames de imagem indicados pelos achados',
+    'Cada teste responde a uma pergunta diferente. O diagnóstico nasce da soma deles com a história.'
+  ),
+  order(
+    'exame-09',
+    'Coloque a consulta inicial em ordem',
+    ['Anamnese', 'Exame extraoral', 'Exame intraoral', 'Exames complementares', 'Diagnóstico e plano'],
+    'Da história ao plano: a sequência sistemática evita esquecer regiões e pedir exames sem pergunta clínica.',
+    { difficulty: 1 }
+  ),
+  choice(
+    'exame-10',
+    'Palpar linfonodos faz parte de qual etapa?',
+    ['Exame extraoral', 'Exame intraoral', 'Anamnese', 'Exame periodontal'],
+    'Face, linfonodos e ATM são avaliados no exame extraoral, antes de olhar a boca.',
+    { difficulty: 1 }
+  ),
+  multi(
+    'exame-11',
+    'O que não pode faltar na história médica?',
+    ['Doenças sistêmicas', 'Medicamentos em uso', 'Alergias'],
+    ['Cor preferida da resina', 'Time de futebol'],
+    'Doenças, remédios e alergias mudam anestesia, prescrição e conduta. Pergunte sempre, mesmo em consulta rápida.',
+    { difficulty: 1 }
+  ),
+  choice(
+    'exame-12',
+    'O que vem primeiro?',
+    ['Diagnosticar e tratar a dor do 46', 'Clarear, porque é o desejo dele', 'Moldar para o clareamento', 'Encaminhar direto para a endodontia'],
+    'Dor espontânea é prioridade. Procedimento eletivo espera o controle do problema ativo.',
+    { scenario: 'Paciente quer clarear para o casamento, mas tem dor espontânea no 46.' }
+  ),
+  truth(
+    'exame-13',
+    'Uma radiografia sozinha fecha o diagnóstico pulpar.',
+    false,
+    'A imagem mostra estrutura, não sensibilidade. Diagnóstico pulpar exige história, testes e imagem juntos.'
+  ),
+  gap(
+    'exame-14',
+    'Dor à percussão vertical sugere inflamação no ___.',
+    'ligamento periodontal',
+    ['esmalte', 'nervo alveolar', 'músculo masseter'],
+    'A percussão comprime o ligamento periodontal. Se ele está inflamado, o paciente sente na hora.'
+  ),
+  choice(
+    'exame-15',
+    'Qual é a conduta?',
+    ['Encaminhar com urgência para avaliação e biópsia', 'Prescrever bochecho e reavaliar em 1 mês', 'Tratar como afta', 'Trocar a escova e observar'],
+    'Úlcera que não cicatriza em 2 a 3 semanas, endurecida e em fumante é suspeita de câncer até prova em contrário.',
+    { scenario: 'Úlcera indolor no bordo da língua há 4 semanas, bordas endurecidas, fumante de 60 anos.', difficulty: 3 }
+  ),
+  choice(
+    'exame-16',
+    'Qual dente é o 36?',
+    ['1º molar inferior esquerdo', '1º molar inferior direito', '1º molar superior esquerdo', '2º pré-molar inferior esquerdo'],
+    'Na notação FDI o primeiro dígito é o quadrante (3 = inferior esquerdo) e o segundo, o dente (6 = primeiro molar).',
+    { difficulty: 1 }
+  ),
+  choice(
+    'exame-17',
+    'Qual dente é o 11?',
+    ['Incisivo central superior direito', 'Incisivo central superior esquerdo', 'Incisivo lateral superior direito', 'Canino superior direito'],
+    'Quadrante 1 é o superior direito; dente 1 é o incisivo central. Os quadrantes seguem o sentido horário visto de frente.',
+    { difficulty: 1 }
+  ),
+  pairs(
+    'exame-18',
+    'Relacione o quadrante FDI à região',
+    [
+      ['Quadrante 1', 'Superior direito'],
+      ['Quadrante 2', 'Superior esquerdo'],
+      ['Quadrante 3', 'Inferior esquerdo'],
+      ['Quadrante 4', 'Inferior direito'],
     ],
-    explanation:
-      'Uma sequência sistemática reduz omissões. Testes e imagens devem responder a perguntas clínicas e podem ser antecipados quando uma urgência ou um achado exigir.',
-  },
-  {
-    id: 'exame-03',
-    kind: 'boolean',
-    difficulty: 2,
-    prompt: 'Verdadeiro ou falso?',
-    statement: 'Um achado radiográfico sozinho já fecha o diagnóstico.',
-    answer: false,
-    explanation:
-      'A radiografia é um exame complementar. Sua interpretação deve ser integrada à história, ao exame clínico e aos testes pertinentes.',
-  },
-  {
-    id: 'exame-04',
-    kind: 'choice',
-    difficulty: 2,
-    prompt: 'O que vem primeiro?',
-    scenario:
-      'O paciente quer clarear os dentes para o casamento, mas tem dor espontânea no 46 e gengiva sangrando.',
-    options: [
-      'O clareamento, porque é o desejo do paciente',
-      'Avaliar e controlar a dor do 46 e a inflamação gengival antes do clareamento',
-      'Moldar para clareamento e tratar a dor no retorno',
-      'Encaminhar direto para a endodontia sem examinar',
-    ],
-    answer: 1,
-    explanation:
-      'A dor espontânea exige diagnóstico e manejo antes de um procedimento eletivo. O sangramento gengival também deve ser avaliado e controlado antes do clareamento.',
-  },
-  {
-    id: 'exame-05',
-    kind: 'multi',
-    difficulty: 2,
-    prompt: 'Selecione os dados médicos relevantes representados nas opções',
-    options: [
-      'Doenças sistêmicas',
-      'Medicamentos em uso',
-      'Alergias',
-      'Cor preferida da resina',
-      'Gestação ou amamentação, quando aplicável',
-    ],
-    answers: [0, 1, 2, 4],
-    explanation:
-      'Doenças, medicamentos, alergias e condições como gestação ou amamentação podem modificar exames, anestesia e prescrição. A anamnese completa também deve ser adaptada à pessoa e ao procedimento planejado.',
-  },
-  {
-    id: 'exame-06',
-    kind: 'match',
-    difficulty: 2,
-    prompt: 'Relacione o teste com o que ele investiga',
-    pairs: [
-      { left: 'Percussão vertical', right: 'Resposta dos tecidos apicais' },
-      {
-        left: 'Sondagem periodontal associada à posição da margem gengival',
-        right: 'Nível clínico de inserção',
-      },
-      { left: 'Teste de frio', right: 'Sensibilidade pulpar' },
-      { left: 'Palpação de fundo de sulco', right: 'Sensibilidade ou aumento de volume apical' },
-    ],
-    explanation:
-      'Cada teste fornece uma informação específica. Nenhum deles, isoladamente, estabelece o diagnóstico pulpar, apical ou periodontal.',
-  },
-  {
-    id: 'exame-07',
-    kind: 'blank',
-    difficulty: 1,
-    prompt: 'Complete a frase',
-    sentence: 'Após o diagnóstico e o manejo de urgências, o controle inicial da doença integra a fase de ___ do meio bucal.',
-    answer: 'adequação',
-    bank: ['adequação', 'reabilitação', 'manutenção', 'estética'],
-    explanation:
-      'A adequação do meio busca controlar biofilme, inflamação e lesões ativas antes de tratamentos definitivos. Urgências são priorizadas conforme a necessidade clínica.',
-  },
-  {
-    id: 'exame-08',
-    kind: 'choice',
-    difficulty: 3,
-    prompt: 'Qual é a abordagem adequada antes da exodontia?',
-    scenario:
-      'Homem de 58 anos, hipertenso, relata losartana e "um remédio para afinar o sangue", mas não sabe informar o nome. Está prevista uma exodontia.',
-    options: [
-      'Nenhum: pode seguir o atendimento normalmente',
-      'Apenas aferir a pressão, pois o outro medicamento não interfere no procedimento',
-      'Aferir a pressão e identificar o antitrombótico, a dose e o horário antes de avaliar o risco hemorrágico',
-      'A idade, que contraindica anestesia com vasoconstritor',
-    ],
-    answer: 2,
-    explanation:
-      'É necessário identificar se o medicamento é anticoagulante ou antiagregante e conhecer seu esquema. A conduta depende do fármaco e do risco do procedimento; ele não deve ser suspenso sem protocolo ou orientação do prescritor. Pressão arterial e condições sistêmicas também devem ser avaliadas.',
-  },
-  {
-    id: 'exame-09',
-    kind: 'boolean',
-    difficulty: 1,
-    prompt: 'Verdadeiro ou falso?',
-    statement:
-      'O exame inicial deve incluir registros dentários e avaliação periodontal compatíveis com os achados e o risco do paciente.',
-    answer: true,
-    explanation:
-      'O odontograma e a avaliação periodontal documentam a condição inicial. A necessidade de um periodontograma completo depende do rastreamento, dos achados e do risco periodontal.',
-  },
-  {
-    id: 'exame-10',
-    kind: 'choice',
-    difficulty: 3,
-    prompt: 'Qual é a conduta mais adequada diante desse achado?',
-    scenario:
-      'Úlcera única no bordo lateral da língua, há mais de 3 semanas, indolor, bordas endurecidas, em fumante de 60 anos.',
-    options: [
-      'Afta comum, basta orientar bochecho',
-      'Tratar como lesão suspeita e encaminhar com urgência para avaliação e biópsia, se indicada',
-      'Herpes labial recorrente',
-      'Queimadura por alimento quente',
-    ],
-    answer: 1,
-    explanation:
-      'Uma úlcera inexplicada persistente por três semanas, especialmente com endurecimento e tabagismo, requer investigação urgente. O diagnóstico definitivo depende de avaliação especializada e exame histopatológico quando indicado.',
-  },
-  {
-    id: 'exame-11',
-    kind: 'blank',
-    difficulty: 2,
-    prompt: 'Complete a frase',
-    sentence: 'Sinal é o que o profissional ___; sintoma é o que o paciente relata.',
-    answer: 'observa',
-    bank: ['observa', 'prescreve', 'imagina', 'registra'],
-    explanation:
-      'Sinal é objetivo (você vê, palpa, mede). Sintoma é subjetivo (o paciente conta). Misturar os dois no prontuário confunde o raciocínio.',
-  },
-  {
-    id: 'exame-12',
-    kind: 'order',
-    difficulty: 3,
-    prompt: 'Em um caso sem urgência imediata, organize as fases gerais do planejamento',
-    steps: [
-      'Diagnóstico, avaliação de risco e definição de prioridades',
-      'Adequação do meio e controle das doenças ativas',
-      'Tratamentos definitivos na sequência indicada para o caso',
-      'Reabilitação protética',
-      'Manutenção e proservação',
-    ],
-    explanation:
-      'O plano deve ser individualizado e pode mudar conforme a resposta ao tratamento. Dor, infecção ou risco agudo são tratados antes dessa sequência eletiva.',
-  },
+    'Direita e esquerda são sempre do paciente. Começa em cima à direita e gira no sentido horário.',
+    1
+  ),
+  truth(
+    'exame-19',
+    'Na notação FDI, os dentes decíduos usam os quadrantes 5 a 8.',
+    true,
+    'Decíduos: 51 a 85. O dente 65, por exemplo, é o segundo molar decíduo superior esquerdo.',
+    2
+  ),
+  gap(
+    'exame-20',
+    'A adequação do meio bucal vem ___ dos tratamentos definitivos.',
+    'antes',
+    ['depois', 'em vez', 'independente'],
+    'Primeiro controla-se biofilme, inflamação e lesões ativas. Restauração definitiva em boca doente dura pouco.'
+  ),
+  order(
+    'exame-21',
+    'Ordene as fases do plano de tratamento',
+    ['Urgência', 'Adequação do meio', 'Tratamento definitivo', 'Reabilitação', 'Manutenção'],
+    'Dor e infecção primeiro; depois estabilizar a doença; só então restaurar, reabilitar e manter.',
+    { difficulty: 3 }
+  ),
+  choice(
+    'exame-22',
+    'Qual é a conduta?',
+    ['Adiar o procedimento eletivo e encaminhar ao médico', 'Anestesiar sem vasoconstritor e extrair', 'Extrair normalmente', 'Pedir para respirar fundo e repetir a medida em 1 min'],
+    'Pressão acima de 180/110 contraindica procedimento eletivo. Estabilizar primeiro, extrair depois.',
+    { scenario: 'Exodontia eletiva marcada. Pressão aferida: 184/112 mmHg, paciente sem sintomas.', difficulty: 3 }
+  ),
+  multi(
+    'exame-23',
+    'Quais sinais tornam uma lesão de mucosa suspeita?',
+    ['Persiste há mais de 2 semanas', 'Bordas endurecidas', 'Sangra sem causa aparente'],
+    ['Doeu ao comer pimenta', 'Sumiu em 5 dias'],
+    'Lesão que não cicatriza, endurece ou sangra espontaneamente exige investigação, não observação.',
+    { difficulty: 2 }
+  ),
+  choice(
+    'exame-24',
+    'O que fazer primeiro?',
+    ['Identificar o medicamento antes de decidir a conduta', 'Suspender o remédio por 3 dias', 'Extrair, pois é um dente só', 'Trocar por outro anti-inflamatório'],
+    'Anticoagulante e antiagregante têm manejos diferentes. Nunca suspenda sem saber o que é e sem falar com o prescritor.',
+    { scenario: 'Paciente usa "um remédio para afinar o sangue" mas não sabe o nome. Exodontia prevista.', difficulty: 3 }
+  ),
+  truth(
+    'exame-25',
+    'Toda "alergia" relatada deve ser investigada: qual fármaco e qual reação.',
+    true,
+    'Náusea não é alergia. Investigar evita tanto reexposição perigosa quanto rótulos errados no prontuário.',
+    2
+  ),
 ];

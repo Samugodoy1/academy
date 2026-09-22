@@ -23,16 +23,15 @@ import { IMPL_EXERCISES } from './implantodontia';
 import { ORTO_EXERCISES } from './ortodontia';
 import { GERI_EXERCISES } from './odontogeriatria';
 import { REFERENCES_BY_TOPIC } from './references';
-import { expandExerciseVariants } from './variants';
 
 const stamp = (topic: StudyKey, seeds: ExerciseSeed[]): Exercise[] =>
-  seeds.flatMap(seed =>
-    expandExerciseVariants({
-      ...seed,
-      topic,
-      conceptId: seed.id,
-      references: REFERENCES_BY_TOPIC[topic],
-    } as Exercise)
+  seeds.map(
+    seed =>
+      ({
+        ...seed,
+        topic,
+        references: REFERENCES_BY_TOPIC[topic],
+      }) as Exercise
   );
 
 interface UnitSeed {

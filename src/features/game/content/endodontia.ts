@@ -1,177 +1,181 @@
 import type { ExerciseSeed } from '../types';
+import { choice, gap, multi, order, pairs, truth } from './authoring';
 
 export const ENDODONTIA_EXERCISES: ExerciseSeed[] = [
-  {
-    id: 'endo-01',
-    kind: 'choice',
-    difficulty: 2,
-    prompt: 'Qual é a hipótese diagnóstica?',
-    scenario:
-      'Dor espontânea, que acorda o paciente à noite, piora com o frio e demora vários minutos para passar.',
-    options: [
-      'Sensibilidade dentinária',
-      'Pulpite irreversível',
-      'Pericoronarite',
-      'Bruxismo',
+  choice(
+    'endo-01',
+    'Qual é o diagnóstico pulpar?',
+    ['Pulpite irreversível sintomática', 'Pulpite reversível', 'Necrose pulpar', 'Polpa normal'],
+    'Dor que persiste depois do frio e aparece sozinha mostra que a polpa não vai se recuperar.',
+    { scenario: 'Dor espontânea no 46, que dura minutos após o frio.', difficulty: 1 }
+  ),
+  choice(
+    'endo-02',
+    'Qual é o diagnóstico periapical?',
+    ['Abscesso apical crônico', 'Abscesso apical agudo', 'Periodontite apical sintomática', 'Tecidos normais'],
+    'Fístula é a marca do abscesso crônico: a infecção drena sozinha e por isso quase não dói.',
+    { scenario: 'Dente 22 sem resposta ao frio, sem dor, com fístula na gengiva vestibular.', difficulty: 2 }
+  ),
+  choice(
+    'endo-03',
+    'Como identificar o dente de origem de uma fístula?',
+    ['Inserir cone de guta-percha na fístula e radiografar', 'Testar o frio em todos os dentes', 'Sondar a fístula com a sonda periodontal', 'Fazer panorâmica'],
+    'O cone segue o trajeto da fístula e aponta o ápice de origem, que nem sempre é o dente mais próximo.',
+    { difficulty: 2 }
+  ),
+  truth(
+    'endo-04',
+    'Um dente com necrose pulpar não responde ao teste de frio.',
+    true,
+    'Sem polpa viva, sem resposta. Cuidado: dentes multirradiculares podem ter necrose parcial e responder ainda.'
+  ),
+  pairs(
+    'endo-05',
+    'Relacione o irrigante à sua principal função',
+    [
+      ['Hipoclorito de sódio', 'Dissolve tecido orgânico e desinfeta'],
+      ['EDTA 17%', 'Remove a parte inorgânica da smear layer'],
+      ['Clorexidina 2%', 'Antimicrobiano sem dissolver tecido'],
+      ['Soro fisiológico', 'Lavagem neutra entre soluções'],
     ],
-    answer: 1,
-    explanation:
-      'Dor espontânea e resposta prolongada ao frio são compatíveis com pulpite irreversível sintomática. O diagnóstico deve combinar história, testes de sensibilidade pulpar, exame apical e imagem.',
-  },
-  {
-    id: 'endo-02',
-    kind: 'boolean',
-    difficulty: 1,
-    prompt: 'Verdadeiro ou falso?',
-    statement: 'A instrumentação deve ocorrer com irrigação adequada e renovada durante o preparo.',
-    answer: true,
-    explanation:
-      'A irrigação auxilia na remoção de detritos, lubrificação e redução microbiana. Volume, frequência e técnica devem seguir um protocolo seguro, sem pressão apical excessiva.',
-  },
-  {
-    id: 'endo-03',
-    kind: 'order',
-    difficulty: 2,
-    prompt: 'Ordene a sessão de endodontia',
-    steps: [
-      'Anestesia e teste da região',
-      'Isolamento absoluto',
-      'Acesso e localização dos canais',
-      'Odontometria (comprimento de trabalho)',
-      'Preparo químico-mecânico',
-      'Irrigação final e obturação, ou medicação e selamento se a sessão não puder ser concluída',
-    ],
-    explanation:
-      'O isolamento precede o acesso. Quando o preparo pode ser concluído adequadamente, a obturação em sessão única é uma opção; medicação intracanal e provisório são usados quando houver indicação de tratamento em mais de uma sessão.',
-  },
-  {
-    id: 'endo-04',
-    kind: 'blank',
-    difficulty: 2,
-    prompt: 'Complete a frase',
-    sentence: 'O irrigante mais usado no preparo químico-mecânico é o ___ de sódio.',
-    answer: 'hipoclorito',
-    bank: ['hipoclorito', 'bicarbonato', 'fluoreto', 'cloreto'],
-    explanation:
-      'Hipoclorito de sódio dissolve tecido orgânico e tem ação antimicrobiana. O EDTA complementa removendo a smear layer inorgânica.',
-  },
-  {
-    id: 'endo-05',
-    kind: 'choice',
-    difficulty: 3,
-    prompt: 'O que fazer na sessão de hoje?',
-    scenario: 'A evolução anterior registra: "acesso realizado, odontometria concluída, CT 21 mm".',
-    options: [
-      'Refazer o acesso para conferir',
-      'Continuar de onde parou: confirmar canais e comprimento e instrumentar',
-      'Obturar direto sem instrumentar',
-      'Recomeçar o caso do zero',
-    ],
-    answer: 1,
-    explanation:
-      'Sob isolamento, remove-se o provisório e reavaliam-se sintomas, anatomia, permeabilidade e comprimento de trabalho. O acesso só deve ser ampliado quando isso for necessário para localizar ou instrumentar os canais com segurança.',
-  },
-  {
-    id: 'endo-06',
-    kind: 'match',
-    difficulty: 3,
-    prompt: 'Relacione o termo com o significado',
-    pairs: [
-      {
-        left: 'Patência apical',
-        right: 'Passagem passiva de lima fina pelo forame sem ampliá-lo',
-      },
-      { left: 'Glide path', right: 'Trajeto inicial reproduzível para a instrumentação' },
-      { left: 'Comprimento de trabalho', right: 'Limite planejado do preparo e da obturação' },
-      { left: 'Smear layer', right: 'Camada de resíduos aderida à parede do canal' },
-    ],
-    explanation:
-      'Esses conceitos orientam o preparo. A patência não deve ser confundida com ampliação deliberada do forame.',
-  },
-  {
-    id: 'endo-07',
-    kind: 'multi',
-    difficulty: 2,
-    prompt: 'Selecione o que precisa constar na evolução da sessão',
-    options: [
-      'Dente e canais trabalhados',
-      'Comprimento de trabalho',
-      'Irrigante e medicação usados',
-      'Marca do carro do paciente',
-      'Tipo de selamento provisório',
-    ],
-    answers: [0, 1, 2, 4],
-    explanation:
-      'O registro permite continuidade segura entre sessões e deve documentar medidas, substâncias, intercorrências e selamento realizado.',
-  },
-  {
-    id: 'endo-08',
-    kind: 'choice',
-    difficulty: 2,
-    prompt: 'Qual acesso é o correto?',
-    options: [
-      'O menor possível, mesmo que a lima entre forçada',
-      'Conservador, porém suficiente para instrumentar em linha reta e sem degraus',
-      'O maior possível, para enxergar bem',
-      'Pela face vestibular em molares, por ser mais direto',
-    ],
-    answer: 1,
-    explanation:
-      'Acesso pequeno demais gera desvio, degrau e fratura de instrumento; grande demais enfraquece o dente. O equilíbrio é o objetivo.',
-  },
-  {
-    id: 'endo-09',
-    kind: 'boolean',
-    difficulty: 2,
-    prompt: 'Verdadeiro ou falso?',
-    statement:
-      'A leitura do localizador foraminal deve ser interpretada com os dados clínicos e a imagem indicada para o caso.',
-    answer: true,
-    explanation:
-      'O localizador eletrônico é útil para estabelecer o comprimento de trabalho, enquanto a radiografia informa anatomia e relação apical. A necessidade e o momento da imagem devem seguir o caso e o protocolo institucional.',
-  },
-  {
-    id: 'endo-10',
-    kind: 'choice',
-    difficulty: 3,
-    prompt: 'Qual é a conduta na urgência?',
-    scenario: 'Necrose pulpar com abscesso periapical agudo, edema localizado e dor intensa no 45.',
-    options: [
-      'Só prescrever antibiótico e remarcar',
-      'Desbridar e drenar pelo canal quando possível, incisar coleção flutuante se indicada e definir o tratamento',
-      'Exodontia imediata',
-      'Apenas analgésico e bolsa de gelo',
-    ],
-    answer: 1,
-    explanation:
-      'O controle local da fonte inclui desbridamento e drenagem; edema flutuante pode exigir incisão. Antibiótico não substitui o procedimento e é reservado, em geral, para disseminação, sinais sistêmicos ou comprometimento do hospedeiro.',
-  },
-  {
-    id: 'endo-11',
-    kind: 'blank',
-    difficulty: 2,
-    prompt: 'Complete a frase',
-    sentence: 'A medicação intracanal mais usada entre sessões é o ___ de cálcio.',
-    answer: 'hidróxido',
-    bank: ['hidróxido', 'sulfato', 'fosfato', 'carbonato'],
-    explanation:
-      'Quando há indicação de medicação entre sessões, o hidróxido de cálcio é uma opção frequente por sua ação antimicrobiana. Ele não é necessário quando o caso pode ser adequadamente concluído em sessão única.',
-  },
-  {
-    id: 'endo-12',
-    kind: 'choice',
-    difficulty: 3,
-    prompt: 'O que provavelmente aconteceu?',
-    scenario:
-      'Durante a irrigação, o paciente relata dor súbita e intensa, com edema aparecendo rapidamente.',
-    options: [
-      'Reação normal ao hipoclorito',
-      'Possível acidente com extravasamento de hipoclorito para os tecidos periapicais',
-      'Anestesia acabando',
-      'Sinusite',
-    ],
-    answer: 1,
-    explanation:
-      'Dor súbita e edema rápido sugerem extravasamento. Deve-se interromper a irrigação, aspirar sem nova pressão, avaliar via aérea e extensão, controlar a dor, documentar e acompanhar. Edema progressivo, disfagia, dispneia ou comprometimento ocular exigem atendimento de urgência.',
-  },
+    'Cada solução tem um papel. Hipoclorito é o irrigante principal; EDTA entra no final para abrir os túbulos.',
+    2
+  ),
+  gap(
+    'endo-06',
+    'O irrigante que dissolve tecido pulpar remanescente é o ___ de sódio.',
+    'hipoclorito',
+    ['bicarbonato', 'cloreto', 'fluoreto'],
+    'Só o hipoclorito dissolve matéria orgânica. Sem ele, restos de polpa ficam nos canais acessórios.',
+    1
+  ),
+  choice(
+    'endo-07',
+    'O que determina o comprimento de trabalho com mais precisão?',
+    ['Localizador apical eletrônico confirmado por radiografia', 'Só a radiografia inicial', 'Tabela de comprimento médio dos dentes', 'Sensibilidade tátil'],
+    'O localizador encontra a constrição apical; a radiografia confirma. Juntos, erram muito menos.',
+    { difficulty: 2 }
+  ),
+  gap(
+    'endo-08',
+    'O limite apical do preparo fica cerca de ___ mm aquém do ápice radiográfico.',
+    '1',
+    ['5', '3', '0'],
+    'O forame raramente coincide com o ápice radiográfico. Parar 0,5 a 1 mm antes respeita a constrição.',
+    2
+  ),
+  truth(
+    'endo-09',
+    'A medicação intracanal com hidróxido de cálcio age pelo pH alcalino elevado.',
+    true,
+    'pH em torno de 12 mata bactérias e neutraliza toxinas. É a medicação padrão entre sessões.',
+    2
+  ),
+  choice(
+    'endo-10',
+    'Qual é a conduta?',
+    ['Capeamento pulpar direto com MTA ou hidróxido de cálcio', 'Tratamento endodôntico imediato', 'Extração', 'Restaurar direto sem proteção'],
+    'Polpa sã, exposição pequena e sem sangramento excessivo: proteger a polpa e selar bem tem boa taxa de sucesso.',
+    { scenario: 'Exposição pulpar pontual em dente assintomático, vital, durante a remoção de cárie.', difficulty: 3 }
+  ),
+  choice(
+    'endo-11',
+    'Qual é a conduta?',
+    ['Reimplantar imediatamente no alvéolo', 'Guardar o dente e reimplantar em 1 semana', 'Descartar o dente', 'Lavar com álcool e reimplantar'],
+    'Cada minuto fora do alvéolo mata células do ligamento. Reimplantar na hora é a melhor chance; leite ou saliva se não der.',
+    { scenario: 'Dente 11 permanente avulsionado há 10 minutos, em criança de 9 anos.', difficulty: 2 }
+  ),
+  truth(
+    'endo-12',
+    'Dente decíduo avulsionado deve ser reimplantado.',
+    false,
+    'Reimplantar decíduo pode lesar o germe do permanente. Orientar e acompanhar o espaço.',
+    2
+  ),
+  multi(
+    'endo-13',
+    'Qual meio serve para transportar um dente avulsionado?',
+    ['Leite', 'Saliva do paciente', 'Soro fisiológico'],
+    ['Álcool', 'Papel toalha seco'],
+    'Meio úmido e isotônico mantém as células do ligamento vivas. Seco por mais de 60 min, o prognóstico despenca.',
+    { difficulty: 1 }
+  ),
+  choice(
+    'endo-14',
+    'Permanente jovem com ápice aberto e polpa vital exposta. Objetivo do tratamento?',
+    ['Manter a polpa viva para completar a raiz (apexogênese)', 'Obturar o canal imediatamente', 'Extrair e colocar implante', 'Aguardar a necrose'],
+    'Raiz incompleta precisa da polpa para crescer. Pulpotomia com MTA preserva a vitalidade radicular.',
+    { difficulty: 3 }
+  ),
+  order(
+    'endo-15',
+    'Ordene as etapas do tratamento endodôntico',
+    ['Diagnóstico e radiografia', 'Anestesia e isolamento absoluto', 'Acesso e localização dos canais', 'Odontometria', 'Preparo químico-mecânico', 'Obturação e selamento coronário'],
+    'Sequência lógica: sem isolamento não há acesso seguro; sem odontometria não há preparo no comprimento certo.',
+    { difficulty: 1 }
+  ),
+  choice(
+    'endo-16',
+    'Qual é o principal material de obturação?',
+    ['Guta-percha com cimento endodôntico', 'Resina composta', 'Amálgama', 'Ionômero de vidro'],
+    'Guta-percha preenche, o cimento sela os espaços. A combinação é padrão há décadas.',
+    { difficulty: 1 }
+  ),
+  truth(
+    'endo-17',
+    'Uma boa restauração coronária é tão importante quanto a obturação para o sucesso do tratamento.',
+    true,
+    'Canal bem obturado com coroa vazando volta a infectar. Selamento coronário protege o trabalho todo.'
+  ),
+  choice(
+    'endo-18',
+    'Antibiótico está indicado?',
+    ['Não; a dor é inflamatória e o tratamento é local', 'Sim, amoxicilina por 7 dias', 'Sim, apenas se houver cárie', 'Sim, antes de qualquer anestesia'],
+    'Pulpite não é infecção sistêmica. Remover a polpa inflamada e prescrever analgésico resolve; antibiótico não age aqui.',
+    { scenario: 'Pulpite irreversível sintomática, sem edema, sem febre.', difficulty: 2 }
+  ),
+  multi(
+    'endo-19',
+    'Quando o antibiótico sistêmico entra em infecção endodôntica?',
+    ['Edema difuso com celulite', 'Febre e mal-estar', 'Trismo ou dificuldade de engolir'],
+    ['Dor intensa localizada sem edema', 'Fístula crônica assintomática'],
+    'Sinais de disseminação sistêmica pedem antibiótico junto com drenagem. Dor isolada não.',
+    { difficulty: 3 }
+  ),
+  choice(
+    'endo-20',
+    'Dor forte súbita e edema durante a irrigação. O que aconteceu?',
+    ['Extravasamento de hipoclorito além do ápice', 'Alergia à guta-percha', 'Fratura de raiz', 'Reação ao anestésico'],
+    'Acidente com hipoclorito: irrigar com soro, analgesia, compressa fria e acompanhar de perto.',
+    { difficulty: 3 }
+  ),
+  gap(
+    'endo-21',
+    'Manter uma lima fina passando pelo forame durante o preparo chama-se ___ apical.',
+    'patência',
+    ['fratura', 'condensação', 'obturação'],
+    'Patência evita acúmulo de raspas no terço apical e mantém o comprimento de trabalho durante o preparo.',
+    3
+  ),
+  truth(
+    'endo-22',
+    'Dor leve nas primeiras 24 a 48 horas após o tratamento é esperada.',
+    true,
+    'A instrumentação irrita o periápice. Avise o paciente antes: dor esperada não vira ligação de emergência.',
+    1
+  ),
+  choice(
+    'endo-23',
+    'Para que serve o preparo prévio do trajeto com limas manuais finas (glide path)?',
+    ['Reduzir o risco de fratura dos instrumentos rotatórios', 'Obturar o canal', 'Anestesiar a polpa', 'Remover a coroa'],
+    'Instrumento rotatório em canal sem caminho pré-definido trava e quebra. Glide path é seguro.',
+    { difficulty: 3 }
+  ),
+  choice(
+    'endo-24',
+    'Qual é o diagnóstico periapical?',
+    ['Abscesso apical agudo', 'Abscesso apical crônico', 'Periodontite apical assintomática', 'Osteíte condensante'],
+    'Dor intensa, edema e sensibilidade à percussão sem fístula: pus preso, precisa drenar.',
+    { scenario: 'Dor intensa, edema vestibular, dente 36 dolorido ao toque, sem fístula.', difficulty: 2 }
+  ),
 ];

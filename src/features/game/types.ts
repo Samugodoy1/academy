@@ -9,8 +9,6 @@ export interface ScientificReference {
 
 interface ExerciseCommon {
   id: string;
-  /** Stable authored question behind runtime variations of the same concept. */
-  conceptId?: string;
   topic: StudyKey;
   /** Short instruction shown above the exercise, Duolingo style. */
   prompt: string;

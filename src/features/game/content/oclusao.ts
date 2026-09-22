@@ -1,115 +1,187 @@
 import type { ExerciseSeed } from '../types';
+import { choice, gap, multi, order, pairs, truth } from './authoring';
 
 export const OCL_EXERCISES: ExerciseSeed[] = [
-  {
-    id: 'ocl-01',
-    kind: 'choice',
-    difficulty: 1,
-    prompt: 'Qual afirmação diferencia máxima intercuspidação e relação cêntrica?',
-    options: [
-      'A máxima intercuspidação é determinada pelo encaixe dentário; a relação cêntrica é uma referência articular independente do contato dental.',
-      'As duas expressões designam obrigatoriamente a mesma posição.',
-      'A máxima intercuspidação depende apenas da posição dos côndilos.',
-      'A relação cêntrica é definida pela maior quantidade de contatos dentários.',
+  choice(
+    'ocl-01',
+    'O que define a relação cêntrica?',
+    ['Posição dos côndilos na fossa, independente dos dentes', 'Onde os dentes encaixam melhor', 'Posição de repouso da mandíbula', 'Máxima abertura'],
+    'RC é articular: côndilos anterossuperiores na fossa, com o disco interposto. Reprodutível mesmo sem dentes.',
+    { difficulty: 2 }
+  ),
+  gap(
+    'ocl-02',
+    'A posição em que os dentes têm o maior número de contatos chama-se máxima ___ habitual.',
+    'intercuspidação',
+    ['protrusão', 'abertura', 'lateralidade'],
+    'MIH é ditada pelos dentes; RC, pela articulação. Quando as duas não coincidem, há um deslize.',
+    1
+  ),
+  pairs(
+    'ocl-03',
+    'Relacione a classe de Angle à posição do 1º molar',
+    [
+      ['Classe I', 'Cúspide MV superior no sulco MV inferior'],
+      ['Classe II', 'Molar inferior distalizado'],
+      ['Classe III', 'Molar inferior mesializado'],
     ],
-    answer: 0,
-    explanation: 'As posições podem coincidir ou não. Máxima intercuspidação é uma relação dentária, enquanto relação cêntrica é uma relação maxilomandibular de referência.',
-  },
-  {
-    id: 'ocl-02',
-    kind: 'boolean',
-    difficulty: 2,
-    prompt: 'Avalie a função da guia anterior.',
-    statement: 'Durante movimentos excursivos, a guia anterior pode contribuir para a desoclusão dos dentes posteriores.',
-    answer: true,
-    explanation: 'O efeito depende da anatomia, do movimento e do esquema oclusal; não significa que exista uma configuração única adequada a todos.',
-  },
-  {
-    id: 'ocl-03',
-    kind: 'multi',
-    difficulty: 3,
-    prompt: 'Sobre contatos oclusais e ajuste, selecione as afirmações corretas.',
-    options: [
-      'Um contato pode modificar a distribuição de forças.',
-      'A presença isolada de um contato não comprova que ele cause dor ou DTM.',
-      'Ajuste oclusal irreversível deve ser feito preventivamente em todo contato marcado.',
-      'Sintomas, função, diagnóstico e alternativas conservadoras devem ser considerados antes de intervir.',
+    'A chave é o primeiro molar. Angle descreve a relação anteroposterior, não a estética.',
+    1
+  ),
+  choice(
+    'ocl-04',
+    'O que é overjet?',
+    ['Trespasse horizontal dos incisivos', 'Trespasse vertical dos incisivos', 'Distância entre os molares', 'Abertura máxima'],
+    'Overjet é para frente; overbite é para baixo. Confundir os dois muda o diagnóstico ortodôntico.',
+    { difficulty: 1 }
+  ),
+  truth(
+    'ocl-05',
+    'Na protrusão, os dentes anteriores devem desocluir os posteriores.',
+    true,
+    'Guia anterior protege os posteriores de forças laterais. Contato posterior na protrusão é interferência.',
+    2
+  ),
+  choice(
+    'ocl-06',
+    'Na lateralidade, qual é o lado de trabalho?',
+    ['O lado para onde a mandíbula se move', 'O lado oposto ao movimento', 'Sempre o lado direito', 'O lado que dói'],
+    'Trabalho é onde se mastiga; balanceio (não trabalho) é o oposto. Interferência no balanceio é a mais danosa.',
+    { difficulty: 1 }
+  ),
+  gap(
+    'ocl-07',
+    'Quando só o canino guia a lateralidade, chamamos de guia ___.',
+    'canina',
+    ['molar', 'incisal', 'condilar'],
+    'Alternativa: função em grupo, com vários dentes do lado de trabalho tocando juntos. Ambas são aceitáveis.',
+    2
+  ),
+  choice(
+    'ocl-08',
+    'Qual é a hipótese mais provável?',
+    ['Bruxismo (parafunção)', 'Erosão por refluxo', 'Cárie de esmalte', 'Fluorose'],
+    'Facetas planas, brilhantes e que se encaixam entre antagonistas são marca de ranger. Investigue sono e estresse.',
+    { scenario: 'Facetas de desgaste planas em caninos e incisivos, masseter hipertrofiado, dor ao acordar.', difficulty: 1 }
+  ),
+  choice(
+    'ocl-09',
+    'Qual dispositivo é indicado para bruxismo do sono?',
+    ['Placa oclusal estabilizadora rígida', 'Placa macia de silicone para sempre', 'Aparelho ortodôntico', 'Nenhum'],
+    'Placa rígida distribui força e protege os dentes. Placa macia pode até aumentar a atividade muscular.',
+    { difficulty: 2 }
+  ),
+  gap(
+    'ocl-10',
+    'A abertura bucal normal em adulto fica em torno de ___ mm.',
+    '40 a 55',
+    ['10 a 15', '80 a 90', '20 a 25'],
+    'Menos de 40 mm sugere limitação: muscular, articular ou trismo. Meça sempre com régua.',
+    2
+  ),
+  multi(
+    'ocl-11',
+    'Sinais e sintomas de disfunção temporomandibular?',
+    ['Dor nos músculos da mastigação', 'Clique ou crepitação na ATM', 'Limitação de abertura'],
+    ['Sangramento gengival', 'Sensibilidade ao frio em um dente'],
+    'DTM é dor e disfunção da articulação e dos músculos. Dente doendo isolado é outro diagnóstico.',
+    { difficulty: 1 }
+  ),
+  choice(
+    'ocl-12',
+    'Clique reprodutível na abertura e no fechamento, sem dor. Hipótese?',
+    ['Deslocamento de disco com redução', 'Deslocamento de disco sem redução', 'Artrite reumatoide', 'Fratura condilar'],
+    'O disco sai e volta ao lugar ("reduz") fazendo o clique. Sem dor e sem travamento, em geral só acompanhar.',
+    { difficulty: 3 }
+  ),
+  choice(
+    'ocl-13',
+    'Qual é o primeiro tratamento para a maioria das DTMs musculares?',
+    ['Conservador: orientação, autocuidado, calor e placa', 'Cirurgia da ATM', 'Ajuste oclusal extenso', 'Coroas em todos os dentes'],
+    'DTM muscular responde a medidas reversíveis. Irreversível só depois, se houver indicação clara.',
+    { difficulty: 2 }
+  ),
+  truth(
+    'ocl-14',
+    'Trauma oclusal pode alargar o espaço do ligamento periodontal na radiografia.',
+    true,
+    'Força excessiva inflama o ligamento e ele "engorda" na imagem. Mobilidade e faceta de desgaste completam o quadro.',
+    2
+  ),
+  choice(
+    'ocl-15',
+    'Curva de Spee é observada em qual plano?',
+    ['Sagital (anteroposterior)', 'Frontal (transversal)', 'Horizontal', 'Nenhum'],
+    'Spee é a curva vista de lado; Wilson é a vista de frente. Ambas ajudam na desoclusão.',
+    { difficulty: 3 }
+  ),
+  pairs(
+    'ocl-16',
+    'Relacione o conceito à definição',
+    [
+      ['Overbite', 'Trespasse vertical'],
+      ['Overjet', 'Trespasse horizontal'],
+      ['Mordida cruzada', 'Inferior por fora do superior'],
+      ['Mordida aberta', 'Sem contato vertical entre antagonistas'],
     ],
-    answers: [0, 1, 3],
-    explanation: 'Marcas oclusais precisam ser interpretadas clinicamente. Não há base para atribuir automaticamente DTM a uma interferência nem para ajuste irreversível indiscriminado.',
-  },
-  {
-    id: 'ocl-04',
-    kind: 'choice',
-    difficulty: 3,
-    prompt: 'Qual alternativa descreve adequadamente o bruxismo?',
-    options: [
-      'Bruxismo do sono e em vigília são atividades musculares distintas e, em pessoas saudáveis, representam comportamento que pode atuar como fator de risco.',
-      'É diagnosticado exclusivamente pela presença de desgaste dentário.',
-      'Ocorre somente durante o sono e sempre constitui doença.',
-      'É definido apenas pelo apertamento com contato dentário.',
-    ],
-    answer: 0,
-    explanation: 'No sono, a atividade pode ser rítmica ou não rítmica; em vigília, pode envolver contato repetitivo ou sustentado, travamento ou projeção mandibular.',
-  },
-  {
-    id: 'ocl-05',
-    kind: 'boolean',
-    difficulty: 2,
-    prompt: 'Avalie a dimensão vertical no planejamento protético.',
-    statement: 'A dimensão vertical de oclusão pode ser definida com segurança usando apenas uma fotografia frontal.',
-    answer: false,
-    explanation: 'Sua avaliação integra história, suporte dentário e protético, espaço funcional, fonética, estética, conforto e adaptação; alterações exigem planejamento individual.',
-  },
-  {
-    id: 'ocl-06',
-    kind: 'multi',
-    difficulty: 2,
-    prompt: 'Quais afirmações sobre articuladores são corretas?',
-    options: [
-      'Podem auxiliar na análise de relações dentárias e simulação de movimentos.',
-      'A precisão depende do registro, da montagem e das limitações do aparelho.',
-      'Substituem anamnese, exame clínico e diagnóstico funcional.',
-      'Seus achados devem ser interpretados junto ao restante do diagnóstico.',
-    ],
-    answers: [0, 1, 3],
-    explanation: 'O articulador é uma ferramenta complementar. Ele não reproduz integralmente a biologia do paciente nem diagnostica sozinho.',
-  },
-  {
-    id: 'ocl-07',
-    kind: 'blank',
-    difficulty: 1,
-    prompt: 'Complete a frase',
-    sentence: 'O deslocamento anterior da mandíbula a partir da máxima intercuspidação é denominado ___.',
-    answer: 'protrusão',
-    bank: ['protrusão', 'retrusão', 'lateralidade', 'intrusão'],
-    explanation: 'Na protrusão, a mandíbula se desloca anteriormente e a guia anterior pode promover desoclusão posterior. O padrão de contatos varia conforme a anatomia e o esquema oclusal.',
-  },
-  {
-    id: 'ocl-08',
-    kind: 'order',
-    difficulty: 3,
-    prompt: 'Com desprogramação indicada e o modelo superior montado, ordene o registro do modelo inferior em relação cêntrica',
-    steps: [
-      'Desprogramar a musculatura e treinar o fechamento sem contato dentário',
-      'Guiar a mandíbula de modo confortável e reproduzível até a relação cêntrica',
-      'Inserir o material de registro sem induzir desvio mandibular',
-      'Manter a posição até a presa e remover o registro',
-      'Verificar adaptação e repetibilidade antes de montar o modelo inferior',
-    ],
-    explanation: 'Um registro confiável deve ser estável, pouco deformável e reproduzível. A técnica de manipulação e o material variam, mas o registro não deve criar contatos ou desvios artificiais.',
-  },
-  {
-    id: 'ocl-09',
-    kind: 'match',
-    difficulty: 2,
-    prompt: 'Relacione o termo oclusal com sua definição',
-    pairs: [
-      { left: 'Curva de Spee', right: 'Curvatura anteroposterior do arco dental' },
-      { left: 'Curva de Wilson', right: 'Curvatura mediolateral observada no plano frontal' },
-      { left: 'Overjet', right: 'Relação horizontal entre incisivos superiores e inferiores' },
-      { left: 'Overbite', right: 'Sobreposição vertical dos incisivos' },
-    ],
-    explanation: 'As curvas oclusais descrevem a organização tridimensional dos arcos, enquanto overjet e overbite descrevem relações anteriores horizontal e vertical, respectivamente.',
-  },
+    'Vocabulário básico de oclusão. Sem ele, não dá para descrever um caso.',
+    1
+  ),
+  choice(
+    'ocl-17',
+    'O que é uma oclusão mutuamente protegida?',
+    ['Posteriores suportam a carga em MIH; anteriores guiam os movimentos', 'Todos os dentes tocam em todos os movimentos', 'Só os anteriores tocam sempre', 'Os posteriores guiam a protrusão'],
+    'Cada grupo protege o outro. Posteriores aguentam força vertical; anteriores aguentam guia.',
+    { difficulty: 3 }
+  ),
+  truth(
+    'ocl-18',
+    'Em prótese total, busca-se oclusão balanceada bilateral.',
+    true,
+    'Sem dentes fixos, a base precisa de contatos dos dois lados em todos os movimentos para não bascular.',
+    2
+  ),
+  choice(
+    'ocl-19',
+    'Como identificar um contato prematuro?',
+    ['Papel de articular e relato do paciente ao fechar', 'Radiografia periapical', 'Teste de frio', 'Sondagem periodontal'],
+    'Marca escura isolada e sensação de "bate primeiro". Ajuste com critério, um pouco de cada vez.',
+    { difficulty: 1 }
+  ),
+  multi(
+    'ocl-20',
+    'O que o arco facial transfere ao articulador?',
+    ['Relação da maxila com o eixo dos côndilos', 'Posição espacial do modelo superior'],
+    ['A cor dos dentes', 'A força de mordida', 'O fluxo salivar'],
+    'Sem arco facial, o modelo entra no articulador em posição arbitrária e a guia sai errada.',
+    { difficulty: 3 }
+  ),
+  choice(
+    'ocl-21',
+    'Interferência oclusal mais prejudicial?',
+    ['Contato no lado de balanceio', 'Contato bilateral em MIH', 'Guia canina', 'Contato anterior em protrusão'],
+    'No balanceio, o côndilo está fora da fossa e a força cai onde não há suporte. Alvo clássico do ajuste.',
+    { difficulty: 3 }
+  ),
+  order(
+    'ocl-22',
+    'Ordene a avaliação oclusal básica',
+    ['Observar a relação molar e o trespasse', 'Checar contatos em MIH com papel de articular', 'Verificar guia em protrusão', 'Verificar guias em lateralidade', 'Registrar facetas de desgaste e mobilidade'],
+    'Estático primeiro, dinâmico depois. Escrever tudo: oclusão muda e você vai querer comparar.',
+    { difficulty: 2 }
+  ),
+  truth(
+    'ocl-23',
+    'A posição de repouso mandibular é um pouco aberta em relação à MIH.',
+    true,
+    'Espaço funcional livre de 2 a 4 mm. Dentes em contato o tempo todo é sinal de apertamento.',
+    1
+  ),
+  choice(
+    'ocl-24',
+    'Dor aguda ao morder em um dente restaurado há 2 dias. Primeira suspeita?',
+    ['Restauração alta', 'Pulpite irreversível', 'Fratura da raiz', 'Gengivite'],
+    'Restauração alta sobrecarrega o ligamento. Marcar, ajustar e reavaliar antes de pensar em canal.',
+    { difficulty: 1 }
+  ),
 ];

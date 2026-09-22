@@ -1,172 +1,182 @@
 import type { ExerciseSeed } from '../types';
+import { choice, gap, multi, order, pairs, truth } from './authoring';
 
 export const PREVENTIVA_EXERCISES: ExerciseSeed[] = [
-  {
-    id: 'prev-01',
-    kind: 'choice',
-    difficulty: 2,
-    prompt: 'O que significa esse achado?',
-    scenario:
-      'Após limpeza e secagem, observa-se mancha branca opaca e rugosa na cervical do 13, em área de acúmulo de biofilme e sem cavitação.',
-    options: [
-      'Lesão de cárie ativa não cavitada',
-      'Lesão inativa, apenas cicatriz',
-      'Fluorose severa',
-      'Hipoplasia de esmalte',
+  choice(
+    'prev-01',
+    'O que pesa mais no risco de cárie?',
+    ['A frequência de açúcar ao longo do dia', 'A quantidade total de açúcar', 'A marca do doce', 'A temperatura do alimento'],
+    'Cada exposição derruba o pH por 30 a 60 minutos. Seis balinhas ao longo do dia atacam mais que um pacote de uma vez.',
+    { difficulty: 1 }
+  ),
+  gap(
+    'prev-02',
+    'O pH crítico para desmineralizar o esmalte é cerca de ___.',
+    '5,5',
+    ['7,0', '3,0', '6,8'],
+    'Abaixo de 5,5 o esmalte perde mineral; a dentina começa a perder já perto de 6,2 a 6,7.',
+    2
+  ),
+  truth(
+    'prev-03',
+    'Após comer açúcar, o pH do biofilme volta ao normal em cerca de 30 a 60 minutos.',
+    true,
+    'É a curva de Stephan. Beliscar o tempo todo mantém o pH lá embaixo sem chance de recuperação.',
+    2
+  ),
+  choice(
+    'prev-04',
+    'Como o flúor protege principalmente contra a cárie?',
+    ['Ação tópica: reduz desmineralização e favorece remineralização', 'Matando todas as bactérias da boca', 'Deixando o esmalte mais duro antes de erupcionar', 'Neutralizando o açúcar'],
+    'Flúor presente no biofilme e na saliva durante o ataque ácido é o que faz diferença. Efeito local, não sistêmico.',
+    { difficulty: 2 }
+  ),
+  choice(
+    'prev-05',
+    'Qual a concentração mínima de flúor eficaz em dentifrício?',
+    ['1000 ppm', '250 ppm', '500 ppm', '5000 ppm'],
+    'Abaixo de 1000 ppm o dentifrício perde efeito anticárie comprovado. Adultos usam 1000 a 1500 ppm.',
+    { difficulty: 2 }
+  ),
+  choice(
+    'prev-06',
+    'Quanto dentifrício para uma criança de 2 anos?',
+    ['Um grão de arroz', 'Uma ervilha', 'Metade da escova', 'Não usar dentifrício com flúor'],
+    'Grão de arroz até os 3 anos, ervilha dos 3 aos 6. Fluoretado desde o primeiro dente, em pouca quantidade.',
+    { difficulty: 1 }
+  ),
+  truth(
+    'prev-07',
+    'Fluorose ocorre por excesso de flúor ingerido durante a formação dos dentes.',
+    true,
+    'O risco é na infância, enquanto o esmalte se forma. Por isso a quantidade de dentifrício é controlada nos pequenos.'
+  ),
+  gap(
+    'prev-08',
+    'O verniz fluoretado a 5% tem cerca de ___ ppm de flúor.',
+    '22.600',
+    ['1.100', '5.000', '500'],
+    'Alta concentração de uso profissional, aplicado 2 a 4 vezes ao ano conforme o risco.',
+    3
+  ),
+  choice(
+    'prev-09',
+    'Mancha branca opaca e rugosa. Ela está?',
+    ['Ativa', 'Inativa', 'Cavitada', 'Curada'],
+    'Opaca e rugosa = perdendo mineral agora. Brilhante e lisa = lesão que parou (inativa).',
+    { difficulty: 2 }
+  ),
+  choice(
+    'prev-10',
+    'Qual é a conduta?',
+    ['Controle de biofilme, flúor e orientação de dieta', 'Restaurar com resina', 'Restaurar com amálgama', 'Extrair'],
+    'Lesão sem cavidade pode remineralizar. Tratar a doença, não só o buraco, ainda mais quando não há buraco.',
+    { scenario: 'Mancha branca ativa na vestibular do 13, sem cavitação.', difficulty: 2 }
+  ),
+  multi(
+    'prev-11',
+    'O que a saliva faz contra a cárie?',
+    ['Tampona o ácido', 'Fornece cálcio e fosfato', 'Limpa restos de alimento'],
+    ['Produz açúcar', 'Descolore o esmalte'],
+    'Saliva é a defesa natural. Boca seca (xerostomia) perde tudo isso e o risco dispara.',
+    { difficulty: 1 }
+  ),
+  truth(
+    'prev-12',
+    'Xerostomia aumenta o risco de cárie.',
+    true,
+    'Menos saliva, menos tampão e menos limpeza. Pacientes com boca seca precisam de flúor extra e acompanhamento.'
+  ),
+  choice(
+    'prev-13',
+    'Onde os selantes são indicados?',
+    ['Fóssulas e fissuras de molares em risco', 'Faces lisas vestibulares', 'Incisivos de leite', 'Todos os dentes de todas as crianças'],
+    'Fissura profunda retém biofilme que a escova não alcança. Selar em quem tem risco protege a face mais vulnerável.',
+    { difficulty: 1 }
+  ),
+  choice(
+    'prev-14',
+    'Qual é o principal fator dessa cárie?',
+    ['Mamadeira adoçada à noite', 'Genética', 'Falta de cálcio na dieta', 'Uso de chupeta'],
+    'Açúcar em contato prolongado, saliva reduzida no sono e sem escovação depois: receita de cárie precoce da infância.',
+    { scenario: 'Criança de 2 anos com cárie nos incisivos superiores; dorme com mamadeira de leite com açúcar.', difficulty: 1 }
+  ),
+  gap(
+    'prev-15',
+    'O ___ é um adoçante não fermentável pelas bactérias do biofilme.',
+    'xilitol',
+    ['sacarose', 'glicose', 'frutose'],
+    'Bactérias não conseguem produzir ácido a partir de xilitol. Ajuda, mas não substitui flúor e escovação.',
+    2
+  ),
+  choice(
+    'prev-16',
+    'Qual açúcar é o mais cariogênico?',
+    ['Sacarose', 'Lactose', 'Xilitol', 'Amido cru'],
+    'A sacarose alimenta a produção de ácido e de polissacarídeos que grudam o biofilme no dente.',
+    { difficulty: 1 }
+  ),
+  truth(
+    'prev-17',
+    'A água fluoretada em nível ótimo tem cerca de 0,7 mg de flúor por litro.',
+    true,
+    'Medida de saúde pública que alcança toda a população, com risco mínimo de fluorose nesse nível.',
+    2
+  ),
+  order(
+    'prev-18',
+    'Ordene a lógica do manejo de cárie',
+    ['Avaliar o risco individual', 'Detectar e classificar as lesões', 'Controlar a doença (biofilme, dieta, flúor)', 'Restaurar só o que precisa', 'Reavaliar em intervalo conforme o risco'],
+    'Primeiro a pessoa, depois o dente. Restaurar sem controlar a causa é começar de novo em pouco tempo.',
+    { difficulty: 2 }
+  ),
+  choice(
+    'prev-19',
+    'Quantas vezes por dia escovar com dentifrício fluoretado?',
+    ['Duas vezes', 'Uma vez', 'Após cada gole de água', 'Só à noite'],
+    'Duas vezes ao dia mantém flúor disponível ao longo do dia. A escovação noturna é a mais importante.',
+    { difficulty: 1 }
+  ),
+  pairs(
+    'prev-20',
+    'Relacione o achado à interpretação',
+    [
+      ['Mancha branca opaca e rugosa', 'Lesão ativa'],
+      ['Mancha brilhante e lisa', 'Lesão inativa'],
+      ['Cavidade em dentina com biofilme', 'Precisa de restauração'],
+      ['Sulco pigmentado sem sombra', 'Observar e prevenir'],
     ],
-    answer: 0,
-    explanation:
-      'Opacidade, rugosidade e localização em área de estagnação de biofilme sustentam atividade. A avaliação deve integrar limpeza, secagem, textura, brilho e localização. Lesões ativas não cavitadas são manejadas inicialmente com controle de biofilme, fluoreto e dieta.',
-  },
-  {
-    id: 'prev-02',
-    kind: 'boolean',
-    difficulty: 1,
-    prompt: 'Verdadeiro ou falso?',
-    statement: 'Toda mancha branca precisa ser restaurada.',
-    answer: false,
-    explanation:
-      'Uma lesão não cavitada pode ser inativada com medidas não restauradoras. A decisão depende da atividade, do risco de cárie e da possibilidade de controle do biofilme.',
-  },
-  {
-    id: 'prev-03',
-    kind: 'multi',
-    difficulty: 2,
-    prompt: 'Selecione os fatores que aumentam o risco de cárie',
-    options: [
-      'Alta frequência de açúcar',
-      'Higiene deficiente',
-      'Xerostomia',
-      'Uso de dentifrício fluoretado',
-      'Exposição radicular',
-    ],
-    answers: [0, 1, 2, 4],
-    explanation:
-      'Frequência (não só quantidade) de açúcar, biofilme, pouca saliva e superfícies expostas aumentam o risco. Dentifrício fluoretado é fator de proteção.',
-  },
-  {
-    id: 'prev-04',
-    kind: 'blank',
-    difficulty: 2,
-    prompt: 'Complete a frase',
-    sentence: 'Maior ___ de exposição a açúcares livres aumenta o tempo de desafio cariogênico.',
-    answer: 'frequência',
-    bank: ['frequência', 'quantidade', 'marca', 'temperatura'],
-    explanation:
-      'A frequência é um componente importante, mas o risco de cárie é multifatorial e também envolve quantidade de açúcares livres, biofilme, saliva, fluoreto e fatores sociais e comportamentais.',
-  },
-  {
-    id: 'prev-05',
-    kind: 'choice',
-    difficulty: 2,
-    prompt: 'Quando o selante está bem indicado?',
-    options: [
-      'Em qualquer dente, como rotina anual',
-      'Em fóssulas e fissuras retentivas de paciente com risco, com campo seco',
-      'Somente após restaurar todos os dentes',
-      'Apenas em dentes decíduos anteriores',
-    ],
-    answer: 1,
-    explanation:
-      'O selante pode proteger fóssulas e fissuras suscetíveis, especialmente em dentes recém-erupcionados e pacientes com risco de cárie. Contaminação durante a aplicação aumenta o risco de perda de retenção.',
-  },
-  {
-    id: 'prev-06',
-    kind: 'match',
-    difficulty: 2,
-    prompt: 'Relacione a medida com o objetivo',
-    pairs: [
-      { left: 'Verniz fluoretado', right: 'Remineralizar lesão inicial' },
-      { left: 'Selante', right: 'Proteger fóssulas e fissuras' },
-      { left: 'Escovação supervisionada', right: 'Controle mecânico do biofilme' },
-      { left: 'Orientação de dieta', right: 'Reduzir a frequência de açúcar' },
-    ],
-    explanation:
-      'Prevenção é um conjunto: química (flúor), física (selante), mecânica (escovação) e comportamental (dieta).',
-  },
-  {
-    id: 'prev-07',
-    kind: 'boolean',
-    difficulty: 2,
-    prompt: 'Verdadeiro ou falso?',
-    statement: 'Profilaxia isolada, sem orientação, tem efeito duradouro na prevenção.',
-    answer: false,
-    explanation:
-      'A remoção profissional isolada tem efeito transitório. Prevenção duradoura exige autocuidado, uso de dentifrício fluoretado e acompanhamento conforme o risco.',
-  },
-  {
-    id: 'prev-08',
-    kind: 'order',
-    difficulty: 2,
-    prompt: 'Em um paciente com biofilme e cálculo supragengival, organize uma sequência possível',
-    steps: [
-      'Avaliar risco de cárie e hábitos',
-      'Evidenciar e mostrar o biofilme ao paciente',
-      'Remover biofilme e cálculo supragengival',
-      'Aplicar fluoreto profissional se indicado pelo risco e pela idade',
-      'Combinar uma meta de higiene e o retorno',
-    ],
-    explanation:
-      'A sequência deve ser adaptada aos achados. Evidenciar o biofilme pode auxiliar a orientação, e a aplicação profissional de fluoreto depende do risco individual.',
-  },
-  {
-    id: 'prev-09',
-    kind: 'choice',
-    difficulty: 3,
-    prompt: 'Qual é a orientação correta?',
-    scenario: 'Após aplicação de verniz fluoretado, o paciente pergunta o que pode comer.',
-    options: [
-      'Pode comer e escovar imediatamente',
-      'Evitar alimentos duros e quentes e adiar a escovação conforme a orientação do produto',
-      'Ficar 24 horas em jejum',
-      'Bochechar com enxaguante logo em seguida',
-    ],
-    answer: 1,
-    explanation:
-      'As orientações após o verniz variam entre produtos. Devem ser seguidas as instruções do fabricante e o protocolo clínico adotado.',
-  },
-  {
-    id: 'prev-10',
-    kind: 'blank',
-    difficulty: 3,
-    prompt: 'Complete a frase',
-    sentence: 'O flúor age principalmente favorecendo a ___ do esmalte desmineralizado.',
-    answer: 'remineralização',
-    bank: ['remineralização', 'esfoliação', 'erosão', 'calcificação pulpar'],
-    explanation:
-      'O fluoreto reduz a desmineralização e favorece a remineralização, além de formar reservatórios superficiais que disponibilizam fluoreto durante novos desafios ácidos.',
-  },
-  {
-    id: 'prev-11',
-    kind: 'choice',
-    difficulty: 3,
-    prompt: 'Qual é a conduta mais adequada?',
-    scenario:
-      'Paciente adulto com xerostomia por medicamento contínuo e três lesões cervicais ativas.',
-    options: [
-      'Restaurar as três lesões e liberar',
-      'Revisar causas, estimular ou substituir saliva, indicar fluoreto conforme o risco e restaurar quando necessário',
-      'Suspender o medicamento do paciente',
-      'Indicar apenas enxaguante com álcool',
-    ],
-    answer: 1,
-    explanation:
-      'O manejo inclui revisar medicamentos com o prescritor quando pertinente, estimular o fluxo residual, aliviar sintomas, controlar dieta e usar fluoreto adequado ao risco. Lesões cavitadas ou não higienizáveis podem exigir restauração em paralelo; produtos com álcool podem agravar o desconforto.',
-  },
-  {
-    id: 'prev-12',
-    kind: 'multi',
-    difficulty: 2,
-    prompt: 'Selecione o que deve constar na orientação de higiene',
-    options: [
-      'Técnica de escovação demonstrada na boca do paciente',
-      'Limpeza interdental (fio ou escova interdental)',
-      'Uso de dentifrício fluoretado',
-      'Promessa de que nunca mais terá cárie',
-      'Uma meta simples e possível de cumprir',
-    ],
-    answers: [0, 1, 2, 4],
-    explanation:
-      'A orientação deve ser demonstrada, individualizada e acompanhada de uma meta viável. Não se deve prometer ausência definitiva de novas lesões.',
-  },
+    'Aparência da superfície conta a história da lesão. Isso decide entre prevenir e restaurar.',
+    2
+  ),
+  multi(
+    'prev-21',
+    'O que aumenta o risco de cárie?',
+    ['Beliscar doces várias vezes ao dia', 'Boca seca por medicamentos', 'Biofilme visível nos dentes'],
+    ['Água fluoretada', 'Escovação noturna com dentifrício fluoretado'],
+    'Risco alto combina açúcar frequente, pouca saliva e biofilme. Cada um deles tem uma orientação específica.',
+    { difficulty: 1 }
+  ),
+  truth(
+    'prev-22',
+    'Clorexidina é a principal medida para prevenir cárie.',
+    false,
+    'Clorexidina reduz bactérias por pouco tempo. Prevenção de cárie se faz com flúor, dieta e biofilme sob controle.',
+    2
+  ),
+  choice(
+    'prev-23',
+    'Qual orientação tem mais chance de funcionar?',
+    ['Uma mudança pequena e específica combinada com o paciente', 'Uma lista de 15 regras', 'Proibir todo açúcar', 'Repetir "escove melhor"'],
+    'Mudança de hábito acontece em passos alcançáveis. Uma meta concreta vale mais que um sermão.',
+    { difficulty: 2 }
+  ),
+  gap(
+    'prev-24',
+    'O biofilme dental precisa ser removido mecanicamente porque bochecho não ___ a placa madura.',
+    'desorganiza',
+    ['adoça', 'colore', 'endurece'],
+    'A escova e o fio quebram a estrutura do biofilme. Enxaguante é complemento, não substituto.',
+    1
+  ),
 ];

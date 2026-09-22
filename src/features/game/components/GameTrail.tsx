@@ -4,7 +4,7 @@ import { BookOpen, Check, Crown, Lock, Play, Star, Trophy } from '../../../icons
 import { CharacterAvatar, hostFor } from '../characters';
 import { GAME_UNITS } from '../content';
 import { CROWNS_PER_UNIT, getUnitState } from '../progress';
-import type { GameState, GameUnit } from '../types';
+import type { ExerciseMemory, GameState, GameUnit } from '../types';
 
 export interface TrailSelection {
   topic: StudyKey;
@@ -67,7 +67,7 @@ export const GameTrail: React.FC<GameTrailProps> = ({
       })),
     [spotlightTopic, state]
   );
-  const dueCount = Object.values(state.exerciseMemory).filter(
+  const dueCount = (Object.values(state.exerciseMemory) as ExerciseMemory[]).filter(
     memory => memory.attempts > 0 && memory.dueAt <= Date.now()
   ).length;
 

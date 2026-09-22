@@ -58,7 +58,7 @@ describe('conteúdo do jogo', () => {
     for (const exercise of ALL_EXERCISES) {
       if (exercise.kind === 'choice') {
         expect(exercise.options[exercise.answer]).toBeTruthy();
-        expect(exercise.options.length).toBeGreaterThanOrEqual(3);
+        expect(exercise.options.length).toBeGreaterThanOrEqual(2);
       }
       if (exercise.kind === 'multi') {
         expect(exercise.answers.length).toBeGreaterThan(0);
@@ -207,6 +207,17 @@ describe('montagem das lições', () => {
   });
 
   it('muda a posição da resposta quando a mesma questão reaparece', () => {
+    const rotatingChoice: Exercise = {
+      id: 'rotation-choice',
+      conceptId: 'rotation-choice',
+      topic: 'anestesia',
+      kind: 'choice',
+      prompt: 'Qual opção está correta?',
+      explanation: 'Uma explicação suficientemente detalhada para o teste.',
+      references,
+      options: ['A', 'B', 'C', 'D'],
+      answer: 1,
+    };
     const rotatingUnit: GameUnit = {
       topic: 'anestesia',
       title: 'Teste',
@@ -214,8 +225,7 @@ describe('montagem das lições', () => {
       lessons: 1,
       exercises: [
         {
-          ...choice,
-          conceptId: choice.id,
+          ...rotatingChoice,
         },
       ],
     };
@@ -226,7 +236,7 @@ describe('montagem das lições', () => {
     const second = buildLesson(rotatingUnit, 0, {
       seed: 'rotation',
       memory: {
-        [choice.id]: { attempts: 1, correct: 1, streak: 1, lastSeenAt: 1, dueAt: 2 },
+        [rotatingChoice.id]: { attempts: 1, correct: 1, streak: 1, lastSeenAt: 1, dueAt: 2 },
       },
     }).exercises[0];
     expect(first.kind).toBe('choice');

@@ -192,7 +192,47 @@ describe('montagem das lições', () => {
     const repeated = second.exercises.filter(exercise =>
       firstConcepts.has(exercise.conceptId)
     );
-    expect(repeated.length).toBeLessThanOrEqual(2);
+    expect(repeated).toHaveLength(0);
+  });
+
+  it('não repete a mesma questão em lições consecutivas de nenhum tema', () => {
+    for (const gameUnit of GAME_UNITS) {
+      const memory: Record<string, ExerciseMemory> = {};
+      let previousIds = new Set<string>();
+      let previousConcepts = new Set<string | undefined>();
+      const conceptCount = new Set(
+        gameUnit.exercises.map(exercise => exercise.conceptId)
+      ).size;
+      const minimumConceptOverlap = Math.max(0, LESSON_SIZE * 2 - conceptCount);
+
+      for (let round = 0; round < 3; round += 1) {
+        const lesson = buildLesson(gameUnit, round, {
+          seed: `${gameUnit.topic}:${round}`,
+          memory,
+          now: round * 1000,
+        });
+        const ids = new Set(lesson.exercises.map(exercise => exercise.id));
+        const concepts = new Set(lesson.exercises.map(exercise => exercise.conceptId));
+        if (round > 0) {
+          expect([...ids].filter(id => previousIds.has(id))).toHaveLength(0);
+          expect(
+            [...concepts].filter(concept => previousConcepts.has(concept)).length
+          ).toBeLessThanOrEqual(minimumConceptOverlap);
+        }
+        for (const exercise of lesson.exercises) {
+          const previous = memory[exercise.id];
+          memory[exercise.id] = {
+            attempts: (previous?.attempts ?? 0) + 1,
+            correct: (previous?.correct ?? 0) + 1,
+            streak: (previous?.streak ?? 0) + 1,
+            lastSeenAt: (round + 1) * 1000,
+            dueAt: 9999999999999,
+          };
+        }
+        previousIds = ids;
+        previousConcepts = concepts;
+      }
+    }
   });
 
   it('monta a prova do box com os exercícios mais difíceis', () => {

@@ -211,6 +211,10 @@ function selectLessonExercises(
       const attempts = memories.reduce((sum, memory) => sum + memory.attempts, 0);
       const correct = memories.reduce((sum, memory) => sum + memory.correct, 0);
       const overdue = memories.filter(memory => memory.dueAt <= options.now).length;
+      const lastSeenAt = memories.reduce(
+        (latest, memory) => Math.max(latest, memory.lastSeenAt),
+        0
+      );
       const difficulty = variants[0]?.difficulty ?? 2;
       return {
         conceptId,
@@ -218,6 +222,7 @@ function selectLessonExercises(
         attempts,
         weakness: attempts === 0 ? 1 : 1 - correct / attempts,
         overdue,
+        lastSeenAt,
         difficultyDistance: Math.abs(difficulty - targetDifficulty),
         tie: random(),
       };
@@ -225,6 +230,7 @@ function selectLessonExercises(
     .sort(
       (a, b) =>
         a.attempts - b.attempts ||
+        a.lastSeenAt - b.lastSeenAt ||
         b.overdue - a.overdue ||
         b.weakness - a.weakness ||
         a.difficultyDistance - b.difficultyDistance ||
@@ -237,6 +243,26 @@ function selectLessonExercises(
       EXERCISE_KIND_CYCLE[(hashSeed(options.seed) + offset) % EXERCISE_KIND_CYCLE.length]
   );
   const remaining = [...ranked];
+  const formatAttempts = EXERCISE_KIND_CYCLE.reduce<Record<Exercise['kind'], number>>(
+    (totals, kind) => {
+      totals[kind] = pool
+        .filter(exercise => exercise.kind === kind)
+        .reduce(
+          (sum, exercise) => sum + (options.memory[exercise.id]?.attempts ?? 0),
+          0
+        );
+      return totals;
+    },
+    { choice: 0, multi: 0, boolean: 0, order: 0, match: 0, blank: 0 }
+  );
+  const sessionKindCounts: Record<Exercise['kind'], number> = {
+    choice: 0,
+    multi: 0,
+    boolean: 0,
+    order: 0,
+    match: 0,
+    blank: 0,
+  };
   const orderedTargets = targetKinds
     .map((kind, order) => ({
       kind,
@@ -247,17 +273,37 @@ function selectLessonExercises(
     }))
     .sort((a, b) => a.availability - b.availability || a.order - b.order);
   const balanced = orderedTargets.map(({ kind }) => {
-    const authoredIndex = remaining.findIndex(group =>
-      group.variants.some(
-        variant => variant.id === group.conceptId && variant.kind === kind
-      )
-    );
     const compatibleIndex = remaining.findIndex(group =>
       group.variants.some(variant => variant.kind === kind)
     );
-    const groupIndex = authoredIndex >= 0 ? authoredIndex : compatibleIndex;
+    const best = remaining[0];
+    const compatible = compatibleIndex >= 0 ? remaining[compatibleIndex] : null;
+    const groupIndex =
+      compatible &&
+      compatible.attempts === best.attempts &&
+      compatible.lastSeenAt === best.lastSeenAt
+        ? compatibleIndex
+        : 0;
     const [group] = remaining.splice(groupIndex >= 0 ? groupIndex : 0, 1);
-    return { group, kind };
+    const availableKinds = [...new Set(group.variants.map(variant => variant.kind))];
+    const selectedKind = availableKinds
+      .map(candidate => ({
+        kind: candidate,
+        variantAttempts: Math.min(
+          ...group.variants
+            .filter(variant => variant.kind === candidate)
+            .map(variant => options.memory[variant.id]?.attempts ?? 0)
+        ),
+      }))
+      .sort(
+        (a, b) =>
+          a.variantAttempts - b.variantAttempts ||
+          sessionKindCounts[a.kind] - sessionKindCounts[b.kind] ||
+          Number(a.kind !== kind) - Number(b.kind !== kind) ||
+          formatAttempts[a.kind] - formatAttempts[b.kind]
+      )[0].kind;
+    sessionKindCounts[selectedKind] += 1;
+    return { group, kind: selectedKind };
   });
 
   const selected = balanced.map(({ group, kind }) => {

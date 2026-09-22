@@ -26,6 +26,17 @@ export function expandExerciseVariants(exercise: Exercise): Exercise[] {
       : exercise.prompt;
     return [
       source,
+      {
+        ...common(
+          exercise,
+          `${exercise.id}::blank`,
+          'Complete com a resposta correta para o caso'
+        ),
+        kind: 'blank',
+        sentence: `${prompt} ___`,
+        answer: exercise.options[exercise.answer],
+        bank: exercise.options,
+      },
       ...exercise.options.map((option, index) => ({
         ...common(exercise, `${exercise.id}::option:${index}`, prompt),
         kind: 'boolean' as const,
@@ -66,8 +77,21 @@ export function expandExerciseVariants(exercise: Exercise): Exercise[] {
   }
 
   if (exercise.kind === 'order') {
+    const ordinalPairs = exercise.steps.map((step, index) => ({
+      left: `${index + 1}ª etapa`,
+      right: step,
+    }));
     return [
       source,
+      {
+        ...common(
+          exercise,
+          `${exercise.id}::sequence`,
+          `Relacione cada posição à etapa correta: ${exercise.prompt}`
+        ),
+        kind: 'match' as const,
+        pairs: ordinalPairs,
+      },
       {
         ...common(exercise, `${exercise.id}::first`, `Qual é a primeira etapa? ${exercise.prompt}`),
         kind: 'choice' as const,
@@ -89,6 +113,17 @@ export function expandExerciseVariants(exercise: Exercise): Exercise[] {
     const rights = exercise.pairs.map(pair => pair.right);
     return [
       source,
+      ...exercise.pairs.map((pair, index) => ({
+        ...common(
+          exercise,
+          `${exercise.id}::blank:${index}`,
+          'Complete a correspondência'
+        ),
+        kind: 'blank' as const,
+        sentence: `${pair.left} corresponde a ___`,
+        answer: pair.right,
+        bank: rights,
+      })),
       ...exercise.pairs.map((pair, index) => ({
         ...common(
           exercise,

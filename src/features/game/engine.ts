@@ -98,7 +98,7 @@ export function exerciseSpeech(exercise: Exercise): string | null {
     return exercise.scenario ? `${exercise.scenario} ${exercise.prompt}` : exercise.prompt;
   }
   if (exercise.kind === 'match') return exercise.prompt;
-  return exercise.prompt;
+  return null;
 }
 
 /** Human readable correct answer, used by the feedback sheet when the student misses. */

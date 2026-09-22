@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Check, Gem, Heart, Sparkles, Target, TrendingUp, Zap } from '../../../icons';
-import { CharacterAvatar, guide, hostFor } from '../characters';
+import { CharacterAvatar, CharacterSay, guide, hostFor } from '../characters';
 import { levelTitle } from '../engine';
 import { feedback } from '../sound';
 import type { LessonOutcome, LessonReward } from '../types';
@@ -23,20 +23,51 @@ const headlineFor = (reward: LessonReward, accuracy: number) => {
   return 'Concluída — e agora você sabe onde apertar';
 };
 
-const Stat: React.FC<{ icon: React.ElementType; label: string; value: string; tone?: string }> = ({
-  icon: Icon,
-  label,
-  value,
-  tone = 'text-[var(--neo)]',
-}) => (
-  <div className="flex-1 rounded-[20px] bg-[#f5f5f7] px-4 py-4 text-center">
-    <span className={`mx-auto flex h-8 w-8 items-center justify-center ${tone}`}>
-      <Icon size={20} />
-    </span>
-    <p className="mt-1 text-[22px] font-semibold tabular-nums tracking-[-0.02em] text-[var(--neo-ink)]">
+/** Counts from 0 to `target` in ~0.9 s, like the XP tally on a results screen. */
+function useCountUp(target: number, delayMs = 0): number {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (target <= 0) {
+      setValue(0);
+      return undefined;
+    }
+    let frame = 0;
+    let start = 0;
+    const duration = 900;
+    const tick = (now: number) => {
+      if (!start) start = now;
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setValue(Math.round(target * eased));
+      if (t < 1) frame = window.requestAnimationFrame(tick);
+    };
+    const timer = window.setTimeout(() => {
+      frame = window.requestAnimationFrame(tick);
+    }, delayMs);
+    return () => {
+      window.clearTimeout(timer);
+      window.cancelAnimationFrame(frame);
+    };
+  }, [delayMs, target]);
+  return value;
+}
+
+const Stat: React.FC<{
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  color: string;
+  delay?: number;
+}> = ({ icon: Icon, label, value, color, delay = 0 }) => (
+  <div
+    className="game-stat game-pop"
+    style={{ '--stat': color, animationDelay: `${delay}ms` } as React.CSSProperties}
+  >
+    <p className="game-stat-label">{label}</p>
+    <p className="game-stat-value">
+      <Icon size={18} />
       {value}
     </p>
-    <p className="mt-0.5 text-[12px] text-[var(--neo-gray)]">{label}</p>
   </div>
 );
 
@@ -52,6 +83,9 @@ export const LessonComplete: React.FC<LessonCompleteProps> = ({
   const accuracy = outcome.total > 0 ? outcome.correct / outcome.total : 0;
   const seconds = Math.round(outcome.elapsedMs / 1000);
   const host = hostFor(outcome.topic);
+  const xpShown = useCountUp(reward.xp, 250);
+  const accuracyShown = useCountUp(Math.round(accuracy * 100), 400);
+  const gemsShown = useCountUp(reward.gems, 550);
 
   useEffect(() => {
     feedback('complete', soundOn);
@@ -61,38 +95,39 @@ export const LessonComplete: React.FC<LessonCompleteProps> = ({
     <div className="fixed inset-0 z-[200] flex flex-col overflow-y-auto bg-white">
       <div className="mx-auto flex w-full max-w-[620px] flex-1 flex-col justify-center px-5 py-10 sm:px-6">
         <div className="game-pop text-center">
-          <CharacterAvatar id={host.id} mood="cheer" size={132} className="mx-auto" />
-          <p className="mt-2 text-[13px] font-medium uppercase tracking-[0.06em] text-[var(--neo)]">
-            {reward.perfect ? 'Sem erros' : 'Concluído'}
+          <CharacterAvatar id={host.id} mood="cheer" size={148} className="game-face-bounce mx-auto" />
+          <p className="mt-2 text-[13px] font-bold uppercase tracking-[0.1em] text-[#ffb400]">
+            {reward.perfect ? 'Sem erros' : 'Lição concluída'}
           </p>
-          <h2 className="mt-2 text-[32px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)] sm:text-[40px]">
+          <h2 className="mt-2 text-[34px] font-bold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)] sm:text-[42px]">
             {headlineFor(reward, accuracy)}
           </h2>
-          <p className="mx-auto mt-3 max-w-[34ch] text-[17px] leading-snug text-[var(--neo-gray)]">
-            {host.name}: “{reward.perfect ? host.lines.perfect : host.lines.done}”
-          </p>
-          <p className="mx-auto mt-2 max-w-[34ch] text-[15px] leading-snug text-[var(--neo-gray)]">
-            {reward.streakIncreased
-              ? `Ofensiva de ${reward.streak} ${reward.streak === 1 ? 'dia' : 'dias'} garantida hoje.`
-              : `Você acertou ${outcome.correct} de ${outcome.total} de primeira.`}
-          </p>
         </div>
 
-        <div className="mt-8 flex gap-3">
-          <Stat icon={TrendingUp} label="XP ganho" value={`+${reward.xp}`} />
+        <CharacterSay
+          className="mt-6"
+          character={host}
+          mood="cheer"
+          size={56}
+          anonymous
+          text={`${reward.perfect ? host.lines.perfect : host.lines.done} ${
+            reward.streakIncreased
+              ? `Ofensiva de ${reward.streak} ${reward.streak === 1 ? 'dia' : 'dias'} garantida hoje.`
+              : `Você acertou ${outcome.correct} de ${outcome.total} de primeira.`
+          }`}
+        />
+
+        <div className="mt-6 flex gap-3">
+          <Stat icon={TrendingUp} label="XP" value={`+${xpShown}`} color="#ffb400" delay={150} />
           <Stat
             icon={Target}
-            label="De primeira"
-            value={`${Math.round(accuracy * 100)}%`}
-            tone="text-[var(--game-right)]"
+            label="Acertos"
+            value={`${accuracyShown}%`}
+            color="var(--game-right)"
+            delay={300}
           />
-          <Stat
-            icon={Zap}
-            label="Combo máximo"
-            value={`x${outcome.bestCombo}`}
-            tone="text-[#ffb400]"
-          />
-          <Stat icon={Gem} label="Cristais" value={`+${reward.gems}`} tone="text-[#0a84ff]" />
+          <Stat icon={Zap} label="Combo" value={`x${outcome.bestCombo}`} color="#ff9500" delay={450} />
+          <Stat icon={Gem} label="Cristais" value={`+${gemsShown}`} color="#0a84ff" delay={600} />
         </div>
 
         <div className="mt-4 space-y-2">

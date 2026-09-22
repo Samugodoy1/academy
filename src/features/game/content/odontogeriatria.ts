@@ -1,115 +1,182 @@
 import type { ExerciseSeed } from '../types';
+import { choice, gap, multi, order, pairs, truth } from './authoring';
 
 export const GERI_EXERCISES: ExerciseSeed[] = [
-  {
-    id: 'geri-01',
-    kind: 'multi',
-    difficulty: 2,
-    prompt: 'Por que a lista completa de medicamentos deve ser revisada na consulta do paciente idoso?',
-    options: [
-      'Para identificar interações com medicamentos odontológicos.',
-      'Para reconhecer efeitos orais, risco de sangramento e sedação.',
-      'Para coordenar possíveis alterações com o prescritor, sem suspender tratamentos automaticamente.',
-      'Porque a polifarmácia elimina a necessidade de anamnese clínica.',
+  truth(
+    'geri-01',
+    'Perder dentes é consequência natural do envelhecimento.',
+    false,
+    'Dente se perde por doença (cárie, periodontite), não por idade. Idoso saudável pode manter os dentes a vida toda.'
+  ),
+  choice(
+    'geri-02',
+    'Qual tipo de cárie é típico do idoso?',
+    ['Cárie radicular', 'Cárie de fissura', 'Cárie precoce', 'Cárie de mamadeira'],
+    'Recessão expõe cemento, que é menos mineralizado e desmineraliza em pH mais alto que o esmalte.',
+    { difficulty: 1 }
+  ),
+  choice(
+    'geri-03',
+    'Qual material é boa escolha para restaurar cárie radicular?',
+    ['Ionômero de vidro', 'Amálgama', 'Cerâmica', 'Cimento de fosfato de zinco'],
+    'Adere à dentina úmida, libera flúor e tolera campo difícil. Ideal para margens em cemento.',
+    { difficulty: 2 }
+  ),
+  gap(
+    'geri-04',
+    'Para idosos de alto risco de cárie, pode-se prescrever dentifrício com ___ ppm de flúor.',
+    '5.000',
+    ['250', '500', '50.000'],
+    'Dentifrício de alta concentração, sob prescrição, reduz cárie radicular em quem tem boca seca ou recessão.',
+    3
+  ),
+  choice(
+    'geri-05',
+    'Causa mais comum de boca seca no idoso?',
+    ['Efeito de medicamentos', 'Envelhecimento das glândulas por si só', 'Falta de água', 'Prótese total'],
+    'Anti-hipertensivos, antidepressivos e anticolinérgicos secam a boca. Quanto mais remédios, mais seco.',
+    { difficulty: 1 }
+  ),
+  multi(
+    'geri-06',
+    'Manejo da hipossalivação?',
+    ['Hidratação frequente', 'Goma ou pastilha sem açúcar', 'Saliva artificial ou lubrificantes', 'Flúor de alta concentração'],
+    ['Bochecho com álcool', 'Balas com açúcar para estimular'],
+    'Estimular saliva onde existe, substituir onde não existe e proteger o dente do risco aumentado.',
+    { difficulty: 2 }
+  ),
+  truth(
+    'geri-07',
+    'A polpa do idoso responde menos ao teste de frio.',
+    true,
+    'Câmara reduzida por dentina secundária e menos fibras. Um teste negativo não fecha necrose; compare com outros dentes.',
+    2
+  ),
+  choice(
+    'geri-08',
+    'Qual é o diagnóstico mais provável?',
+    ['Estomatite por prótese (candidíase)', 'Alergia à resina', 'Carcinoma de palato', 'Queimadura'],
+    'Prótese que não sai à noite e não é limpa vira ninho de Candida. Tratar a prótese, não só a mucosa.',
+    { scenario: 'Mucosa vermelha exatamente na área coberta pela prótese total superior; paciente dorme com ela.', difficulty: 1 }
+  ),
+  multi(
+    'geri-09',
+    'Orientações de higiene da prótese total?',
+    ['Escovar com escova própria e sabão neutro', 'Retirar para dormir', 'Deixar imersa em solução adequada durante a noite'],
+    ['Escovar com dentifrício abrasivo', 'Ferver a prótese semanalmente'],
+    'Dentifrício risca a resina e acumula mais biofilme. Água fervente deforma. Simples e diário funciona.',
+    { difficulty: 1 }
+  ),
+  choice(
+    'geri-10',
+    'Tecido mole redundante na região do rebordo, em volta da borda da prótese. Hipótese?',
+    ['Hiperplasia fibrosa por prótese mal adaptada', 'Carcinoma', 'Torus', 'Mucocele'],
+    'A borda machuca, o tecido cresce. Ajustar ou refazer a prótese; remover o excesso se não regredir.',
+    { difficulty: 2 }
+  ),
+  choice(
+    'geri-11',
+    'Bisfosfonato oral para osteoporose há 2 anos e precisa extrair um dente. Risco de osteonecrose?',
+    ['Baixo, mas exige informar e planejar', 'Muito alto; contraindicação absoluta', 'Zero', 'Só existe com dose intravenosa'],
+    'Oral por pouco tempo: risco baixo. Intravenoso oncológico: alto. Em ambos, técnica atraumática e acompanhamento.',
+    { difficulty: 3 }
+  ),
+  truth(
+    'geri-12',
+    'O exame das mucosas deve fazer parte de toda consulta do idoso.',
+    true,
+    'Câncer de boca é mais frequente após os 60 anos e começa sem dor. Quem olha encontra cedo.',
+    1
+  ),
+  choice(
+    'geri-13',
+    'Ao levantar da cadeira, o idoso fica tonto. O que fazer?',
+    ['Levantar em etapas e aguardar sentado antes de ficar em pé', 'Levantar rápido para melhorar a circulação', 'Deitar por 1 hora', 'Dar café'],
+    'Hipotensão ortostática é comum com anti-hipertensivos. Subir a cadeira devagar previne queda.',
+    { difficulty: 1 }
+  ),
+  choice(
+    'geri-14',
+    'Como se comunicar com um paciente com demência leve?',
+    ['Frases curtas, uma instrução por vez, com o cuidador presente', 'Falar alto e rápido', 'Explicar só ao cuidador', 'Evitar falar durante o atendimento'],
+    'Respeito e simplicidade. O paciente ainda participa; o cuidador complementa e leva as orientações para casa.',
+    { difficulty: 2 }
+  ),
+  truth(
+    'geri-15',
+    'Higiene oral reduz o risco de pneumonia aspirativa em idosos frágeis.',
+    true,
+    'Biofilme oral vai para o pulmão com a aspiração. Boca limpa salva vidas em instituições e hospitais.',
+    2
+  ),
+  gap(
+    'geri-16',
+    'O uso de muitos medicamentos ao mesmo tempo chama-se ___.',
+    'polifarmácia',
+    ['automedicação', 'hipofarmácia', 'fitoterapia'],
+    'Mais remédios, mais interações e mais boca seca. Conciliar a lista antes de prescrever qualquer coisa.',
+    1
+  ),
+  choice(
+    'geri-17',
+    'Diabético idoso em uso de insulina. Melhor horário para a consulta?',
+    ['Pela manhã, após o café e a medicação habitual', 'Em jejum, cedo', 'Fim da tarde sem lanche', 'Não importa'],
+    'Evita hipoglicemia na cadeira. Pergunte se comeu e se tomou o remédio antes de começar.',
+    { difficulty: 2 }
+  ),
+  choice(
+    'geri-18',
+    'Por que a dentina do idoso é menos sensível ao preparo?',
+    ['Dentina esclerótica com túbulos obliterados', 'Ausência de polpa', 'Esmalte mais espesso', 'Menos flúor'],
+    'Túbulos fechados por mineral conduzem menos estímulo. A cor mais amarelada vem daí também.',
+    { difficulty: 2 }
+  ),
+  multi(
+    'geri-19',
+    'Adaptações úteis no atendimento do idoso frágil?',
+    ['Sessões mais curtas', 'Posição da cadeira menos inclinada', 'Instruções por escrito para o cuidador'],
+    ['Sempre sedação', 'Ignorar a lista de remédios'],
+    'Menos tempo, mais conforto e comunicação clara. Isso melhora a adesão e reduz emergências.',
+    { difficulty: 1 }
+  ),
+  pairs(
+    'geri-20',
+    'Relacione o achado à orientação',
+    [
+      ['Boca seca', 'Revisar medicamentos e usar substitutos de saliva'],
+      ['Cárie radicular', 'Ionômero e flúor de alta concentração'],
+      ['Estomatite por prótese', 'Higiene da prótese e retirar à noite'],
+      ['Hiperplasia por prótese', 'Ajustar ou refazer a prótese'],
     ],
-    answers: [0, 1, 2],
-    explanation: 'Medicamentos prescritos, isentos de receita e fitoterápicos podem modificar a saúde oral e a segurança do atendimento.',
-  },
-  {
-    id: 'geri-02',
-    kind: 'choice',
-    difficulty: 2,
-    prompt: 'Qual alternativa diferencia corretamente xerostomia e hipossalivação?',
-    options: [
-      'Xerostomia é sensação subjetiva de boca seca; hipossalivação é redução objetiva do fluxo salivar, e uma pode ocorrer sem a outra.',
-      'São sinônimos obrigatórios e só podem ser diagnosticados por radiografia.',
-      'Xerostomia é aumento de saliva causado exclusivamente pelo envelhecimento.',
-      'Hipossalivação não influencia cárie, mucosa ou retenção de próteses.',
-    ],
-    answer: 0,
-    explanation: 'Medicamentos são causa frequente. A hipossalivação aumenta risco de cárie, inclusive radicular, enquanto xerostomia afeta conforto e função.',
-  },
-  {
-    id: 'geri-03',
-    kind: 'boolean',
-    difficulty: 1,
-    prompt: 'Avalie o risco de cárie radicular.',
-    statement: 'Exposição radicular, biofilme, dieta cariogênica e redução salivar podem aumentar o risco de cárie de raiz.',
-    answer: true,
-    explanation: 'A prevenção deve ser individualizada e pode incluir higiene assistida, controle dietético, fluoretos e acompanhamento segundo o risco.',
-  },
-  {
-    id: 'geri-04',
-    kind: 'multi',
-    difficulty: 2,
-    prompt: 'Quais fatores devem orientar a adaptação das instruções de higiene oral?',
-    options: [
-      'Destreza manual, visão e capacidade de compreender e executar a técnica.',
-      'Grau de dependência e disponibilidade de apoio.',
-      'Preferências, rotina e recursos do paciente.',
-      'A exigência de usar a mesma técnica para todas as pessoas.',
-    ],
-    answers: [0, 1, 2],
-    explanation: 'Escovas adaptadas ou elétricas, recursos interproximais e apoio de cuidador podem ser necessários, preservando a participação do paciente.',
-  },
-  {
-    id: 'geri-05',
-    kind: 'choice',
-    difficulty: 2,
-    prompt: 'Qual orientação é mais adequada para uma prótese removível?',
-    options: [
-      'Higienizar prótese e tecidos orais diariamente, removê-la durante o sono em regra e realizar acompanhamento periódico.',
-      'Mantê-la continuamente na boca para impedir qualquer alteração do rebordo.',
-      'Usar dentifrício muito abrasivo para remover desgaste e riscos.',
-      'Procurar avaliação apenas quando a prótese quebrar.',
-    ],
-    answer: 0,
-    explanation: 'Uso contínuo e biofilme favorecem estomatite protética e trauma. Armazenamento e produtos de limpeza devem seguir o material e a orientação profissional.',
-  },
-  {
-    id: 'geri-06',
-    kind: 'boolean',
-    difficulty: 3,
-    prompt: 'Avalie o cuidado de uma pessoa com alteração cognitiva.',
-    statement: 'A presença de alteração cognitiva impede qualquer tratamento odontológico e transfere automaticamente todas as decisões ao cuidador.',
-    answer: false,
-    explanation: 'É necessário avaliar capacidade decisória, adaptar a comunicação e usar decisão apoiada quando indicada, preservando autonomia, preferências, consentimento e segurança.',
-  },
-  {
-    id: 'geri-07',
-    kind: 'blank',
-    difficulty: 2,
-    prompt: 'Complete a frase',
-    sentence: 'Em pessoas idosas, maior carga farmacológica ___ pode contribuir para redução salivar e sensação de boca seca.',
-    answer: 'anticolinérgica',
-    bank: ['anticolinérgica', 'antiagregante', 'anticoagulante', 'hipoglicemiante'],
-    explanation: 'Medicamentos com efeitos anticolinérgicos podem reduzir a secreção salivar. A revisão deve considerar o efeito cumulativo, sem suspender ou alterar tratamentos sem coordenação com o prescritor.',
-  },
-  {
-    id: 'geri-08',
-    kind: 'order',
-    difficulty: 1,
-    prompt: 'Ordene a higiene noturna de uma prótese total removível',
-    steps: [
-      'Remover a prótese sobre uma pia protegida ou recipiente com água',
-      'Enxaguar para retirar resíduos soltos',
-      'Escovar todas as superfícies com escova e produto não abrasivo apropriados',
-      'Deixar a prótese fora da boca durante o sono e armazená-la conforme o material',
-      'Enxaguar antes de recolocá-la pela manhã',
-    ],
-    explanation: 'A remoção noturna reduz o contato contínuo da mucosa com a prótese. Produtos e armazenamento devem ser compatíveis com o material, e os tecidos orais também precisam de higiene diária.',
-  },
-  {
-    id: 'geri-09',
-    kind: 'match',
-    difficulty: 2,
-    prompt: 'Relacione o achado geriátrico com uma implicação para o cuidado odontológico',
-    pairs: [
-      { left: 'Hipossalivação', right: 'Maior risco de cárie radicular e dificuldade com próteses' },
-      { left: 'Disfagia', right: 'Necessidade de reduzir risco de aspiração durante o atendimento' },
-      { left: 'Comprometimento cognitivo', right: 'Comunicação adaptada e avaliação da capacidade decisória' },
-      { left: 'Destreza manual reduzida', right: 'Indicação de dispositivos de higiene adaptados ou apoio do cuidador' },
-    ],
-    explanation: 'O plano deve integrar função, cognição, autonomia, comorbidades e suporte disponível. Idade cronológica isolada não define capacidade nem contraindica tratamento.',
-  },
+    'Os problemas mais comuns do idoso têm condutas simples e bem definidas.',
+    2
+  ),
+  truth(
+    'geri-21',
+    'Idoso com capacidade de decisão preservada pode consentir sozinho ao tratamento.',
+    true,
+    'Idade não tira autonomia. O cuidador participa quando o paciente quer ou quando a capacidade está comprometida.',
+    1
+  ),
+  choice(
+    'geri-22',
+    'Prótese total antiga com dentes muito gastos. Consequência provável?',
+    ['Redução da dimensão vertical e queilite angular', 'Aumento da dimensão vertical', 'Fluorose', 'Cárie radicular'],
+    'Dente gasto fecha a boca demais; a comissura dobra e fica úmida, favorecendo Candida.',
+    { difficulty: 2 }
+  ),
+  order(
+    'geri-23',
+    'Ordene a consulta inicial do idoso',
+    ['Revisar lista completa de medicamentos e doenças', 'Aferir pressão e perguntar sobre alimentação do dia', 'Examinar mucosas, dentes, próteses e saliva', 'Priorizar dor, infecção e função mastigatória', 'Combinar plano com paciente e cuidador'],
+    'A boca do idoso é lida junto com a saúde geral. O plano precisa caber na vida dele.',
+    { difficulty: 2 }
+  ),
+  choice(
+    'geri-24',
+    'Raiz residual assintomática em idoso sob prótese total. Conduta?',
+    ['Avaliar clínica e radiograficamente; remover se houver infecção ou interferir na prótese', 'Extrair sempre, imediatamente', 'Ignorar sem exame', 'Fazer canal'],
+    'Nem toda raiz precisa sair. Risco cirúrgico versus benefício, com o paciente na decisão.',
+    { difficulty: 3 }
+  ),
 ];

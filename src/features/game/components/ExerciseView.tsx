@@ -23,8 +23,8 @@ export interface ExerciseViewProps {
 
 function toneFor(locked: boolean, selected: boolean, correct: boolean) {
   if (!locked) return selected ? 'game-tile-selected' : '';
-  if (correct) return 'game-tile-right';
-  if (selected) return 'game-tile-wrong';
+  if (correct) return selected ? 'game-tile-right game-bounce' : 'game-tile-right';
+  if (selected) return 'game-tile-wrong game-shake';
   return 'game-tile-ghost';
 }
 
@@ -282,9 +282,9 @@ const BlankView: React.FC<ExerciseViewProps & { exercise: BlankExercise }> = ({
               className={`game-chip ${
                 locked
                   ? isAnswer
-                    ? 'border-[var(--game-right)] bg-[var(--game-right-wash)] text-[var(--game-right-ink)]'
+                    ? `border-[var(--game-right)] bg-[var(--game-right-wash)] text-[var(--game-right-ink)] ${isSelected ? 'game-bounce' : ''}`
                     : isSelected
-                      ? 'border-[var(--game-wrong)] bg-[var(--game-wrong-wash)] text-[var(--game-wrong-ink)]'
+                      ? 'border-[var(--game-wrong)] bg-[var(--game-wrong-wash)] text-[var(--game-wrong-ink)] game-shake'
                       : 'opacity-40'
                   : isSelected
                     ? 'border-[var(--neo)] bg-[var(--neo-wash)] text-[var(--neo)]'
@@ -367,7 +367,7 @@ const MatchView: React.FC<ExerciseViewProps & { exercise: MatchExercise }> = ({
                   setActiveLeft(activeLeft === left ? null : left);
                 }}
                 className={`game-tile min-h-[64px] text-[14px] ${
-                  done ? 'game-tile-right' : activeLeft === left ? 'game-tile-selected' : ''
+                  done ? 'game-tile-right game-bounce' : activeLeft === left ? 'game-tile-selected' : ''
                 }`}
               >
                 {left}
@@ -384,7 +384,7 @@ const MatchView: React.FC<ExerciseViewProps & { exercise: MatchExercise }> = ({
                 type="button"
                 disabled={done || locked}
                 onClick={() => tapRight(right)}
-                className={`game-tile min-h-[64px] text-[14px] ${done ? 'game-tile-right' : ''} ${
+                className={`game-tile min-h-[64px] text-[14px] ${done ? 'game-tile-right game-bounce' : ''} ${
                   missPair === right ? 'game-tile-wrong game-shake' : ''
                 }`}
               >

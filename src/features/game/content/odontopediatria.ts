@@ -1,178 +1,182 @@
 import type { ExerciseSeed } from '../types';
+import { choice, gap, multi, order, pairs, truth } from './authoring';
 
 export const ODONTOPEDIATRIA_EXERCISES: ExerciseSeed[] = [
-  {
-    id: 'odped-01',
-    kind: 'choice',
-    difficulty: 1,
-    prompt: 'Qual é a técnica de manejo descrita?',
-    scenario:
-      'Você explica o sugador com palavras simples, mostra funcionando na mão da criança e só então usa na boca.',
-    options: ['Dizer-mostrar-fazer', 'Controle de voz', 'Distração', 'Reforço negativo'],
-    answer: 0,
-    explanation:
-      'Dizer-mostrar-fazer familiariza a criança com o procedimento e pode reduzir ansiedade relacionada ao desconhecido.',
-  },
-  {
-    id: 'odped-02',
-    kind: 'boolean',
-    difficulty: 1,
-    prompt: 'Verdadeiro ou falso?',
-    statement:
-      'Em crianças, a dose máxima do anestésico deve considerar o peso, o limite absoluto e a condição clínica.',
-    answer: true,
-    explanation:
-      'O cálculo em mg/kg evita uma dose padronizada inadequada, mas representa um teto. Devem-se considerar massa corporal, condição médica, limite absoluto e a menor dose eficaz.',
-  },
-  {
-    id: 'odped-03',
-    kind: 'choice',
-    difficulty: 3,
-    prompt: 'Qual é a conduta?',
-    scenario:
-      'Molar decíduo com cárie extensa, mobilidade e sucessor permanente já próximo na radiografia.',
-    options: [
-      'Realizar tratamento endodôntico independentemente da reabsorção e da restaurabilidade',
-      'Avaliar restaurabilidade, infecção e reabsorção; extrair se não restaurável ou próximo da esfoliação',
-      'Restaurar com resina e liberar',
-      'Ignorar, porque vai cair sozinho de qualquer forma',
+  choice(
+    'ped-01',
+    'Qual é o primeiro dente decíduo a erupcionar?',
+    ['Incisivo central inferior', 'Incisivo central superior', 'Primeiro molar', 'Canino'],
+    'Por volta dos 6 meses, os centrais inferiores abrem a dentição decídua.',
+    { difficulty: 1 }
+  ),
+  choice(
+    'ped-02',
+    'Qual é o primeiro dente permanente a erupcionar?',
+    ['Primeiro molar', 'Incisivo central superior', 'Canino', 'Segundo molar'],
+    'Aos 6 anos o primeiro molar nasce atrás dos decíduos, sem trocar nenhum dente. Muitos pais acham que é de leite.',
+    { difficulty: 1 }
+  ),
+  gap(
+    'ped-03',
+    'A dentição decídua completa tem ___ dentes.',
+    '20',
+    ['24', '28', '32'],
+    'Cinco por quadrante: dois incisivos, um canino e dois molares. Não há pré-molares decíduos.',
+    1
+  ),
+  truth(
+    'ped-04',
+    'A primeira consulta odontológica deve acontecer até o primeiro ano de vida.',
+    true,
+    'Ao nascer o primeiro dente ou até 12 meses: orientar dieta, higiene e flúor antes da doença aparecer.'
+  ),
+  pairs(
+    'ped-05',
+    'Relacione a técnica de manejo à descrição',
+    [
+      ['Falar-mostrar-fazer', 'Explica, demonstra e só então executa'],
+      ['Reforço positivo', 'Elogia o comportamento desejado'],
+      ['Distração', 'Desvia a atenção durante o procedimento'],
+      ['Controle de voz', 'Muda tom e volume para ganhar atenção'],
     ],
-    answer: 1,
-    explanation:
-      'A decisão depende de sintomas, infecção, restaurabilidade, reabsorção radicular e tempo até a esfoliação. Um dente não restaurável ou com infecção e esfoliação próxima pode exigir extração; um dente funcional por mais tempo pode receber terapia pulpar e restauração quando indicadas.',
-  },
-  {
-    id: 'odped-04',
-    kind: 'blank',
-    difficulty: 2,
-    prompt: 'Complete a frase',
-    sentence: 'A dentição decídua completa tem ___ dentes.',
-    answer: '20',
-    bank: ['20', '24', '28', '32'],
-    explanation:
-      'A dentição decídua completa possui 20 dentes, distribuídos em cinco por hemiarco.',
-  },
-  {
-    id: 'odped-05',
-    kind: 'choice',
-    difficulty: 2,
-    prompt: 'A criança não tolera um procedimento eletivo apesar das técnicas comunicativas. Qual é a conduta?',
-    options: [
-      'Usar contenção sem consentimento para concluir todo o tratamento',
-      'Interromper com segurança, reavaliar urgência e planejar adaptação, sedação ou encaminhamento',
-      'Dispensar sem nenhuma orientação',
-      'Repetir o mesmo procedimento até dar certo',
-    ],
-    answer: 1,
-    explanation:
-      'Em tratamento eletivo, pode-se adiar ou usar medidas provisórias após avaliar risco e benefício. Estabilização protetora é reservada a situações selecionadas, com indicação, consentimento, técnica segura e documentação.',
-  },
-  {
-    id: 'odped-06',
-    kind: 'match',
-    difficulty: 3,
-    prompt: 'Relacione o procedimento com a indicação',
-    pairs: [
-      {
-        left: 'ART',
-        right: 'Lesão cavitada acessível quando a abordagem manual com ionômero é apropriada',
-      },
-      { left: 'Selante', right: 'Fóssulas e fissuras com risco ou lesão não cavitada' },
-      {
-        left: 'Pulpotomia',
-        right: 'Polpa radicular vital e saudável após remoção da polpa coronária',
-      },
-      {
-        left: 'Mantenedor de espaço',
-        right: 'Perda precoce com risco individual de redução do espaço',
-      },
-    ],
-    explanation:
-      'A indicação depende do diagnóstico, da restaurabilidade, da cronologia de erupção e da cooperação. Nenhum desses procedimentos é indicado apenas pela idade.',
-  },
-  {
-    id: 'odped-07',
-    kind: 'multi',
-    difficulty: 2,
-    prompt: 'Selecione o que deve ser abordado no planejamento com a criança e o responsável',
-    options: [
-      'Consentimento informado registrado',
-      'Assentimento da criança quando ela puder participar',
-      'Orientação de dieta e higiene',
-      'Explicação do que será feito hoje',
-      'Nota da prova do aluno',
-      'Sinais de alerta e como retornar',
-    ],
-    answers: [0, 1, 2, 3, 5],
-    explanation:
-      'O responsável fornece consentimento, e a criança deve participar da decisão de modo compatível com sua maturidade. Plano, autocuidado, riscos e acesso ao retorno precisam ser compreendidos.',
-  },
-  {
-    id: 'odped-08',
-    kind: 'boolean',
-    difficulty: 2,
-    prompt: 'Verdadeiro ou falso?',
-    statement: 'Cárie em dente decíduo não precisa de tratamento porque o dente vai cair.',
-    answer: false,
-    explanation:
-      'Cárie em dente decíduo pode causar dor, infecção, perda de espaço e, em casos graves, afetar o sucessor permanente. A intervenção é escolhida conforme atividade, extensão e risco.',
-  },
-  {
-    id: 'odped-09',
-    kind: 'choice',
-    difficulty: 3,
-    prompt: 'Qual é a conduta imediata?',
-    scenario: 'Criança de 8 anos chega com avulsão do incisivo central permanente há 30 minutos, dente em leite.',
-    options: [
-      'Descartar o dente e planejar prótese',
-      'Manusear pela coroa, reimplantar rapidamente e seguir protocolo de contenção e acompanhamento',
-      'Lavar o dente escovando a raiz antes de reimplantar',
-      'Aguardar 24 horas para avaliar',
-    ],
-    answer: 1,
-    explanation:
-      'O tempo extra-alveolar e o meio de armazenamento influenciam o prognóstico. O dente deve ser segurado pela coroa e, se sujo, enxaguado suavemente sem esfregar a raiz; após reimplante, indicam-se contenção flexível, avaliação de tétano e antibiótico conforme protocolo e acompanhamento pulpar.',
-  },
-  {
-    id: 'odped-10',
-    kind: 'order',
-    difficulty: 2,
-    prompt: 'Ordene a primeira consulta infantil',
-    steps: [
-      'Acolher criança e responsável',
-      'Anamnese com o responsável',
-      'Exame clínico adaptado à idade',
-      'Procedimento preventivo ou terapêutico curto, se necessário e tolerado',
-      'Reforço positivo e combinação do retorno',
-    ],
-    explanation:
-      'A primeira consulta deve priorizar avaliação, prevenção e construção de confiança. Um procedimento não é obrigatório quando não houver necessidade ou tolerância.',
-  },
-  {
-    id: 'odped-11',
-    kind: 'blank',
-    difficulty: 3,
-    prompt: 'Complete a frase',
-    sentence: 'A perda precoce de um decíduo pode exigir um ___ de espaço.',
-    answer: 'mantenedor',
-    bank: ['mantenedor', 'expansor', 'contentor', 'levantador'],
-    explanation:
-      'A indicação depende do dente perdido, idade, estágio de erupção, espaço existente e oclusão. Nem toda perda precoce exige mantenedor.',
-  },
-  {
-    id: 'odped-12',
-    kind: 'choice',
-    difficulty: 2,
-    prompt: 'Qual orientação de higiene é a correta?',
-    scenario: 'Mãe de criança de 4 anos pergunta como escovar os dentes do filho.',
-    options: [
-      'Deixar a criança escovar sozinha, sem supervisão',
-      'Escovação pelo adulto, duas vezes ao dia, com uma ervilha de dentifrício fluoretado',
-      'Usar apenas água até os 7 anos',
-      'Escovar uma vez por semana',
-    ],
-    answer: 1,
-    explanation:
-      'Aos 4 anos, recomenda-se dentifrício com pelo menos 1.000 ppm de fluoreto em quantidade do tamanho de uma ervilha, com um adulto realizando ou completando a escovação e reduzindo a deglutição.',
-  },
+    'Manejo é técnica, não improviso. Combinar as ferramentas evita a maior parte dos "não abre a boca".',
+    1
+  ),
+  truth(
+    'ped-06',
+    'A técnica de mão sobre a boca é recomendada para crianças que choram.',
+    false,
+    'Técnicas aversivas não são recomendadas. Comunicação, distração e, se preciso, sedação são as alternativas.',
+    2
+  ),
+  choice(
+    'ped-07',
+    'Qual é o tratamento indicado?',
+    ['Pulpotomia', 'Pulpectomia', 'Extração', 'Restauração sem tratar a polpa'],
+    'Polpa coronária exposta por cárie, sem sinais de necrose e com raiz sadia: remove a coroa da polpa e preserva a radicular.',
+    { scenario: 'Molar decíduo com exposição pulpar por cárie, sem dor espontânea, sem fístula, sem lesão radicular.', difficulty: 2 }
+  ),
+  choice(
+    'ped-08',
+    'Qual material NÃO se usa para obturar canal de decíduo?',
+    ['Guta-percha', 'Pasta de óxido de zinco e eugenol', 'Pasta iodoformada', 'Pasta reabsorvível à base de hidróxido de cálcio'],
+    'A raiz do decíduo reabsorve; a obturação precisa reabsorver junto. Guta-percha ficaria no osso.',
+    { difficulty: 3 }
+  ),
+  choice(
+    'ped-09',
+    'Qual restauração para molar decíduo após pulpotomia?',
+    ['Coroa de aço', 'Resina classe I pequena', 'Selante', 'Nenhuma'],
+    'Dente sem polpa coronária e com pouca estrutura fratura fácil. Coroa de aço sela e protege até a esfoliação.',
+    { difficulty: 2 }
+  ),
+  gap(
+    'ped-10',
+    'Na técnica de ___, a coroa de aço é cimentada sobre a cárie sem remover tecido cariado.',
+    'Hall',
+    ['Black', 'Kennedy', 'Winter'],
+    'Selar a cárie isola as bactérias do açúcar e a lesão para. Sem anestesia, sem broca, boa evidência em decíduos.',
+    3
+  ),
+  choice(
+    'ped-11',
+    'Perda precoce do 75 aos 6 anos. Conduta?',
+    ['Mantenedor de espaço', 'Nada, o permanente vai nascer', 'Extrair o 85 também para simetria', 'Prótese fixa'],
+    'Sem o decíduo, o molar permanente migra para mesial e o pré-molar perde espaço. Banda-alça resolve.',
+    { difficulty: 2 }
+  ),
+  choice(
+    'ped-12',
+    'Dente decíduo avulsionado. Conduta?',
+    ['Não reimplantar; acompanhar', 'Reimplantar imediatamente', 'Reimplantar após 1 hora em leite', 'Colocar prótese fixa'],
+    'Reimplantar pode lesar o germe do permanente. Orientar, controlar e acompanhar a erupção.',
+    { difficulty: 2 }
+  ),
+  truth(
+    'ped-13',
+    'Molares decíduos têm câmara pulpar grande e esmalte fino.',
+    true,
+    'Por isso a cárie chega rápido à polpa e o preparo precisa ser conservador.',
+    1
+  ),
+  multi(
+    'ped-14',
+    'Quais fatores causam cárie precoce da infância?',
+    ['Mamadeira adoçada à noite', 'Ausência de escovação com flúor', 'Amamentação noturna livre após a erupção sem higiene'],
+    ['Uso de chupeta', 'Dentes que nasceram cedo'],
+    'Açúcar frequente, especialmente à noite, sem flúor. O manejo é dieta, higiene e flúor, não só restaurar.',
+    { difficulty: 1 }
+  ),
+  choice(
+    'ped-15',
+    'Quantidade de dentifrício fluoretado para criança de 4 anos?',
+    ['Grão de ervilha', 'Grão de arroz', 'Toda a escova', 'Nenhuma, só água'],
+    'Ervilha dos 3 aos 6 anos, com o adulto escovando ou supervisionando. Cuspir sem enxaguar demais.',
+    { difficulty: 1 }
+  ),
+  truth(
+    'ped-16',
+    'Os pais devem escovar ou supervisionar a escovação até cerca de 7 a 8 anos.',
+    true,
+    'Antes disso a criança não tem coordenação fina para limpar bem. Deixar "só ela" é deixar cárie.',
+    1
+  ),
+  choice(
+    'ped-17',
+    'Chupeta até que idade costuma não deixar sequela?',
+    ['Cerca de 3 anos', '6 anos', '10 anos', 'Qualquer idade'],
+    'Hábito removido antes dos 3 anos costuma permitir autocorreção da mordida aberta anterior.',
+    { difficulty: 2 }
+  ),
+  choice(
+    'ped-18',
+    'Anestésico contraindicado em criança de 3 anos?',
+    ['Articaína', 'Lidocaína', 'Mepivacaína', 'Prilocaína'],
+    'Articaína não tem segurança estabelecida abaixo de 4 anos. A lidocaína 2% é a escolha padrão em pediatria.',
+    { difficulty: 3 }
+  ),
+  gap(
+    'ped-19',
+    'Após bloqueio inferior em criança, oriente os pais sobre o risco de ___ do lábio.',
+    'mordedura',
+    ['queimadura', 'fratura', 'descoloração'],
+    'Lábio dormente é brinquedo para criança. Aviso simples evita ferida grande.',
+    1
+  ),
+  order(
+    'ped-20',
+    'Ordene a erupção dos dentes decíduos',
+    ['Incisivos centrais', 'Incisivos laterais', 'Primeiros molares', 'Caninos', 'Segundos molares'],
+    'O canino nasce depois do primeiro molar: uma das pegadinhas clássicas. Tudo completo por volta dos 2 anos e meio.',
+    { difficulty: 2 }
+  ),
+  choice(
+    'ped-21',
+    'Qual é a conduta?',
+    ['Radiografar para ver a direção da intrusão e acompanhar', 'Extrair imediatamente', 'Reposicionar com fórceps', 'Colocar contenção rígida por 3 meses'],
+    'Se a raiz foi para vestibular (longe do germe), pode reerupcionar. Se foi para o germe, extrair.',
+    { scenario: 'Criança de 2 anos com intrusão do 51 após queda.', difficulty: 3 }
+  ),
+  truth(
+    'ped-24',
+    'Selante é indicado em primeiros molares permanentes de crianças com risco de cárie.',
+    true,
+    'Fissura profunda em dente recém-erupcionado é onde a cárie começa. Selar cedo, em quem tem risco, protege.',
+    1
+  ),
+  choice(
+    'ped-22',
+    'Qual sinal indica necrose em molar decíduo?',
+    ['Fístula ou abscesso na gengiva', 'Dor ao frio que passa rápido', 'Mancha branca na vestibular', 'Mobilidade fisiológica por esfoliação'],
+    'Fístula, edema e radiolucidez interradicular indicam necrose: pulpectomia ou extração, não pulpotomia.',
+    { difficulty: 2 }
+  ),
+  multi(
+    'ped-23',
+    'O que dizer à mãe após uma restauração em criança de 5 anos?',
+    ['Cuidado para não morder o lábio dormente', 'Evitar alimentos duros até passar a anestesia', 'Continuar a escovação normalmente'],
+    ['Não escovar o dente restaurado por 1 semana', 'Dar bala para acalmar'],
+    'Orientação clara para quem cuida em casa é parte do tratamento.',
+    { difficulty: 1 }
+  ),
 ];

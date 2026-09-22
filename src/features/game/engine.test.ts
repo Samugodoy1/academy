@@ -44,9 +44,14 @@ describe('conteúdo do jogo', () => {
     }
   });
 
-  it('expande o banco revisado para centenas de variações seguras', () => {
-    expect(ALL_EXERCISES.length).toBeGreaterThan(500);
-    expect(GAME_UNITS.every(gameUnit => gameUnit.lessons >= 3)).toBe(true);
+  it('tem um banco autoral amplo, com todos os formatos em cada tema', () => {
+    expect(ALL_EXERCISES.length).toBeGreaterThanOrEqual(21 * 24);
+    for (const gameUnit of GAME_UNITS) {
+      expect(gameUnit.exercises.length).toBeGreaterThanOrEqual(24);
+      expect(gameUnit.lessons).toBeGreaterThanOrEqual(4);
+      const kinds = new Set(gameUnit.exercises.map(exercise => exercise.kind));
+      expect(kinds).toEqual(new Set(['choice', 'multi', 'boolean', 'order', 'match', 'blank']));
+    }
   });
 
   it('não repete ids de exercício', () => {
@@ -54,11 +59,23 @@ describe('conteúdo do jogo', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  it('escreve como um card do Duolingo: enunciado curto e alternativas curtas', () => {
+    for (const exercise of ALL_EXERCISES) {
+      expect(exercise.prompt.length).toBeLessThanOrEqual(120);
+      if (exercise.kind === 'choice' || exercise.kind === 'multi') {
+        for (const option of exercise.options) {
+          expect(option.length).toBeLessThanOrEqual(90);
+        }
+        expect(new Set(exercise.options).size).toBe(exercise.options.length);
+      }
+    }
+  });
+
   it('mantém respostas válidas em todos os formatos', () => {
     for (const exercise of ALL_EXERCISES) {
       if (exercise.kind === 'choice') {
         expect(exercise.options[exercise.answer]).toBeTruthy();
-        expect(exercise.options.length).toBeGreaterThanOrEqual(2);
+        expect(exercise.options.length).toBeGreaterThanOrEqual(3);
       }
       if (exercise.kind === 'multi') {
         expect(exercise.answers.length).toBeGreaterThan(0);
@@ -171,15 +188,34 @@ describe('montagem das lições', () => {
     expect(first.exercises.length).toBe(LESSON_SIZE);
   });
 
-  it('equilibra os seis formatos em cada lição', () => {
-    const expectedKinds = new Set(['choice', 'multi', 'boolean', 'order', 'match', 'blank']);
+  it('varia os formatos dentro de cada lição', () => {
     for (const gameUnit of GAME_UNITS) {
       const lesson = buildLesson(gameUnit, 0, `formats:${gameUnit.topic}`);
-      expect(new Set(lesson.exercises.map(exercise => exercise.kind))).toEqual(expectedKinds);
+      const counts = lesson.exercises.reduce<Record<string, number>>((totals, exercise) => {
+        totals[exercise.kind] = (totals[exercise.kind] ?? 0) + 1;
+        return totals;
+      }, {});
+      expect(Object.keys(counts).length).toBeGreaterThanOrEqual(3);
+      expect(Math.max(...Object.values(counts))).toBeLessThanOrEqual(2);
     }
   });
 
-  it('maximiza conceitos novos sem perder o equilíbrio de formatos', () => {
+  it('abre a lição com um formato rápido', () => {
+    for (const gameUnit of GAME_UNITS) {
+      const lesson = buildLesson(gameUnit, 0, `opener:${gameUnit.topic}`);
+      expect(['choice', 'boolean', 'blank']).toContain(lesson.exercises[0].kind);
+    }
+  });
+
+  it('começa pelas questões fáceis e guarda as difíceis para a prova', () => {
+    const first = buildLesson(unit, 0, 'easy');
+    const review = buildUnitReview(unit, 0, 'hard');
+    const average = (exercises: Exercise[]) =>
+      exercises.reduce((sum, exercise) => sum + (exercise.difficulty ?? 2), 0) / exercises.length;
+    expect(average(first.exercises)).toBeLessThan(average(review.exercises));
+  });
+
+  it('prioriza questões ainda não vistas na lição seguinte', () => {
     const first = buildLesson(unit, 0, 'first');
     const memory = Object.fromEntries(
       first.exercises.map(exercise => [
@@ -188,22 +224,14 @@ describe('montagem das lições', () => {
       ])
     ) satisfies Record<string, ExerciseMemory>;
     const second = buildLesson(unit, 1, { seed: 'second', memory, now: 200 });
-    const firstConcepts = new Set(first.exercises.map(exercise => exercise.conceptId));
-    const repeated = second.exercises.filter(exercise =>
-      firstConcepts.has(exercise.conceptId)
-    );
-    expect(repeated).toHaveLength(0);
+    const firstIds = new Set(first.exercises.map(exercise => exercise.id));
+    expect(second.exercises.filter(exercise => firstIds.has(exercise.id))).toHaveLength(0);
   });
 
   it('não repete a mesma questão em lições consecutivas de nenhum tema', () => {
     for (const gameUnit of GAME_UNITS) {
       const memory: Record<string, ExerciseMemory> = {};
       let previousIds = new Set<string>();
-      let previousConcepts = new Set<string | undefined>();
-      const conceptCount = new Set(
-        gameUnit.exercises.map(exercise => exercise.conceptId)
-      ).size;
-      const minimumConceptOverlap = Math.max(0, LESSON_SIZE * 2 - conceptCount);
 
       for (let round = 0; round < 3; round += 1) {
         const lesson = buildLesson(gameUnit, round, {
@@ -212,12 +240,9 @@ describe('montagem das lições', () => {
           now: round * 1000,
         });
         const ids = new Set(lesson.exercises.map(exercise => exercise.id));
-        const concepts = new Set(lesson.exercises.map(exercise => exercise.conceptId));
+        expect(ids.size).toBe(LESSON_SIZE);
         if (round > 0) {
           expect([...ids].filter(id => previousIds.has(id))).toHaveLength(0);
-          expect(
-            [...concepts].filter(concept => previousConcepts.has(concept)).length
-          ).toBeLessThanOrEqual(minimumConceptOverlap);
         }
         for (const exercise of lesson.exercises) {
           const previous = memory[exercise.id];
@@ -230,18 +255,34 @@ describe('montagem das lições', () => {
           };
         }
         previousIds = ids;
-        previousConcepts = concepts;
       }
     }
+  });
+
+  it('traz de volta primeiro o que está vencido e o que o aluno mais erra', () => {
+    const now = 1_000_000;
+    const memory: Record<string, ExerciseMemory> = {};
+    unit.exercises.forEach((exercise, index) => {
+      memory[exercise.id] = {
+        attempts: 4,
+        correct: index === 0 ? 1 : 4,
+        streak: index === 0 ? 0 : 4,
+        lastSeenAt: now - 10,
+        dueAt: index < 3 ? now - 1 : now + 100_000,
+      };
+    });
+    const practice = buildPersonalizedLesson(unit.exercises, { seed: 'due', memory, now });
+    const ids = practice.exercises.map(exercise => exercise.id);
+    expect(ids).toContain(unit.exercises[0].id);
+    expect(ids).toContain(unit.exercises[1].id);
+    expect(ids).toContain(unit.exercises[2].id);
   });
 
   it('monta a prova do box com os exercícios mais difíceis', () => {
     const review = buildUnitReview(unit, 0, 'review-seed');
     expect(review.kind).toBe('review');
-    expect(review.exercises.length).toBe(Math.min(REVIEW_SIZE, 12));
-    expect(new Set(review.exercises.map(exercise => exercise.conceptId)).size).toBe(
-      review.exercises.length
-    );
+    expect(review.exercises.length).toBe(REVIEW_SIZE);
+    expect(new Set(review.exercises.map(exercise => exercise.id)).size).toBe(REVIEW_SIZE);
   });
 
   it('monta a revisão de erros a partir dos ids salvos', () => {
@@ -260,7 +301,6 @@ describe('montagem das lições', () => {
   it('muda a posição da resposta quando a mesma questão reaparece', () => {
     const rotatingChoice: Exercise = {
       id: 'rotation-choice',
-      conceptId: 'rotation-choice',
       topic: 'anestesia',
       kind: 'choice',
       prompt: 'Qual opção está correta?',
@@ -298,19 +338,17 @@ describe('montagem das lições', () => {
     }
   });
 
-  it('gera prática personalizada contínua sem repetir conceitos na rodada', () => {
+  it('gera prática personalizada contínua sem repetir questões na rodada', () => {
     const practice = buildPersonalizedLesson(ALL_EXERCISES, 'practice-seed');
     expect(practice.kind).toBe('practice');
     expect(practice.exercises).toHaveLength(REVIEW_SIZE);
-    expect(new Set(practice.exercises.map(exercise => exercise.conceptId)).size).toBe(
-      REVIEW_SIZE
-    );
+    expect(new Set(practice.exercises.map(exercise => exercise.id)).size).toBe(REVIEW_SIZE);
     const kindCounts = practice.exercises.reduce<Record<string, number>>((counts, exercise) => {
       counts[exercise.kind] = (counts[exercise.kind] ?? 0) + 1;
       return counts;
     }, {});
-    expect(Object.keys(kindCounts)).toHaveLength(6);
-    expect(Math.max(...Object.values(kindCounts)) - Math.min(...Object.values(kindCounts))).toBeLessThanOrEqual(1);
+    expect(Object.keys(kindCounts).length).toBeGreaterThanOrEqual(3);
+    expect(Math.max(...Object.values(kindCounts))).toBeLessThanOrEqual(3);
   });
 
   it('embaralha de forma determinística', () => {

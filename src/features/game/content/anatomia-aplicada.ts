@@ -1,110 +1,195 @@
 import type { ExerciseSeed } from '../types';
+import { choice, gap, multi, order, pairs, truth } from './authoring';
 
 export const ANAT_EXERCISES: ExerciseSeed[] = [
-  {
-    id: 'anat-01',
-    kind: 'choice',
-    difficulty: 1,
-    prompt: 'Por onde o nervo alveolar inferior entra na mandíbula antes de percorrer o canal mandibular?',
-    options: ['Forame mandibular', 'Forame mentual', 'Forame infraorbitário', 'Canal incisivo'],
-    answer: 0,
-    explanation: 'O nervo alveolar inferior entra pelo forame mandibular, na face medial do ramo, e segue pelo canal mandibular.',
-  },
-  {
-    id: 'anat-02',
-    kind: 'boolean',
-    difficulty: 2,
-    prompt: 'Avalie a distribuição sensitiva do nervo mentual.',
-    statement: 'O nervo mentual emerge pelo forame mentual e inerva exclusivamente os dentes incisivos inferiores.',
-    answer: false,
-    explanation: 'O nervo mentual fornece sensibilidade principalmente ao lábio inferior, ao mento e à mucosa vestibular adjacente; a inervação pulpar anterior segue pelo ramo incisivo.',
-  },
-  {
-    id: 'anat-03',
-    kind: 'multi',
-    difficulty: 2,
-    prompt: 'Quais afirmações descrevem corretamente a relação entre dentes posteriores superiores e seio maxilar?',
-    options: [
-      'A proximidade entre o assoalho do seio e os ápices dentários varia entre indivíduos.',
-      'Molares superiores apresentam relação frequente, mas pré-molares também podem estar próximos.',
-      'Toda exodontia de molar superior produz comunicação oroantral.',
-      'A avaliação clínica e radiográfica ajuda a estimar o risco cirúrgico.',
+  choice(
+    'anat-01',
+    'Qual nervo inerva a polpa dos dentes inferiores?',
+    ['Alveolar inferior', 'Lingual', 'Bucal', 'Facial'],
+    'O alveolar inferior entra no canal mandibular e distribui ramos para todos os dentes do lado.',
+    { difficulty: 1 }
+  ),
+  choice(
+    'anat-02',
+    'Onde fica o forame mentoniano?',
+    ['Perto dos ápices dos pré-molares inferiores', 'Abaixo do canino inferior', 'Abaixo do segundo molar inferior', 'Na linha média'],
+    'Geralmente entre o primeiro e o segundo pré-molar. Por isso é referência para o bloqueio mentoniano e alerta na cirurgia periapical.',
+    { difficulty: 2 }
+  ),
+  gap(
+    'anat-03',
+    'O nervo ___ dá sensibilidade aos dois terços anteriores da língua.',
+    'lingual',
+    ['facial', 'hipoglosso', 'glossofaríngeo'],
+    'O lingual é o vizinho do alveolar inferior no bloqueio, por isso a língua também dorme.',
+    1
+  ),
+  choice(
+    'anat-04',
+    'Qual nervo inerva a gengiva vestibular dos molares inferiores?',
+    ['Bucal', 'Lingual', 'Mentoniano', 'Alveolar inferior'],
+    'O bloqueio do alveolar inferior não pega a gengiva vestibular dos molares. Complementar com o bucal.',
+    { difficulty: 2 }
+  ),
+  pairs(
+    'anat-05',
+    'Relacione o nervo à região',
+    [
+      ['Nasopalatino', 'Palato anterior'],
+      ['Palatino maior', 'Palato posterior'],
+      ['Infraorbital', 'Lábio superior e asa do nariz'],
+      ['Alveolar superior posterior', 'Molares superiores'],
     ],
-    answers: [0, 1, 3],
-    explanation: 'A relação é variável e pode envolver molares e pré-molares. Proximidade anatômica aumenta o risco, mas não torna a comunicação oroantral inevitável.',
-  },
-  {
-    id: 'anat-04',
-    kind: 'choice',
-    difficulty: 3,
-    prompt: 'Qual descrição explica o risco de lesão do nervo lingual na cirurgia de terceiro molar inferior?',
-    options: [
-      'Seu trajeto nos tecidos linguais pode ficar muito próximo da cortical e da crista alveolar.',
-      'Ele percorre o interior do canal mandibular junto ao nervo alveolar inferior.',
-      'Ele emerge pelo forame mentual antes de chegar à língua.',
-      'Ele atravessa o seio maxilar junto às raízes dos molares.',
+    'Mapa da maxila: saber o território de cada nervo escolhe a técnica anestésica certa.',
+    2
+  ),
+  truth(
+    'anat-06',
+    'A raiz mesiovestibular do primeiro molar superior costuma ser inervada pelo alveolar superior médio.',
+    true,
+    'Por isso o bloqueio do alveolar superior posterior às vezes deixa essa raiz sensível. Complementar por infiltração.',
+    3
+  ),
+  choice(
+    'anat-07',
+    'Quantas raízes tem o primeiro molar superior?',
+    ['Três', 'Duas', 'Uma', 'Quatro'],
+    'Duas vestibulares e uma palatina. A mesiovestibular frequentemente esconde um segundo canal (MV2).',
+    { difficulty: 1 }
+  ),
+  choice(
+    'anat-08',
+    'Qual canal é mais frequentemente esquecido no primeiro molar superior?',
+    ['Segundo canal mesiovestibular (MV2)', 'Palatino', 'Distovestibular', 'Distal'],
+    'O MV2 existe em mais da metade dos casos e fica escondido sob uma prateleira de dentina. Procure sempre.',
+    { difficulty: 3 }
+  ),
+  gap(
+    'anat-09',
+    'O molar inferior tem tipicamente ___ raízes.',
+    'duas',
+    ['três', 'quatro', 'uma'],
+    'Mesial e distal. A mesial costuma ter dois canais; a distal, um ou dois.',
+    1
+  ),
+  multi(
+    'anat-10',
+    'Quais músculos fecham a boca (elevadores)?',
+    ['Masseter', 'Temporal', 'Pterigóideo medial'],
+    ['Pterigóideo lateral', 'Bucinador'],
+    'Os três elevadores fecham; o pterigóideo lateral abre e protrui. Dor no masseter é a queixa mais comum na DTM muscular.',
+    { difficulty: 2 }
+  ),
+  choice(
+    'anat-11',
+    'Qual músculo pode ser lesado pela agulha no bloqueio do alveolar inferior, causando trismo?',
+    ['Pterigóideo medial', 'Masseter', 'Temporal', 'Bucinador'],
+    'O pterigóideo medial fica no caminho da agulha. Hematoma ou trauma nele dá trismo dias depois.',
+    { difficulty: 3 }
+  ),
+  pairs(
+    'anat-12',
+    'Relacione a glândula ao ducto',
+    [
+      ['Parótida', 'Ducto de Stensen, na altura do 2º molar superior'],
+      ['Submandibular', 'Ducto de Wharton, na carúncula sublingual'],
+      ['Sublingual', 'Vários ductos pequenos no assoalho'],
     ],
-    answer: 0,
-    explanation: 'Na região do terceiro molar, o nervo lingual tem posição variável e pode estar junto à cortical lingual, ao nível ou até acima da crista alveolar.',
-  },
-  {
-    id: 'anat-05',
-    kind: 'boolean',
-    difficulty: 1,
-    prompt: 'Avalie a referência anatômica.',
-    statement: 'O forame infraorbitário é a região de emergência do nervo infraorbitário na face.',
-    answer: true,
-    explanation: 'O nervo infraorbitário emerge pelo forame infraorbitário, referência relevante para anestesia regional e avaliação de trauma facial.',
-  },
-  {
-    id: 'anat-06',
-    kind: 'multi',
-    difficulty: 2,
-    prompt: 'Sobre a artéria facial na borda mandibular, selecione as afirmações corretas.',
-    options: [
-      'Ela cruza a borda inferior da mandíbula imediatamente anterior à inserção do masseter.',
-      'Seu pulso pode ser palpado nessa região em algumas pessoas.',
-      'Ela percorre normalmente o interior do canal mandibular.',
-      'Conhecer seu trajeto auxilia no planejamento e no controle de sangramento.',
-    ],
-    answers: [0, 1, 3],
-    explanation: 'A artéria facial contorna a borda inferior mandibular à frente do masseter; não percorre o canal mandibular.',
-  },
-  {
-    id: 'anat-07',
-    kind: 'blank',
-    difficulty: 2,
-    prompt: 'Complete a frase',
-    sentence: 'O único ramo do trigêmeo que conduz fibras motoras para os músculos da mastigação é o nervo ___.',
-    answer: 'mandibular',
-    bank: ['mandibular', 'maxilar', 'oftálmico', 'infraorbitário'],
-    explanation: 'O nervo mandibular (V3) é misto: conduz sensibilidade e fibras motoras para os músculos da mastigação. V1 e V2 são exclusivamente sensitivos.',
-  },
-  {
-    id: 'anat-08',
-    kind: 'order',
-    difficulty: 3,
-    prompt: 'Ordene o trajeto do nervo alveolar inferior na mandíbula',
-    steps: [
-      'Entrar no forame mandibular na face medial do ramo',
-      'Percorrer o canal mandibular em direção anterior',
-      'Emitir ramos dentários para molares e pré-molares inferiores',
-      'Dividir-se em ramos mentual e incisivo na região dos pré-molares',
-      'Emergir como nervo mentual pelo forame mentual',
-    ],
-    explanation: 'Após entrar pelo forame mandibular, o nervo percorre o canal e fornece ramos dentários. Próximo aos pré-molares, origina os ramos incisivo e mentual; este último emerge pelo forame mentual.',
-  },
-  {
-    id: 'anat-09',
-    kind: 'match',
-    difficulty: 2,
-    prompt: 'Relacione a estrutura anatômica com sua localização',
-    pairs: [
-      { left: 'Forame mandibular', right: 'Face medial do ramo da mandíbula' },
-      { left: 'Forame mentual', right: 'Corpo mandibular, geralmente próximo aos pré-molares' },
-      { left: 'Forame infraorbitário', right: 'Maxila, inferiormente à margem da órbita' },
-      { left: 'Forame palatino maior', right: 'Palato duro posterolateral' },
-    ],
-    explanation: 'Esses forames orientam bloqueios anestésicos e procedimentos cirúrgicos. Sua posição apresenta variação individual e deve ser correlacionada ao exame e à imagem quando necessário.',
-  },
+    'Saber onde os ductos abrem ajuda a localizar cálculo salivar e evitar lesão em cirurgia.',
+    2
+  ),
+  choice(
+    'anat-13',
+    'Paciente com paralisia facial transitória após bloqueio inferior. O que aconteceu?',
+    ['Anestésico depositado na parótida atingiu o nervo facial', 'Lesão do alveolar inferior', 'Reação alérgica', 'AVC'],
+    'Agulha muito profunda ou posterior chega à parótida, onde o facial passa. Tranquilizar, proteger o olho e aguardar.',
+    { difficulty: 3 }
+  ),
+  truth(
+    'anat-14',
+    'O nervo facial é responsável pela sensibilidade da face.',
+    false,
+    'O facial (VII) é motor da mímica. Sensibilidade da face é do trigêmeo (V).',
+    1
+  ),
+  choice(
+    'anat-15',
+    'Infecção do 2º molar inferior com ápice abaixo da inserção do milo-hióideo se espalha para qual espaço?',
+    ['Submandibular', 'Sublingual', 'Canino', 'Bucal'],
+    'Ápice abaixo do milo-hióideo drena para submandibular; acima dele, para sublingual. Esse detalhe muda a gravidade.',
+    { difficulty: 3 }
+  ),
+  gap(
+    'anat-16',
+    'Celulite bilateral dos espaços submandibular, sublingual e submentoniano chama-se angina de ___.',
+    'Ludwig',
+    ['Vincent', 'Bell', 'Winter'],
+    'Emergência: risco de obstrução da via aérea. Encaminhar para hospital, não tratar no consultório.',
+    3
+  ),
+  choice(
+    'anat-17',
+    'Qual estrutura fica logo acima dos ápices dos molares superiores?',
+    ['Seio maxilar', 'Canal mandibular', 'Fossa nasal', 'Forame mentoniano'],
+    'Raízes de molares e pré-molares superiores podem projetar-se no seio. Risco de comunicação na exodontia.',
+    { difficulty: 1 }
+  ),
+  truth(
+    'anat-18',
+    'A articulação temporomandibular tem um disco entre o côndilo e a fossa.',
+    true,
+    'O disco articular acompanha o côndilo. Deslocamento dele produz o clique clássico.',
+    1
+  ),
+  choice(
+    'anat-19',
+    'Qual músculo faz a protrusão e ajuda a abrir a boca?',
+    ['Pterigóideo lateral', 'Masseter', 'Temporal', 'Pterigóideo medial'],
+    'O pterigóideo lateral puxa o côndilo e o disco para frente. É o único mastigatório que abre.',
+    { difficulty: 2 }
+  ),
+  multi(
+    'anat-20',
+    'O que o bloqueio do alveolar inferior costuma anestesiar?',
+    ['Dentes inferiores do lado', 'Lábio inferior e mento', 'Metade da língua'],
+    ['Gengiva vestibular dos molares', 'Lábio superior'],
+    'Alveolar inferior + lingual dormem juntos. Gengiva vestibular dos molares é do nervo bucal.',
+    { difficulty: 2 }
+  ),
+  gap(
+    'anat-21',
+    'A artéria que irriga a maxila e a mandíbula é ramo da carótida ___.',
+    'externa',
+    ['interna', 'comum', 'vertebral'],
+    'A artéria maxilar, ramo da carótida externa, dá as alveolares. Hemorragia arterial em cirurgia bucal vem daí.',
+    2
+  ),
+  choice(
+    'anat-22',
+    'Qual referência óssea marca a entrada do canal mandibular?',
+    ['Língula', 'Linha oblíqua externa', 'Processo coronoide', 'Tubérculo geniano'],
+    'A língula protege o forame mandibular. É o alvo mental do bloqueio do alveolar inferior.',
+    { difficulty: 3 }
+  ),
+  truth(
+    'anat-23',
+    'Incisivos inferiores podem ter dois canais.',
+    true,
+    'Cerca de 20 a 40% têm canal lingual extra. Em retratamento, procure antes de culpar a obturação.',
+    3
+  ),
+  order(
+    'anat-25',
+    'Ordene o trajeto do nervo alveolar inferior',
+    ['Nervo mandibular (V3) sai do crânio pelo forame oval', 'Entra no forame mandibular, atrás da língula', 'Percorre o canal mandibular', 'Emite o nervo mentoniano pelo forame mentoniano', 'Termina como plexo incisivo'],
+    'Do crânio ao queixo: cada trecho explica um sinal clínico, do bloqueio à parestesia do lábio.',
+    { difficulty: 3 }
+  ),
+  choice(
+    'anat-24',
+    'Qual nervo dá sensibilidade à mucosa jugal?',
+    ['Bucal', 'Facial', 'Lingual', 'Mentoniano'],
+    'O bucal é sensitivo (ramo do V3). Não confundir com o músculo bucinador, que é motor do facial.',
+    { difficulty: 2 }
+  ),
 ];

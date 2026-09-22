@@ -33,6 +33,7 @@ export const StreakPanel: React.FC<StreakPanelProps> = ({
   limits,
   onBuyFreeze,
   onRepair,
+  onStartChallenge,
 }) => {
   const days = weekStrip(state);
   const atRisk = streakAtRisk(state);

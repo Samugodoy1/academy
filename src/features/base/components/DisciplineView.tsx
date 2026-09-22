@@ -61,7 +61,7 @@ export function DisciplineView({
 
       <div className="flex flex-col gap-10 desktop:grid desktop:grid-cols-12 desktop:items-start desktop:gap-x-12">
         <div className="space-y-10 desktop:col-span-7">
-          <BaseSection kicker="Resumos">
+          <BaseSection kicker="Sessões">
             <GroupedList>
               {discipline.lessons.map((lesson, index) => {
                 const unlocked = isLessonUnlocked(plan, index);

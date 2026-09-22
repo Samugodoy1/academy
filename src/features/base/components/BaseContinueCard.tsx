@@ -26,7 +26,7 @@ export const BaseContinueCard: React.FC<BaseContinueCardProps> = ({ plan, onOpen
 
   const open = () => {
     if (suggestion) {
-      handOffToBase({ kind: 'lesson', disciplineId: suggestion.discipline.id, lessonIndex: suggestion.lessonIndex });
+      handOffToBase({ kind: 'session', disciplineId: suggestion.discipline.id, lessonIndex: suggestion.lessonIndex });
     } else {
       handOffToBase({ kind: 'home' });
     }
@@ -40,7 +40,7 @@ export const BaseContinueCard: React.FC<BaseContinueCardProps> = ({ plan, onOpen
           ? suggestion.reason === 'resume'
             ? 'Continuar de onde parou'
             : suggestion.reason === 'next'
-              ? 'Próximo resumo'
+              ? 'Próxima sessão'
               : 'Ciclo básico · comece por aqui'
           : 'Ciclo básico'}
       </p>
@@ -53,7 +53,7 @@ export const BaseContinueCard: React.FC<BaseContinueCardProps> = ({ plan, onOpen
           <p className="mt-3 text-[15px] leading-snug text-white/90">{suggestion.lesson.summary}</p>
           <p className="mt-4 flex items-center justify-between text-[15px] text-white/90">
             <span>{suggestion.lesson.minutes} min · {done} de {total} lidos</span>
-            <span>Ler ›</span>
+            <span>Iniciar sessão ›</span>
           </p>
         </>
       ) : (

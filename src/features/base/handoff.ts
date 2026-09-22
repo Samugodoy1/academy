@@ -1,17 +1,31 @@
 import type { StudyKey } from '../../utils/studyTopics';
+import type { LabId } from './session/types';
 
 export type BaseView =
   | { kind: 'home' }
   | { kind: 'discipline'; disciplineId: string }
-  | { kind: 'lesson'; disciplineId: string; lessonIndex: number }
-  | { kind: 'mindmap'; disciplineId: string };
+  | { kind: 'session'; disciplineId: string; lessonIndex: number }
+  | { kind: 'reference'; disciplineId: string; lessonIndex: number }
+  | { kind: 'mindmap'; disciplineId: string }
+  | { kind: 'review' }
+  | { kind: 'mix' }
+  | { kind: 'case'; caseId: string }
+  | { kind: 'lab'; labId: LabId };
 
 export const BASE_VIEW_KEY = 'odontohub-academy-base-view';
+
+function normalizeView(raw: BaseView | { kind: string }): BaseView {
+  if (raw.kind === 'lesson') {
+    const legacy = raw as { kind: 'lesson'; disciplineId: string; lessonIndex: number };
+    return { kind: 'session', disciplineId: legacy.disciplineId, lessonIndex: legacy.lessonIndex };
+  }
+  return raw as BaseView;
+}
 
 export function readBaseView(): BaseView {
   try {
     const raw = JSON.parse(sessionStorage.getItem(BASE_VIEW_KEY) || 'null') as BaseView | null;
-    if (raw && typeof raw === 'object' && 'kind' in raw) return raw;
+    if (raw && typeof raw === 'object' && 'kind' in raw) return normalizeView(raw);
   } catch {
     /* fall through to home */
   }

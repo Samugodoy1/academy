@@ -48,8 +48,9 @@ export const BASE_BLOCK_COPY: Record<BaseBlock, { title: string; body: string }>
 
 /** Everything the library paywall promises, in the order it is shown. */
 export const BASE_STUDENT_PERKS = [
-  'Todos os resumos do ciclo básico',
-  'Mapa mental de cada disciplina',
-  'Referência científica em todo conteúdo',
+  'Sessões completas em todas as disciplinas',
+  'Revisão espaçada e mistura interdisciplinar',
+  'Laboratórios, mini-casos e competências',
+  'Mapas mentais e referências em todo conteúdo',
   'Cola e treino sem limite diário',
 ] as const;

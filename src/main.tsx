@@ -7,6 +7,7 @@ import { SystemThemeProvider } from './theme/systemTheme';
 import { AcademyNeoProvider } from './theme/AcademyNeoProvider';
 import { AcademyWidgetsProvider } from './theme/AcademyWidgetsProvider';
 import { AcademyNavProvider } from './theme/AcademyNavProvider';
+import { AcademyStageProvider } from './theme/AcademyStageProvider';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
@@ -16,9 +17,11 @@ createRoot(document.getElementById('root')!).render(
         <AcademyNeoProvider>
           <AcademyWidgetsProvider>
             <AcademyNavProvider>
-              <BrowserRouter>
-                <App />
-              </BrowserRouter>
+              <AcademyStageProvider>
+                <BrowserRouter>
+                  <App />
+                </BrowserRouter>
+              </AcademyStageProvider>
             </AcademyNavProvider>
           </AcademyWidgetsProvider>
         </AcademyNeoProvider>

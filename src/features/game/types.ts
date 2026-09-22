@@ -9,6 +9,8 @@ export interface ScientificReference {
 
 interface ExerciseCommon {
   id: string;
+  /** Stable authored question behind runtime variations of the same concept. */
+  conceptId?: string;
   topic: StudyKey;
   /** Short instruction shown above the exercise, Duolingo style. */
   prompt: string;
@@ -87,7 +89,7 @@ export type Answer =
   | { kind: 'match'; mistakes: number }
   | { kind: 'blank'; value: string };
 
-export type LessonKind = 'lesson' | 'review' | 'mistakes' | 'blitz';
+export type LessonKind = 'lesson' | 'review' | 'practice' | 'mistakes' | 'blitz';
 
 export interface LessonPlan {
   id: string;
@@ -113,6 +115,14 @@ export interface UnitState {
   lessons: number;
   /** 0-3, earned by clearing the unit review. */
   crowns: number;
+}
+
+export interface ExerciseMemory {
+  attempts: number;
+  correct: number;
+  streak: number;
+  lastSeenAt: number;
+  dueAt: number;
 }
 
 export type QuestKind = 'xp' | 'lessons' | 'correct' | 'perfect' | 'combo' | 'mistakes';
@@ -145,7 +155,7 @@ export interface AcademyChallenge {
 }
 
 export interface GameState {
-  version: 2;
+  version: 3;
   xp: number;
   hearts: number;
   /** Epoch ms of the last heart regeneration checkpoint. */
@@ -159,6 +169,8 @@ export interface GameState {
   units: Record<string, UnitState>;
   /** Exercise ids missed recently, oldest first. */
   mistakes: string[];
+  /** Per-variation recall history used by personalized and spaced practice. */
+  exerciseMemory: Record<string, ExerciseMemory>;
   sound: boolean;
   totalCorrect: number;
   totalAnswered: number;

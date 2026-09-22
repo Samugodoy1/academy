@@ -9,7 +9,16 @@ import {
   rememberDay,
   resolveStreak,
 } from './streak';
-import type { AcademyChallenge, ChallengeDays, GameState, LessonOutcome, LessonReward, Quest, UnitState } from './types';
+import type {
+  AcademyChallenge,
+  ChallengeDays,
+  ExerciseMemory,
+  GameState,
+  LessonOutcome,
+  LessonReward,
+  Quest,
+  UnitState,
+} from './types';
 
 export const GAME_STORAGE_KEY = 'academy_cola_game_v1';
 
@@ -61,7 +70,7 @@ export { dayKeyOf };
 export function createInitialState(now: Date = new Date()): GameState {
   const dayKey = dayKeyOf(now);
   return {
-    version: 2,
+    version: 3,
     xp: 0,
     hearts: MAX_HEARTS,
     heartsAt: now.getTime(),
@@ -72,6 +81,7 @@ export function createInitialState(now: Date = new Date()): GameState {
     dailyGoal: DEFAULT_DAILY_GOAL,
     units: {},
     mistakes: [],
+    exerciseMemory: {},
     sound: true,
     totalCorrect: 0,
     totalAnswered: 0,
@@ -211,6 +221,39 @@ function rememberMistakes(mistakes: string[], missed: string[], mastered: string
   return next.slice(-MAX_TRACKED_MISTAKES);
 }
 
+const REVIEW_INTERVAL_DAYS = [1, 2, 4, 8, 16, 30] as const;
+
+function rememberExerciseMemory(
+  memory: Record<string, ExerciseMemory>,
+  outcome: LessonOutcome,
+  now: Date
+): Record<string, ExerciseMemory> {
+  const next = { ...memory };
+  const seen = new Set([...outcome.mastered, ...outcome.missed]);
+  for (const id of seen) {
+    const previous = memory[id] ?? {
+      attempts: 0,
+      correct: 0,
+      streak: 0,
+      lastSeenAt: 0,
+      dueAt: 0,
+    };
+    const correct = outcome.mastered.includes(id) && !outcome.missed.includes(id);
+    const streak = correct ? previous.streak + 1 : 0;
+    const intervalDays = correct
+      ? REVIEW_INTERVAL_DAYS[Math.min(streak - 1, REVIEW_INTERVAL_DAYS.length - 1)]
+      : 0;
+    next[id] = {
+      attempts: previous.attempts + 1,
+      correct: previous.correct + (correct ? 1 : 0),
+      streak,
+      lastSeenAt: now.getTime(),
+      dueAt: now.getTime() + intervalDays * 24 * 60 * 60 * 1000,
+    };
+  }
+  return next;
+}
+
 export function registerLessonResult(
   state: GameState,
   outcome: LessonOutcome,
@@ -300,6 +343,7 @@ export function registerLessonResult(
     hearts: heartRecovered ? rolled.hearts + 1 : rolled.hearts,
     heartsAt: heartRecovered ? now.getTime() : rolled.heartsAt,
     mistakes: rememberMistakes(rolled.mistakes, outcome.missed, outcome.mastered),
+    exerciseMemory: rememberExerciseMemory(rolled.exerciseMemory, outcome, now),
     totalCorrect: rolled.totalCorrect + outcome.correct,
     totalAnswered: rolled.totalAnswered + outcome.total,
     lessonsDone: rolled.lessonsDone + 1,
@@ -344,6 +388,7 @@ export function registerFailedLesson(
   return {
     ...rolled,
     mistakes: rememberMistakes(rolled.mistakes, outcome.missed, outcome.mastered),
+    exerciseMemory: rememberExerciseMemory(rolled.exerciseMemory, outcome, now),
     totalCorrect: rolled.totalCorrect + outcome.correct,
     totalAnswered: rolled.totalAnswered + outcome.correct + outcome.missed.length,
     bestCombo: Math.max(rolled.bestCombo, outcome.bestCombo),
@@ -420,6 +465,25 @@ function sanitizeQuests(value: unknown, dayKey: string, dailyGoal: number): Ques
   return quests.length > 0 ? quests : rollQuests(dayKey, dailyGoal);
 }
 
+function sanitizeExerciseMemory(value: unknown): Record<string, ExerciseMemory> {
+  if (!value || typeof value !== 'object') return {};
+  const memory: Record<string, ExerciseMemory> = {};
+  for (const [id, raw] of Object.entries(value).slice(-2000)) {
+    if (!raw || typeof raw !== 'object') continue;
+    const item = raw as Partial<ExerciseMemory>;
+    const attempts = Math.max(0, Number(item.attempts) || 0);
+    const correct = Math.min(attempts, Math.max(0, Number(item.correct) || 0));
+    memory[id] = {
+      attempts,
+      correct,
+      streak: Math.max(0, Number(item.streak) || 0),
+      lastSeenAt: Math.max(0, Number(item.lastSeenAt) || 0),
+      dueAt: Math.max(0, Number(item.dueAt) || 0),
+    };
+  }
+  return memory;
+}
+
 export function sanitizeState(raw: unknown, now: Date = new Date()): GameState {
   const base = createInitialState(now);
   if (!raw || typeof raw !== 'object') return base;
@@ -451,6 +515,7 @@ export function sanitizeState(raw: unknown, now: Date = new Date()): GameState {
     dailyGoal,
     units,
     mistakes: stringList(value.mistakes, MAX_TRACKED_MISTAKES),
+    exerciseMemory: sanitizeExerciseMemory(value.exerciseMemory),
     sound: value.sound !== false,
     totalCorrect: Math.max(0, Number(value.totalCorrect) || 0),
     totalAnswered: Math.max(0, Number(value.totalAnswered) || 0),

@@ -51,7 +51,9 @@ function gainFor(quest: Quest, outcome: LessonOutcome, xp: number): number {
     case 'xp':
       return xp;
     case 'lessons':
-      return outcome.kind === 'lesson' || outcome.kind === 'review' ? 1 : 0;
+      return outcome.kind === 'lesson' || outcome.kind === 'review' || outcome.kind === 'practice'
+        ? 1
+        : 0;
     case 'correct':
       return outcome.correct;
     case 'perfect':

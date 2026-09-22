@@ -159,6 +159,36 @@ describe('progresso da trilha', () => {
     expect(second.state.mistakes).toEqual(['anest-02']);
   });
 
+  it('agenda revisão espaçada e antecipa novamente quando há erro', () => {
+    const now = at('2026-03-01T09:00:00');
+    const learned = registerLessonResult(
+      createInitialState(now),
+      baseOutcome({ mastered: ['anest-01'], missed: [] }),
+      now
+    ).state;
+    expect(learned.exerciseMemory['anest-01']).toMatchObject({
+      attempts: 1,
+      correct: 1,
+      streak: 1,
+    });
+    expect(learned.exerciseMemory['anest-01'].dueAt).toBe(
+      now.getTime() + 24 * 60 * 60 * 1000
+    );
+
+    const retryAt = at('2026-03-02T09:00:00');
+    const missed = registerLessonResult(
+      learned,
+      baseOutcome({ mastered: [], missed: ['anest-01'] }),
+      retryAt
+    ).state;
+    expect(missed.exerciseMemory['anest-01']).toMatchObject({
+      attempts: 2,
+      correct: 1,
+      streak: 0,
+      dueAt: retryAt.getTime(),
+    });
+  });
+
   it('devolve uma vida ao completar o treino livre sem erros', () => {
     const now = at('2026-03-01T09:00:00');
     const spent = spendHeart(createInitialState(now), now);
@@ -202,13 +232,11 @@ describe('lição perdida', () => {
 });
 
 describe('limites do plano', () => {
-  it('o Free libera cinco lições por dia', () => {
+  it('o Free libera uma lição por dia', () => {
     const now = at('2026-03-01T09:00:00');
     let state = createInitialState(now);
-    for (let i = 0; i < 5; i += 1) {
-      expect(canStartLesson(state, now, FREE_LIMITS)).toBe(true);
-      state = startLesson(state, now);
-    }
+    expect(canStartLesson(state, now, FREE_LIMITS)).toBe(true);
+    state = startLesson(state, now);
     expect(canStartLesson(state, now, FREE_LIMITS)).toBe(false);
     expect(lessonsLeftToday(state, now, FREE_LIMITS)).toBe(0);
   });
@@ -216,19 +244,18 @@ describe('limites do plano', () => {
   it('devolve a cota quando a lição é abandonada', () => {
     const now = at('2026-03-01T09:00:00');
     const started = startLesson(createInitialState(now), now);
-    expect(lessonsLeftToday(started, now, FREE_LIMITS)).toBe(4);
+    expect(lessonsLeftToday(started, now, FREE_LIMITS)).toBe(0);
     const quit = cancelLesson(started, now);
-    expect(lessonsLeftToday(quit, now, FREE_LIMITS)).toBe(5);
+    expect(lessonsLeftToday(quit, now, FREE_LIMITS)).toBe(1);
     expect(cancelLesson(quit, now).dayLessons).toBe(0);
   });
 
   it('a cota volta na virada do dia', () => {
     const now = at('2026-03-01T09:00:00');
-    let state = createInitialState(now);
-    for (let i = 0; i < 5; i += 1) state = startLesson(state, now);
+    const state = startLesson(createInitialState(now), now);
     const tomorrow = at('2026-03-02T07:00:00');
     expect(canStartLesson(state, tomorrow, FREE_LIMITS)).toBe(true);
-    expect(lessonsLeftToday(state, tomorrow, FREE_LIMITS)).toBe(5);
+    expect(lessonsLeftToday(state, tomorrow, FREE_LIMITS)).toBe(1);
   });
 
   it('o Student não tem cota nem gasta vidas', () => {
@@ -329,7 +356,7 @@ describe('sanitize', () => {
       { version: 1, xp: 320, streak: 4, lastDay: '2026-03-10', hearts: 3, dailyGoal: 30 },
       now
     );
-    expect(state.version).toBe(2);
+    expect(state.version).toBe(3);
     expect(state.gems).toBe(0);
     expect(state.freezes).toBe(0);
     expect(state.quests).toHaveLength(3);

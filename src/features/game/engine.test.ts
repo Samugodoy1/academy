@@ -171,6 +171,14 @@ describe('montagem das lições', () => {
     expect(first.exercises.length).toBe(LESSON_SIZE);
   });
 
+  it('equilibra os seis formatos em cada lição', () => {
+    const expectedKinds = new Set(['choice', 'multi', 'boolean', 'order', 'match', 'blank']);
+    for (const gameUnit of GAME_UNITS) {
+      const lesson = buildLesson(gameUnit, 0, `formats:${gameUnit.topic}`);
+      expect(new Set(lesson.exercises.map(exercise => exercise.kind))).toEqual(expectedKinds);
+    }
+  });
+
   it('prioriza conceitos ainda não vistos na lição seguinte', () => {
     const first = buildLesson(unit, 0, 'first');
     const memory = Object.fromEntries(
@@ -254,6 +262,12 @@ describe('montagem das lições', () => {
     expect(new Set(practice.exercises.map(exercise => exercise.conceptId)).size).toBe(
       REVIEW_SIZE
     );
+    const kindCounts = practice.exercises.reduce<Record<string, number>>((counts, exercise) => {
+      counts[exercise.kind] = (counts[exercise.kind] ?? 0) + 1;
+      return counts;
+    }, {});
+    expect(Object.keys(kindCounts)).toHaveLength(6);
+    expect(Math.max(...Object.values(kindCounts)) - Math.min(...Object.values(kindCounts))).toBeLessThanOrEqual(1);
   });
 
   it('embaralha de forma determinística', () => {

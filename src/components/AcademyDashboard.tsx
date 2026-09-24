@@ -17,6 +17,7 @@ import { DataLoadingSkeleton } from './DataLoadingSkeleton';
 import { studentGreeting } from '../theme/academyWidgets';
 import { ColaShortcut } from '../features/game/ColaShortcut';
 import type { GamePlan } from '../features/game/plan';
+import { FREE_TENSION, STUDENT_PRIDE } from '../features/subscription/conversionCopy';
 import { useResolvedAcademyStage } from '../theme/AcademyStageProvider';
 import { STAGE_LABEL } from '../theme/academyStage';
 import { AcademyStageControl } from './AcademyStageControl';
@@ -44,6 +45,7 @@ interface AcademyDashboardProps {
   academicPeriod?: string;
   institution?: string;
   gamePlan?: GamePlan;
+  onOpenStudentPlan?: () => void;
 }
 
 const ACTIVE_STATUSES = new Set(['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS']);
@@ -422,6 +424,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
   academicPeriod,
   institution,
   gamePlan,
+  onOpenStudentPlan,
 }) => {
   const { stage, setStage, isPreClinical } = useResolvedAcademyStage({
     academicPeriod,
@@ -750,7 +753,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         <span className="neo-pill !px-3.5 !py-1.5 !text-[13px] shrink-0">
           {isPreClinical && patients.length === 0
             ? STAGE_LABEL['pre-clinico']
-            : `${patients.length} ${patients.length === 1 ? 'paciente' : 'pacientes'}`}
+            : gamePlan === 'student'
+              ? `Student · ${patients.length}`
+              : `${patients.length} ${patients.length === 1 ? 'paciente' : 'pacientes'}`}
         </span>
       </header>
 
@@ -817,6 +822,29 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
             </div>
           )}
 
+          {gamePlan === 'student' && patients.length > 0 && (
+            <p className="text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">
+              {STUDENT_PRIDE.homeLine}
+            </p>
+          )}
+
+          {gamePlan !== 'student' && patients.length > 0 && onOpenStudentPlan && (
+            <button
+              type="button"
+              onClick={onOpenStudentPlan}
+              className="w-full rounded-[24px] bg-[#f5f5f7] px-5 py-5 text-left"
+            >
+              <p className="text-[13px] text-[var(--neo-gray)]">Free · 1 de 1</p>
+              <p className="mt-1 text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
+                {FREE_TENSION.homeHeadline}
+              </p>
+              <p className="mt-2 text-[15px] leading-snug text-[var(--neo-gray)]">
+                {FREE_TENSION.homeBody}
+              </p>
+              <p className="neo-link mt-4 text-[15px]">{FREE_TENSION.homeCta} ›</p>
+            </button>
+          )}
+
           {showBoxMode && boxPrepItems.length > 0 && (
             <HomeSection kicker="Antes de sentar">
               <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
@@ -838,6 +866,11 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
                   </button>
                 ))}
               </div>
+              {gamePlan !== 'student' && onOpenStudentPlan && (
+                <button type="button" onClick={onOpenStudentPlan} className="neo-link mt-3 text-[15px]">
+                  {FREE_TENSION.prepLine}
+                </button>
+              )}
             </HomeSection>
           )}
         </div>

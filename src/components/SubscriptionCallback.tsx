@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircle2, Clock, XCircle, ArrowLeft, Loader2 } from 'lucide-react';
+import { STUDENT_PRIDE } from '../features/subscription/conversionCopy';
 
 interface SubscriptionCallbackProps {
   apiFetch: (url: string, options?: any) => Promise<Response>;
@@ -59,15 +60,19 @@ export const SubscriptionCallback: React.FC<SubscriptionCallbackProps> = ({
             <div className="w-16 h-16 rounded-full bg-emerald-50 mx-auto mb-4 flex items-center justify-center">
               <CheckCircle2 size={32} className="text-emerald-600" />
             </div>
-            <h2 className="text-lg font-bold text-slate-800 mb-2">Assinatura ativada!</h2>
+            <h2 className="text-lg font-bold text-slate-800 mb-2">
+              {product === 'academy' ? STUDENT_PRIDE.checkoutHeadline : 'Assinatura ativada!'}
+            </h2>
             <p className="text-sm text-slate-500 mb-6">
-              Seu plano foi atualizado com sucesso. Aproveite todos os recursos premium!
+              {product === 'academy'
+                ? STUDENT_PRIDE.checkoutBody
+                : 'Seu plano foi atualizado com sucesso. Aproveite todos os recursos premium!'}
             </p>
             <button
               onClick={onNavigate}
               className="px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors"
             >
-              Ir para o sistema
+              {product === 'academy' ? STUDENT_PRIDE.checkoutCta : 'Ir para o sistema'}
             </button>
           </>
         )}

@@ -2755,6 +2755,13 @@ export default function App() {
                       academicPeriod={profile?.academic_period}
                       institution={profile?.institution}
                       gamePlan={(getProductAccess(getCurrentProduct())?.plan || 'free') === 'free' ? 'free' : 'student'}
+                      onOpenStudentPlan={() => {
+                        setActiveTab('configuracoes');
+                        navigate('/');
+                        window.setTimeout(() => {
+                          document.getElementById('assinatura')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 120);
+                      }}
                     />
                   )}
 
@@ -4174,12 +4181,12 @@ export default function App() {
                     <div className="p-6">
                       <p className="text-[13px] font-normal text-sys-muted mb-2 text-center">Academy Free</p>
                       <h3 className="text-[22px] font-semibold text-sys-text mb-2 text-center leading-[1.05] tracking-[-0.025em]">
-                        {academyUpgradeReason === 'estudos' ? 'A estante inteira, do 1º período à clínica.' : 'Seu caso gratuito já está rodando.'}
+                        {academyUpgradeReason === 'estudos' ? 'A estante inteira, do 1º período à clínica.' : 'O próximo paciente não entra.'}
                       </h3>
                       <p className="text-[15px] font-normal text-sys-muted leading-relaxed mb-4 text-center">
                         {academyUpgradeReason === 'estudos'
                           ? 'O Free mostra o formato. No Student todos os resumos, mapas mentais e a Cola sem limite acompanham você até a cadeira.'
-                          : 'No Free você cadastra 1 paciente para sentir o fluxo. No Student entram Modo Box, casos ilimitados e agenda sem teto mensal.'}
+                          : 'Você já tem um caso vivo. A clínica do semestre não para nesse nome. No Student o próximo cadastro e o Modo Box abrem juntos.'}
                       </p>
                       <div className="space-y-2">
                         {(academyUpgradeReason === 'estudos'
@@ -4361,7 +4368,11 @@ export default function App() {
           product: 'academy',
           upgradePlan: 'student',
         });
-        navigate('/subscription');
+        setActiveTab('configuracoes');
+        navigate('/');
+        window.setTimeout(() => {
+          document.getElementById('assinatura')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 120);
       }}
     />
   </>

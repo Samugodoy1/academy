@@ -7,6 +7,7 @@ import { studentGreeting } from '../../theme/academyWidgets';
 import { useResolvedAcademyStage } from '../../theme/AcademyStageProvider';
 import { STAGE_LABEL } from '../../theme/academyStage';
 import { AcademyStageControl } from '../../components/AcademyStageControl';
+import { FREE_TENSION, STUDENT_PRIDE } from '../subscription/conversionCopy';
 import {
   isAcademyStudentPlan,
   studentAcademicLine,
@@ -352,10 +353,20 @@ export function AcademyAccount({
             </h2>
             {isStudent ? (
               <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
-                <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">Student</p>
+                <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">{STUDENT_PRIDE.kicker}</p>
                 <p className="mt-1 text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
-                  Sem teto no semestre.
+                  {STUDENT_PRIDE.headline}
                 </p>
+                <p className="mt-2 text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
+                  {STUDENT_PRIDE.body}
+                </p>
+                <ul className="mt-4 space-y-1.5">
+                  {STUDENT_PRIDE.owned.map((item) => (
+                    <li key={item} className="text-[15px] tracking-[-0.011em] text-[var(--neo-ink)]">
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </div>
             ) : (
               <button
@@ -367,14 +378,14 @@ export function AcademyAccount({
                   Free
                 </p>
                 <p className="mt-2 text-[26px] font-semibold leading-[1.05] tracking-[-0.025em]">
-                  {stage === 'pre-clinico' ? 'A estante inteira do ciclo básico.' : 'Um caso. Modo Box no Student.'}
+                  {stage === 'pre-clinico' ? 'A estante inteira do ciclo básico.' : FREE_TENSION.accountHeadline}
                 </p>
                 <p className="mt-2 text-[15px] tracking-[-0.011em] text-white/85">
                   {stage === 'pre-clinico'
                     ? 'No Student todos os resumos e mapas mentais abrem, e a Cola perde o limite diário.'
-                    : 'No Free você organiza 1 paciente. No Student liberam Modo Box, casos ilimitados e agenda sem teto.'}
+                    : FREE_TENSION.accountBody}
                 </p>
-                <p className="mt-4 text-[15px] text-white/90">Mudar para Student ›</p>
+                <p className="mt-4 text-[15px] text-white/90">{FREE_TENSION.accountCta} ›</p>
               </button>
             )}
             {waitingAccess && (

@@ -78,6 +78,7 @@ import {
   generateBoxNowSteps
 } from '../data/boxIntelligence';
 import { exportClinicalCasePdf, type StudentProfileForPdf } from '../utils/exportClinicalCasePdf';
+import { STUDENT_PRIDE } from '../features/subscription/conversionCopy';
 
 interface PatientClinicalProps {
   patient: any;
@@ -2033,7 +2034,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                     <p className={`text-[12px] font-medium mt-1 line-clamp-2 ${canUseBoxMode ? 'text-white/75' : 'text-slate-500'}`}>
                       {canUseBoxMode
                         ? (boxIntelContext.criticalCheckpoint || boxIntelContext.expectedTodaySummary || boxIntelContext.boxProcedureDetail || 'Cola clínica rápida')
-                        : 'Checklist, bandeja e passo a passo no atendimento — exclusivo do Student.'}
+                        : 'O passo a passo deste atendimento fica fechado. Sem ele, o box depende da memória.'}
                     </p>
                   </div>
                   <BookOpen size={20} className={`shrink-0 ${canUseBoxMode ? 'text-white/90' : 'text-slate-400'}`} />
@@ -2053,6 +2054,11 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                 </div>
               </button>
             </div>
+            {canUseBoxMode && (
+              <p className="mt-3 text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">
+                {STUDENT_PRIDE.chairLine}
+              </p>
+            )}
             <button
               type="button"
               onClick={handleExportClinicalCasePdf}

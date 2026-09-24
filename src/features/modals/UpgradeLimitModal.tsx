@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, X } from '../../icons';
+import { trackPaywallView, trackStudentCta } from '../analytics/track';
 import { ACADEMY_FREE_MAX_PATIENTS } from '../subscription/academyEntitlements';
 import { UPGRADE_MOMENT, type UpgradeFeature } from '../subscription/conversionCopy';
 
@@ -10,6 +12,15 @@ export const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
   const currentUsage = data?.currentUsage ?? limit;
   const progress = limit > 0 ? Math.min(100, Math.round((currentUsage / limit) * 100)) : 100;
   const showUsageBar = Boolean(moment.usageLabel);
+
+  useEffect(() => {
+    if (!data?.open) return;
+    trackPaywallView(`upgrade_limit_${feature}`, {
+      limit: data.limit,
+      current_usage: data.currentUsage,
+      feature,
+    });
+  }, [data?.open, data?.limit, data?.currentUsage, feature]);
 
   return (
     <AnimatePresence>
@@ -98,7 +109,10 @@ export const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
 
               <div className="sticky bottom-0 mt-6 space-y-2 bg-white/95 pt-3 backdrop-blur-md">
                 <button
-                  onClick={onUpgrade}
+                  onClick={() => {
+                    trackStudentCta(`upgrade_limit_${feature}`);
+                    onUpgrade();
+                  }}
                   className="apple-btn w-full"
                 >
                   {moment.cta}

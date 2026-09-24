@@ -8,6 +8,7 @@ import {
   rememberCouponCode,
 } from '../features/coupons/couponUtils';
 import type { CouponPreview } from '../features/coupons/types';
+import { trackProductEvent, trackStudentCta } from '../features/analytics/track';
 import { FREE_TENSION, STUDENT_PRIDE } from '../features/subscription/conversionCopy';
 
 interface SubscriptionPlan {
@@ -155,6 +156,7 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
   const handleCreateSubscription = async (planId: number) => {
     setCreateLoading(true);
     setError(null);
+    trackStudentCta('subscription_checkout', { plan_id: planId });
     try {
       const res = await apiFetch('/api/subscriptions/create', {
         method: 'POST',
@@ -167,6 +169,7 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
       });
       const data = await res.json();
       if (res.ok && data.init_point) {
+        trackProductEvent('checkout_redirect', { plan_id: planId, coupon: couponPreview?.code || null });
         redirectToCheckout(data.init_point);
       } else {
         setError(data.error || 'Erro ao criar assinatura');

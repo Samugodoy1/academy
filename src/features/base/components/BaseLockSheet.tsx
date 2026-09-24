@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Lock } from '../../../icons';
+import { trackPaywallView, trackStudentCta } from '../../analytics/track';
 import { BASE_BLOCK_COPY, BASE_STUDENT_PERKS, type BaseBlock } from '../plan';
 
 interface BaseLockSheetProps {
@@ -17,6 +18,10 @@ interface BaseLockSheetProps {
  */
 export const BaseLockSheet: React.FC<BaseLockSheetProps> = ({ block, subject, onClose, onUpgrade }) => {
   const copy = BASE_BLOCK_COPY[block];
+
+  useEffect(() => {
+    trackPaywallView('base_lock', { block });
+  }, [block]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -68,7 +73,14 @@ export const BaseLockSheet: React.FC<BaseLockSheetProps> = ({ block, subject, on
 
         <div className="mt-6 flex flex-col gap-2">
           {onUpgrade && (
-            <button type="button" onClick={onUpgrade} className="neo-pill w-full">
+            <button
+              type="button"
+              onClick={() => {
+                trackStudentCta('base_lock', { block });
+                onUpgrade();
+              }}
+              className="neo-pill w-full"
+            >
               Conhecer o Student
             </button>
           )}

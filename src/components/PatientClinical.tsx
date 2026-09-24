@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { trackProductEvent } from '../features/analytics/track';
 import {
   Activity,
   ArrowDownRight,
@@ -1735,6 +1736,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       onRequestBoxUpgrade?.();
       return;
     }
+    trackProductEvent('box_mode_open', { source: 'clinical_hub' });
     setIsBoxModeOpen(true);
   };
 

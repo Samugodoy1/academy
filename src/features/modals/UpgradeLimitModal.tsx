@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, X } from '../../icons';
+import { trackPaywallView, trackStudentCta } from '../analytics/track';
 
 export const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
   const isPdfFeature = data?.feature === 'pdf';
@@ -21,6 +23,20 @@ export const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
       : `Você já organizou ${currentUsage} casos. Para continuar acompanhando seus pacientes, evoluções e atendimentos da faculdade, mude para o Academy Student.`;
 
   const barLabel = isAppointmentLimit ? 'Agendamentos no mês' : 'Casos no Free';
+
+  useEffect(() => {
+    if (!data?.open) return;
+    const surface = isPdfFeature
+      ? 'upgrade_limit_pdf'
+      : isAppointmentLimit
+        ? 'upgrade_limit_appointments'
+        : 'upgrade_limit_cases';
+    trackPaywallView(surface, {
+      limit: data.limit,
+      current_usage: data.currentUsage,
+      feature: data.feature,
+    });
+  }, [data?.open, data?.limit, data?.currentUsage, data?.feature, isPdfFeature, isAppointmentLimit]);
   const benefitItems = isPdfFeature
     ? ['Exportar casos clínicos em PDF', 'Casos e agenda ilimitados', 'Modo box e evoluções completos']
     : ['Casos ilimitados', 'Agenda acadêmica sem limite', 'Evoluções e modo box completos'];
@@ -112,7 +128,16 @@ export const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
 
               <div className="sticky bottom-0 mt-6 space-y-2 bg-white/95 pt-3 backdrop-blur-md">
                 <button
-                  onClick={onUpgrade}
+                  onClick={() => {
+                    trackStudentCta(
+                      isPdfFeature
+                        ? 'upgrade_limit_pdf'
+                        : isAppointmentLimit
+                          ? 'upgrade_limit_appointments'
+                          : 'upgrade_limit_cases',
+                    );
+                    onUpgrade();
+                  }}
                   className="apple-btn w-full"
                 >
                   Mudar para Student

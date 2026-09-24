@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { trackProductEvent } from '../features/analytics/track';
 import {
   Activity,
   ArrowDownRight,
@@ -2000,7 +2001,10 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => setIsBoxModeOpen(true)}
+                onClick={() => {
+                  trackProductEvent('box_mode_open', { source: 'clinical_hub' });
+                  setIsBoxModeOpen(true);
+                }}
                 className="rounded-[22px] bg-[var(--neo)] px-5 py-4 text-left text-white active:scale-[0.98]"
               >
                 <div className="flex items-center justify-between gap-3">

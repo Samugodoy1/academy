@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Check } from '../../../icons';
+import { trackPaywallView, trackStudentCta } from '../../analytics/track';
 import { CharacterAvatar, GUIDE_ID } from '../characters';
 import { BLOCK_COPY, STUDENT_PERKS, type PlanBlock } from '../plan';
 
@@ -12,6 +13,10 @@ interface PlanSheetProps {
 /** Shown when a Free limit stops the run. Never blocks what is already unlocked. */
 export const PlanSheet: React.FC<PlanSheetProps> = ({ block, onClose, onUpgrade }) => {
   const copy = BLOCK_COPY[block];
+
+  useEffect(() => {
+    trackPaywallView('game_plan_sheet', { block });
+  }, [block]);
 
   return (
     <div className="fixed inset-0 z-[210] flex items-end justify-center bg-black/40 px-4 pb-4 sm:items-center sm:pb-0">
@@ -39,7 +44,14 @@ export const PlanSheet: React.FC<PlanSheetProps> = ({ block, onClose, onUpgrade 
 
         <div className="mt-6 space-y-2">
           {onUpgrade && (
-            <button type="button" onClick={onUpgrade} className="game-cta">
+            <button
+              type="button"
+              onClick={() => {
+                trackStudentCta('game_plan_sheet', { block });
+                onUpgrade?.();
+              }}
+              className="game-cta"
+            >
               Conhecer o Student
             </button>
           )}

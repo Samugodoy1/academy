@@ -34,6 +34,7 @@ import { PlanSheet } from './PlanSheet';
 import { QuestBoard } from './QuestBoard';
 import { StreakCelebration } from './StreakCelebration';
 import { StreakPanel } from './StreakPanel';
+import { trackProductEvent } from '../../analytics/track';
 
 interface ColaGameProps {
   /** Topic of the student's next appointment: always unlocked and highlighted. */
@@ -85,6 +86,10 @@ export const ColaGame: React.FC<ColaGameProps> = ({
   const [goalOpen, setGoalOpen] = useState(false);
   const [streakOpen, setStreakOpen] = useState(false);
   const [planBlock, setPlanBlock] = useState<PlanBlock | null>(null);
+
+  useEffect(() => {
+    trackProductEvent('game_session_start', { plan: plan ?? 'free' });
+  }, [plan]);
 
   const streak = state.streak;
   const level = levelOf(state.xp);

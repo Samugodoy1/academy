@@ -101,6 +101,12 @@ import { applyAcademyPrefsToProfile } from './theme/academyAccount';
 import { ClinicalPageRoute } from './features/clinical/ClinicalPageRoute';
 import { LegacyClinicalRedirect } from './features/clinical/LegacyClinicalRedirect';
 import { UpgradeLimitModal } from './features/modals/UpgradeLimitModal';
+import {
+  ACADEMY_FREE_MAX_PATIENTS,
+  academyPatientLimitReached,
+  canExportAcademyClinicalPdf,
+  canUseAcademyBoxMode,
+} from './features/subscription/academyEntitlements';
 import { useAcademyStage } from './theme/AcademyStageProvider';
 import { resolveAcademyStage } from './theme/academyStage';
 import { ForgotPassword } from './features/auth/ForgotPassword';
@@ -288,7 +294,7 @@ export default function App() {
     currentUsage: number;
     product: string;
     upgradePlan: string;
-    feature?: 'pdf' | 'cases' | 'appointments';
+    feature?: 'pdf' | 'cases' | 'appointments' | 'box';
   }>({
     open: false,
     limit: 0,
@@ -480,6 +486,37 @@ export default function App() {
   const hasApprovedProductAccess = useCallback((product: Product) => {
     return getProductAccess(product)?.approval_status === 'approved';
   }, [getProductAccess]);
+
+  const academyAccessPlan = getProductAccess(getCurrentProduct())?.plan || 'free';
+
+  const openAcademyUpgradeLimit = useCallback((
+    feature: 'pdf' | 'cases' | 'appointments' | 'box',
+    options?: { limit?: number; currentUsage?: number },
+  ) => {
+    setUpgradeLimitModal({
+      open: true,
+      limit: options?.limit ?? (feature === 'appointments' ? 10 : ACADEMY_FREE_MAX_PATIENTS),
+      currentUsage: options?.currentUsage ?? 0,
+      product: 'academy',
+      upgradePlan: 'student',
+      feature,
+    });
+  }, []);
+
+  const openNewPatientModal = useCallback((open = true) => {
+    if (!open) {
+      setIsPatientModalOpen(false);
+      return;
+    }
+    if (academyPatientLimitReached(academyAccessPlan, patients.length)) {
+      openAcademyUpgradeLimit('cases', {
+        limit: ACADEMY_FREE_MAX_PATIENTS,
+        currentUsage: patients.length,
+      });
+      return;
+    }
+    setIsPatientModalOpen(true);
+  }, [academyAccessPlan, patients.length, openAcademyUpgradeLimit]);
 
   // ─── Agenda date navigation helper ───────────────────────────────────
   const navigateDate = useCallback((direction: 'prev' | 'next' | 'today') => {
@@ -1783,12 +1820,9 @@ export default function App() {
       } else {
         if (data.upgrade_required) {
           setIsModalOpen(false);
-          setUpgradeLimitModal({
-            open: true,
+          openAcademyUpgradeLimit('appointments', {
             limit: data.limit ?? 10,
             currentUsage: data.current_usage ?? 0,
-            product: data.product || 'academy',
-            upgradePlan: data.upgrade_plan || 'student',
           });
           return;
         }
@@ -1834,12 +1868,9 @@ export default function App() {
         const data = await res.json();
         if (data.upgrade_required) {
           setIsPatientModalOpen(false);
-          setUpgradeLimitModal({
-            open: true,
-            limit: data.limit ?? 3,
+          openAcademyUpgradeLimit('cases', {
+            limit: data.limit ?? ACADEMY_FREE_MAX_PATIENTS,
             currentUsage: data.current_usage ?? patients.length,
-            product: data.product || 'academy',
-            upgradePlan: data.upgrade_plan || 'student',
           });
           return;
         }
@@ -2339,17 +2370,10 @@ export default function App() {
                   setPatients(prev => prev.map(p => p.id === loadedPatient.id ? { ...p, ...loadedPatient } : p));
                 }}
                 profile={profile}
-                canExportClinicalCasePdf={(getProductAccess(getCurrentProduct())?.plan || 'free') !== 'free'}
-                onRequestPdfUpgrade={() =>
-                  setUpgradeLimitModal({
-                    open: true,
-                    limit: 0,
-                    currentUsage: 0,
-                    product: 'academy',
-                    upgradePlan: 'student',
-                    feature: 'pdf',
-                  })
-                }
+                canExportClinicalCasePdf={canExportAcademyClinicalPdf(academyAccessPlan)}
+                onRequestPdfUpgrade={() => openAcademyUpgradeLimit('pdf')}
+                canUseBoxMode={canUseAcademyBoxMode(academyAccessPlan)}
+                onRequestBoxUpgrade={() => openAcademyUpgradeLimit('box')}
               />
             </main>
           </div>
@@ -2724,7 +2748,7 @@ export default function App() {
                       openPatientRecord={openPatientRecord}
                       openPatientEvolution={openPatientEvolution}
                       setActiveTab={setActiveTab}
-                      setIsPatientModalOpen={setIsPatientModalOpen}
+                      setIsPatientModalOpen={openNewPatientModal}
                       openAppointmentModal={openAppointmentModal}
                       onDismissOnboarding={() => updateUserOnboarding('onboarding_done')}
                       onDismissWelcome={() => updateUserOnboarding('welcome_seen')}
@@ -2834,7 +2858,7 @@ export default function App() {
                           openPatientRecord={openPatientRecord}
                           contactPatientOnWhatsApp={contactPatientOnWhatsApp}
                           generatePatientPortalLink={generatePatientPortalLink}
-                          setIsPatientModalOpen={setIsPatientModalOpen}
+                          setIsPatientModalOpen={openNewPatientModal}
                           setActiveTab={setActiveTab}
                         />
                       </Suspense>
@@ -4150,17 +4174,17 @@ export default function App() {
                     <div className="p-6">
                       <p className="text-[13px] font-normal text-sys-muted mb-2 text-center">Academy Free</p>
                       <h3 className="text-[22px] font-semibold text-sys-text mb-2 text-center leading-[1.05] tracking-[-0.025em]">
-                        {academyUpgradeReason === 'estudos' ? 'A estante inteira, do 1º período à clínica.' : 'O box já tem os primeiros casos.'}
+                        {academyUpgradeReason === 'estudos' ? 'A estante inteira, do 1º período à clínica.' : 'Seu caso gratuito já está rodando.'}
                       </h3>
                       <p className="text-[15px] font-normal text-sys-muted leading-relaxed mb-4 text-center">
                         {academyUpgradeReason === 'estudos'
                           ? 'O Free mostra o formato. No Student todos os resumos, mapas mentais e a Cola sem limite acompanham você até a cadeira.'
-                          : 'Você organizou 3 casos. No Student a evolução, a agenda e o prontuário seguem no semestre.'}
+                          : 'No Free você cadastra 1 paciente para sentir o fluxo. No Student entram Modo Box, casos ilimitados e agenda sem teto mensal.'}
                       </p>
                       <div className="space-y-2">
                         {(academyUpgradeReason === 'estudos'
                           ? ['Todos os resumos e mapas do ciclo básico', 'Cola e treino sem limite diário', 'Casos, agenda e prontuário sem limite']
-                          : ['Casos ilimitados', 'Agenda acadêmica sem limite', 'Evoluções e modo box completos']
+                          : ['Modo Box inteligente no atendimento', 'Casos ilimitados no semestre', 'Agenda acadêmica sem limite mensal']
                         ).map((item) => (
                           <div key={item} className="flex items-center gap-3 rounded-2xl bg-primary/5 px-3 py-2.5 text-[13px] font-semibold text-slate-700">
                             <CheckCircle2 size={16} className="text-primary shrink-0" />

@@ -1,29 +1,38 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, X } from '../../icons';
+import { ACADEMY_FREE_MAX_PATIENTS } from '../subscription/academyEntitlements';
+
+type UpgradeFeature = 'pdf' | 'cases' | 'appointments' | 'box';
 
 export const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
-  const isPdfFeature = data?.feature === 'pdf';
-  const isAppointmentLimit = !isPdfFeature && data?.limit && data.limit > 3;
-  const limit = data?.limit || 3;
-  const currentUsage = data?.currentUsage || limit;
-  const progress = Math.min(100, Math.round((currentUsage / limit) * 100));
+  const feature = (data?.feature || 'cases') as UpgradeFeature;
+  const limit = data?.limit || ACADEMY_FREE_MAX_PATIENTS;
+  const currentUsage = data?.currentUsage ?? limit;
+  const progress = limit > 0 ? Math.min(100, Math.round((currentUsage / limit) * 100)) : 100;
 
-  const headlineText = isPdfFeature
-    ? 'Exportar caso em PDF é exclusivo do Academy Student.'
-    : isAppointmentLimit
-      ? 'Você atingiu o limite de agendamentos deste mês.'
-      : 'Seu Academy já tem seus primeiros casos.';
+  const headlineText = {
+    pdf: 'Exportar caso em PDF é exclusivo do Academy Student.',
+    box: 'Modo Box é o copiloto do atendimento na cadeira.',
+    appointments: 'Você atingiu o limite de agendamentos deste mês.',
+    cases: 'Seu caso gratuito já está no Academy.',
+  }[feature];
 
-  const descriptionText = isPdfFeature
-    ? 'Gere um resumo do caso para revisão, estudo e apresentação acadêmica. Esse recurso faz parte do plano pago do Academy.'
-    : isAppointmentLimit
-      ? `Você já agendou ${currentUsage} atendimentos neste mês. Para continuar agendando sem limite, mude para o Academy Student.`
-      : `Você já organizou ${currentUsage} casos. Para continuar acompanhando seus pacientes, evoluções e atendimentos da faculdade, mude para o Academy Student.`;
+  const descriptionText = {
+    pdf: 'Gere um resumo do caso para revisão, estudo e apresentação acadêmica. Esse recurso faz parte do plano pago do Academy.',
+    box: 'Checklist por procedimento, bandeja, alertas de anamnese e passo a passo contextualizado — tudo pensado para você não travar no box.',
+    appointments: `Você já agendou ${currentUsage} atendimentos neste mês. Para continuar agendando sem limite, mude para o Academy Student.`,
+    cases: `No Free você organiza ${limit} caso${limit === 1 ? '' : 's'} para sentir o fluxo. Para acompanhar mais pacientes, evoluções e agenda no semestre, o Student remove esse teto.`,
+  }[feature];
 
-  const barLabel = isAppointmentLimit ? 'Agendamentos no mês' : 'Casos no Free';
-  const benefitItems = isPdfFeature
-    ? ['Exportar casos clínicos em PDF', 'Casos e agenda ilimitados', 'Modo box e evoluções completos']
-    : ['Casos ilimitados', 'Agenda acadêmica sem limite', 'Evoluções e modo box completos'];
+  const barLabel = feature === 'appointments' ? 'Agendamentos no mês' : 'Casos no Free';
+  const showUsageBar = feature === 'cases' || feature === 'appointments';
+
+  const benefitItems = {
+    pdf: ['Exportar casos clínicos em PDF', 'Modo Box inteligente no atendimento', 'Casos e agenda ilimitados'],
+    box: ['Modo Box completo em todo atendimento', 'Checklist e bandeja por procedimento', 'Casos, agenda e PDF sem limite'],
+    appointments: ['Agenda acadêmica ilimitada', 'Modo Box e evoluções completos', 'Casos ilimitados no semestre'],
+    cases: ['Casos ilimitados no semestre', 'Modo Box inteligente no atendimento', 'Agenda acadêmica sem limite mensal'],
+  }[feature];
 
   return (
     <AnimatePresence>
@@ -73,7 +82,7 @@ export const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
                 </p>
               </div>
 
-              {!isPdfFeature && (
+              {showUsageBar && (
                 <div className="mt-6 rounded-[22px] border border-slate-100 bg-slate-50/80 p-4 sm:rounded-[24px]">
                   <div className="mb-3 flex items-center justify-between">
                     <span className="text-sm font-semibold text-slate-700">
@@ -96,7 +105,7 @@ export const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
                 </div>
               )}
 
-              <div className={`grid gap-2 ${isPdfFeature ? 'mt-6' : 'mt-4'}`}>
+              <div className={`grid gap-2 ${showUsageBar ? 'mt-4' : 'mt-6'}`}>
                 {benefitItems.map((item) => (
                   <div
                     key={item}
@@ -115,7 +124,7 @@ export const UpgradeLimitModal = ({ data, onClose, onUpgrade }: any) => {
                   onClick={onUpgrade}
                   className="apple-btn w-full"
                 >
-                  Mudar para Student
+                  Conhecer o Academy Student
                 </button>
 
                 <button

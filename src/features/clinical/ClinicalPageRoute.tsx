@@ -7,7 +7,7 @@ const PatientClinical = lazy(() =>
   import('../../components/PatientClinical').then(m => ({ default: m.PatientClinical }))
 );
 
-export const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpdateAnamnesis, onAddEvolution, onAddTransaction, onOpenSidebar, apiFetch, setAppActiveTab, navigate, pendingEvolutionAppointment, onClearPendingEvolution, onPatientLoaded, profile, canExportClinicalCasePdf, onRequestPdfUpgrade }: any) => {
+export const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient, onUpdateAnamnesis, onAddEvolution, onAddTransaction, onOpenSidebar, apiFetch, setAppActiveTab, navigate, pendingEvolutionAppointment, onClearPendingEvolution, onPatientLoaded, profile, canExportClinicalCasePdf, onRequestPdfUpgrade, canUseBoxMode, onRequestBoxUpgrade }: any) => {
   const { id } = useParams();
   const [patient, setPatient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -98,6 +98,8 @@ export const ClinicalPageRoute = ({ transactions, appointments, onUpdatePatient,
         } : null}
         canExportClinicalCasePdf={canExportClinicalCasePdf}
         onRequestPdfUpgrade={onRequestPdfUpgrade}
+        canUseBoxMode={canUseBoxMode}
+        onRequestBoxUpgrade={onRequestBoxUpgrade}
       />
     </Suspense>
   );

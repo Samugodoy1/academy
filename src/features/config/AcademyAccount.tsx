@@ -367,12 +367,12 @@ export function AcademyAccount({
                   Free
                 </p>
                 <p className="mt-2 text-[26px] font-semibold leading-[1.05] tracking-[-0.025em]">
-                  {stage === 'pre-clinico' ? 'A estante inteira do ciclo básico.' : 'Três casos. O box já começou.'}
+                  {stage === 'pre-clinico' ? 'A estante inteira do ciclo básico.' : 'Um caso. Modo Box no Student.'}
                 </p>
                 <p className="mt-2 text-[15px] tracking-[-0.011em] text-white/85">
                   {stage === 'pre-clinico'
                     ? 'No Student todos os resumos e mapas mentais abrem, e a Cola perde o limite diário.'
-                    : 'No Student a evolução, a agenda e o prontuário seguem no semestre.'}
+                    : 'No Free você organiza 1 paciente. No Student liberam Modo Box, casos ilimitados e agenda sem teto.'}
                 </p>
                 <p className="mt-4 text-[15px] text-white/90">Mudar para Student ›</p>
               </button>

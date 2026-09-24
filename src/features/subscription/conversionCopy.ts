@@ -1,12 +1,13 @@
 /**
  * Copy de conversão do Academy.
  *
- * Princípios (produtos que convertem sem humilhar — Duolingo, Notion, Spotify):
- * - Efeito Zeigarnik: o semestre fica incompleto com 1 caso. A falta é o próximo nome, não uma lista de features.
- * - Aversão à perda no instante da parede: o paciente novo "fica de fora", o atendimento segue sem passo a passo.
- * - Dotação: só pede upgrade depois que a pessoa já tem um caso vivo.
- * - Identidade: Student é quem chega preparado na cadeira, não um recibo.
- * - Pico e fim: quem pagou ouve, no uso, que aquilo já é seu — reforço pós-compra, não novo anúncio.
+ * Regra principal:
+ * o aluno não compra "recursos". Ele compra uma rotina mais organizada
+ * para estudar e chegar melhor preparado na clínica.
+ *
+ * O Free precisa entregar valor real, mas o Student precisa resolver uma
+ * necessidade recorrente. A copy mostra essa diferença sem pressionar
+ * artificialmente o aluno.
  */
 
 export type UpgradeFeature = 'pdf' | 'cases' | 'appointments' | 'box';
@@ -23,82 +24,82 @@ export interface UpgradeMoment {
 
 export const UPGRADE_MOMENT: Record<UpgradeFeature, UpgradeMoment> = {
   cases: {
-    kicker: 'Academy Free',
-    headline: 'O próximo paciente não entra.',
-    body: 'Você já tem um caso vivo. A clínica do semestre não para nesse nome. No Student o próximo cadastro, o Modo Box e a agenda abrem juntos.',
-    cta: 'Abrir o semestre no Student',
-    dismiss: 'Deixar esse paciente de fora',
-    usageLabel: 'Casos no Free',
+    kicker: 'Academy Student',
+    headline: 'Continue acompanhando sua clínica por aqui.',
+    body: 'Você já começou este caso no Academy. No Student, você pode continuar cadastrando pacientes, registrar as evoluções e manter os atendimentos do semestre organizados em um só lugar.',
+    cta: 'Conhecer o Student',
+    dismiss: 'Continuar no Free',
+    usageLabel: 'Seu limite no Free',
     benefits: [
-      'O próximo paciente entra na hora',
-      'Modo Box no atendimento, não só na cabeça',
-      'Agenda do mês sem teto',
+      'Casos e evoluções durante todo o semestre',
+      'Modo Box para acompanhar o atendimento',
+      'Agenda acadêmica sem limite',
     ],
   },
   box: {
-    kicker: 'Academy Free',
-    headline: 'O atendimento pede o Modo Box.',
-    body: 'Checklist, bandeja e o passo deste procedimento ficam fechados no Free. Sem eles, o box depende só da memória — na hora em que a cadeira já está ocupada.',
-    cta: 'Levar o Modo Box para a cadeira',
-    dismiss: 'Atender sem o passo a passo',
+    kicker: 'Academy Student',
+    headline: 'É aqui que o Academy fica útil durante o atendimento.',
+    body: 'O Modo Box transforma o caso em orientação para a cadeira: o que conferir, o que preparar e quais pontos merecem atenção. Ele está disponível no Student.',
+    cta: 'Conhecer o Modo Box',
+    dismiss: 'Continuar sem o Modo Box',
     benefits: [
-      'Passo a passo do procedimento aberto',
-      'Bandeja e alertas da anamnese',
-      'Casos e agenda do semestre sem teto',
+      'Orientação do atendimento dentro do caso',
+      'Checklist e informações importantes na hora certa',
+      'Histórico do caso sempre à mão',
     ],
   },
   appointments: {
-    kicker: 'Academy Free',
-    headline: 'Este mês da agenda fechou.',
-    body: 'Os atendimentos deste mês já ocuparam o Free. O próximo horário da clínica só entra no Student — a agenda deixa de contar contra você.',
-    cta: 'Liberar a agenda do mês',
-    dismiss: 'Não marcar este horário',
+    kicker: 'Academy Student',
+    headline: 'Continue organizando seus atendimentos.',
+    body: 'Você já está usando a agenda do Academy. No Student, os atendimentos do semestre ficam organizados junto aos pacientes, casos e evoluções.',
+    cta: 'Conhecer o Student',
+    dismiss: 'Continuar no Free',
     usageLabel: 'Agendamentos no mês',
     benefits: [
-      'Horários do mês sem contagem',
-      'Modo Box em cada atendimento',
-      'Casos do semestre sem teto',
+      'Agenda acadêmica sem limite mensal',
+      'Pacientes e atendimentos no mesmo lugar',
+      'Modo Box durante a clínica',
     ],
   },
   pdf: {
-    kicker: 'Academy Free',
-    headline: 'O caso não sai daqui em PDF.',
-    body: 'O resumo para revisão, estudo e apresentação na faculdade é do Student. O prontuário continua no Free — o arquivo para levar, não.',
-    cta: 'Gerar o PDF no Student',
-    dismiss: 'Deixar o caso só na tela',
+    kicker: 'Academy Student',
+    headline: 'Leve o caso com você.',
+    body: 'No Student, você pode gerar o PDF do caso para revisar, estudar ou apresentar na faculdade sem precisar montar tudo de novo.',
+    cta: 'Gerar PDF no Student',
+    dismiss: 'Continuar sem PDF',
     benefits: [
-      'PDF do caso para a faculdade',
-      'Modo Box no atendimento',
-      'Casos e agenda sem teto',
+      'Resumo do caso em PDF',
+      'Prontuário e evoluções organizados',
+      'Modo Box durante o atendimento',
     ],
   },
 };
 
 export const STUDENT_PRIDE = {
-  kicker: 'Student',
-  headline: 'Você chega no box com o caso inteiro.',
-  body: 'Modo Box, pacientes do semestre e o PDF do caso já são seus. O plano pago é presença na cadeira, não um selo.',
+  kicker: 'Seu Academy',
+  headline: 'Tudo o que você precisa para acompanhar a faculdade e a clínica.',
+  body: 'No Student, o Academy deixa de ser só um lugar para estudar e passa a acompanhar sua rotina: estudos, pacientes, casos, agenda e Modo Box.',
   owned: [
-    'Seus casos, sem teto no semestre',
-    'Seu Modo Box em todo atendimento',
-    'Sua agenda, sem limite no mês',
+    'Seus casos e evoluções do semestre',
+    'Seu Modo Box durante os atendimentos',
+    'Sua agenda acadêmica sem limite',
   ],
-  chairLine: 'Student. Este atendimento abre com checklist e bandeja.',
-  homeLine: 'Student. Modo Box e os casos do semestre estão abertos.',
-  checkoutHeadline: 'Agora o semestre cabe aqui.',
-  checkoutBody: 'Você é Student. Modo Box, casos e o PDF do prontuário já estão abertos — use no próximo atendimento.',
-  checkoutCta: 'Ir para a clínica',
-  billingLine: 'Continua seu: Modo Box, casos do semestre e agenda sem teto no mês.',
+  chairLine: 'Modo Box ativo. Abra o caso e siga o atendimento por aqui.',
+  homeLine: 'Student ativo. Seus estudos e sua clínica ficam no mesmo lugar.',
+  checkoutHeadline: 'Seu Academy está pronto para acompanhar o semestre.',
+  checkoutBody: 'Agora você tem acesso ao Student. Cadastre seus pacientes, organize seus casos e use o Modo Box no próximo atendimento.',
+  checkoutCta: 'Ir para o Academy',
+  billingLine: 'Seu Student inclui casos, agenda e Modo Box para acompanhar sua rotina na faculdade.',
 };
 
 export const FREE_TENSION = {
-  accountHeadline: 'Um caso. O próximo fica de fora.',
-  accountBody: 'O Free guarda um paciente para você sentir o fluxo. A lista da clínica, o Modo Box e a agenda do mês abrem no Student.',
-  accountCta: 'Quero chegar preparado',
-  homeHeadline: 'O próximo nome da lista não entra.',
-  homeBody: 'Você já organizou o caso gratuito. O semestre da clínica pede o seguinte — e o Modo Box na hora de sentar.',
-  homeCta: 'Abrir o semestre',
-  prepLine: 'Isso é o aquecimento. O passo a passo na cadeira é do Student.',
-  priceLead: 'O Free guarda um caso. O Student guarda o semestre — e o Modo Box na hora do atendimento.',
-  subscribeCta: 'Quero o Student',
+  accountHeadline: 'Comece pelo Free. Continue quando fizer sentido.',
+  accountBody: 'O Free permite conhecer o Academy e começar a organizar sua rotina. O Student libera o que você precisa quando a clínica começa a exigir mais: casos, agenda e Modo Box.',
+  accountCta: 'Conhecer o Student',
+  homeHeadline: 'Seu caso já começou. Quer continuar por aqui?',
+  homeBody: 'O Academy pode acompanhar o caso durante o semestre. No Student, você libera novos pacientes, evoluções e o Modo Box para usar durante o atendimento.',
+  homeCta: 'Conhecer o Student',
+  prepLine: 'Quer usar o passo a passo durante o atendimento? Isso faz parte do Student.',
+  priceLead: 'O Student foi feito para quem quer usar o Academy de verdade durante o semestre — estudando, organizando casos e atendendo.',
+  subscribeCta: 'Assinar o Student',
 };

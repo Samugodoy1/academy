@@ -15,6 +15,13 @@ import {
   PRESENCE_LABELS,
   type PresenceStatus,
 } from './adminUserPresence';
+import {
+  croByUserId,
+  pickCro,
+  rowsFromAdminUsersPayload,
+  showsOdontohubCro,
+  withResolvedCro,
+} from './adminUserCro';
 import type { Product, ProductApprovalStatus, ProductPlan } from '../../types/clinical';
 
 type ApiFetch = (url: string, options?: RequestInit & { product?: string }) => Promise<Response>;
@@ -46,6 +53,7 @@ export interface DirectoryUser {
   next_payment_date: string | null;
   coupon_code: string | null;
   coupon_ambassador: string | null;
+  cro?: string | null;
 }
 
 interface DirectoryResponse {
@@ -118,6 +126,7 @@ export function AdminUserControlPanel({
   const [presenceFilter, setPresenceFilter] = useState('all');
   const [sort, setSort] = useState('last_seen');
   const [data, setData] = useState<DirectoryResponse | null>(null);
+  const [croIndex, setCroIndex] = useState<Map<number, string>>(() => new Map());
   const [loading, setLoading] = useState(true);
   const [actionUserId, setActionUserId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -145,15 +154,28 @@ export function AdminUserControlPanel({
       if (accountKindFilter !== 'all') params.set('account_kind', accountKindFilter);
       if (presenceFilter !== 'all') params.set('presence', presenceFilter);
 
-      const res = await apiFetch(`/api/admin/users/directory?${params.toString()}`, {
-        product: DEFAULT_PRODUCT,
-      });
+      const directoryUrl = `/api/admin/users/directory?${params.toString()}`;
+      const needsCro = productFilter === 'all' || productFilter === 'odontohub';
+      const [res, croRes] = await Promise.all([
+        apiFetch(directoryUrl, { product: DEFAULT_PRODUCT }),
+        needsCro
+          ? apiFetch('/api/admin/users?product=odontohub', { product: DEFAULT_PRODUCT })
+          : Promise.resolve(null),
+      ]);
       if (!res.ok) {
         setError('Não foi possível carregar usuários. Confirme se a API foi atualizada.');
         setData(null);
         return;
       }
-      setData(await res.json());
+      const payload = await res.json() as DirectoryResponse;
+      const index = croRes?.ok
+        ? croByUserId(rowsFromAdminUsersPayload(await croRes.json()))
+        : new Map<number, string>();
+      setCroIndex(index);
+      setData({
+        ...payload,
+        users: (payload.users ?? []).map((user) => withResolvedCro(user, index)),
+      });
     } catch {
       setError('Erro de conexão ao carregar usuários.');
       setData(null);
@@ -344,6 +366,11 @@ export function AdminUserControlPanel({
                         </span>
                       </div>
                       <p className="text-sm text-slate-500 truncate">{user.email}</p>
+                      {showsOdontohubCro(user.product) && (
+                        <p className="text-sm font-semibold text-slate-800 mt-0.5">
+                          CRO {pickCro(user) || croIndex.get(user.user_id) || 'não informado'}
+                        </p>
+                      )}
                       <div className="flex flex-wrap gap-1.5 mt-2">
                         <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                           {user.product} · {user.plan}

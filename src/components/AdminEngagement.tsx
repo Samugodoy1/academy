@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Activity, Users, TrendingUp, Clock, UserX, CheckCircle2 } from '../icons';
+import {
+  croByUserId,
+  pickCro,
+  rowsFromAdminUsersPayload,
+  showsOdontohubCro,
+  withResolvedCro,
+} from '../features/admin/adminUserCro';
 
 type ApiFetch = (url: string, options?: RequestInit & { product?: string }) => Promise<Response>;
 
@@ -55,6 +62,7 @@ interface EngagementUser {
   subscription_plan?: string | null;
   coupon_code?: string | null;
   coupon_ambassador?: string | null;
+  cro?: string | null;
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -117,19 +125,27 @@ export default function AdminEngagement({ apiFetch, product, compact = false }: 
     setLoading(true);
     try {
       const excludeParam = excludeTest ? 'true' : 'false';
-      const [overviewRes, usersRes] = await Promise.all([
+      const needsCro = productFilter !== 'academy';
+      const [overviewRes, usersRes, croRes] = await Promise.all([
         apiFetch(`/api/admin/metrics/overview?product=${productFilter}`, { product }),
         apiFetch(
           `/api/admin/metrics/engagement?product=${productFilter}&status=${statusFilter}&exclude_test=${excludeParam}&limit=200`,
           { product },
         ),
+        needsCro
+          ? apiFetch('/api/admin/users?product=odontohub', { product })
+          : Promise.resolve(null),
       ]);
       if (overviewRes.ok) {
         const data = await overviewRes.json();
         setOverview(data.overview);
       }
       if (usersRes.ok) {
-        setUsers(await usersRes.json());
+        const rows = await usersRes.json() as EngagementUser[];
+        const index = croRes?.ok
+          ? croByUserId(rowsFromAdminUsersPayload(await croRes.json()))
+          : new Map<number, string>();
+        setUsers((Array.isArray(rows) ? rows : []).map((row) => withResolvedCro(row, index)));
       }
     } catch (error) {
       console.error('Error fetching engagement metrics:', error);
@@ -215,6 +231,7 @@ export default function AdminEngagement({ apiFetch, product, compact = false }: 
                   <thead>
                     <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-bold">
                       <th className="px-4 py-3">Usuário</th>
+                      {productFilter !== 'academy' && <th className="px-4 py-3">CRO</th>}
                       <th className="px-4 py-3">Tipo</th>
                       <th className="px-4 py-3">Status</th>
                       <th className="px-4 py-3">Funil</th>
@@ -237,6 +254,11 @@ export default function AdminEngagement({ apiFetch, product, compact = false }: 
                             <p className="text-xs text-slate-400">{u.email}</p>
                             <p className="text-[10px] text-slate-400">{u.product} · {u.plan}</p>
                           </td>
+                          {productFilter !== 'academy' && (
+                            <td className="px-4 py-3 text-sm font-semibold text-slate-800">
+                              {showsOdontohubCro(u.product) ? (pickCro(u) || 'não informado') : '—'}
+                            </td>
+                          )}
                           <td className="px-4 py-3 text-xs font-semibold text-slate-600">
                             {KIND_LABELS[u.account_kind || 'standard'] || u.account_kind}
                           </td>
@@ -279,7 +301,7 @@ export default function AdminEngagement({ apiFetch, product, compact = false }: 
                     })}
                     {users.length === 0 && (
                       <tr>
-                        <td colSpan={10} className="px-4 py-8 text-center text-slate-400">Nenhum usuário encontrado</td>
+                        <td colSpan={productFilter === 'academy' ? 10 : 11} className="px-4 py-8 text-center text-slate-400">Nenhum usuário encontrado</td>
                       </tr>
                     )}
                   </tbody>
@@ -296,6 +318,9 @@ export default function AdminEngagement({ apiFetch, product, compact = false }: 
                         <div>
                           <p className="font-bold text-slate-800">{u.name}</p>
                           <p className="text-xs text-slate-400">{u.email}</p>
+                          {showsOdontohubCro(u.product) && (
+                            <p className="text-xs font-semibold text-slate-700">CRO {pickCro(u) || 'não informado'}</p>
+                          )}
                         </div>
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${status.color}`}>
                           {status.label}

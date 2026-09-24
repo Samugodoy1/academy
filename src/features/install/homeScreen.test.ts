@@ -3,8 +3,6 @@ import {
   detectHomeScreenPlatform,
   isIosSafari,
   isStandaloneDisplay,
-  nextDismissUntil,
-  readDismissedUntil,
   shouldSuggestHomeScreen,
 } from './homeScreen';
 
@@ -24,19 +22,30 @@ describe('home screen suggestion', () => {
   it('hides when already installed, dismissed, or printing', () => {
     expect(isStandaloneDisplay({ standalone: true }, false)).toBe(true);
     expect(isStandaloneDisplay({}, true)).toBe(true);
-    const base = { platform: 'ios' as const, standalone: false, dismissedUntil: null, pathname: '/' };
+    const base = {
+      platform: 'ios' as const,
+      standalone: false,
+      installed: false,
+      dismissedThisVisit: false,
+      pathname: '/',
+    };
     expect(shouldSuggestHomeScreen(base)).toBe(true);
     expect(shouldSuggestHomeScreen({ ...base, standalone: true })).toBe(false);
-    expect(shouldSuggestHomeScreen({ ...base, dismissedUntil: 1 })).toBe(false);
+    expect(shouldSuggestHomeScreen({ ...base, installed: true })).toBe(false);
+    expect(shouldSuggestHomeScreen({ ...base, dismissedThisVisit: true })).toBe(false);
     expect(shouldSuggestHomeScreen({ ...base, pathname: '/print/evolucao/1' })).toBe(false);
     expect(shouldSuggestHomeScreen({ ...base, platform: null })).toBe(false);
   });
 
-  it('snoozes a dismissal for two weeks', () => {
-    const now = 1_000_000;
-    const until = nextDismissUntil(now);
-    expect(readDismissedUntil(String(until), now + 1000)).toBe(until);
-    expect(readDismissedUntil(String(until), until + 1)).toBeNull();
-    expect(readDismissedUntil('nope')).toBeNull();
+  it('comes back on the next visit after Agora não', () => {
+    const hidden = {
+      platform: 'android' as const,
+      standalone: false,
+      installed: false,
+      dismissedThisVisit: true,
+      pathname: '/',
+    };
+    expect(shouldSuggestHomeScreen(hidden)).toBe(false);
+    expect(shouldSuggestHomeScreen({ ...hidden, dismissedThisVisit: false })).toBe(true);
   });
 });

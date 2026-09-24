@@ -116,6 +116,7 @@ import PrintDocument from './features/print/PrintRoutes';
 import { useAgendaState } from './features/agenda/useAgendaState';
 import { AppProvider } from './app/AppProvider';
 import { AddToHomeScreen } from './features/install/AddToHomeScreen';
+import { PhoneNotifications } from './features/notifications/PhoneNotifications';
 
 const AcademyEstudos = lazy(() =>
   import('./components/AcademyEstudos').then(m => ({ default: m.AcademyEstudos }))
@@ -2319,6 +2320,15 @@ export default function App() {
     <>
     <AcademyPrefsSync userId={user?.id ?? null} profile={profile} />
     <AddToHomeScreen />
+    <PhoneNotifications
+      signedIn={Boolean(user)}
+      appointments={appointments.map(item => ({
+        id: item.id,
+        patientName: item.patient_name,
+        startMs: new Date(item.start_time).getTime(),
+        status: item.status,
+      }))}
+    />
     <Routes>
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />

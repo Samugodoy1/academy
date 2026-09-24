@@ -79,6 +79,7 @@ import {
   generateBoxNowSteps
 } from '../data/boxIntelligence';
 import { exportClinicalCasePdf, type StudentProfileForPdf } from '../utils/exportClinicalCasePdf';
+import { STUDENT_PRIDE } from '../features/subscription/conversionCopy';
 
 interface PatientClinicalProps {
   patient: any;
@@ -94,6 +95,8 @@ interface PatientClinicalProps {
   studentProfile?: StudentProfileForPdf | null;
   canExportClinicalCasePdf?: boolean;
   onRequestPdfUpgrade?: () => void;
+  canUseBoxMode?: boolean;
+  onRequestBoxUpgrade?: () => void;
 }
 
 type InfoTab = 'anamneses' | 'dados' | 'imagens' | 'financeiro';
@@ -285,6 +288,8 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   studentProfile,
   canExportClinicalCasePdf = false,
   onRequestPdfUpgrade,
+  canUseBoxMode = true,
+  onRequestBoxUpgrade,
 }) => {
   const [isAddingEvolution, setIsAddingEvolution] = useState(false);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
@@ -1726,6 +1731,15 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     return 'Boa noite';
   })();
 
+  const handleOpenBoxMode = () => {
+    if (!canUseBoxMode) {
+      onRequestBoxUpgrade?.();
+      return;
+    }
+    trackProductEvent('box_mode_open', { source: 'clinical_hub' });
+    setIsBoxModeOpen(true);
+  };
+
   const handleExportClinicalCasePdf = async () => {
     if (isExportingPdf) return;
     if (!canExportClinicalCasePdf) {
@@ -2001,20 +2015,31 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => {
-                  trackProductEvent('box_mode_open', { source: 'clinical_hub' });
-                  setIsBoxModeOpen(true);
-                }}
-                className="rounded-[22px] bg-[var(--neo)] px-5 py-4 text-left text-white active:scale-[0.98]"
+                onClick={handleOpenBoxMode}
+                className={`rounded-[22px] px-5 py-4 text-left active:scale-[0.98] ${
+                  canUseBoxMode
+                    ? 'bg-[var(--neo)] text-white'
+                    : 'bg-slate-100 text-slate-800 ring-1 ring-slate-200/80'
+                }`}
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[16px] font-semibold tracking-[-0.016em]">Modo Box</p>
-                    <p className="text-[12px] text-white/75 font-medium mt-1 line-clamp-2">
-                      {boxIntelContext.criticalCheckpoint || boxIntelContext.expectedTodaySummary || boxIntelContext.boxProcedureDetail || 'Cola clínica rápida'}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-[16px] font-semibold tracking-[-0.016em]">Modo Box</p>
+                      {!canUseBoxMode && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-slate-500">
+                          <Lock size={10} />
+                          Student
+                        </span>
+                      )}
+                    </div>
+                    <p className={`text-[12px] font-medium mt-1 line-clamp-2 ${canUseBoxMode ? 'text-white/75' : 'text-slate-500'}`}>
+                      {canUseBoxMode
+                        ? (boxIntelContext.criticalCheckpoint || boxIntelContext.expectedTodaySummary || boxIntelContext.boxProcedureDetail || 'Cola clínica rápida')
+                        : 'O passo a passo deste atendimento fica fechado. Sem ele, o box depende da memória.'}
                     </p>
                   </div>
-                  <BookOpen size={20} className="shrink-0 text-white/90" />
+                  <BookOpen size={20} className={`shrink-0 ${canUseBoxMode ? 'text-white/90' : 'text-slate-400'}`} />
                 </div>
               </button>
               <button
@@ -2031,6 +2056,11 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
                 </div>
               </button>
             </div>
+            {canUseBoxMode && (
+              <p className="mt-3 text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">
+                {STUDENT_PRIDE.chairLine}
+              </p>
+            )}
             <button
               type="button"
               onClick={handleExportClinicalCasePdf}

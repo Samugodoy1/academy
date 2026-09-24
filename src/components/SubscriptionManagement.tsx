@@ -9,6 +9,7 @@ import {
 } from '../features/coupons/couponUtils';
 import type { CouponPreview } from '../features/coupons/types';
 import { trackProductEvent, trackStudentCta } from '../features/analytics/track';
+import { FREE_TENSION, STUDENT_PRIDE } from '../features/subscription/conversionCopy';
 
 interface SubscriptionPlan {
   id: number;
@@ -252,7 +253,7 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
   const statusInfo = subscription && hasSubscriptionCard
     ? STATUS_MAP[subscription.status] || STATUS_MAP.pending
     : null;
-  const subscribeCtaLabel = product === 'academy' ? `Assinar ${paidPlan?.name || 'Student'}` : 'Assinar OdontoHub Pro';
+  const subscribeCtaLabel = product === 'academy' ? FREE_TENSION.subscribeCta : 'Assinar OdontoHub Pro';
   const showFreeUpgrade = isFree && !isPending && !isProActive && paidPlan;
   const showCancelledExpired = subscription && ['cancelled', 'expired'].includes(subscription.status) && paidPlan;
   const hasCardBody = Boolean(
@@ -336,6 +337,12 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
                 </div>
               )}
 
+              {product === 'academy' && (
+                <p className="text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-ink)]">
+                  {STUDENT_PRIDE.billingLine}
+                </p>
+              )}
+
               <button
                 onClick={() => setShowCancelConfirm(true)}
                 className="w-full p-3 border border-slate-200 rounded-xl text-xs font-medium text-slate-400 hover:text-red-500 hover:border-red-200 transition-all"
@@ -387,6 +394,9 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
           {showFreeUpgrade && (
             neo ? (
               <div className="space-y-4">
+                <p className="text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-ink)]">
+                  {FREE_TENSION.priceLead}
+                </p>
                 <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
                   {chargedAmount != null ? formatCurrency(chargedAmount) : formatCurrency(paidPlan.amount)} por mês
                 </p>

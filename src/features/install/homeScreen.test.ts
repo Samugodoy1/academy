@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  chooseHomeScreenPrompt,
   detectHomeScreenPlatform,
+  homeScreenDay,
   isIosSafari,
   isStandaloneDisplay,
-  nextDismissUntil,
-  readDismissedUntil,
-  shouldSuggestHomeScreen,
 } from './homeScreen';
 
 describe('home screen suggestion', () => {
@@ -21,22 +20,26 @@ describe('home screen suggestion', () => {
     expect(isIosSafari('Mozilla/5.0 (iPhone) CriOS/128.0.6613.98 Mobile Safari/604.1')).toBe(false);
   });
 
-  it('hides when already installed, dismissed, or printing', () => {
+  it('shows the sheet once a day, then the banner after Agora não', () => {
     expect(isStandaloneDisplay({ standalone: true }, false)).toBe(true);
-    expect(isStandaloneDisplay({}, true)).toBe(true);
-    const base = { platform: 'ios' as const, standalone: false, dismissedUntil: null, pathname: '/' };
-    expect(shouldSuggestHomeScreen(base)).toBe(true);
-    expect(shouldSuggestHomeScreen({ ...base, standalone: true })).toBe(false);
-    expect(shouldSuggestHomeScreen({ ...base, dismissedUntil: 1 })).toBe(false);
-    expect(shouldSuggestHomeScreen({ ...base, pathname: '/print/evolucao/1' })).toBe(false);
-    expect(shouldSuggestHomeScreen({ ...base, platform: null })).toBe(false);
-  });
-
-  it('snoozes a dismissal for two weeks', () => {
-    const now = 1_000_000;
-    const until = nextDismissUntil(now);
-    expect(readDismissedUntil(String(until), now + 1000)).toBe(until);
-    expect(readDismissedUntil(String(until), until + 1)).toBeNull();
-    expect(readDismissedUntil('nope')).toBeNull();
+    expect(homeScreenDay(new Date(2026, 8, 24))).toBe('2026-09-24');
+    const base = {
+      platform: 'ios' as const,
+      standalone: false,
+      installed: false,
+      pathname: '/',
+      declinedOnce: false,
+      modalDay: null as string | null,
+      today: '2026-09-24',
+      quietThisVisit: false,
+    };
+    expect(chooseHomeScreenPrompt(base)).toBe('modal');
+    expect(chooseHomeScreenPrompt({ ...base, modalDay: '2026-09-24' })).toBe('none');
+    expect(chooseHomeScreenPrompt({ ...base, declinedOnce: true, modalDay: '2026-09-24' })).toBe('banner');
+    expect(chooseHomeScreenPrompt({ ...base, declinedOnce: true, modalDay: '2026-09-23' })).toBe('modal');
+    expect(chooseHomeScreenPrompt({ ...base, declinedOnce: true, modalDay: '2026-09-24', quietThisVisit: true })).toBe('none');
+    expect(chooseHomeScreenPrompt({ ...base, installed: true })).toBe('none');
+    expect(chooseHomeScreenPrompt({ ...base, pathname: '/print/evolucao/1' })).toBe('none');
+    expect(chooseHomeScreenPrompt({ ...base, platform: null })).toBe('none');
   });
 });

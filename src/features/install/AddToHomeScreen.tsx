@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
+import { AcademyToast } from '../../components/AcademyToast';
+import { noticeDurationMs } from '../../components/academyNotices';
 import {
-  HOME_SCREEN_DISMISS_KEY,
+  HOME_SCREEN_DECLINED_KEY,
+  HOME_SCREEN_INSTALLED_KEY,
+  HOME_SCREEN_MODAL_DAY_KEY,
+  HOME_SCREEN_SESSION_KEY,
+  chooseHomeScreenPrompt,
   detectHomeScreenPlatform,
+  homeScreenDay,
   isIosSafari,
   isStandaloneDisplay,
-  nextDismissUntil,
-  readDismissedUntil,
-  shouldSuggestHomeScreen,
   type HomeScreenPlatform,
 } from './homeScreen';
 
@@ -122,6 +126,7 @@ export const AddToHomeScreen: React.FC = () => {
   const [platform, setPlatform] = useState<HomeScreenPlatform | null>(null);
   const [safari, setSafari] = useState(true);
   const [open, setOpen] = useState(false);
+  const [banner, setBanner] = useState(false);
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
@@ -132,16 +137,42 @@ export const AddToHomeScreen: React.FC = () => {
     );
     const ua = nav.userAgent || '';
     const detected = detectHomeScreenPlatform(ua, nav.maxTouchPoints, nav.platform);
-    const dismissedUntil = readDismissedUntil(localStorage.getItem(HOME_SCREEN_DISMISS_KEY));
-    if (!shouldSuggestHomeScreen({ platform: detected, standalone, dismissedUntil, pathname })) {
+    const prompt = chooseHomeScreenPrompt({
+      platform: detected,
+      standalone,
+      installed: localStorage.getItem(HOME_SCREEN_INSTALLED_KEY) === '1',
+      pathname,
+      declinedOnce: localStorage.getItem(HOME_SCREEN_DECLINED_KEY) === '1',
+      modalDay: localStorage.getItem(HOME_SCREEN_MODAL_DAY_KEY),
+      today: homeScreenDay(),
+      quietThisVisit: sessionStorage.getItem(HOME_SCREEN_SESSION_KEY) === '1',
+    });
+    if (prompt === 'none') {
       setOpen(false);
+      setBanner(false);
       return;
     }
     setPlatform(detected);
     setSafari(detected === 'ios' ? isIosSafari(ua) : true);
-    const timer = window.setTimeout(() => setOpen(true), 1600);
+    const timer = window.setTimeout(() => {
+      if (prompt === 'modal') {
+        localStorage.setItem(HOME_SCREEN_MODAL_DAY_KEY, homeScreenDay());
+        setBanner(false);
+        setOpen(true);
+        return;
+      }
+      setOpen(false);
+      setBanner(true);
+      sessionStorage.setItem(HOME_SCREEN_SESSION_KEY, '1');
+    }, 1600);
     return () => window.clearTimeout(timer);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!banner) return;
+    const timer = window.setTimeout(() => setBanner(false), noticeDurationMs({ message: 'Instalar o app', actionLabel: 'Ver', onAction: openFromBanner }));
+    return () => window.clearTimeout(timer);
+  }, [banner]);
 
   useEffect(() => {
     const onPrompt = (event: Event) => {
@@ -149,7 +180,7 @@ export const AddToHomeScreen: React.FC = () => {
       setInstallEvent(event as BeforeInstallPromptEvent);
     };
     const onInstalled = () => {
-      localStorage.setItem(HOME_SCREEN_DISMISS_KEY, String(nextDismissUntil(Date.now() + 1000 * 60 * 60 * 24 * 365)));
+      localStorage.setItem(HOME_SCREEN_INSTALLED_KEY, '1');
       setOpen(false);
     };
     window.addEventListener('beforeinstallprompt', onPrompt);
@@ -161,8 +192,21 @@ export const AddToHomeScreen: React.FC = () => {
   }, []);
 
   const dismiss = () => {
-    localStorage.setItem(HOME_SCREEN_DISMISS_KEY, String(nextDismissUntil()));
+    localStorage.setItem(HOME_SCREEN_DECLINED_KEY, '1');
+    localStorage.setItem(HOME_SCREEN_MODAL_DAY_KEY, homeScreenDay());
+    sessionStorage.setItem(HOME_SCREEN_SESSION_KEY, '1');
     setOpen(false);
+    setBanner(false);
+  };
+
+  const dismissBanner = () => {
+    sessionStorage.setItem(HOME_SCREEN_SESSION_KEY, '1');
+    setBanner(false);
+  };
+
+  const openFromBanner = () => {
+    setBanner(false);
+    setOpen(true);
   };
 
   const install = async () => {
@@ -170,13 +214,25 @@ export const AddToHomeScreen: React.FC = () => {
     await installEvent.prompt();
     const choice = await installEvent.userChoice;
     setInstallEvent(null);
-    if (choice.outcome === 'accepted') dismiss();
+    if (choice.outcome === 'accepted') {
+      localStorage.setItem(HOME_SCREEN_INSTALLED_KEY, '1');
+      setOpen(false);
+    }
   };
 
   const steps = platform === 'android' ? ANDROID_STEPS : IOS_STEPS;
   const title = platform === 'android' ? 'Adicionar à tela inicial' : 'Adicionar à Tela de Início';
 
   return (
+    <>
+    <AnimatePresence>
+      {banner && (
+        <AcademyToast
+          notice={{ message: 'Instalar o app', actionLabel: 'Ver', onAction: openFromBanner }}
+          onDismiss={dismissBanner}
+        />
+      )}
+    </AnimatePresence>
     <AnimatePresence>
       {open && platform && (
         <div className="pointer-events-none fixed inset-0 z-[90] flex items-end justify-center no-print">
@@ -243,5 +299,6 @@ export const AddToHomeScreen: React.FC = () => {
         </div>
       )}
     </AnimatePresence>
+    </>
   );
 };

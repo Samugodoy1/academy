@@ -115,6 +115,7 @@ import { ResetPassword } from './features/auth/ResetPassword';
 import PrintDocument from './features/print/PrintRoutes';
 import { useAgendaState } from './features/agenda/useAgendaState';
 import { AppProvider } from './app/AppProvider';
+import { AddToHomeScreen } from './features/install/AddToHomeScreen';
 
 const AcademyEstudos = lazy(() =>
   import('./components/AcademyEstudos').then(m => ({ default: m.AcademyEstudos }))
@@ -2317,6 +2318,7 @@ export default function App() {
   return (
     <>
     <AcademyPrefsSync userId={user?.id ?? null} profile={profile} />
+    <AddToHomeScreen />
     <Routes>
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />

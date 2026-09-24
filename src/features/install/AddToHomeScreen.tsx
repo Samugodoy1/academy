@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import {
-  HOME_SCREEN_DISMISS_KEY,
+  HOME_SCREEN_INSTALLED_KEY,
+  HOME_SCREEN_SESSION_KEY,
   detectHomeScreenPlatform,
   isIosSafari,
   isStandaloneDisplay,
-  nextDismissUntil,
-  readDismissedUntil,
   shouldSuggestHomeScreen,
   type HomeScreenPlatform,
 } from './homeScreen';
@@ -132,8 +131,9 @@ export const AddToHomeScreen: React.FC = () => {
     );
     const ua = nav.userAgent || '';
     const detected = detectHomeScreenPlatform(ua, nav.maxTouchPoints, nav.platform);
-    const dismissedUntil = readDismissedUntil(localStorage.getItem(HOME_SCREEN_DISMISS_KEY));
-    if (!shouldSuggestHomeScreen({ platform: detected, standalone, dismissedUntil, pathname })) {
+    const installed = localStorage.getItem(HOME_SCREEN_INSTALLED_KEY) === '1';
+    const dismissedThisVisit = sessionStorage.getItem(HOME_SCREEN_SESSION_KEY) === '1';
+    if (!shouldSuggestHomeScreen({ platform: detected, standalone, installed, dismissedThisVisit, pathname })) {
       setOpen(false);
       return;
     }
@@ -149,7 +149,7 @@ export const AddToHomeScreen: React.FC = () => {
       setInstallEvent(event as BeforeInstallPromptEvent);
     };
     const onInstalled = () => {
-      localStorage.setItem(HOME_SCREEN_DISMISS_KEY, String(nextDismissUntil(Date.now() + 1000 * 60 * 60 * 24 * 365)));
+      localStorage.setItem(HOME_SCREEN_INSTALLED_KEY, '1');
       setOpen(false);
     };
     window.addEventListener('beforeinstallprompt', onPrompt);
@@ -161,7 +161,7 @@ export const AddToHomeScreen: React.FC = () => {
   }, []);
 
   const dismiss = () => {
-    localStorage.setItem(HOME_SCREEN_DISMISS_KEY, String(nextDismissUntil()));
+    sessionStorage.setItem(HOME_SCREEN_SESSION_KEY, '1');
     setOpen(false);
   };
 
@@ -170,7 +170,10 @@ export const AddToHomeScreen: React.FC = () => {
     await installEvent.prompt();
     const choice = await installEvent.userChoice;
     setInstallEvent(null);
-    if (choice.outcome === 'accepted') dismiss();
+    if (choice.outcome === 'accepted') {
+      localStorage.setItem(HOME_SCREEN_INSTALLED_KEY, '1');
+      setOpen(false);
+    }
   };
 
   const steps = platform === 'android' ? ANDROID_STEPS : IOS_STEPS;

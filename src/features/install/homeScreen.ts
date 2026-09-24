@@ -1,5 +1,7 @@
-export const HOME_SCREEN_DISMISS_KEY = 'odontohub-academy-home-screen';
-const DISMISS_MS = 14 * 24 * 60 * 60 * 1000;
+/** Set when the person actually installs. "Agora não" does not use this. */
+export const HOME_SCREEN_INSTALLED_KEY = 'odontohub-academy-home-screen-installed';
+/** Hides the sheet only for the current visit, so the next open asks again. */
+export const HOME_SCREEN_SESSION_KEY = 'odontohub-academy-home-screen-session';
 
 export type HomeScreenPlatform = 'ios' | 'android';
 
@@ -26,25 +28,15 @@ export function isIosSafari(ua: string): boolean {
   return /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS|Instagram|FBAN|FBAV/i.test(ua);
 }
 
-export function readDismissedUntil(raw: string | null, now = Date.now()): number | null {
-  if (!raw) return null;
-  const until = Number(raw);
-  if (!Number.isFinite(until)) return null;
-  return until > now ? until : null;
-}
-
-export function nextDismissUntil(now = Date.now()): number {
-  return now + DISMISS_MS;
-}
-
 export function shouldSuggestHomeScreen(input: {
   platform: HomeScreenPlatform | null;
   standalone: boolean;
-  dismissedUntil: number | null;
+  installed: boolean;
+  dismissedThisVisit: boolean;
   pathname: string;
 }): boolean {
-  if (!input.platform || input.standalone) return false;
+  if (!input.platform || input.standalone || input.installed) return false;
   if (input.pathname.startsWith('/print')) return false;
-  if (input.dismissedUntil) return false;
+  if (input.dismissedThisVisit) return false;
   return true;
 }

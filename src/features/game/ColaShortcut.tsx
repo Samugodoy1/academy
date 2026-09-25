@@ -60,9 +60,7 @@ export const ColaShortcut: React.FC<ColaShortcutProps> = ({ plan, onOpen }) => {
     <button
       type="button"
       onClick={onOpen}
-      className={`w-full rounded-[22px] px-5 py-5 text-left ${
-        atRisk ? 'bg-[#fff3e0]' : 'bg-white'
-      }`}
+      className="ac-sheet w-full px-5 py-5 text-left"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 gap-3">
@@ -72,7 +70,7 @@ export const ColaShortcut: React.FC<ColaShortcutProps> = ({ plan, onOpen }) => {
             size={64}
           />
           <div className="min-w-0">
-            <p className="ac-section-title">{headline}</p>
+            <p className="ac-name text-[22px]">{headline}</p>
             <p className="mt-2 text-[15px] leading-snug tracking-[-0.016em] text-[var(--neo-gray)]">
               {subline}
             </p>

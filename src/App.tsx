@@ -2336,7 +2336,7 @@ export default function App() {
       <Route path="/pre-atendimento/:token" element={<PreAtendimento />} />
       <Route path="/prontuario/:id" element={
         user ? (
-          <div className="min-h-screen bg-[#f5f5f7] flex font-sans text-sys-text relative overflow-x-hidden">
+          <div className="min-h-screen bg-transparent flex font-sans text-sys-text relative overflow-x-hidden">
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
               {isSidebarOpen && (
@@ -2415,7 +2415,7 @@ export default function App() {
       } />
       <Route path="*" element={
         !user ? (
-          <div className="min-h-screen bg-[#f5f5f7] flex items-center justify-center px-5 font-sans antialiased">
+          <div className="min-h-screen bg-transparent flex items-center justify-center px-5 font-sans antialiased">
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2602,7 +2602,7 @@ export default function App() {
           </div>
         ) : (
           <AppProvider value={appContextValue}>
-          <div className="min-h-screen bg-[#f5f5f7] flex font-sans text-sys-text relative overflow-x-hidden">
+          <div className="min-h-screen bg-transparent flex font-sans text-sys-text relative overflow-x-hidden">
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
               {isSidebarOpen && (
@@ -2635,7 +2635,7 @@ export default function App() {
 
             {/* Main Content */}
             <main className="flex-1 min-w-0 w-full print:p-0">
-              <div className="tablet-l:hidden sticky top-0 z-30 bg-[#f5f5f7]/80 px-5 py-3 backdrop-blur-xl no-print">
+              <div className="tablet-l:hidden sticky top-0 z-30 bg-[#f6f3ef]/70 px-5 py-3 backdrop-blur-xl no-print">
                 <AcademyWordmark size="sm" />
               </div>
               {/* ── Floating Guide Banner ── */}

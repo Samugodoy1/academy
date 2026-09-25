@@ -32,6 +32,8 @@ export function applyResolvedTheme(resolved: ResolvedTheme) {
   if (root.getAttribute('data-product') === 'academy') {
     root.setAttribute('data-theme', 'light');
     root.style.colorScheme = 'light';
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', '#f5f5f7');
     return;
   }
   root.setAttribute('data-theme', resolved);

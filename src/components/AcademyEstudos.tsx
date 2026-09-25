@@ -1221,7 +1221,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         </button>
 
         {selectedCase && caseBox && (
-          <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+          <div className="rounded-[22px] bg-white px-5 py-5">
             <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">
               Para o atendimento
             </p>
@@ -1269,7 +1269,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
 
         {activeMaterial.quickFacts.length > 0 && (
           <StudySection kicker="Na ponta da língua">
-            <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+            <div className="ac-group">
               {activeMaterial.quickFacts.map(fact => (
                 <div
                   key={fact.label}
@@ -1288,7 +1288,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         <StudySection kicker="Roteiro">
           <div className="space-y-3">
             {activeMaterial.modules.map((module, moduleIndex) => (
-              <article key={module.title} className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+              <article key={module.title} className="rounded-[22px] bg-white px-5 py-5">
                 <p className="text-[13px] tabular-nums text-[var(--neo)]">
                   {String(moduleIndex + 1).padStart(2, '0')}
                 </p>
@@ -1319,7 +1319,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
             </span>
           }
         >
-          <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+          <div className="ac-group">
             {activeMaterial.checklist.map(item => {
               const isChecked = checkedItems.has(item);
               return (
@@ -1351,7 +1351,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
 
         {activeMaterial.selfTest.length > 0 && (
           <StudySection kicker="Teste-se">
-            <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+            <div className="ac-group">
               {activeMaterial.selfTest.map((qa, index) => {
                 const revealed = revealedAnswers.has(index);
                 return (
@@ -1380,7 +1380,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         )}
 
         <StudySection kicker="Cuidado">
-          <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+          <div className="ac-group">
             {activeMaterial.pitfalls.map(item => (
               <p
                 key={item}
@@ -1393,7 +1393,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         </StudySection>
 
         <StudySection kicker="Explicar">
-          <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+          <div className="rounded-[22px] bg-white px-5 py-5">
             <p className="text-[15px] leading-relaxed tracking-[-0.011em] text-[var(--neo-ink)]">
               {activeMaterial.patientTalk}
             </p>
@@ -1401,7 +1401,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         </StudySection>
 
         <StudySection kicker="Confiança">
-          <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+          <div className="ac-group">
             {CONFIDENCE_OPTIONS.map(option => {
               const isSelected = selectedStudy ? confidenceMap[selectedStudy]?.level === option.level : false;
               return (
@@ -1500,7 +1500,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         </p>
       </header>
 
-      <div className="grid grid-cols-2 gap-1 rounded-full bg-[#f5f5f7] p-1 desktop:max-w-[320px]">
+      <div className="grid grid-cols-2 gap-1 rounded-full bg-[#e8e8ed] p-1 desktop:max-w-[320px]">
         {(['estudar', 'treinar'] as StudyMode[]).map(option => (
           <button
             key={option}
@@ -1520,7 +1520,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
       {mode === 'treinar' ? (
         <Suspense
           fallback={
-            <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-8 text-center text-[15px] text-[var(--neo-gray)]">
+            <div className="rounded-[22px] bg-white px-5 py-8 text-center text-[15px] text-[var(--neo-gray)]">
               Carregando o treino…
             </div>
           }
@@ -1580,7 +1580,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
             <button
               type="button"
               onClick={() => openStudy(studyNudges[0].topic)}
-              className="w-full rounded-[24px] bg-[#f5f5f7] px-5 py-5 text-left"
+              className="w-full rounded-[22px] bg-white px-5 py-5 text-left"
             >
               <p className="text-[13px] text-[var(--neo-gray)]">Estudar agora</p>
               <p className="mt-1 text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
@@ -1595,7 +1595,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
               </p>
             </button>
           ) : (
-            <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+            <div className="rounded-[22px] bg-white px-5 py-5">
               <p className="text-[13px] text-[var(--neo-gray)]">Agenda</p>
               <p className="mt-1 text-[22px] font-semibold tracking-[-0.025em] text-[var(--neo-ink)]">
                 Livre agora
@@ -1625,7 +1625,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
 
           {laterCases.length > 0 && (
             <StudySection kicker="A seguir">
-              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+              <div className="ac-group">
                 {laterCases.map(caseInfo => {
                   const material = STUDY_LIBRARY[caseInfo.topicKey];
                   return (
@@ -1653,7 +1653,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
 
           {studyNudges.length > (nextCase ? 0 : 1) && (
             <StudySection kicker="Para você">
-              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+              <div className="ac-group">
                 {studyNudges.slice(nextCase ? 0 : 1).map(nudge => (
                   <button
                     type="button"
@@ -1694,7 +1694,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
             </div>
 
             {filteredLibraryItems.length > 0 ? (
-              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+              <div className="ac-group">
                 {filteredLibraryItems.map(cat => {
                   const conf = confidenceMap[cat.id]?.level;
                   const caption =
@@ -1726,7 +1726,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
                 })}
               </div>
             ) : (
-              <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+              <div className="rounded-[22px] bg-white px-5 py-5">
                 <p className="text-[15px] font-semibold text-[var(--neo-ink)]">Nada com esse nome.</p>
                 <p className="mt-1 text-[13px] text-[var(--neo-gray)]">
                   Tente o procedimento — extração, canal, raspagem.

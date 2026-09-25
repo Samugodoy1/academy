@@ -22,7 +22,7 @@ export const QuestBoard: React.FC<{ quests: Quest[] }> = ({ quests }) => {
           {done}/{quests.length}
         </span>
       </div>
-      <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+      <div className="ac-group">
         {quests.map(quest => {
           const complete = quest.progress >= quest.target;
           const ratio = Math.min(1, quest.progress / Math.max(1, quest.target));

@@ -60,8 +60,8 @@ export const ColaShortcut: React.FC<ColaShortcutProps> = ({ plan, onOpen }) => {
     <button
       type="button"
       onClick={onOpen}
-      className={`w-full rounded-[24px] px-5 py-5 text-left ${
-        atRisk ? 'bg-[#fff3e0]' : 'bg-[#f5f5f7]'
+      className={`w-full rounded-[22px] px-5 py-5 text-left ${
+        atRisk ? 'bg-[#fff3e0]' : 'bg-white'
       }`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -72,10 +72,8 @@ export const ColaShortcut: React.FC<ColaShortcutProps> = ({ plan, onOpen }) => {
             size={64}
           />
           <div className="min-w-0">
-            <p className="text-[22px] font-semibold leading-[1.08] tracking-[-0.025em] text-[var(--neo-ink)]">
-              {headline}
-            </p>
-            <p className="mt-2 text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
+            <p className="ac-section-title">{headline}</p>
+            <p className="mt-2 text-[15px] leading-snug tracking-[-0.016em] text-[var(--neo-gray)]">
               {subline}
             </p>
           </div>
@@ -86,7 +84,7 @@ export const ColaShortcut: React.FC<ColaShortcutProps> = ({ plan, onOpen }) => {
         </span>
       </div>
 
-      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white">
+      <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-[#f5f5f7]">
         <span
           className="block h-full rounded-full bg-[var(--neo)]"
           style={{ width: `${Math.round(goalProgress * 100)}%` }}

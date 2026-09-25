@@ -26,7 +26,7 @@ export const AcademyStageControl: React.FC<AcademyStageControlProps> = ({ value,
               onClick={() => onChange(option.id)}
               aria-pressed={active}
               className={`rounded-[24px] px-5 py-5 text-left transition-colors ios-press-gentle ${
-                active ? 'bg-[var(--neo)] text-white' : 'bg-[#f5f5f7] text-[var(--neo-ink)]'
+                active ? 'bg-[#1d1d1f] text-white' : 'bg-white text-[var(--neo-ink)]'
               }`}
             >
               <p className="text-[20px] font-semibold leading-[1.1] tracking-[-0.02em]">{STAGE_LABEL[option.id]}</p>
@@ -39,7 +39,7 @@ export const AcademyStageControl: React.FC<AcademyStageControlProps> = ({ value,
   }
 
   return (
-    <div className="grid grid-cols-2 gap-1 rounded-full bg-[#f5f5f7] p-1" role="radiogroup" aria-label="Fase do curso">
+    <div className="grid grid-cols-2 gap-1 rounded-full bg-[#e8e8ed] p-1" role="radiogroup" aria-label="Fase do curso">
       {OPTIONS.map(option => {
         const active = value === option.id;
         return (

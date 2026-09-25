@@ -316,7 +316,7 @@ export const ColaGame: React.FC<ColaGameProps> = ({
 
   return (
     <div className="mx-auto w-full max-w-[560px] space-y-6">
-      <div className="flex items-center justify-between gap-2 rounded-[24px] bg-[#f5f5f7] px-4 py-4 sm:px-5">
+      <div className="flex items-center justify-between gap-2 rounded-[22px] bg-white px-4 py-4 sm:px-5">
         <button
           type="button"
           onClick={() => setStreakOpen(open => !open)}

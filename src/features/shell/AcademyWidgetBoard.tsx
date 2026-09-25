@@ -260,7 +260,7 @@ function WidgetFace({
   if (widget.kind === 'clock') {
     return (
       <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-neo`}>
-        <span className="text-[12px] font-medium uppercase tracking-[0.06em] text-white/80">
+        <span className="text-[13px] font-medium text-white/70">
           {weekday} {day}
         </span>
         <span className="mt-auto block text-[40px] font-semibold leading-none tracking-[-0.05em] tabular-nums">
@@ -351,7 +351,7 @@ function WidgetFace({
   if (widget.kind === 'agenda') {
     return (
       <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-white`}>
-        <span className="text-[12px] font-medium uppercase tracking-[0.06em] text-[var(--neo)]">{weekday}</span>
+        <span className="text-[13px] font-medium text-[var(--neo)]">{weekday}</span>
         <span className="mt-auto block text-[40px] font-semibold leading-none tracking-[-0.05em] tabular-nums text-[var(--neo-ink)]">
           {day}
         </span>

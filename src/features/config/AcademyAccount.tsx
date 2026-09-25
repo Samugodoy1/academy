@@ -41,7 +41,7 @@ export interface AcademyAccountProps {
 }
 
 function Group({ children }: { children: React.ReactNode }) {
-  return <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">{children}</div>;
+  return <div className="ac-group">{children}</div>;
 }
 
 function Row({
@@ -54,7 +54,7 @@ function Row({
   href?: string;
 }) {
   const className =
-    'flex w-full items-center gap-3 border-b border-black/[0.04] px-5 py-4 text-left last:border-b-0';
+    'ac-row';
 
   if (href) {
     return (
@@ -288,11 +288,11 @@ export function AcademyAccount({
           <AcademyNeoPicker />
 
           <section className="space-y-3">
-            <h2 className="px-1 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
+            <h2 className="ac-section-title px-1">
               Na faculdade
             </h2>
             {schoolLine || profile.student_registration ? (
-              <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+              <div className="rounded-[22px] bg-white px-5 py-5">
                 {profile.institution ? (
                   <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
                     {profile.institution}
@@ -317,7 +317,7 @@ export function AcademyAccount({
               <button
                 type="button"
                 onClick={startProfileEditing}
-                className="w-full rounded-[24px] bg-[#f5f5f7] px-5 py-5 text-left"
+                className="w-full rounded-[22px] bg-white px-5 py-5 text-left"
               >
                 <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
                   Onde você estuda
@@ -331,10 +331,10 @@ export function AcademyAccount({
           </section>
 
           <section className="space-y-3">
-            <h2 className="px-1 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
+            <h2 className="ac-section-title px-1">
               Fase do curso
             </h2>
-            <div className="rounded-[24px] bg-[#f5f5f7] px-4 py-4">
+            <div className="rounded-[22px] bg-white px-4 py-4">
               <AcademyStageControl value={stage} onChange={setStage} />
               <p className="mt-3 px-1 text-[13px] leading-snug text-[var(--neo-gray)]">
                 {stage === 'pre-clinico'
@@ -348,11 +348,11 @@ export function AcademyAccount({
           </section>
 
           <section className="space-y-3">
-            <h2 className="px-1 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
+            <h2 className="ac-section-title px-1">
               O plano
             </h2>
             {isStudent ? (
-              <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+              <div className="rounded-[22px] bg-white px-5 py-5">
                 <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">{STUDENT_PRIDE.kicker}</p>
                 <p className="mt-1 text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
                   {STUDENT_PRIDE.headline}
@@ -404,7 +404,7 @@ export function AcademyAccount({
           </div>
 
           <section className="space-y-3">
-            <h2 className="px-1 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
+            <h2 className="ac-section-title px-1">
               Conta
             </h2>
             <Group>

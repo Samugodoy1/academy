@@ -1672,14 +1672,14 @@ html[data-theme="dark"] {
 html[data-product="academy"] {
   color-scheme: light;
   --sys-bg: #ffffff;
-  --sys-elevated: var(--neo-wash);
-  --sys-inset: var(--neo-wash);
+  --sys-elevated: #ffffff;
+  --sys-inset: #f5f5f7;
   --sys-text: #1d1d1f;
   --sys-muted: #6e6e73;
-  --sys-input: var(--neo-wash);
+  --sys-input: #f5f5f7;
   --sys-input-text: #1d1d1f;
-  --sys-secondary: var(--neo-wash);
-  --sys-secondary-hover: var(--neo-soft);
+  --sys-secondary: #f5f5f7;
+  --sys-secondary-hover: #e8e8ed;
   --sys-tabbar: rgba(255, 255, 255, 0.82);
   --sys-sidebar: #ffffff;
   --sys-hairline: color-mix(in srgb, var(--neo) 16%, transparent);
@@ -1751,15 +1751,21 @@ html[data-product="academy"] .neo-link {
   color: var(--neo);
 }
 
+html[data-product="academy"] .ios-input,
+html[data-product="academy"] .apple-input {
+  background: #f5f5f7;
+}
+
 html[data-product="academy"] .ios-input:focus,
 html[data-product="academy"] .apple-input:focus {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--neo) 22%, transparent);
+  background: #ffffff;
 }
 
 html[data-product="academy"] .oh-device,
 html[data-product="academy"] .comic-card,
 html[data-product="academy"] .ios-card {
-  background: var(--neo-wash);
+  background: #ffffff;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   border: none;

@@ -2420,7 +2420,7 @@ export default function App() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full max-w-[420px] oh-device p-7 sm:p-10"
+              className="w-full max-w-[400px]"
             >
               <motion.div
                 className="mb-10"
@@ -2447,7 +2447,7 @@ export default function App() {
               <form onSubmit={isRegistering ? handleRegister : handleLogin} className="space-y-5">
                 {isRegistering && (
                   <div>
-                    <label className="block text-[13px] font-medium text-academy-muted mb-2">Nome completo</label>
+                    <label className="block text-[13px] font-normal text-apple-gray mb-2">Nome completo</label>
                     <input
                       type="text"
                       required
@@ -2460,7 +2460,7 @@ export default function App() {
                 )}
 
                 <div>
-                  <label className="block text-[13px] font-medium text-academy-muted mb-2">E-mail</label>
+                  <label className="block text-[13px] font-normal text-apple-gray mb-2">E-mail</label>
                   <input
                     type="email"
                     required
@@ -2476,7 +2476,7 @@ export default function App() {
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-[13px] font-medium text-academy-muted">Senha</label>
+                    <label className="text-[13px] font-normal text-apple-gray">Senha</label>
                     {!isRegistering && (
                       <Link
                         to="/forgot-password"

@@ -11,7 +11,7 @@ export const BaseSection: React.FC<{
   return (
     <section className="space-y-3">
       <div className="flex items-baseline justify-between gap-3 px-1">
-        <h2 className="ac-section-title">{kicker}</h2>
+        <h2 className="ac-kicker">{kicker}</h2>
         {action}
       </div>
       {children}

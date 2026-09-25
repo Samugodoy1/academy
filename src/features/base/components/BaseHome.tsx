@@ -58,19 +58,13 @@ export function BaseHome({
             <button
               type="button"
               onClick={() => onOpenLesson(suggestion.discipline, suggestion.lessonIndex)}
-              className="ac-hero px-7 pb-7 pt-8 ios-press-gentle"
+              className="ac-hero px-6 pb-6 pt-6 ios-press-gentle sm:px-7 sm:pt-7"
             >
-              <p className="text-[13px] tracking-[-0.011em] text-white/50">
-                {SUGGESTION_KICKER[suggestion.reason]}
-              </p>
-              <p className="mt-2 text-[15px] tracking-[-0.016em] text-white/60">{suggestion.discipline.title}</p>
-              <p className="apple-display mt-1 text-[32px] sm:text-[36px]">
-                {suggestion.lesson.title}
-              </p>
-              <p className="mt-3 text-[17px] leading-snug text-white/80">{suggestion.lesson.summary}</p>
-              <span className="apple-btn-light mt-7 flex w-full py-[14px] text-[17px]">
-                Ler · {suggestion.lesson.minutes} min
-              </span>
+              <p className="ac-voice">{SUGGESTION_KICKER[suggestion.reason]}</p>
+              <p className="ac-support mt-3 !text-[15px]">{suggestion.discipline.title}</p>
+              <p className="ac-name mt-1 text-[28px] sm:text-[32px]">{suggestion.lesson.title}</p>
+              <p className="ac-support mt-3">{suggestion.lesson.summary}</p>
+              <span className="ac-action">Ler · {suggestion.lesson.minutes} min</span>
             </button>
           ) : (
             <div className="rounded-[22px] bg-white px-6 py-6">

@@ -19,7 +19,6 @@ import { ColaShortcut } from '../features/game/ColaShortcut';
 import type { GamePlan } from '../features/game/plan';
 import { FREE_TENSION, STUDENT_PRIDE } from '../features/subscription/conversionCopy';
 import { useResolvedAcademyStage } from '../theme/AcademyStageProvider';
-import { STAGE_LABEL } from '../theme/academyStage';
 import { AcademyStageControl } from './AcademyStageControl';
 
 const BaseContinueCard = lazy(() =>
@@ -739,21 +738,12 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         openCola={openGame}
       />
 
-      <header className="space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <p className="ac-caption">
-            {studentGreeting(now)}{greetingName ? `, ${greetingName}` : ''}
-          </p>
-          <span className="shrink-0 rounded-full bg-white px-3 py-1 text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">
-            {isPreClinical && patients.length === 0
-              ? STAGE_LABEL['pre-clinico']
-              : gamePlan === 'student'
-                ? `Student · ${patients.length}`
-                : `${patients.length} ${patients.length === 1 ? 'paciente' : 'pacientes'}`}
-          </span>
-        </div>
-        {academicLine && <p className="ac-caption">{academicLine}</p>}
-        <h1 className="apple-display-ink max-w-[18ch] text-[34px] sm:text-[40px]">
+      <header className="space-y-2">
+        <p className="ac-voice">
+          {studentGreeting(now)}{greetingName ? `, ${greetingName}` : ''}
+        </p>
+        {academicLine && <p className="ac-support !text-[15px]">{academicLine}</p>}
+        <h1 className="ac-title max-w-[14ch] pt-1 text-[34px] sm:text-[40px]">
           {homeHeadline}
         </h1>
       </header>
@@ -761,24 +751,13 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       <div className="flex flex-col gap-12 desktop:grid desktop:grid-cols-12 desktop:items-start desktop:gap-x-14">
         <div className="space-y-10 desktop:col-span-7">
           {focusPatientName ? (
-            <button type="button" onClick={focus.action} className="ac-hero px-7 pb-7 pt-8">
-              <p className="text-[13px] tracking-[-0.011em] text-white/50">
-                {appointmentMetaLabel || 'Próximo atendimento'}
+            <button type="button" onClick={focus.action} className="ac-hero px-6 pb-6 pt-6 sm:px-7 sm:pt-7">
+              <p className="ac-voice">{appointmentMetaLabel || 'Próximo atendimento'}</p>
+              <p className="ac-name mt-2 text-[32px] sm:text-[36px]">{focusPatientName}</p>
+              <p className="ac-support mt-2 max-w-[28ch]">
+                {procedureHint || focus.subtitle}
               </p>
-              <p className="apple-display mt-2 text-[36px] sm:text-[40px]">
-                {focusPatientName}
-              </p>
-              <div className="mt-6 flex items-end justify-between gap-4">
-                <div className="min-w-0">
-                  <p className="text-[13px] text-white/50">Procedimento</p>
-                  <p className="mt-0.5 line-clamp-2 text-[17px] font-semibold leading-snug tracking-[-0.022em]">
-                    {procedureHint || focus.subtitle}
-                  </p>
-                </div>
-              </div>
-              <span className="apple-btn-light mt-7 flex w-full py-[14px] text-[17px]">
-                {focus.actionLabel}
-              </span>
+              <span className="ac-action">{focus.actionLabel}</span>
             </button>
           ) : focus.kind === 'study' ? (
             <div className="space-y-3">
@@ -788,7 +767,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
               <button
                 type="button"
                 onClick={() => setIsPatientModalOpen(true)}
-                className="ac-row rounded-[22px] bg-white"
+                className="ac-sheet ac-row"
               >
                 <span className="min-w-0 flex-1">
                   <span className="ac-row-title block">Já tem paciente?</span>
@@ -799,7 +778,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
             </div>
           ) : (
             <section className="flex flex-col items-center space-y-4 py-6 text-center">
-              <p className="ac-section-title">Cadeira livre</p>
+              <p className="ac-name text-[28px]">Cadeira livre</p>
               <p className="max-w-[32ch] text-[17px] leading-snug tracking-[-0.022em] text-[var(--neo-gray)]">
                 {focus.subtitle || 'Nenhum box por agora'}
               </p>
@@ -820,12 +799,10 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           )}
 
           {gamePlan !== 'student' && patients.length > 0 && onOpenStudentPlan && (
-            <button type="button" onClick={onOpenStudentPlan} className="w-full rounded-[22px] bg-white px-5 py-5 text-left">
-              <p className="ac-caption">Free · 1 de 1</p>
-              <p className="ac-section-title mt-1">{FREE_TENSION.homeHeadline}</p>
-              <p className="mt-2 text-[15px] leading-snug tracking-[-0.016em] text-[var(--neo-gray)]">
-                {FREE_TENSION.homeBody}
-              </p>
+            <button type="button" onClick={onOpenStudentPlan} className="ac-sheet w-full px-5 py-5 text-left">
+              <p className="ac-voice">Free · 1 de 1</p>
+              <p className="ac-name mt-2 text-[26px]">{FREE_TENSION.homeHeadline}</p>
+              <p className="ac-support mt-2">{FREE_TENSION.homeBody}</p>
               <p className="neo-link mt-4 text-[17px]">{FREE_TENSION.homeCta}</p>
             </button>
           )}
@@ -861,7 +838,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         <div className="space-y-10 desktop:col-span-5">
           {stage === null && patients.length === 0 && (
             <HomeSection title="Onde você está no curso?">
-              <div className="rounded-[22px] bg-white px-4 py-4">
+              <div className="ac-sheet px-4 py-4">
                 <AcademyStageControl value={null} onChange={setStage} />
                 <p className="ac-caption mt-3 px-1 leading-snug">
                   No ciclo básico a home começa pelos Estudos. Na clínica, pelo caso.
@@ -934,7 +911,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
           {focus.kind === 'study' && (
             <HomeSection title="Estudos">
-              <button type="button" onClick={() => setActiveTab('base')} className="ac-row rounded-[22px] bg-white">
+              <button type="button" onClick={() => setActiveTab('base')} className="ac-sheet ac-row">
                 <span className="min-w-0 flex-1">
                   <span className="ac-row-title block">Ciclo básico</span>
                   <span className="ac-row-meta block">
@@ -955,9 +932,9 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
               <button
                 type="button"
                 onClick={() => openStudyTopic(studySuggestion.topicKey)}
-                className="w-full rounded-[22px] bg-white px-5 py-5 text-left"
+                className="ac-sheet w-full px-5 py-5 text-left"
               >
-                <p className="ac-section-title">{studySuggestion.topic}</p>
+                <p className="ac-name text-[22px]">{studySuggestion.topic}</p>
                 <p className="mt-2 text-[15px] leading-snug tracking-[-0.016em] text-[var(--neo-gray)]">
                   {studySuggestion.reason}
                 </p>
@@ -971,7 +948,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
           {pausedCase && focus.patient?.id !== pausedCase.id && (
             <HomeSection title="Retorno">
-              <button type="button" onClick={() => openPatientRecord(pausedCase.id)} className="ac-row rounded-[22px] bg-white">
+              <button type="button" onClick={() => openPatientRecord(pausedCase.id)} className="ac-sheet ac-row">
                 <div className="min-w-0 flex-1">
                   <p className="ac-row-title truncate">{pausedCase.name}</p>
                   <p className="ac-row-meta">Sem próximo passo marcado</p>
@@ -986,7 +963,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveTab('pacientes')}
-                className="ac-row rounded-[22px] bg-white"
+                className="ac-sheet ac-row"
               >
                 <span className="ac-row-title flex-1">Ver os seus casos</span>
                 <span className="neo-link text-[17px]">Abrir</span>
@@ -1012,7 +989,7 @@ function HomeSection({
   return (
     <section className="space-y-3">
       <div className="flex items-baseline justify-between gap-3 px-1">
-        <h2 className="ac-section-title">{title}</h2>
+        <h2 className="ac-kicker">{title}</h2>
         {action}
       </div>
       {children}
@@ -1037,7 +1014,7 @@ const ListRow = ({
       className="ac-row cursor-pointer"
       onClick={onClick}
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f5f5f7] text-[13px] font-semibold text-[var(--neo-ink)]">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--neo-soft)] text-[13px] font-medium text-[var(--neo)]">
         {(title || '?').charAt(0).toUpperCase()}
       </div>
       <div className="min-w-0 flex-1">

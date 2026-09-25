@@ -60,11 +60,11 @@ export function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-sys-bg flex items-center justify-center p-4 font-sans">
+    <div className="min-h-screen bg-white flex items-center justify-center p-6 font-sans">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="oh-device w-full max-w-md overflow-hidden"
+        className="w-full max-w-[400px]"
       >
         <div className="p-8 md:p-12">
           <div className="flex justify-center mb-8">

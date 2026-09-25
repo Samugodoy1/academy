@@ -34,8 +34,8 @@ export const BaseContinueCard: React.FC<BaseContinueCardProps> = ({ plan, onOpen
   };
 
   return (
-    <button type="button" onClick={open} className="ac-hero px-7 pb-7 pt-8 ios-press-gentle">
-      <p className="text-[13px] tracking-[-0.011em] text-white/50">
+    <button type="button" onClick={open} className="ac-hero px-6 pb-6 pt-6 ios-press-gentle sm:px-7 sm:pt-7">
+      <p className="ac-voice">
         {suggestion
           ? suggestion.reason === 'resume'
             ? 'Continuar de onde parou'
@@ -46,24 +46,18 @@ export const BaseContinueCard: React.FC<BaseContinueCardProps> = ({ plan, onOpen
       </p>
       {suggestion ? (
         <>
-          <p className="mt-2 text-[15px] tracking-[-0.016em] text-white/60">{suggestion.discipline.title}</p>
-          <p className="apple-display mt-1 text-[32px] sm:text-[36px]">
-            {suggestion.lesson.title}
-          </p>
-          <p className="mt-3 max-w-[40ch] text-[17px] leading-snug text-white/80">{suggestion.lesson.summary}</p>
-          <span className="apple-btn-light mt-7 flex w-full py-[14px] text-[17px]">
-            Ler · {suggestion.lesson.minutes} min · {done} de {total}
-          </span>
+          <p className="ac-support mt-3 !text-[15px]">{suggestion.discipline.title} · {done} de {total}</p>
+          <p className="ac-name mt-1 text-[28px] sm:text-[32px]">{suggestion.lesson.title}</p>
+          <p className="ac-support mt-3 max-w-[36ch]">{suggestion.lesson.summary}</p>
+          <span className="ac-action">Ler · {suggestion.lesson.minutes} min</span>
         </>
       ) : (
         <>
-          <p className="apple-display mt-2 text-[32px] sm:text-[36px]">
-            Você leu o que estava aberto.
-          </p>
-          <p className="mt-3 text-[17px] leading-snug text-white/80">
+          <p className="ac-name mt-3 text-[28px] sm:text-[32px]">Você leu o que estava aberto.</p>
+          <p className="ac-support mt-3">
             Volte aos mapas e reconstrua um ramo de memória — é assim que fixa.
           </p>
-          <span className="apple-btn-light mt-7 flex w-full py-[14px] text-[17px]">Abrir Estudos</span>
+          <span className="ac-action">Abrir Estudos</span>
         </>
       )}
     </button>

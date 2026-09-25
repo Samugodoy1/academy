@@ -2415,7 +2415,7 @@ export default function App() {
       } />
       <Route path="*" element={
         !user ? (
-          <div className="min-h-screen bg-white flex items-center justify-center px-5 font-sans antialiased">
+          <div className="min-h-screen bg-[#f5f5f7] flex items-center justify-center px-5 font-sans antialiased">
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}

@@ -32,11 +32,13 @@ export function AcademyDock({ activeTab, onGo, onSchedule }: AcademyDockProps) {
               className="flex flex-col items-center gap-0.5 rounded-[18px] px-1 py-1"
             >
               <Icon
-                size={26}
-                weight={active ? 'fill' : 'regular'}
-                className={active ? 'text-[var(--neo)]' : 'text-[#1d1d1f]'}
+                size={22}
+                weight="regular"
+                className={active ? 'text-[var(--neo)]' : 'text-[var(--neo-ink)]'}
               />
-              <span className="sr-only">{item.label}</span>
+              <span className={`text-[10px] tracking-[-0.01em] ${active ? 'text-[var(--neo)]' : 'text-[var(--neo-gray)]'}`}>
+                {item.label}
+              </span>
             </button>
           );
         })}
@@ -47,8 +49,8 @@ export function AcademyDock({ activeTab, onGo, onSchedule }: AcademyDockProps) {
             aria-label="Encaixar horário"
             className="flex flex-col items-center gap-0.5 rounded-[18px] px-1 py-1"
           >
-            <CalendarPlus size={26} weight="regular" className="text-[#1d1d1f]" />
-            <span className="sr-only">Encaixe</span>
+            <CalendarPlus size={22} weight="regular" className="text-[var(--neo-ink)]" />
+            <span className="text-[10px] tracking-[-0.01em] text-[var(--neo-gray)]">Encaixe</span>
           </button>
         )}
       </nav>

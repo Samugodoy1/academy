@@ -11,7 +11,7 @@ export const BaseSection: React.FC<{
   return (
     <section className="space-y-3">
       <div className="flex items-baseline justify-between gap-3 px-1">
-        <h2 className="ac-section-title">{kicker}</h2>
+        <h2 className="text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">{kicker}</h2>
         {action}
       </div>
       {children}
@@ -20,7 +20,7 @@ export const BaseSection: React.FC<{
 };
 
 export function GroupedList({ children }: { children: React.ReactNode }) {
-  return <div className="ac-group">{children}</div>;
+  return <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">{children}</div>;
 }
 
 export const ListRow: React.FC<{
@@ -35,13 +35,17 @@ export const ListRow: React.FC<{
     <button
       type="button"
       onClick={onClick}
-      className="ac-row"
+      className="flex w-full items-center gap-4 border-b border-black/[0.04] px-5 py-4 text-left last:border-b-0"
     >
       <div className="min-w-0 flex-1">
-        <p className={`ac-row-title truncate ${locked ? 'text-[var(--neo-gray)]' : ''}`}>
+        <p
+          className={`truncate text-[15px] font-semibold tracking-[-0.011em] ${
+            locked ? 'text-[var(--neo-gray)]' : 'text-[var(--neo-ink)]'
+          }`}
+        >
           {title}
         </p>
-        {meta && <p className="ac-row-meta truncate">{meta}</p>}
+        {meta && <p className="mt-0.5 truncate text-[13px] text-[var(--neo-gray)]">{meta}</p>}
       </div>
       {trailing}
       {done && !locked && (
@@ -102,7 +106,7 @@ export function ReferenceList({
             </div>
           </>
         );
-        const className = 'ac-row block';
+        const className = 'block border-b border-black/[0.04] px-5 py-4 text-left last:border-b-0';
         return href ? (
           <a key={reference.id} href={href} target="_blank" rel="noreferrer" className={className}>
             {body}

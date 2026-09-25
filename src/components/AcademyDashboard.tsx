@@ -729,7 +729,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
       onDismissOnboarding={onDismissOnboarding}
       onDismissWelcome={onDismissWelcome}
     >
-    <div className="page-shell space-y-10">
+    <div className="page-shell space-y-8 desktop:space-y-10">
       <AcademyActivationCard
         user={user}
         patients={patients}
@@ -739,111 +739,128 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         openCola={openGame}
       />
 
-      <header className="space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <p className="ac-caption">
+      <header className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[15px] font-normal text-[var(--neo-gray)] tracking-[-0.011em]">
             {studentGreeting(now)}{greetingName ? `, ${greetingName}` : ''}
           </p>
-          <span className="shrink-0 rounded-full bg-white px-3 py-1 text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">
-            {isPreClinical && patients.length === 0
-              ? STAGE_LABEL['pre-clinico']
-              : gamePlan === 'student'
-                ? `Student · ${patients.length}`
-                : `${patients.length} ${patients.length === 1 ? 'paciente' : 'pacientes'}`}
-          </span>
+          {academicLine && (
+            <p className="mt-1 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
+              {academicLine}
+            </p>
+          )}
         </div>
-        {academicLine && <p className="ac-caption">{academicLine}</p>}
-        <h1 className="apple-display-ink max-w-[18ch] text-[34px] sm:text-[40px]">
-          {homeHeadline}
-        </h1>
+        <span className="neo-pill !px-3.5 !py-1.5 !text-[13px] shrink-0">
+          {isPreClinical && patients.length === 0
+            ? STAGE_LABEL['pre-clinico']
+            : gamePlan === 'student'
+              ? `Student · ${patients.length}`
+              : `${patients.length} ${patients.length === 1 ? 'paciente' : 'pacientes'}`}
+        </span>
       </header>
 
-      <div className="flex flex-col gap-12 desktop:grid desktop:grid-cols-12 desktop:items-start desktop:gap-x-14">
-        <div className="space-y-10 desktop:col-span-7">
+      <h1 className="text-[28px] sm:text-[34px] font-semibold text-[var(--neo-ink)] leading-[1.05] tracking-[-0.025em] max-w-[20ch]">
+        {homeHeadline}
+      </h1>
+
+      <div className="flex flex-col gap-10 desktop:grid desktop:grid-cols-12 desktop:items-start desktop:gap-x-12">
+        <div className="space-y-8 desktop:col-span-7">
           {focusPatientName ? (
-            <button type="button" onClick={focus.action} className="ac-hero px-7 pb-7 pt-8">
-              <p className="text-[13px] tracking-[-0.011em] text-white/50">
-                {appointmentMetaLabel || 'Próximo atendimento'}
-              </p>
-              <p className="apple-display mt-2 text-[36px] sm:text-[40px]">
+            <button
+              type="button"
+              onClick={focus.action}
+              className="w-full rounded-[28px] bg-[var(--neo)] px-6 py-6 text-left text-white"
+            >
+              {appointmentMetaLabel && (
+                <p className="text-[12px] font-normal uppercase tracking-[0.04em] text-white/80">
+                  {appointmentMetaLabel}
+                </p>
+              )}
+              <p className="mt-2 text-[26px] sm:text-[32px] font-semibold leading-[1.05] tracking-[-0.025em]">
                 {focusPatientName}
               </p>
-              <div className="mt-6 flex items-end justify-between gap-4">
-                <div className="min-w-0">
-                  <p className="text-[13px] text-white/50">Procedimento</p>
-                  <p className="mt-0.5 line-clamp-2 text-[17px] font-semibold leading-snug tracking-[-0.022em]">
-                    {procedureHint || focus.subtitle}
-                  </p>
-                </div>
-              </div>
-              <span className="apple-btn-light mt-7 flex w-full py-[14px] text-[17px]">
-                {focus.actionLabel}
-              </span>
+              <p className="mt-2 text-[15px] text-white/85 tracking-[-0.011em]">
+                {procedureHint || focus.subtitle}
+              </p>
+              <p className="mt-4 text-[15px] text-white/90">
+                {focus.actionLabel} ›
+              </p>
             </button>
           ) : focus.kind === 'study' ? (
             <div className="space-y-3">
-              <Suspense fallback={<div className="h-[196px] rounded-[28px] bg-white" />}>
+              <Suspense fallback={<div className="h-[196px] rounded-[28px] bg-[var(--neo-soft)]" />}>
                 <BaseContinueCard plan={gamePlan ?? 'free'} onOpen={() => setActiveTab('base')} />
               </Suspense>
               <button
                 type="button"
                 onClick={() => setIsPatientModalOpen(true)}
-                className="ac-row rounded-[22px] bg-white"
+                className="flex w-full items-center justify-between gap-4 rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left"
               >
-                <span className="min-w-0 flex-1">
-                  <span className="ac-row-title block">Já tem paciente?</span>
-                  <span className="ac-row-meta block">Cadastre e a home vira clínica.</span>
+                <span className="min-w-0">
+                  <span className="block text-[15px] tracking-[-0.011em] text-[var(--neo-ink)]">Já tem paciente?</span>
+                  <span className="block text-[13px] text-[var(--neo-gray)]">Cadastre e a home vira clínica.</span>
                 </span>
-                <span className="neo-link shrink-0 text-[17px]">Cadastrar</span>
+                <span className="neo-link shrink-0 text-[15px]">Cadastrar ›</span>
               </button>
             </div>
           ) : (
-            <section className="flex flex-col items-center space-y-4 py-6 text-center">
-              <p className="ac-section-title">Cadeira livre</p>
-              <p className="max-w-[32ch] text-[17px] leading-snug tracking-[-0.022em] text-[var(--neo-gray)]">
+            <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+              <p className="text-[13px] text-[var(--neo-gray)]">Agenda</p>
+              <p className="mt-1 text-[22px] font-semibold tracking-[-0.025em] text-[var(--neo-ink)]">
+                Cadeira livre
+              </p>
+              <p className="mt-1 text-[15px] text-[var(--neo-gray)] tracking-[-0.011em]">
                 {focus.subtitle || 'Nenhum box por agora'}
               </p>
               <button
                 type="button"
-                className="apple-btn"
+                className="neo-link mt-3 text-[15px]"
                 onClick={focus.kind === 'start' ? () => setIsPatientModalOpen(true) : openAppointmentModal}
               >
-                {focus.kind === 'start' ? 'Cadastrar paciente' : 'Agendar consulta'}
+                {focus.kind === 'start' ? 'Cadastrar paciente ›' : 'Agendar consulta ›'}
               </button>
-            </section>
+            </div>
           )}
 
           {gamePlan === 'student' && patients.length > 0 && (
-            <p className="text-[17px] leading-snug tracking-[-0.022em] text-[var(--neo-gray)]">
+            <p className="text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">
               {STUDENT_PRIDE.homeLine}
             </p>
           )}
 
           {gamePlan !== 'student' && patients.length > 0 && onOpenStudentPlan && (
-            <button type="button" onClick={onOpenStudentPlan} className="w-full rounded-[22px] bg-white px-5 py-5 text-left">
-              <p className="ac-caption">Free · 1 de 1</p>
-              <p className="ac-section-title mt-1">{FREE_TENSION.homeHeadline}</p>
-              <p className="mt-2 text-[15px] leading-snug tracking-[-0.016em] text-[var(--neo-gray)]">
+            <button
+              type="button"
+              onClick={onOpenStudentPlan}
+              className="w-full rounded-[24px] bg-[#f5f5f7] px-5 py-5 text-left"
+            >
+              <p className="text-[13px] text-[var(--neo-gray)]">Free · 1 de 1</p>
+              <p className="mt-1 text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
+                {FREE_TENSION.homeHeadline}
+              </p>
+              <p className="mt-2 text-[15px] leading-snug text-[var(--neo-gray)]">
                 {FREE_TENSION.homeBody}
               </p>
-              <p className="neo-link mt-4 text-[17px]">{FREE_TENSION.homeCta}</p>
+              <p className="neo-link mt-4 text-[15px]">{FREE_TENSION.homeCta} ›</p>
             </button>
           )}
 
           {showBoxMode && boxPrepItems.length > 0 && (
-            <HomeSection title="Antes de sentar">
-              <div className="ac-group">
+            <HomeSection kicker="Antes de sentar">
+              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
                 {boxPrepItems.map((item, index) => (
                   <button
                     key={`${item.label}-${index}`}
                     type="button"
                     onClick={() => item.studyTopic && openStudyTopic(item.studyTopic)}
-                    className="ac-row"
+                    className="flex w-full items-center gap-3 border-b border-black/[0.04] px-5 py-4 text-left last:border-b-0"
                   >
                     <CheckCircle2 size={18} className="shrink-0 text-[var(--neo)]" />
-                    <span className="ac-row-title min-w-0 flex-1">{item.label}</span>
-                    <span className="flex shrink-0 items-center gap-1 text-[15px] text-[var(--neo-gray)]">
-                      <Clock size={13} />
+                    <span className="min-w-0 flex-1 text-[17px] tracking-[-0.011em] text-[var(--neo-ink)]">
+                      {item.label}
+                    </span>
+                    <span className="flex shrink-0 items-center gap-1 text-[13px] text-[var(--neo-gray)]">
+                      <Clock size={12} />
                       {item.duration}
                     </span>
                   </button>
@@ -858,12 +875,12 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           )}
         </div>
 
-        <div className="space-y-10 desktop:col-span-5">
+        <div className="space-y-8 desktop:col-span-5">
           {stage === null && patients.length === 0 && (
-            <HomeSection title="Onde você está no curso?">
-              <div className="rounded-[22px] bg-white px-4 py-4">
+            <HomeSection kicker="Onde você está no curso?">
+              <div className="rounded-[24px] bg-[#f5f5f7] px-4 py-4">
                 <AcademyStageControl value={null} onChange={setStage} />
-                <p className="ac-caption mt-3 px-1 leading-snug">
+                <p className="mt-3 px-1 text-[13px] leading-snug text-[var(--neo-gray)]">
                   No ciclo básico a home começa pelos Estudos. Na clínica, pelo caso.
                 </p>
               </div>
@@ -871,8 +888,8 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           )}
 
           {pendingRows.length > 0 && (
-            <HomeSection title="Pra fechar">
-              <div className="ac-group">
+            <HomeSection kicker="Pra fechar">
+              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
                 {pendingRows.map(row => (
                   <React.Fragment key={row.id}>
                     <ListRow
@@ -897,14 +914,14 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
           {otherAppointments.length > 0 && (
             <HomeSection
-              title="A seguir"
+              kicker="A seguir"
               action={
-                <button type="button" onClick={() => setActiveTab('agenda')} className="neo-link text-[15px]">
-                  Agenda
+                <button type="button" onClick={() => setActiveTab('agenda')} className="neo-link text-[13px]">
+                  Agenda ›
                 </button>
               }
             >
-              <div className="ac-group">
+              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
                 {otherAppointments.map(app => {
                   const dateTime = formatAgendaListDateTime(app.start_time);
                   return (
@@ -912,17 +929,17 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
                       key={app.id}
                       type="button"
                       onClick={() => openPatientRecord(app.patient_id)}
-                      className="ac-row"
+                      className="flex w-full items-center gap-4 border-b border-black/[0.04] px-5 py-4 text-left last:border-b-0"
                     >
                       <div className="w-14 shrink-0">
-                        <p className="text-[13px] text-[var(--neo)]">{dateTime.date}</p>
+                        <p className="text-[12px] font-semibold text-[var(--neo)]">{dateTime.date}</p>
                         <p className="mt-0.5 text-[17px] font-semibold tabular-nums tracking-[-0.022em] text-[var(--neo-ink)]">
                           {dateTime.time}
                         </p>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="ac-row-title truncate">{app.patient_name}</p>
-                        <p className="ac-row-meta truncate">{app.notes || 'Atendimento'}</p>
+                        <p className="truncate text-[15px] font-semibold text-[var(--neo-ink)]">{app.patient_name}</p>
+                        <p className="truncate text-[13px] text-[var(--neo-gray)]">{app.notes || 'Atendimento'}</p>
                       </div>
                       <ChevronRight size={16} className="shrink-0 text-[#C6C6C8]" />
                     </button>
@@ -933,12 +950,16 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           )}
 
           {focus.kind === 'study' && (
-            <HomeSection title="Estudos">
-              <button type="button" onClick={() => setActiveTab('base')} className="ac-row rounded-[22px] bg-white">
+            <HomeSection kicker="Estudos">
+              <button
+                type="button"
+                onClick={() => setActiveTab('base')}
+                className="flex w-full items-center gap-4 rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left"
+              >
                 <span className="min-w-0 flex-1">
-                  <span className="ac-row-title block">Ciclo básico</span>
-                  <span className="ac-row-meta block">
-                    Do 1º ao 4º período · resumos, mapas e referências
+                  <span className="block text-[15px] font-semibold tracking-[-0.011em] text-[var(--neo-ink)]">Ciclo básico</span>
+                  <span className="block text-[13px] text-[var(--neo-gray)]">
+                    Do 1º ao 4º período · resumos, mapas mentais e referências
                   </span>
                 </span>
                 <ChevronRight size={16} className="shrink-0 text-[#C6C6C8]" />
@@ -946,35 +967,41 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
             </HomeSection>
           )}
 
-          <HomeSection title="Treino">
+          <HomeSection kicker="Treino">
             <ColaShortcut plan={gamePlan ?? 'free'} onOpen={openGame} />
           </HomeSection>
 
           {studySuggestion && (
-            <HomeSection title="Cola">
+            <HomeSection kicker="Cola">
               <button
                 type="button"
                 onClick={() => openStudyTopic(studySuggestion.topicKey)}
-                className="w-full rounded-[22px] bg-white px-5 py-5 text-left"
+                className="w-full rounded-[24px] bg-[#f5f5f7] px-5 py-5 text-left"
               >
-                <p className="ac-section-title">{studySuggestion.topic}</p>
-                <p className="mt-2 text-[15px] leading-snug tracking-[-0.016em] text-[var(--neo-gray)]">
+                <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
+                  {studySuggestion.topic}
+                </p>
+                <p className="mt-2 text-[15px] leading-snug text-[var(--neo-gray)] tracking-[-0.011em]">
                   {studySuggestion.reason}
                 </p>
                 <p className="mt-4 flex items-center justify-between text-[15px]">
                   <span className="text-[var(--neo-gray)]">{studySuggestion.duration}</span>
-                  <span className="neo-link">Revisar</span>
+                  <span className="neo-link">Revisar ›</span>
                 </p>
               </button>
             </HomeSection>
           )}
 
           {pausedCase && focus.patient?.id !== pausedCase.id && (
-            <HomeSection title="Retorno">
-              <button type="button" onClick={() => openPatientRecord(pausedCase.id)} className="ac-row rounded-[22px] bg-white">
+            <HomeSection kicker="Retorno">
+              <button
+                type="button"
+                onClick={() => openPatientRecord(pausedCase.id)}
+                className="flex w-full items-center gap-4 rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left"
+              >
                 <div className="min-w-0 flex-1">
-                  <p className="ac-row-title truncate">{pausedCase.name}</p>
-                  <p className="ac-row-meta">Sem próximo passo marcado</p>
+                  <p className="truncate text-[15px] font-semibold text-[var(--neo-ink)]">{pausedCase.name}</p>
+                  <p className="mt-0.5 text-[13px] text-[var(--neo-gray)]">Sem próximo passo marcado</p>
                 </div>
                 <ChevronRight size={16} className="shrink-0 text-[#C6C6C8]" />
               </button>
@@ -982,14 +1009,14 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           )}
 
           {patients.length > 0 && pendingRows.length === 0 && otherAppointments.length === 0 && !studySuggestion && !pausedCase && (
-            <HomeSection title="Pacientes">
+            <HomeSection kicker="Pacientes">
               <button
                 type="button"
                 onClick={() => setActiveTab('pacientes')}
-                className="ac-row rounded-[22px] bg-white"
+                className="flex w-full items-center justify-between rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left"
               >
-                <span className="ac-row-title flex-1">Ver os seus casos</span>
-                <span className="neo-link text-[17px]">Abrir</span>
+                <span className="text-[15px] text-[var(--neo-ink)]">Ver os seus casos</span>
+                <span className="neo-link text-[15px]">Abrir ›</span>
               </button>
             </HomeSection>
           )}
@@ -1001,18 +1028,18 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 };
 
 function HomeSection({
-  title,
+  kicker,
   action,
   children,
 }: {
-  title: string;
+  kicker: string;
   action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <section className="space-y-3">
       <div className="flex items-baseline justify-between gap-3 px-1">
-        <h2 className="ac-section-title">{title}</h2>
+        <h2 className="text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">{kicker}</h2>
         {action}
       </div>
       {children}
@@ -1034,16 +1061,16 @@ const ListRow = ({
     <motion.div
       whileTap={{ backgroundColor: '#ffffff' }}
       transition={{ duration: 0.2 }}
-      className="ac-row cursor-pointer"
+      className="flex cursor-pointer items-center gap-4 border-b border-black/[0.04] px-5 py-4 last:border-b-0"
       onClick={onClick}
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f5f5f7] text-[13px] font-semibold text-[var(--neo-ink)]">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--neo-soft)] text-[13px] font-semibold text-[var(--neo)]">
         {(title || '?').charAt(0).toUpperCase()}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="ac-row-title truncate">{title}</p>
+        <p className="truncate text-[15px] font-semibold text-[var(--neo-ink)]">{title}</p>
         {metaLines.map((line, i) => (
-          <p key={i} className={`ac-row-meta truncate ${i === 0 ? '' : ''}`}>
+          <p key={i} className={`truncate text-[13px] text-[var(--neo-gray)] ${i === 0 ? 'mt-0.5' : ''}`}>
             {line}
           </p>
         ))}

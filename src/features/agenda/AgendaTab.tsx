@@ -186,7 +186,7 @@ function AgendaTabComponent({
               onClick={() => navigateDate('today')}
               className={`px-4 py-2 text-[13px] font-normal rounded-full transition-all min-h-[36px] ${
                 selectedDate.toDateString() === new Date().toDateString()
-                  ? 'liquid-glass-segment-active text-[var(--neo-ink)]'
+                  ? 'liquid-glass-segment-active text-white'
                   : 'text-[var(--neo-gray)]'
               }`}
               aria-label="Ir para hoje (T)"

@@ -228,7 +228,7 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
 
   if (loading) {
     return (
-      <div className={product === 'academy' ? 'rounded-[22px] bg-white p-5' : 'bg-white rounded-3xl border border-slate-100 shadow-sm p-6'}>
+      <div className={product === 'academy' ? 'rounded-[24px] bg-[#f5f5f7] p-5' : 'bg-white rounded-3xl border border-slate-100 shadow-sm p-6'}>
         <div className="animate-pulse space-y-3">
           <div className="h-4 bg-black/5 rounded w-1/3" />
           <div className="h-10 bg-black/5 rounded-xl w-full" />
@@ -266,7 +266,7 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
 
   return (
     <div className="space-y-4">
-      <div className={neo ? 'ac-group' : 'bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden'}>
+      <div className={neo ? 'overflow-hidden rounded-[24px] bg-[#f5f5f7]' : 'bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden'}>
         {!neo && (
         <div className={`px-6 py-4 ${isProActive ? 'bg-gradient-to-r from-primary/10 via-primary/5 to-transparent' : isPendingCheckout ? 'bg-gradient-to-r from-amber-50/80 to-transparent' : 'bg-gradient-to-r from-slate-50 to-transparent'}`}>
           <div className="flex items-center justify-between">

@@ -48,7 +48,7 @@ export function DisciplineView({
             {discipline.tagline}
           </p>
         </div>
-        <div className="rounded-[22px] bg-white px-5 py-4">
+        <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-4">
           <div className="flex items-baseline justify-between gap-3">
             <p className="text-[15px] font-semibold tracking-[-0.011em] text-[var(--neo-ink)]">
               {read} de {total} resumos lidos
@@ -112,7 +112,7 @@ export function DisciplineView({
             <button
               type="button"
               onClick={() => onOpenCola(discipline.colaTopic!)}
-              className="w-full rounded-[22px] bg-white px-5 py-5 text-left ios-press-gentle"
+              className="w-full rounded-[24px] bg-[#f5f5f7] px-5 py-5 text-left ios-press-gentle"
             >
               <p className="text-[13px] text-[var(--neo-gray)]">Na clínica isto vira</p>
               <p className="mt-1 text-[17px] font-semibold tracking-[-0.016em] text-[var(--neo-ink)]">

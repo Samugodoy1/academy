@@ -43,11 +43,11 @@ export function BaseHome({
   return (
     <div className="page-shell space-y-10">
       <header>
-        <p className="ac-caption">Estudos · Ciclo básico</p>
-        <h1 className="apple-display-ink mt-2 max-w-[18ch] text-[34px] sm:text-[40px]">
+        <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">Estudos · Ciclo básico</p>
+        <h1 className="mt-2 max-w-[18ch] text-[28px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)] sm:text-[34px]">
           {done === 0 ? 'A base que sustenta a clínica.' : `${done} de ${total} resumos lidos.`}
         </h1>
-        <p className="mt-3 max-w-[38ch] text-[17px] leading-snug tracking-[-0.022em] text-[var(--neo-gray)]">
+        <p className="mt-3 max-w-[38ch] text-[17px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
           Resumos e mapas mentais do 1º ao 4º período. Cada afirmação com o artigo que a sustenta.
         </p>
       </header>
@@ -58,24 +58,25 @@ export function BaseHome({
             <button
               type="button"
               onClick={() => onOpenLesson(suggestion.discipline, suggestion.lessonIndex)}
-              className="ac-hero px-7 pb-7 pt-8 ios-press-gentle"
+              className="w-full rounded-[28px] bg-[var(--neo)] px-6 py-6 text-left text-white ios-press-gentle"
             >
-              <p className="text-[13px] tracking-[-0.011em] text-white/50">
+              <p className="text-[12px] font-normal uppercase tracking-[0.04em] text-white/80">
                 {SUGGESTION_KICKER[suggestion.reason]}
               </p>
-              <p className="mt-2 text-[15px] tracking-[-0.016em] text-white/60">{suggestion.discipline.title}</p>
-              <p className="apple-display mt-1 text-[32px] sm:text-[36px]">
+              <p className="mt-2 text-[15px] tracking-[-0.011em] text-white/85">{suggestion.discipline.title}</p>
+              <p className="mt-1 text-[26px] font-semibold leading-[1.05] tracking-[-0.025em] sm:text-[32px]">
                 {suggestion.lesson.title}
               </p>
-              <p className="mt-3 text-[17px] leading-snug text-white/80">{suggestion.lesson.summary}</p>
-              <span className="apple-btn-light mt-7 flex w-full py-[14px] text-[17px]">
-                Ler · {suggestion.lesson.minutes} min
-              </span>
+              <p className="mt-3 text-[15px] leading-snug text-white/90">{suggestion.lesson.summary}</p>
+              <p className="mt-4 flex items-center justify-between text-[15px] text-white/90">
+                <span>{suggestion.lesson.minutes} min de leitura</span>
+                <span>Ler ›</span>
+              </p>
             </button>
           ) : (
-            <div className="rounded-[22px] bg-white px-6 py-6">
-              <p className="ac-caption">Estante</p>
-              <p className="ac-section-title mt-1">
+            <div className="rounded-[28px] bg-[#f5f5f7] px-6 py-6">
+              <p className="text-[13px] text-[var(--neo-gray)]">Estante</p>
+              <p className="mt-1 text-[22px] font-semibold tracking-[-0.025em] text-[var(--neo-ink)]">
                 Você leu tudo o que estava aberto.
               </p>
               <p className="mt-2 text-[15px] leading-snug text-[var(--neo-gray)]">
@@ -91,7 +92,7 @@ export function BaseHome({
             </div>
           )}
 
-          <div className="rounded-[22px] bg-white px-5 py-4">
+          <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-4">
             <div className="flex items-baseline justify-between gap-3">
               <p className="text-[15px] font-semibold tracking-[-0.011em] text-[var(--neo-ink)]">
                 {done} de {total} resumos
@@ -195,7 +196,7 @@ export function BaseHome({
           <button
             type="button"
             onClick={onOpenCola}
-            className="w-full rounded-[22px] bg-white px-5 py-5 text-left ios-press-gentle"
+            className="w-full rounded-[24px] bg-[#f5f5f7] px-5 py-5 text-left ios-press-gentle"
           >
             <p className="text-[13px] text-[var(--neo-gray)]">Já está na clínica?</p>
             <p className="mt-1 text-[17px] font-semibold tracking-[-0.016em] text-[var(--neo-ink)]">

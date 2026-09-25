@@ -87,7 +87,7 @@ export function LessonView({
             </section>
           ))}
 
-          <div className="flex gap-4 rounded-[22px] bg-white px-5 py-5">
+          <div className="flex gap-4 rounded-[24px] bg-[#f5f5f7] px-5 py-5">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[var(--neo)]">
               <Stethoscope size={18} />
             </span>
@@ -155,7 +155,7 @@ export function LessonView({
               <button
                 type="button"
                 onClick={() => onOpenLesson(lessonIndex + 1)}
-                className="flex w-full items-center gap-4 rounded-[22px] bg-white px-5 py-4 text-left ios-press-gentle"
+                className="flex w-full items-center gap-4 rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left ios-press-gentle"
               >
                 <span className="min-w-0 flex-1">
                   <span className="block text-[13px] text-[var(--neo-gray)]">Próximo resumo</span>

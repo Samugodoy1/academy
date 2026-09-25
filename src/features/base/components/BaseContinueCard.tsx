@@ -34,8 +34,8 @@ export const BaseContinueCard: React.FC<BaseContinueCardProps> = ({ plan, onOpen
   };
 
   return (
-    <button type="button" onClick={open} className="ac-hero px-7 pb-7 pt-8 ios-press-gentle">
-      <p className="text-[13px] tracking-[-0.011em] text-white/50">
+    <button type="button" onClick={open} className="w-full rounded-[28px] bg-[var(--neo)] px-6 py-6 text-left text-white ios-press-gentle">
+      <p className="text-[12px] font-normal uppercase tracking-[0.04em] text-white/80">
         {suggestion
           ? suggestion.reason === 'resume'
             ? 'Continuar de onde parou'
@@ -46,24 +46,25 @@ export const BaseContinueCard: React.FC<BaseContinueCardProps> = ({ plan, onOpen
       </p>
       {suggestion ? (
         <>
-          <p className="mt-2 text-[15px] tracking-[-0.016em] text-white/60">{suggestion.discipline.title}</p>
-          <p className="apple-display mt-1 text-[32px] sm:text-[36px]">
+          <p className="mt-2 text-[15px] tracking-[-0.011em] text-white/85">{suggestion.discipline.title}</p>
+          <p className="mt-1 text-[26px] font-semibold leading-[1.05] tracking-[-0.025em] sm:text-[32px]">
             {suggestion.lesson.title}
           </p>
-          <p className="mt-3 max-w-[40ch] text-[17px] leading-snug text-white/80">{suggestion.lesson.summary}</p>
-          <span className="apple-btn-light mt-7 flex w-full py-[14px] text-[17px]">
-            Ler · {suggestion.lesson.minutes} min · {done} de {total}
-          </span>
+          <p className="mt-3 text-[15px] leading-snug text-white/90">{suggestion.lesson.summary}</p>
+          <p className="mt-4 flex items-center justify-between text-[15px] text-white/90">
+            <span>{suggestion.lesson.minutes} min · {done} de {total} lidos</span>
+            <span>Ler ›</span>
+          </p>
         </>
       ) : (
         <>
-          <p className="apple-display mt-2 text-[32px] sm:text-[36px]">
+          <p className="mt-2 text-[26px] font-semibold leading-[1.05] tracking-[-0.025em] sm:text-[32px]">
             Você leu o que estava aberto.
           </p>
-          <p className="mt-3 text-[17px] leading-snug text-white/80">
+          <p className="mt-3 text-[15px] leading-snug text-white/90">
             Volte aos mapas e reconstrua um ramo de memória — é assim que fixa.
           </p>
-          <span className="apple-btn-light mt-7 flex w-full py-[14px] text-[17px]">Abrir Estudos</span>
+          <p className="mt-4 text-[15px] text-white/90">Abrir Estudos ›</p>
         </>
       )}
     </button>

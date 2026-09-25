@@ -282,7 +282,7 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
               <p className="mt-4 max-w-[32ch] text-[17px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
                 Caso, box, prontuário e a Cola. A home te guia; o jogo te puxa de volta.
               </p>
-              <ol className="mt-10 ac-group">
+              <ol className="mt-10 overflow-hidden rounded-[24px] bg-[#f5f5f7]">
                 {steps.map(step => (
                   <li
                     key={step.id}
@@ -356,7 +356,7 @@ export const AcademyOnboarding: React.FC<AcademyOnboardingProps> = ({
               {copy.coach}
             </p>
 
-            <ol className="mt-10 ac-group">
+            <ol className="mt-10 overflow-hidden rounded-[24px] bg-[#f5f5f7]">
               {steps.map(step => (
                 <li key={step.id} className="border-b border-black/[0.04] last:border-b-0">
                   <button
@@ -434,7 +434,7 @@ export const AcademyActivationCard: React.FC<{
       <button
         type="button"
         onClick={() => openPatientRecord(firstPatient.id)}
-        className="flex w-full items-center justify-between gap-4 rounded-[22px] bg-white px-5 py-4 text-left"
+        className="flex w-full items-center justify-between gap-4 rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left"
       >
         <div className="min-w-0">
           <p className="text-[15px] tracking-[-0.011em] text-[var(--neo-ink)]">
@@ -457,7 +457,7 @@ export const AcademyActivationCard: React.FC<{
           writeColaOpened(user?.id);
           openCola();
         }}
-        className="flex w-full items-center justify-between gap-4 rounded-[22px] bg-white px-5 py-4 text-left"
+        className="flex w-full items-center justify-between gap-4 rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left"
       >
         <div className="min-w-0">
           <p className="text-[15px] tracking-[-0.011em] text-[var(--neo-ink)]">

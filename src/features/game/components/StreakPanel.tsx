@@ -68,7 +68,7 @@ export const StreakPanel: React.FC<StreakPanelProps> = ({
   })();
 
   return (
-    <section className="space-y-3 rounded-[22px] bg-white px-5 py-5">
+    <section className="space-y-3 rounded-[24px] bg-[#f5f5f7] px-5 py-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">

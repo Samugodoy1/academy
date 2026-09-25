@@ -8,10 +8,12 @@ export const BottomNavItem = ({ id, icon: Icon, label, activeTab, setActiveTab, 
         navigate('/');
       }}
       aria-current={isActive ? 'page' : undefined}
-      className="relative flex h-[49px] flex-1 flex-col items-center justify-center gap-0.5 min-w-0"
+      className="relative flex h-14 flex-1 flex-col items-center justify-center gap-0.5 min-w-0 px-0.5"
     >
-      <Icon size={22} className={isActive ? 'text-[var(--neo)]' : 'text-[#8e8e93]'} strokeWidth={isActive ? 2.2 : 1.8} />
-      <span className={`text-[10px] leading-none tracking-[-0.01em] truncate max-w-full ${isActive ? 'text-[var(--neo)]' : 'text-[#8e8e93]'}`}>
+      <span className={`flex h-8 w-11 items-center justify-center ${isActive ? 'text-[var(--neo)]' : 'text-[var(--neo-ink)]'}`}>
+        <Icon size={20} />
+      </span>
+      <span className={`text-[10px] leading-none truncate max-w-full px-0.5 ${isActive ? 'text-[var(--neo)]' : 'text-[var(--neo-gray)]'}`}>
         {label}
       </span>
     </button>

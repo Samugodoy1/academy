@@ -29,13 +29,12 @@ export function AcademyDock({ activeTab, onGo, onSchedule }: AcademyDockProps) {
               onClick={() => onGo(item.id)}
               aria-label={item.label}
               aria-current={active ? 'page' : undefined}
-              className="relative mx-auto flex h-11 w-11 items-center justify-center rounded-[18px]"
+              className="flex flex-col items-center gap-0.5 rounded-[18px] px-1 py-1"
             >
-              {active && <span className="ac-lens absolute inset-0 rounded-[18px]" aria-hidden />}
               <Icon
-                size={24}
+                size={26}
                 weight={active ? 'fill' : 'regular'}
-                className={`relative ${active ? 'text-[var(--neo)]' : 'text-[#1d1d1f]'}`}
+                className={active ? 'text-[var(--neo)]' : 'text-[#1d1d1f]'}
               />
               <span className="sr-only">{item.label}</span>
             </button>

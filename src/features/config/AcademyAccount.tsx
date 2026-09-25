@@ -372,18 +372,20 @@ export function AcademyAccount({
               <button
                 type="button"
                 onClick={() => document.getElementById('assinatura')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                className="ac-hero px-6 pb-6 pt-6 text-left"
+                className="w-full rounded-[28px] bg-[var(--neo)] px-6 py-6 text-left text-white"
               >
-                <p className="ac-voice">Free</p>
-                <p className="ac-name mt-2 text-[28px]">
+                <p className="text-[12px] font-normal uppercase tracking-[0.04em] text-white/80">
+                  Free
+                </p>
+                <p className="mt-2 text-[26px] font-semibold leading-[1.05] tracking-[-0.025em]">
                   {stage === 'pre-clinico' ? 'A estante inteira do ciclo básico.' : FREE_TENSION.accountHeadline}
                 </p>
-                <p className="ac-support mt-2">
+                <p className="mt-2 text-[15px] tracking-[-0.011em] text-white/85">
                   {stage === 'pre-clinico'
                     ? 'No Student todos os resumos e mapas mentais abrem, e a Cola perde o limite diário.'
                     : FREE_TENSION.accountBody}
                 </p>
-                <span className="ac-action">{FREE_TENSION.accountCta}</span>
+                <p className="mt-4 text-[15px] text-white/90">{FREE_TENSION.accountCta} ›</p>
               </button>
             )}
             {waitingAccess && (

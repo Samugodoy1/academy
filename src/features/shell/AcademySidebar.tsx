@@ -73,18 +73,18 @@ export function AcademySidebar({
     <>
     <aside
       className={`
-        ac-rail
-        fixed inset-y-0 left-0 z-[110] flex w-[292px] flex-col p-5 transition-all duration-300 ease-in-out no-print
+        clinic-control-rail
+        fixed inset-y-0 left-0 z-[110] flex w-[292px] flex-col p-4 transition-all duration-300 ease-in-out no-print
         tablet-l:static tablet-l:translate-x-0 tablet-l:w-[292px] desktop:w-[300px]
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full tablet-l:translate-x-0'}
       `}
     >
       <div className="mb-4 px-1">
-        <p className="ac-voice">{studentGreeting(clock)}</p>
-        <p className="ac-name mt-1 truncate text-[28px]">
+        <p className="ac-caption">{studentGreeting(clock)}</p>
+        <p className="apple-display-ink mt-0.5 truncate text-[28px]">
           {firstName || 'você'}
         </p>
-        <p className="ac-support mt-1.5 !text-[15px]">
+        <p className="mt-1.5 text-[15px] font-semibold leading-snug tracking-[-0.016em] text-[var(--neo-ink)]">
           {statusLine}
         </p>
       </div>

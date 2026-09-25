@@ -2336,7 +2336,7 @@ export default function App() {
       <Route path="/pre-atendimento/:token" element={<PreAtendimento />} />
       <Route path="/prontuario/:id" element={
         user ? (
-          <div className="min-h-screen bg-white flex font-sans text-sys-text relative overflow-x-hidden">
+          <div className="min-h-screen bg-[#f5f5f7] flex font-sans text-sys-text relative overflow-x-hidden">
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
               {isSidebarOpen && (
@@ -2415,12 +2415,12 @@ export default function App() {
       } />
       <Route path="*" element={
         !user ? (
-          <div className="min-h-screen bg-white flex items-center justify-center px-5 font-sans antialiased">
+          <div className="min-h-screen bg-[#f5f5f7] flex items-center justify-center px-5 font-sans antialiased">
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full max-w-[400px]"
+              className="w-full max-w-[420px] oh-device p-7 sm:p-10"
             >
               <motion.div
                 className="mb-10"
@@ -2447,7 +2447,7 @@ export default function App() {
               <form onSubmit={isRegistering ? handleRegister : handleLogin} className="space-y-5">
                 {isRegistering && (
                   <div>
-                    <label className="block text-[13px] font-normal text-apple-gray mb-2">Nome completo</label>
+                    <label className="block text-[13px] font-medium text-academy-muted mb-2">Nome completo</label>
                     <input
                       type="text"
                       required
@@ -2460,7 +2460,7 @@ export default function App() {
                 )}
 
                 <div>
-                  <label className="block text-[13px] font-normal text-apple-gray mb-2">E-mail</label>
+                  <label className="block text-[13px] font-medium text-academy-muted mb-2">E-mail</label>
                   <input
                     type="email"
                     required
@@ -2476,7 +2476,7 @@ export default function App() {
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-[13px] font-normal text-apple-gray">Senha</label>
+                    <label className="text-[13px] font-medium text-academy-muted">Senha</label>
                     {!isRegistering && (
                       <Link
                         to="/forgot-password"
@@ -2602,7 +2602,7 @@ export default function App() {
           </div>
         ) : (
           <AppProvider value={appContextValue}>
-          <div className="min-h-screen bg-white flex font-sans text-sys-text relative overflow-x-hidden">
+          <div className="min-h-screen bg-[#f5f5f7] flex font-sans text-sys-text relative overflow-x-hidden">
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
               {isSidebarOpen && (
@@ -2635,7 +2635,7 @@ export default function App() {
 
             {/* Main Content */}
             <main className="flex-1 min-w-0 w-full print:p-0">
-              <div className="tablet-l:hidden sticky top-0 z-30 bg-white/80 px-5 py-3 backdrop-blur-xl no-print">
+              <div className="tablet-l:hidden sticky top-0 z-30 bg-[#f5f5f7]/80 px-5 py-3 backdrop-blur-xl no-print">
                 <AcademyWordmark size="sm" />
               </div>
               {/* ── Floating Guide Banner ── */}

@@ -1544,37 +1544,37 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
             <button
               type="button"
               onClick={() => openStudy(nextCase.topicKey, nextCase)}
-              className="ac-hero px-6 pb-6 pt-6 text-left sm:px-7 sm:pt-7"
+              className="w-full rounded-[28px] bg-[var(--neo)] px-6 py-6 text-left text-white"
             >
-              <p className="ac-voice">
+              <p className="text-[12px] font-normal uppercase tracking-[0.04em] text-white/80">
                 {getWhenLabel(nextCase.date)}
                 {nextCase.box.targetTooth ? ` · Dente ${nextCase.box.targetTooth}` : ''}
               </p>
-              <p className="ac-name mt-2 text-[28px] sm:text-[32px]">
+              <p className="mt-2 text-[26px] font-semibold leading-[1.05] tracking-[-0.025em] sm:text-[32px]">
                 {nextCaseTopic.title}
               </p>
-              <p className="ac-support mt-2">
+              <p className="mt-2 text-[15px] tracking-[-0.011em] text-white/85">
                 {nextCaseTopic.duration} · {nextCaseTopic.subtitle}
               </p>
               {cleanCheckpoint(nextCase.box.criticalCheckpoint) && (
-                <p className="ac-support mt-4">
+                <p className="mt-4 text-[15px] leading-snug text-white/90">
                   {cleanCheckpoint(nextCase.box.criticalCheckpoint)}
                 </p>
               )}
               {nextCase.box.anamnesisAlert && (
-                <p className="mt-3 rounded-[16px] bg-[var(--neo-wash)] px-4 py-3 text-[15px] leading-snug text-[var(--neo-ink)]">
+                <p className="mt-3 rounded-[16px] bg-white/15 px-4 py-3 text-[14px] leading-snug">
                   {nextCase.box.anamnesisAlert}
                 </p>
               )}
               {(confidenceMap[nextCase.topicKey]?.level === 'review' ||
                 confidenceMap[nextCase.topicKey]?.level === 'ask') && (
-                <p className="ac-support mt-3 !text-[13px]">
+                <p className="mt-3 text-[13px] text-white/80">
                   {confidenceMap[nextCase.topicKey]?.level === 'review'
                     ? 'Você marcou este tema para rever.'
                     : 'Você ficou de levar uma dúvida ao professor.'}
                 </p>
               )}
-              <span className="ac-action">Revisar</span>
+              <p className="mt-4 text-[15px] text-white/90">Revisar ›</p>
             </button>
           ) : studyNudges[0] ? (
             <button

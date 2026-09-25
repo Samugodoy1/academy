@@ -879,14 +879,11 @@ html[data-theme="dark"] {
   .ac-sheet {
     width: 100%;
     overflow: hidden;
-    border-radius: 28px;
+    border-radius: 22px;
     text-align: left;
-    background: rgba(255, 255, 255, 0.72);
-    border: 0.5px solid rgba(255, 255, 255, 0.85);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.95),
-      0 1px 1px rgba(60, 40, 20, 0.03),
-      0 18px 50px rgba(80, 40, 10, 0.06);
+    background: var(--neo-wash);
+    border: none;
+    box-shadow: none;
   }
 
   .ac-hero {
@@ -894,13 +891,23 @@ html[data-theme="dark"] {
     overflow: hidden;
     border-radius: 28px;
     text-align: left;
-    color: #1d1d1f;
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.62));
-    border: 0.5px solid rgba(255, 255, 255, 0.9);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.95),
-      0 20px 50px color-mix(in srgb, var(--neo) 14%, transparent);
+    color: #ffffff;
+    background: var(--neo);
+    border: none;
+    box-shadow: none;
+  }
+
+  .ac-hero .ac-voice {
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .ac-hero .ac-name,
+  .ac-hero .ac-title {
+    color: #ffffff;
+  }
+
+  .ac-hero .ac-support {
+    color: rgba(255, 255, 255, 0.84);
   }
 
   .ac-action {
@@ -908,25 +915,28 @@ html[data-theme="dark"] {
     width: 100%;
     align-items: center;
     justify-content: center;
-    min-height: 50px;
-    margin-top: 1.75rem;
+    min-height: 48px;
+    margin-top: 1.5rem;
     border-radius: 980px;
-    background: var(--neo);
-    color: #ffffff;
+    background: #ffffff;
+    color: var(--neo);
     font-size: 17px;
     font-weight: 500;
     letter-spacing: -0.014em;
     line-height: 1.2;
   }
 
+  .ac-sheet .ac-action {
+    background: var(--neo);
+    color: #ffffff;
+  }
+
   .ac-group {
     overflow: hidden;
-    border-radius: 26px;
-    background: rgba(255, 255, 255, 0.72);
-    border: 0.5px solid rgba(255, 255, 255, 0.8);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      0 10px 30px rgba(60, 40, 20, 0.04);
+    border-radius: 22px;
+    background: var(--neo-wash);
+    border: none;
+    box-shadow: none;
   }
 
   .ac-row {
@@ -946,7 +956,7 @@ html[data-theme="dark"] {
     right: 1.1rem;
     bottom: 0;
     height: 0.5px;
-    background: rgba(60, 60, 67, 0.14);
+    background: color-mix(in srgb, var(--neo) 18%, transparent);
   }
 
   .ac-row:last-child::after {
@@ -1661,29 +1671,29 @@ html[data-theme="dark"] {
 
 html[data-product="academy"] {
   color-scheme: light;
-  --sys-bg: transparent;
-  --sys-elevated: rgba(255, 255, 255, 0.72);
-  --sys-inset: color-mix(in srgb, var(--neo-wash) 70%, #f6f3ef);
+  --sys-bg: #ffffff;
+  --sys-elevated: var(--neo-wash);
+  --sys-inset: var(--neo-wash);
   --sys-text: #1d1d1f;
   --sys-muted: #6e6e73;
-  --sys-input: rgba(255, 255, 255, 0.8);
+  --sys-input: var(--neo-wash);
   --sys-input-text: #1d1d1f;
-  --sys-secondary: rgba(255, 255, 255, 0.55);
-  --sys-secondary-hover: rgba(255, 255, 255, 0.8);
-  --sys-tabbar: rgba(255, 255, 255, 0.42);
-  --sys-sidebar: transparent;
-  --sys-hairline: rgba(60, 60, 67, 0.12);
+  --sys-secondary: var(--neo-wash);
+  --sys-secondary-hover: var(--neo-soft);
+  --sys-tabbar: rgba(255, 255, 255, 0.82);
+  --sys-sidebar: #ffffff;
+  --sys-hairline: color-mix(in srgb, var(--neo) 16%, transparent);
   --academy-primary: var(--neo);
   --academy-primary-dark: #1d1d1f;
   --academy-primary-light: var(--neo);
   --academy-soft: var(--neo-soft);
-  --academy-bg: transparent;
-  --academy-card: rgba(255, 255, 255, 0.72);
+  --academy-bg: #ffffff;
+  --academy-card: var(--neo-wash);
   --academy-text: #1d1d1f;
   --academy-muted: #6e6e73;
-  --academy-study: rgba(255, 255, 255, 0.72);
+  --academy-study: var(--neo-wash);
   --academy-study-text: #6e6e73;
-  --academy-success: rgba(255, 255, 255, 0.72);
+  --academy-success: var(--neo-wash);
   --academy-success-text: #1d1d1f;
 
   --apple-blue: var(--neo);
@@ -1698,11 +1708,8 @@ html[data-product="academy"] {
 
 html[data-product="academy"],
 html[data-product="academy"] body {
-  background-color: #f6f3ef;
-  background-image:
-    radial-gradient(880px 520px at -6% -8%, color-mix(in srgb, var(--neo) 30%, transparent), transparent 64%),
-    radial-gradient(720px 460px at 108% -12%, color-mix(in srgb, var(--neo-soft) 90%, transparent), transparent 62%);
-  background-attachment: fixed;
+  background-color: #ffffff;
+  background-image: none;
   color: #1d1d1f;
 }
 
@@ -1752,13 +1759,11 @@ html[data-product="academy"] .apple-input:focus {
 html[data-product="academy"] .oh-device,
 html[data-product="academy"] .comic-card,
 html[data-product="academy"] .ios-card {
-  background: rgba(255, 255, 255, 0.62);
-  -webkit-backdrop-filter: blur(28px) saturate(170%);
-  backdrop-filter: blur(28px) saturate(170%);
-  border: 0.5px solid rgba(255, 255, 255, 0.78);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 18px 50px rgba(80, 40, 10, 0.08);
+  background: var(--neo-wash);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border: none;
+  box-shadow: none;
 }
 
 html[data-product="academy"] .oh-device-inset {
@@ -1770,15 +1775,13 @@ html[data-product="academy"] .liquid-glass-nav,
 html[data-product="academy"] .tab-bar-float,
 html[data-product="academy"] .tab-bar-liquid,
 html[data-product="academy"] .ac-tabbar {
-  min-height: 62px;
-  border-radius: 32px;
-  background: rgba(255, 255, 255, 0.42);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  backdrop-filter: blur(28px) saturate(180%);
-  border: 0.5px solid rgba(255, 255, 255, 0.72);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.88),
-    0 12px 40px rgba(70, 36, 12, 0.12);
+  min-height: 58px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.86);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border: 0.5px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
 }
 
 html[data-product="academy"] .page-shell {
@@ -1800,56 +1803,58 @@ html[data-product="academy"] .neo-widget-lg {
 }
 
 html[data-product="academy"] .neo-widget-neo {
-  background: linear-gradient(165deg, color-mix(in srgb, var(--neo) 78%, white), var(--neo));
+  background: var(--neo);
   color: #ffffff;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.35),
-    0 12px 28px color-mix(in srgb, var(--neo) 28%, transparent);
+  box-shadow: none;
 }
 
-html[data-product="academy"] .neo-widget-soft,
-html[data-product="academy"] .neo-widget-wash,
-html[data-product="academy"] .neo-widget-white,
-html[data-product="academy"] .neo-widget-note {
-  background: rgba(255, 255, 255, 0.58);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  backdrop-filter: blur(18px) saturate(160%);
+html[data-product="academy"] .neo-widget-soft {
+  background: var(--neo-soft);
   color: #1d1d1f;
-  border: 0.5px solid rgba(255, 255, 255, 0.75);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 8px 24px rgba(70, 36, 12, 0.05);
+  border: none;
+  box-shadow: none;
+}
+
+html[data-product="academy"] .neo-widget-wash,
+html[data-product="academy"] .neo-widget-note {
+  background: var(--neo-wash);
+  color: #1d1d1f;
+  border: none;
+  box-shadow: none;
+}
+
+html[data-product="academy"] .neo-widget-white {
+  background: var(--neo-wash);
+  color: #1d1d1f;
+  border: none;
+  box-shadow: none;
 }
 
 html[data-product="academy"] .neo-dock {
   width: min(420px, calc(100% - 32px));
-  padding: 12px 18px 10px;
-  border-radius: 980px;
-  background: rgba(255, 255, 255, 0.62);
-  border: 0.5px solid rgba(255, 255, 255, 0.7);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.9);
+  padding: 10px 16px 8px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 0.5px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
 html[data-product="academy"] .neo-control-tile {
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow:
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.95),
-    0 1px 3px rgba(0, 0, 0, 0.04);
+  background: var(--neo-wash);
+  box-shadow: none;
 }
 
 html[data-product="academy"] .neo-control-tile-active {
-  background: color-mix(in srgb, var(--neo-soft) 70%, white);
+  background: var(--neo-soft);
 }
 
 html[data-product="academy"] .ac-rail {
-  background: transparent;
+  background: #ffffff;
   box-shadow: none;
 }
 
 html[data-product="academy"] .liquid-glass-segment {
-  background: #f5f5f7;
+  background: var(--neo-wash);
 }
 
 html[data-product="academy"] .liquid-glass-segment-active {
@@ -1859,21 +1864,10 @@ html[data-product="academy"] .liquid-glass-segment-active {
 
 html[data-product="academy"] .liquid-glass-subtle,
 html[data-product="academy"] .liquid-glass-card {
-  background: #ffffff;
+  background: var(--neo-wash);
   box-shadow: none;
 }
 
 html[data-product="academy"] .academy-wordmark-accent {
   color: var(--neo);
-}
-
-html[data-product="academy"] .clinic-control-rail {
-  background: linear-gradient(
-    180deg,
-    rgba(236, 236, 240, 0.78) 0%,
-    rgba(242, 242, 247, 0.58) 100%
-  );
-  -webkit-backdrop-filter: blur(52px) saturate(190%);
-  backdrop-filter: blur(52px) saturate(190%);
-  box-shadow: inset -0.5px 0 0 rgba(0, 0, 0, 0.06);
 }

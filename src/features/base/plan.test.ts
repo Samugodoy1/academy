@@ -8,6 +8,8 @@ describe('Base plan gating', () => {
     expect(isLessonUnlocked('free', 1)).toBe(false);
     expect(isLessonUnlocked('student', 1)).toBe(true);
     expect(isLessonUnlocked('student', 5)).toBe(true);
+    expect(isLessonUnlocked('clinico', 5)).toBe(true);
+    expect(isMindMapUnlocked('clinico', 2)).toBe(true);
   });
 
   it('opens exactly one mind map on Free', () => {

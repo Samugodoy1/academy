@@ -3,7 +3,7 @@
  * open but rations how much can be played in a day; Student removes the
  * rationing so a study marathon is never interrupted.
  */
-export type GamePlan = 'free' | 'student';
+export type GamePlan = 'free' | 'clinico' | 'student';
 
 export interface PlanLimits {
   /** Trail lessons per day, or null for no cap. */
@@ -22,6 +22,14 @@ export const FREE_LIMITS: PlanLimits = {
   blitz: false,
 };
 
+export const CLINICO_LIMITS: PlanLimits = {
+  dailyLessons: 5,
+  heartRegenMs: 20 * 60 * 1000,
+  infiniteHearts: false,
+  maxFreezes: 1,
+  blitz: false,
+};
+
 export const STUDENT_LIMITS: PlanLimits = {
   dailyLessons: null,
   heartRegenMs: 5 * 60 * 1000,
@@ -31,7 +39,9 @@ export const STUDENT_LIMITS: PlanLimits = {
 };
 
 export function limitsFor(plan: GamePlan): PlanLimits {
-  return plan === 'free' ? FREE_LIMITS : STUDENT_LIMITS;
+  if (plan === 'student') return STUDENT_LIMITS;
+  if (plan === 'clinico') return CLINICO_LIMITS;
+  return FREE_LIMITS;
 }
 
 /** Everything the paywall sheet promises, in the order it is shown. */

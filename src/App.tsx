@@ -103,6 +103,7 @@ import { LegacyClinicalRedirect } from './features/clinical/LegacyClinicalRedire
 import { UpgradeLimitModal } from './features/modals/UpgradeLimitModal';
 import {
   ACADEMY_FREE_MAX_PATIENTS,
+  academyGamePlan,
   academyPatientLimitReached,
   canExportAcademyClinicalPdf,
   canUseAcademyBoxMode,
@@ -2789,7 +2790,7 @@ export default function App() {
                       onDismissWelcome={() => updateUserOnboarding('welcome_seen')}
                       academicPeriod={profile?.academic_period}
                       institution={profile?.institution}
-                      gamePlan={(getProductAccess(getCurrentProduct())?.plan || 'free') === 'free' ? 'free' : 'student'}
+                      gamePlan={academyGamePlan(getProductAccess(getCurrentProduct())?.plan)}
                       onOpenStudentPlan={openStudentPlan}
                     />
                   )}
@@ -2802,7 +2803,7 @@ export default function App() {
                           appointments={appointments}
                           setActiveTab={setActiveTab}
                           openPatientRecord={openPatientRecord}
-                          plan={(getProductAccess(getCurrentProduct())?.plan || 'free') === 'free' ? 'free' : 'student'}
+                          plan={academyGamePlan(getProductAccess(getCurrentProduct())?.plan)}
                           onUpgrade={() => openAcademyUpgrade('estudos')}
                         />
                       </Suspense>
@@ -2813,7 +2814,7 @@ export default function App() {
                     <ErrorBoundary fallbackTitle="Não foi possível carregar o Ciclo básico">
                       <Suspense fallback={<DataLoadingSkeleton rows={6} className="mt-10" />}>
                         <BaseTab
-                          plan={(getProductAccess(getCurrentProduct())?.plan || 'free') === 'free' ? 'free' : 'student'}
+                          plan={academyGamePlan(getProductAccess(getCurrentProduct())?.plan)}
                           academicPeriod={profile?.academic_period}
                           setActiveTab={setActiveTab}
                           onUpgrade={() => openAcademyUpgrade('estudos')}
@@ -4192,7 +4193,7 @@ export default function App() {
               navigate={navigate}
               studentActive={studentActive}
               onSubscribe={openStudentPlan}
-              gamePlan={academyAccessPlan === 'free' ? 'free' : 'student'}
+              gamePlan={academyGamePlan(academyAccessPlan)}
               onOpenCola={() => {
                 try { localStorage.setItem('academy_study_mode', 'treinar'); } catch { /* modo padrão */ }
                 setActiveTab('estudos');

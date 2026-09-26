@@ -10,6 +10,7 @@ import {
 import type { CouponPreview } from '../features/coupons/types';
 import { trackProductEvent, trackStudentCta } from '../features/analytics/track';
 import { FREE_TENSION, STUDENT_PRIDE } from '../features/subscription/conversionCopy';
+import { AcademyPlanChooser } from '../features/subscription/AcademyPlanChooser';
 
 interface SubscriptionPlan {
   id: number;
@@ -21,6 +22,7 @@ interface SubscriptionPlan {
   currency: string;
   frequency: number;
   frequency_type: string;
+  billing_cycle?: string;
   active: boolean;
 }
 
@@ -254,11 +256,12 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
     ? STATUS_MAP[subscription.status] || STATUS_MAP.pending
     : null;
   const subscribeCtaLabel = product === 'academy' ? FREE_TENSION.subscribeCta : 'Assinar OdontoHub Pro';
-  const showFreeUpgrade = isFree && !isPending && !isProActive && paidPlan;
+  const showFreeUpgrade = isFree && !isProActive && Boolean(paidPlan) && (neo || !isPending);
+  const showAcademyPendingChoice = neo && isPending && Boolean(subscription) && isFree && !isProActive;
   const showCancelledExpired = subscription && ['cancelled', 'expired'].includes(subscription.status) && paidPlan;
   const hasCardBody = Boolean(
     (isProActive && subscription)
-    || (isPending && subscription)
+    || (isPending && subscription && !showAcademyPendingChoice)
     || showFreeUpgrade
     || showCancelledExpired
     || payments.length > 0
@@ -352,8 +355,8 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
             </>
           )}
 
-          {/* Pending — resume checkout CTA */}
-          {isPending && subscription && (
+          {/* Pending — resume checkout CTA. No Academy os outros planos continuam disponíveis. */}
+          {isPending && subscription && !showAcademyPendingChoice && (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-slate-50 rounded-xl p-3">
@@ -394,20 +397,24 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
           {showFreeUpgrade && (
             neo ? (
               <div className="space-y-4">
-                <p className="text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-ink)]">
-                  {FREE_TENSION.priceLead}
-                </p>
-                <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
-                  {chargedAmount != null ? formatCurrency(chargedAmount) : formatCurrency(paidPlan.amount)} por mês
-                </p>
-                {couponPreview?.valid && planAmount != null && chargedAmount != null && chargedAmount < planAmount && (
-                  <p className="text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">
-                    De {formatCurrency(planAmount)} com o cupom {couponPreview.code}.
-                  </p>
+                {showAcademyPendingChoice && subscription && (
+                  <div className="flex items-center justify-between gap-3 text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">
+                    <p>Pagamento de {subscription.plan_name} ainda não concluído.</p>
+                    <button
+                      type="button"
+                      onClick={handleResumeSubscription}
+                      disabled={createLoading}
+                      className="shrink-0 text-[var(--neo-ink)] disabled:opacity-50"
+                    >
+                      Continuar
+                    </button>
+                  </div>
                 )}
-                {paidPlan.description && (
-                  <p className="text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">{paidPlan.description}</p>
-                )}
+                <AcademyPlanChooser
+                  plans={plans}
+                  loading={createLoading}
+                  onSubscribe={handleCreateSubscription}
+                />
                 {showCouponField && (
                   <CouponApplyField
                     apiFetch={apiFetch}
@@ -419,16 +426,6 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
                     onChange={setCouponPreview}
                   />
                 )}
-                <button
-                  onClick={() => handleCreateSubscription(paidPlan.id)}
-                  disabled={createLoading}
-                  className="neo-pill w-full disabled:opacity-50"
-                >
-                  {createLoading ? 'Processando' : subscribeCtaLabel}
-                </button>
-                <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">
-                  Mercado Pago. Cancela quando quiser.
-                </p>
               </div>
             ) : (
             <div className="space-y-3">

@@ -79,10 +79,11 @@ describe('Academy account prefs', () => {
     expect(resolved.widgets).toBeNull();
   });
 
-  it('keeps a chosen color when reload has not restored the account yet', () => {
-    expect(chooseAcademyNeo('blue', 'pink')).toBe('pink');
-    expect(chooseAcademyNeo('orange', null)).toBe('orange');
-    expect(chooseAcademyNeo('pink', 'blue')).toBe('pink');
+  it('uses the color saved on the account, not the one left by another login', () => {
+    expect(chooseAcademyNeo('orange', 'pink')).toEqual({ id: 'orange', pushLocal: false });
+    expect(chooseAcademyNeo('pink', 'blue')).toEqual({ id: 'pink', pushLocal: false });
+    expect(chooseAcademyNeo('blue', 'green')).toEqual({ id: 'green', pushLocal: true });
+    expect(chooseAcademyNeo(null, 'green')).toEqual({ id: 'green', pushLocal: false });
   });
 
   it('keeps a local widget board when the server has none', () => {

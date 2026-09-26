@@ -1,6 +1,17 @@
 import { CURRENT_PRODUCT } from '../config/product';
 
 export const ACADEMY_NEO_STORAGE_KEY = 'odontohub-academy-neo';
+export const ACADEMY_CANVAS = '#f5f5f7';
+
+let boundNeoUserId: number | null = null;
+
+export function bindAcademyNeoUser(userId: number | null) {
+  boundNeoUserId = userId;
+}
+
+function storageKey(userId?: number | null) {
+  return userId ? `${ACADEMY_NEO_STORAGE_KEY}:${userId}` : ACADEMY_NEO_STORAGE_KEY;
+}
 
 /**
  * Apple system colors, standard light appearance (Padrão leve).
@@ -63,14 +74,15 @@ export function readStoredAcademyNeoId(): AcademyNeoId {
   return readExplicitAcademyNeoId() ?? DEFAULT_ACADEMY_NEO_ID;
 }
 
-/** Null when the user has never chosen a color on this browser. */
-export function readExplicitAcademyNeoId(): AcademyNeoId | null {
+/** Null when this account has never chosen a color on this browser. */
+export function readExplicitAcademyNeoId(userId?: number | null): AcademyNeoId | null {
   if (typeof localStorage === 'undefined') return null;
-  const raw = localStorage.getItem(ACADEMY_NEO_STORAGE_KEY);
+  const key = storageKey(userId);
+  const raw = localStorage.getItem(key);
   if (raw == null || raw === '') return null;
   const normalized = normalizeAcademyNeoId(raw);
   if (normalized && normalized !== raw) {
-    localStorage.setItem(ACADEMY_NEO_STORAGE_KEY, normalized);
+    localStorage.setItem(key, normalized);
   }
   return normalized;
 }
@@ -78,6 +90,7 @@ export function readExplicitAcademyNeoId(): AcademyNeoId | null {
 export function persistAcademyNeoId(id: AcademyNeoId) {
   if (typeof localStorage === 'undefined') return;
   localStorage.setItem(ACADEMY_NEO_STORAGE_KEY, id);
+  if (boundNeoUserId) localStorage.setItem(storageKey(boundNeoUserId), id);
 }
 
 export function applyAcademyNeoColorway(id: AcademyNeoId, enabled = true) {
@@ -104,5 +117,5 @@ export function applyAcademyNeoColorway(id: AcademyNeoId, enabled = true) {
   root.style.colorScheme = 'light';
 
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', '#ffffff');
+  if (meta) meta.setAttribute('content', ACADEMY_CANVAS);
 }

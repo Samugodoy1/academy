@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  chooseAcademyNeo,
   chooseAcademyWidgets,
   embedAcademyPrefsInBio,
   parseAcademyPrefsEnvelope,
@@ -76,6 +77,12 @@ describe('Academy account prefs', () => {
     const resolved = resolveAcademyPrefs({ academy_neo: 'space-black' });
     expect(resolved.neo).toBeNull();
     expect(resolved.widgets).toBeNull();
+  });
+
+  it('keeps a chosen color when reload has not restored the account yet', () => {
+    expect(chooseAcademyNeo('blue', 'pink')).toBe('pink');
+    expect(chooseAcademyNeo('orange', null)).toBe('orange');
+    expect(chooseAcademyNeo('pink', 'blue')).toBe('pink');
   });
 
   it('keeps a local widget board when the server has none', () => {

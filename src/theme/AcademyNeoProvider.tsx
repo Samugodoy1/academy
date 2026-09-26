@@ -4,6 +4,7 @@ import {
   applyAcademyNeoColorway,
   DEFAULT_ACADEMY_NEO_ID,
   persistAcademyNeoId,
+  readStoredAcademyNeoId,
   shouldApplyAcademyNeo,
   type AcademyNeoId,
 } from './academyNeo';
@@ -12,7 +13,7 @@ interface AcademyNeoContextValue {
   enabled: boolean;
   colorwayId: AcademyNeoId;
   setColorwayId: (id: AcademyNeoId) => void;
-  hydrateColorway: (id: AcademyNeoId) => void;
+  hydrateColorway: (id: AcademyNeoId, options?: { persist?: boolean }) => void;
 }
 
 const AcademyNeoContext = createContext<AcademyNeoContextValue>({
@@ -24,16 +25,16 @@ const AcademyNeoContext = createContext<AcademyNeoContextValue>({
 
 export function AcademyNeoProvider({ children }: { children: React.ReactNode }) {
   const enabled = shouldApplyAcademyNeo();
-  const [colorwayId, setColorwayIdState] = useState<AcademyNeoId>(DEFAULT_ACADEMY_NEO_ID);
+  const [colorwayId, setColorwayIdState] = useState<AcademyNeoId>(() => readStoredAcademyNeoId());
 
   useEffect(() => {
     applyAcademyNeoColorway(colorwayId, enabled);
   }, [colorwayId, enabled]);
 
-  const hydrateColorway = useCallback((id: AcademyNeoId) => {
+  const hydrateColorway = useCallback((id: AcademyNeoId, options?: { persist?: boolean }) => {
     setColorwayIdState(id);
     setAcademyAccountPrefs({ academy_neo: id });
-    persistAcademyNeoId(id);
+    if (options?.persist !== false) persistAcademyNeoId(id);
     applyAcademyNeoColorway(id, enabled);
   }, [enabled]);
 

@@ -123,6 +123,14 @@ export function serializeAcademyWidgets(widgets: AcademyWidget[]): AcademyWidget
   return parseAcademyWidgets(widgets) || [];
 }
 
+export function chooseAcademyNeo(
+  remote: AcademyNeoId | null | undefined,
+  local: AcademyNeoId | null,
+): AcademyNeoId {
+  if (local && local !== DEFAULT_ACADEMY_NEO_ID) return local;
+  return remote || local || DEFAULT_ACADEMY_NEO_ID;
+}
+
 function sameWidgets(left: AcademyWidget[], right: AcademyWidget[]) {
   return JSON.stringify(left) === JSON.stringify(right);
 }

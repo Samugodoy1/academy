@@ -3,6 +3,7 @@ import { DEFAULT_ACADEMY_NEO_ID, persistAcademyNeoId, readExplicitAcademyNeoId, 
 import { useAcademyNeo } from './AcademyNeoProvider';
 import { useAcademyWidgets } from './AcademyWidgetsProvider';
 import {
+  chooseAcademyNeo,
   chooseAcademyWidgets,
   fetchAcademyPrefs,
   resolveAcademyPrefs,
@@ -12,7 +13,7 @@ import {
   resetAcademyAccountPrefs,
   type AcademyAccountPrefs,
 } from './academyAccount';
-import { defaultAcademyWidgets, persistAcademyWidgets, readAcademyWidgets, readExplicitAcademyWidgets } from './academyWidgets';
+import { persistAcademyWidgets, readAcademyWidgets, readExplicitAcademyWidgets } from './academyWidgets';
 
 interface AcademyPrefsSyncProps {
   userId?: number | null;
@@ -30,8 +31,10 @@ export function AcademyPrefsSync({ userId, profile }: AcademyPrefsSyncProps) {
       hydratedUser.current = null;
       fromApi.current = false;
       resetAcademyAccountPrefs();
-      hydrateColorway(DEFAULT_ACADEMY_NEO_ID);
-      hydrateWidgets(defaultAcademyWidgets());
+      const storedNeo = readExplicitAcademyNeoId();
+      hydrateColorway(storedNeo ?? DEFAULT_ACADEMY_NEO_ID, { persist: false });
+      const storedWidgets = readExplicitAcademyWidgets();
+      if (storedWidgets && storedWidgets.length > 0) hydrateWidgets(storedWidgets);
       return;
     }
 
@@ -52,7 +55,7 @@ export function AcademyPrefsSync({ userId, profile }: AcademyPrefsSyncProps) {
     });
 
     const chooseNeo = (remoteNeo: AcademyAccountPrefs['academy_neo'] | null | undefined) => (
-      readExplicitAcademyNeoId() ?? remoteNeo ?? readStoredAcademyNeoId()
+      chooseAcademyNeo(remoteNeo, readExplicitAcademyNeoId())
     );
 
     const chooseWidgets = (

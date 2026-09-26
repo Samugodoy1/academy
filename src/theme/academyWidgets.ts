@@ -101,14 +101,19 @@ export function parseAcademyWidgets(raw: unknown): AcademyWidget[] | null {
   return widgets.length > 0 ? widgets : null;
 }
 
-export function readAcademyWidgets(): AcademyWidget[] {
-  if (typeof localStorage === 'undefined') return defaultAcademyWidgets();
+export function readExplicitAcademyWidgets(): AcademyWidget[] | null {
+  if (typeof localStorage === 'undefined') return null;
+  const raw = localStorage.getItem(ACADEMY_WIDGETS_KEY);
+  if (raw == null) return null;
   try {
-    const parsed = parseAcademyWidgets(JSON.parse(localStorage.getItem(ACADEMY_WIDGETS_KEY) || 'null'));
-    return parsed || defaultAcademyWidgets();
+    return parseAcademyWidgets(JSON.parse(raw));
   } catch {
-    return defaultAcademyWidgets();
+    return null;
   }
+}
+
+export function readAcademyWidgets(): AcademyWidget[] {
+  return readExplicitAcademyWidgets() || defaultAcademyWidgets();
 }
 
 export function persistAcademyWidgets(widgets: AcademyWidget[]) {

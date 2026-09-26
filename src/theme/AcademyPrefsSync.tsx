@@ -3,6 +3,7 @@ import { DEFAULT_ACADEMY_NEO_ID, persistAcademyNeoId, readExplicitAcademyNeoId, 
 import { useAcademyNeo } from './AcademyNeoProvider';
 import { useAcademyWidgets } from './AcademyWidgetsProvider';
 import {
+  chooseAcademyWidgets,
   fetchAcademyPrefs,
   resolveAcademyPrefs,
   saveAcademyAccount,
@@ -11,7 +12,7 @@ import {
   resetAcademyAccountPrefs,
   type AcademyAccountPrefs,
 } from './academyAccount';
-import { defaultAcademyWidgets, persistAcademyWidgets, readAcademyWidgets } from './academyWidgets';
+import { defaultAcademyWidgets, persistAcademyWidgets, readAcademyWidgets, readExplicitAcademyWidgets } from './academyWidgets';
 
 interface AcademyPrefsSyncProps {
   userId?: number | null;
@@ -54,6 +55,16 @@ export function AcademyPrefsSync({ userId, profile }: AcademyPrefsSyncProps) {
       readExplicitAcademyNeoId() ?? remoteNeo ?? readStoredAcademyNeoId()
     );
 
+    const chooseWidgets = (
+      remoteWidgets: AcademyAccountPrefs['academy_widgets'] | null | undefined,
+      profileWidgets: AcademyAccountPrefs['academy_widgets'] | null | undefined,
+    ) => chooseAcademyWidgets(
+      remoteWidgets,
+      profileWidgets,
+      readExplicitAcademyWidgets(),
+      fromLocal().academy_widgets,
+    );
+
     if (hydratedUser.current !== userId) {
       hydratedUser.current = userId;
       fromApi.current = false;
@@ -63,16 +74,18 @@ export function AcademyPrefsSync({ userId, profile }: AcademyPrefsSyncProps) {
         const fromProfile = resolveAcademyPrefs(profile);
         if (remote) {
           fromApi.current = true;
+          const widgets = chooseWidgets(remote.academy_widgets, fromProfile.widgets);
           apply({
             academy_neo: chooseNeo(remote.academy_neo || fromProfile.neo),
-            academy_widgets: remote.academy_widgets || fromProfile.widgets || fromLocal().academy_widgets,
-          }, false);
+            academy_widgets: widgets.widgets,
+          }, widgets.pushLocal);
           return;
         }
+        const widgets = chooseWidgets(null, fromProfile.widgets);
         apply({
           academy_neo: chooseNeo(fromProfile.neo),
-          academy_widgets: fromProfile.widgets || fromLocal().academy_widgets,
-        }, !fromProfile.neo || !fromProfile.widgets);
+          academy_widgets: widgets.widgets,
+        }, !fromProfile.neo || widgets.pushLocal);
       });
       return () => {
         cancelled = true;
@@ -82,10 +95,11 @@ export function AcademyPrefsSync({ userId, profile }: AcademyPrefsSyncProps) {
     if (!fromApi.current && profile) {
       const fromProfile = resolveAcademyPrefs(profile);
       if (fromProfile.neo || fromProfile.widgets) {
+        const widgets = chooseWidgets(null, fromProfile.widgets);
         apply({
           academy_neo: chooseNeo(fromProfile.neo),
-          academy_widgets: fromProfile.widgets || fromLocal().academy_widgets,
-        }, !fromProfile.neo || !fromProfile.widgets);
+          academy_widgets: widgets.widgets,
+        }, !fromProfile.neo || widgets.pushLocal);
       }
     }
   }, [hydrateColorway, hydrateWidgets, profile, userId]);

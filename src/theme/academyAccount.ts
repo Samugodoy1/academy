@@ -123,6 +123,29 @@ export function serializeAcademyWidgets(widgets: AcademyWidget[]): AcademyWidget
   return parseAcademyWidgets(widgets) || [];
 }
 
+function sameWidgets(left: AcademyWidget[], right: AcademyWidget[]) {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+/**
+ * O arranjo gravado neste aparelho ganha de uma lista vazia ou incompleta do servidor.
+ * Sem arranjo local, vale o que a conta já tem.
+ */
+export function chooseAcademyWidgets(
+  remote: AcademyWidget[] | null | undefined,
+  profile: AcademyWidget[] | null | undefined,
+  local: AcademyWidget[] | null,
+  fallback: AcademyWidget[],
+): { widgets: AcademyWidget[]; pushLocal: boolean } {
+  if (local && local.length > 0) {
+    return { widgets: local, pushLocal: !remote || !sameWidgets(local, remote) };
+  }
+  if (remote && remote.length > 0) return { widgets: remote, pushLocal: false };
+  if (profile && profile.length > 0) return { widgets: profile, pushLocal: true };
+  if (local) return { widgets: local, pushLocal: false };
+  return { widgets: fallback, pushLocal: false };
+}
+
 export function applyAcademyPrefsToProfile<T extends Record<string, unknown>>(profile: T, prefs = currentPrefs): T {
   const nextBio = embedAcademyPrefsInBio(profile.bio, prefs);
   const address = typeof profile.clinic_address === 'string' ? profile.clinic_address : '';

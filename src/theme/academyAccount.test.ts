@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  chooseAcademyWidgets,
   embedAcademyPrefsInBio,
   parseAcademyPrefsEnvelope,
   prefsFromUnknown,
@@ -75,6 +76,24 @@ describe('Academy account prefs', () => {
     const resolved = resolveAcademyPrefs({ academy_neo: 'space-black' });
     expect(resolved.neo).toBeNull();
     expect(resolved.widgets).toBeNull();
+  });
+
+  it('keeps a local widget board when the server has none', () => {
+    const local = [
+      { id: 'clock', kind: 'clock' as const, size: 'md' as const },
+      { id: 'base', kind: 'base' as const, size: 'sm' as const },
+    ];
+    const chosen = chooseAcademyWidgets([], null, local, []);
+    expect(chosen.widgets.map(widget => widget.kind)).toEqual(['clock', 'base']);
+    expect(chosen.pushLocal).toBe(true);
+    expect(chooseAcademyWidgets(local, null, local, []).pushLocal).toBe(false);
+  });
+
+  it('uses the server board on a device that never arranged widgets', () => {
+    const remote = [{ id: 'agenda', kind: 'agenda' as const, size: 'sm' as const }];
+    const chosen = chooseAcademyWidgets(remote, null, null, []);
+    expect(chosen.widgets).toEqual(remote);
+    expect(chosen.pushLocal).toBe(false);
   });
 
   it('reads the dedicated /api/academy/prefs payload', () => {

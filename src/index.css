@@ -1037,6 +1037,26 @@ html[data-theme="dark"] {
     transform: scale(0.97);
   }
 
+  .student-pill-compact {
+    height: 26px;
+    gap: 4px;
+    padding: 0 8px 0 6px;
+    font-size: 11px;
+    box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.08);
+  }
+
+  .student-pill-compact .student-mark-dot {
+    width: 6px;
+    height: 6px;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--neo) 18%, transparent);
+  }
+
+  .student-pill-compact .student-mark-offer {
+    width: 13px;
+    height: 13px;
+    font-size: 11px;
+  }
+
   .student-mark-dot {
     width: 8px;
     height: 8px;

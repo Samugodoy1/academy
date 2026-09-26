@@ -123,12 +123,17 @@ export function serializeAcademyWidgets(widgets: AcademyWidget[]): AcademyWidget
   return parseAcademyWidgets(widgets) || [];
 }
 
+/**
+ * A cor da conta vem do servidor. O valor local só entra se a conta ainda não tiver uma,
+ * e nesse caso ele é enviado. Azul padrão no servidor não apaga uma escolha desta conta.
+ */
 export function chooseAcademyNeo(
   remote: AcademyNeoId | null | undefined,
   local: AcademyNeoId | null,
-): AcademyNeoId {
-  if (local && local !== DEFAULT_ACADEMY_NEO_ID) return local;
-  return remote || local || DEFAULT_ACADEMY_NEO_ID;
+): { id: AcademyNeoId; pushLocal: boolean } {
+  if (remote && remote !== DEFAULT_ACADEMY_NEO_ID) return { id: remote, pushLocal: false };
+  if (local && local !== DEFAULT_ACADEMY_NEO_ID) return { id: local, pushLocal: Boolean(remote) };
+  return { id: remote || local || DEFAULT_ACADEMY_NEO_ID, pushLocal: false };
 }
 
 function sameWidgets(left: AcademyWidget[], right: AcademyWidget[]) {

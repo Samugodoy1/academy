@@ -49,7 +49,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             navigate={navigate}
           />
         ))}
-        <StudentMark active={studentActive} onSubscribe={onSubscribe} className="mr-1 shrink-0 self-center" />
+        <StudentMark active={studentActive} onSubscribe={onSubscribe} className="student-pill-compact mr-0.5 shrink-0 self-center" />
       </nav>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { DEFAULT_ACADEMY_NEO_ID, persistAcademyNeoId, readExplicitAcademyNeoId, readStoredAcademyNeoId } from './academyNeo';
+import { bindAcademyNeoUser, DEFAULT_ACADEMY_NEO_ID, persistAcademyNeoId, readExplicitAcademyNeoId, readStoredAcademyNeoId } from './academyNeo';
 import { useAcademyNeo } from './AcademyNeoProvider';
 import { useAcademyWidgets } from './AcademyWidgetsProvider';
 import {
@@ -30,13 +30,15 @@ export function AcademyPrefsSync({ userId, profile }: AcademyPrefsSyncProps) {
     if (!userId) {
       hydratedUser.current = null;
       fromApi.current = false;
+      bindAcademyNeoUser(null);
       resetAcademyAccountPrefs();
-      const storedNeo = readExplicitAcademyNeoId();
-      hydrateColorway(storedNeo ?? DEFAULT_ACADEMY_NEO_ID, { persist: false });
+      hydrateColorway(readExplicitAcademyNeoId() ?? DEFAULT_ACADEMY_NEO_ID, { persist: false });
       const storedWidgets = readExplicitAcademyWidgets();
       if (storedWidgets && storedWidgets.length > 0) hydrateWidgets(storedWidgets);
       return;
     }
+
+    bindAcademyNeoUser(userId);
 
     if (profile) setAcademyProfileSnapshot(profile);
 
@@ -55,7 +57,7 @@ export function AcademyPrefsSync({ userId, profile }: AcademyPrefsSyncProps) {
     });
 
     const chooseNeo = (remoteNeo: AcademyAccountPrefs['academy_neo'] | null | undefined) => (
-      chooseAcademyNeo(remoteNeo, readExplicitAcademyNeoId())
+      chooseAcademyNeo(remoteNeo, readExplicitAcademyNeoId(userId))
     );
 
     const chooseWidgets = (
@@ -78,17 +80,19 @@ export function AcademyPrefsSync({ userId, profile }: AcademyPrefsSyncProps) {
         if (remote) {
           fromApi.current = true;
           const widgets = chooseWidgets(remote.academy_widgets, fromProfile.widgets);
+          const neo = chooseNeo(remote.academy_neo || fromProfile.neo);
           apply({
-            academy_neo: chooseNeo(remote.academy_neo || fromProfile.neo),
+            academy_neo: neo.id,
             academy_widgets: widgets.widgets,
-          }, widgets.pushLocal);
+          }, widgets.pushLocal || neo.pushLocal);
           return;
         }
         const widgets = chooseWidgets(null, fromProfile.widgets);
+        const neo = chooseNeo(fromProfile.neo);
         apply({
-          academy_neo: chooseNeo(fromProfile.neo),
+          academy_neo: neo.id,
           academy_widgets: widgets.widgets,
-        }, !fromProfile.neo || widgets.pushLocal);
+        }, !fromProfile.neo || widgets.pushLocal || neo.pushLocal);
       });
       return () => {
         cancelled = true;
@@ -99,10 +103,11 @@ export function AcademyPrefsSync({ userId, profile }: AcademyPrefsSyncProps) {
       const fromProfile = resolveAcademyPrefs(profile);
       if (fromProfile.neo || fromProfile.widgets) {
         const widgets = chooseWidgets(null, fromProfile.widgets);
+        const neo = chooseNeo(fromProfile.neo);
         apply({
-          academy_neo: chooseNeo(fromProfile.neo),
+          academy_neo: neo.id,
           academy_widgets: widgets.widgets,
-        }, !fromProfile.neo || widgets.pushLocal);
+        }, !fromProfile.neo || widgets.pushLocal || neo.pushLocal);
       }
     }
   }, [hydrateColorway, hydrateWidgets, profile, userId]);

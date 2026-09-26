@@ -1,8 +1,9 @@
 import { academyApiFetch } from '../api/client';
 import {
   DEFAULT_ACADEMY_NEO_ID,
-  isAcademyNeoId,
+  normalizeAcademyNeoId,
   persistAcademyNeoId,
+  readStoredAcademyNeoId,
   type AcademyNeoId,
 } from './academyNeo';
 import {
@@ -45,7 +46,7 @@ function readNestedPrefs(source: unknown): { neo?: AcademyNeoId; widgets?: Acade
   if (!source || typeof source !== 'object') return {};
   const record = source as Record<string, unknown>;
   const neoValue = record.academy_neo ?? record.neo;
-  const neo = typeof neoValue === 'string' && isAcademyNeoId(neoValue) ? neoValue : undefined;
+  const neo = typeof neoValue === 'string' ? normalizeAcademyNeoId(neoValue) ?? undefined : undefined;
   const widgets = parseAcademyWidgets(record.academy_widgets ?? record.widgets) ?? undefined;
   return { neo, widgets };
 }
@@ -145,7 +146,7 @@ export function prefsFromUnknown(raw: unknown): AcademyAccountPrefs | null {
   const resolved = resolveAcademyPrefs(raw);
   if (!resolved.neo && !resolved.widgets) return null;
   return {
-    academy_neo: resolved.neo || currentPrefs.academy_neo,
+    academy_neo: resolved.neo || readStoredAcademyNeoId(),
     academy_widgets: resolved.widgets || currentPrefs.academy_widgets,
   };
 }

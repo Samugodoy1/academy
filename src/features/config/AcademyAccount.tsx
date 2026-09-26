@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { Camera, ChevronRight, LogOut, UserCog } from '../../icons';
 import { AcademyNeoPicker } from '../../components/AcademyNeoPicker';
 import { SubscriptionManagement } from '../../components/SubscriptionManagement';
-import { studentGreeting } from '../../theme/academyWidgets';
 import { useResolvedAcademyStage } from '../../theme/AcademyStageProvider';
 import { STAGE_LABEL } from '../../theme/academyStage';
 import { AcademyStageControl } from '../../components/AcademyStageControl';
@@ -12,8 +11,6 @@ import {
   isAcademyStudentPlan,
   studentAcademicLine,
   studentFirstName,
-  studentIdentityHeadline,
-  studentSchoolLine,
 } from '../../theme/academyProfile';
 import type { CurrentUser, Dentist } from '../../types/clinical';
 
@@ -41,7 +38,7 @@ export interface AcademyAccountProps {
 }
 
 function Group({ children }: { children: React.ReactNode }) {
-  return <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">{children}</div>;
+  return <div className="overflow-hidden ah-card">{children}</div>;
 }
 
 function Row({
@@ -117,8 +114,6 @@ export function AcademyAccount({
 }: AcademyAccountProps) {
   const firstName = studentFirstName(profile.name || user.name);
   const academicLine = studentAcademicLine(profile.academic_period, profile.institution);
-  const schoolLine = studentSchoolLine(profile.institution, profile.current_discipline);
-  const headline = studentIdentityHeadline(profile.academic_period);
   const isStudent = isAcademyStudentPlan(currentPlan);
   const { stage, stored: storedStage, setStage } = useResolvedAcademyStage({ academicPeriod: profile.academic_period });
   const academyAccess = profile.product_accesses?.find(access => access.product === 'academy');
@@ -134,18 +129,9 @@ export function AcademyAccount({
 
   return (
     <div className="page-shell space-y-8 tablet-l:max-w-[640px] desktop:space-y-10">
-      <header className="min-w-0">
-        <p className="text-[15px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
-          {studentGreeting(new Date())}{firstName ? `, ${firstName}` : ''}
-        </p>
-        <h1 className="mt-3 text-[28px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)] sm:text-[34px]">
-          {isProfileEditing ? 'Seus dados.' : headline}
-        </h1>
-      </header>
-
-      <section className="flex flex-col items-center text-center">
+      <section className="flex flex-col items-center pt-2 text-center">
         <label className="group relative cursor-pointer">
-          <span className="block h-40 w-40 overflow-hidden rounded-[40px] bg-[var(--neo-soft)] sm:h-48 sm:w-48">
+          <span className="block h-28 w-28 overflow-hidden rounded-full bg-[#e8e8ed] shadow-[0_0_0_0.5px_rgba(0,0,0,0.06)]">
             {profile.photo_url ? (
               <img
                 src={profile.photo_url}
@@ -154,40 +140,25 @@ export function AcademyAccount({
                 referrerPolicy="no-referrer"
               />
             ) : (
-              <span className="flex h-full w-full items-center justify-center text-[52px] font-semibold tracking-[-0.04em] text-[var(--neo)]">
+              <span className="flex h-full w-full items-center justify-center text-[40px] font-semibold tracking-[-0.04em] text-[var(--neo)]">
                 {(firstName || 'A').charAt(0).toUpperCase()}
               </span>
             )}
           </span>
-          <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-white/92 px-2.5 py-1 text-[12px] tracking-[-0.011em] text-[var(--neo-ink)] shadow-[0_4px_16px_rgba(29,29,31,0.08)]">
-            <Camera size={12} />
-            Foto
+          <span className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-white text-[var(--neo-ink)] shadow-[0_0_0_0.5px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.08)]">
+            <Camera size={14} />
           </span>
           <input type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} />
         </label>
 
         {!isProfileEditing && (
           <>
-            <p className="mt-5 max-w-[20ch] text-[26px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)] sm:text-[32px]">
+            <h1 className="mt-4 text-[28px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
               {profile.name || 'Sem nome ainda'}
+            </h1>
+            <p className="mt-1 text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">
+              {academicLine || 'Período e faculdade'}
             </p>
-            {academicLine ? (
-              <p className="mt-2 text-[17px] tracking-[-0.011em] text-[var(--neo-gray)]">
-                {academicLine}
-              </p>
-            ) : (
-              <p className="mt-2 text-[17px] tracking-[-0.011em] text-[var(--neo-gray)]">
-                Falta período e faculdade.
-              </p>
-            )}
-            {profile.current_discipline && academicLine && (
-              <p className="mt-1 text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">
-                {profile.current_discipline}
-              </p>
-            )}
-            <button type="button" onClick={startProfileEditing} className="neo-link mt-4 text-[17px]">
-              Editar ›
-            </button>
           </>
         )}
       </section>
@@ -288,53 +259,46 @@ export function AcademyAccount({
           <AcademyNeoPicker />
 
           <section className="space-y-3">
-            <h2 className="px-1 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
-              Na faculdade
+            <h2 className="px-4 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
+              Faculdade
             </h2>
-            {schoolLine || profile.student_registration ? (
-              <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
-                {profile.institution ? (
-                  <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
-                    {profile.institution}
-                  </p>
-                ) : (
-                  <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
-                    Sem faculdade ainda
-                  </p>
-                )}
-                {profile.current_discipline && (
-                  <p className="mt-2 text-[17px] tracking-[-0.011em] text-[var(--neo-ink)]">
-                    {profile.current_discipline}
-                  </p>
-                )}
-                {profile.student_registration && (
-                  <p className="mt-2 text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">
-                    RA {profile.student_registration}
-                  </p>
-                )}
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={startProfileEditing}
-                className="w-full rounded-[24px] bg-[#f5f5f7] px-5 py-5 text-left"
-              >
-                <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
-                  Onde você estuda
-                </p>
-                <p className="mt-2 text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">
-                  Faculdade, período e a clínica de agora.
-                </p>
-                <p className="neo-link mt-4 text-[15px]">Completar ›</p>
-              </button>
-            )}
+            <Group>
+              <Row onClick={startProfileEditing}>
+                <span className="w-24 shrink-0 text-[15px] text-[var(--neo-gray)]">Período</span>
+                <span className={`min-w-0 flex-1 truncate text-[17px] tracking-[-0.011em] ${profile.academic_period ? 'text-[var(--neo-ink)]' : 'text-[var(--neo-gray)]'}`}>
+                  {profile.academic_period || 'Adicionar'}
+                </span>
+                <ChevronRight size={16} className="shrink-0 text-[#C6C6C8]" />
+              </Row>
+              <Row onClick={startProfileEditing}>
+                <span className="w-24 shrink-0 text-[15px] text-[var(--neo-gray)]">Faculdade</span>
+                <span className={`min-w-0 flex-1 truncate text-[17px] tracking-[-0.011em] ${profile.institution ? 'text-[var(--neo-ink)]' : 'text-[var(--neo-gray)]'}`}>
+                  {profile.institution || 'Adicionar'}
+                </span>
+                <ChevronRight size={16} className="shrink-0 text-[#C6C6C8]" />
+              </Row>
+              <Row onClick={startProfileEditing}>
+                <span className="w-24 shrink-0 text-[15px] text-[var(--neo-gray)]">Clínica</span>
+                <span className={`min-w-0 flex-1 truncate text-[17px] tracking-[-0.011em] ${profile.current_discipline ? 'text-[var(--neo-ink)]' : 'text-[var(--neo-gray)]'}`}>
+                  {profile.current_discipline || 'Adicionar'}
+                </span>
+                <ChevronRight size={16} className="shrink-0 text-[#C6C6C8]" />
+              </Row>
+              <Row onClick={startProfileEditing}>
+                <span className="w-24 shrink-0 text-[15px] text-[var(--neo-gray)]">RA</span>
+                <span className={`min-w-0 flex-1 truncate text-[17px] tracking-[-0.011em] ${profile.student_registration ? 'text-[var(--neo-ink)]' : 'text-[var(--neo-gray)]'}`}>
+                  {profile.student_registration || 'Adicionar'}
+                </span>
+                <ChevronRight size={16} className="shrink-0 text-[#C6C6C8]" />
+              </Row>
+            </Group>
           </section>
 
           <section className="space-y-3">
-            <h2 className="px-1 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
+            <h2 className="px-4 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
               Fase do curso
             </h2>
-            <div className="rounded-[24px] bg-[#f5f5f7] px-4 py-4">
+            <div className="ah-card px-4 py-4">
               <AcademyStageControl value={stage} onChange={setStage} />
               <p className="mt-3 px-1 text-[13px] leading-snug text-[var(--neo-gray)]">
                 {stage === 'pre-clinico'
@@ -348,11 +312,11 @@ export function AcademyAccount({
           </section>
 
           <section className="space-y-3">
-            <h2 className="px-1 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
+            <h2 className="px-4 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
               O plano
             </h2>
             {isStudent ? (
-              <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+              <div className="ah-card px-5 py-5">
                 <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">{STUDENT_PRIDE.kicker}</p>
                 <p className="mt-1 text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
                   {STUDENT_PRIDE.headline}
@@ -395,7 +359,12 @@ export function AcademyAccount({
             )}
           </section>
 
-          <div id="assinatura">
+          <div id="assinatura" className="space-y-3">
+            {(user.account_kind === 'ambassador' || profile.account_kind === 'ambassador') && (
+              <p className="ah-card px-5 py-4 text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-ink)]">
+                Embaixadores usam o Student de graça.
+              </p>
+            )}
             <SubscriptionManagement
               apiFetch={apiFetch}
               product="academy"
@@ -404,7 +373,7 @@ export function AcademyAccount({
           </div>
 
           <section className="space-y-3">
-            <h2 className="px-1 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
+            <h2 className="px-4 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
               Conta
             </h2>
             <Group>

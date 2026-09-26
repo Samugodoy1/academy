@@ -4,34 +4,44 @@ import {
   DEFAULT_ACADEMY_NEO_ID,
   getAcademyNeoColorway,
   isAcademyNeoId,
+  normalizeAcademyNeoId,
   shouldApplyAcademyNeo,
 } from './academyNeo';
 
 describe('Academy Neo colorways', () => {
-  it('keeps Laranja as the default colorway', () => {
-    expect(DEFAULT_ACADEMY_NEO_ID).toBe('laranja');
-    expect(getAcademyNeoColorway(undefined)).toEqual(ACADEMY_NEO_COLORWAYS[0]);
-    expect(getAcademyNeoColorway('laranja')).toMatchObject({
-      neo: '#FF6B2C',
-      soft: '#FFD8C4',
-      wash: '#FFF4ED',
+  it('keeps Azul as the default colorway', () => {
+    expect(DEFAULT_ACADEMY_NEO_ID).toBe('blue');
+    expect(getAcademyNeoColorway(undefined).id).toBe('blue');
+    expect(getAcademyNeoColorway('blue')).toMatchObject({
+      neo: '#0088FF',
+      soft: '#D6ECFF',
+      wash: '#F0F8FF',
     });
   });
 
-  it('accepts the five landing colorways and rejects unknown ids', () => {
+  it('uses the Apple system colors in light appearance', () => {
     expect(ACADEMY_NEO_COLORWAYS.map(item => item.id)).toEqual([
-      'laranja',
-      'lima',
-      'azul',
-      'rosa',
-      'violeta',
+      'red',
+      'orange',
+      'yellow',
+      'green',
+      'mint',
+      'teal',
+      'cyan',
+      'blue',
+      'indigo',
+      'purple',
+      'pink',
+      'brown',
     ]);
-    expect(isAcademyNeoId('violeta')).toBe(true);
+    expect(isAcademyNeoId('pink')).toBe(true);
+    expect(normalizeAcademyNeoId('rosa')).toBe('pink');
+    expect(normalizeAcademyNeoId('azul')).toBe('blue');
     expect(isAcademyNeoId('space-black')).toBe(false);
-    expect(getAcademyNeoColorway('violeta')).toMatchObject({
-      neo: '#BF5AF2',
-      wash: '#F8F0FD',
-    });
+    expect(getAcademyNeoColorway('red')).toMatchObject({ neo: '#FF383C' });
+    expect(getAcademyNeoColorway('green')).toMatchObject({ neo: '#34C759' });
+    expect(getAcademyNeoColorway('pink')).toMatchObject({ neo: '#F4B6C8' });
+    expect(getAcademyNeoColorway('brown')).toMatchObject({ neo: '#AC7F5E' });
   });
 
   it('applies Neo on Academy hosts and never on the Pro sistema host', () => {

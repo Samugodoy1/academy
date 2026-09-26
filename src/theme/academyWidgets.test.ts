@@ -8,6 +8,7 @@ import {
   parseAcademyWidgets,
   patchAcademyWidget,
   removeAcademyWidget,
+  homeGreeting,
   studentGreeting,
 } from './academyWidgets';
 
@@ -58,5 +59,28 @@ describe('Academy widgets', () => {
     expect(studentGreeting(new Date('2026-09-03T09:00:00'))).toBe('Fala');
     expect(studentGreeting(new Date('2026-09-03T15:00:00'))).toBe('E aí');
     expect(studentGreeting(new Date('2026-09-03T21:00:00'))).toBe('Fechou?');
+  });
+
+  it('greets from the situation, not a fixed night line', () => {
+    const night = new Date('2026-09-03T21:00:00');
+    expect(homeGreeting(night, {
+      focusKind: 'evolution',
+      pendingCount: 1,
+      userName: 'Ana',
+      patientCount: 2,
+    })).toBe('Tem atendimento pra fechar, Ana');
+    expect(homeGreeting(night, {
+      focusKind: 'today',
+      pendingCount: 0,
+      patientFirstName: 'Lia',
+      userName: 'Ana',
+      patientCount: 2,
+    })).toBe('Lia te espera agora, Ana');
+    expect(homeGreeting(night, {
+      focusKind: 'calm',
+      pendingCount: 0,
+      userName: 'Ana',
+      patientCount: 2,
+    })).toBe('Boa noite, Ana. Nada pendente');
   });
 });

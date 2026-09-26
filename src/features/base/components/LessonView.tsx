@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, ChevronRight, Lock, Stethoscope } from '../../../icons';
+import { Check, ChevronRight, Lock } from '../../../icons';
 import type { BaseDiscipline, BaseLesson } from '../types';
 import { isLessonUnlocked, type BasePlan } from '../plan';
 import { BackLink, BaseSection, GroupedList, ReferenceList } from './ui';
@@ -54,17 +54,17 @@ export function LessonView({
 
       <div className="flex flex-col gap-10 desktop:grid desktop:grid-cols-12 desktop:items-start desktop:gap-x-12">
         <article className="space-y-10 desktop:col-span-7">
-          <div className="rounded-[28px] bg-[var(--neo-wash)] px-6 py-6">
-            <p className="text-[12px] font-medium uppercase tracking-[0.06em] text-[var(--neo)]">Leve com você</p>
-            <ol className="mt-3 space-y-3">
+          <section className="space-y-3">
+            <h2 className="px-1 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">Leve com você</h2>
+            <ol className="ah-card space-y-4 px-5 py-5">
               {lesson.keyPoints.map((point, index) => (
-                <li key={index} className="flex gap-3 text-[16px] leading-snug tracking-[-0.011em] text-[var(--neo-ink)]">
-                  <span className="w-5 shrink-0 tabular-nums text-[var(--neo)]">{index + 1}</span>
+                <li key={index} className="flex gap-3 text-[17px] leading-snug tracking-[-0.011em] text-[var(--neo-ink)]">
+                  <span className="w-5 shrink-0 tabular-nums text-[var(--neo-gray)]">{index + 1}</span>
                   <span>{point}</span>
                 </li>
               ))}
             </ol>
-          </div>
+          </section>
 
           {lesson.sections.map(section => (
             <section key={section.heading} className="space-y-3">
@@ -78,7 +78,7 @@ export function LessonView({
                 <ul className="space-y-2">
                   {section.bullets.map((bullet, index) => (
                     <li key={index} className="flex gap-3 text-[16px] leading-snug tracking-[-0.011em] text-[var(--neo-ink)]">
-                      <span className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--neo)]" />
+                      <span className="mt-[9px] h-1 w-1 shrink-0 rounded-full bg-[#c7c7cc]" />
                       <span>{bullet}</span>
                     </li>
                   ))}
@@ -87,15 +87,10 @@ export function LessonView({
             </section>
           ))}
 
-          <div className="flex gap-4 rounded-[24px] bg-[#f5f5f7] px-5 py-5">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[var(--neo)]">
-              <Stethoscope size={18} />
-            </span>
-            <div>
-              <p className="text-[13px] text-[var(--neo-gray)]">Na cadeira</p>
-              <p className="mt-1 text-[16px] leading-snug tracking-[-0.011em] text-[var(--neo-ink)]">{lesson.clinicalBridge}</p>
-            </div>
-          </div>
+          <section className="space-y-3">
+            <h2 className="px-1 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">Na cadeira</h2>
+            <p className="ah-card max-w-[42ch] px-5 py-5 text-[17px] leading-snug tracking-[-0.011em] text-[var(--neo-ink)]">{lesson.clinicalBridge}</p>
+          </section>
 
           <BaseSection kicker="Fixar · responda antes de abrir">
             <GroupedList>
@@ -141,7 +136,7 @@ export function LessonView({
             <button
               type="button"
               onClick={onToggleDone}
-              className={`w-full ${done ? 'neo-pill-secondary !bg-[#f5f5f7]' : 'neo-pill'}`}
+              className={`w-full ${done ? 'neo-pill-secondary !bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)]' : 'neo-pill'}`}
             >
               {done ? (
                 <>
@@ -155,7 +150,7 @@ export function LessonView({
               <button
                 type="button"
                 onClick={() => onOpenLesson(lessonIndex + 1)}
-                className="flex w-full items-center gap-4 rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left ios-press-gentle"
+                className="ah-card flex w-full items-center gap-4 px-5 py-4 text-left ios-press-gentle"
               >
                 <span className="min-w-0 flex-1">
                   <span className="block text-[13px] text-[var(--neo-gray)]">Próximo resumo</span>

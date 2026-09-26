@@ -31,7 +31,7 @@ export function MindMapView({ discipline, onBack, onOpenLesson }: MindMapViewPro
         </div>
       </header>
 
-      <div className="rounded-[28px] bg-[#f5f5f7] px-4 py-5 sm:px-6 sm:py-6">
+      <div className="ah-feature px-4 py-5 sm:px-6 sm:py-6">
         <MindMap root={discipline.mindMap} />
       </div>
 
@@ -47,7 +47,7 @@ export function MindMapView({ discipline, onBack, onOpenLesson }: MindMapViewPro
       <div className="flex flex-col gap-10 desktop:grid desktop:grid-cols-12 desktop:items-start desktop:gap-x-12">
         <div className="desktop:col-span-7">
           <BaseSection kicker="Cada ramo tem um resumo">
-            <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+            <div className="overflow-hidden ah-card">
               {discipline.lessons.map((lesson, index) => (
                 <button
                   key={lesson.id}

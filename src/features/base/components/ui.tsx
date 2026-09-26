@@ -20,7 +20,7 @@ export const BaseSection: React.FC<{
 };
 
 export function GroupedList({ children }: { children: React.ReactNode }) {
-  return <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">{children}</div>;
+  return <div className="ah-card overflow-hidden">{children}</div>;
 }
 
 export const ListRow: React.FC<{
@@ -49,9 +49,7 @@ export const ListRow: React.FC<{
       </div>
       {trailing}
       {done && !locked && (
-        <span className="shrink-0 rounded-full bg-[var(--neo-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--neo)]">
-          Lido
-        </span>
+        <span className="shrink-0 text-[13px] text-[var(--neo-gray)]">Lido</span>
       )}
       {locked ? (
         <Lock size={15} className="shrink-0 text-[#C6C6C8]" />
@@ -66,7 +64,7 @@ export function ProgressBar({ value, className = '' }: { value: number; classNam
   const pct = Math.max(0, Math.min(100, Math.round(value * 100)));
   return (
     <div className={`h-1.5 overflow-hidden rounded-full bg-black/[0.06] ${className}`}>
-      <span className="block h-full rounded-full bg-[var(--neo)] transition-[width] duration-500" style={{ width: `${pct}%` }} />
+      <span className="block h-full rounded-full bg-[#1d1d1f] transition-[width] duration-500" style={{ width: `${pct}%` }} />
     </div>
   );
 }
@@ -86,7 +84,7 @@ export function ReferenceList({
           <>
             <div className="flex items-start gap-3">
               {numbered && (
-                <span className="mt-0.5 w-5 shrink-0 text-[13px] tabular-nums text-[var(--neo)]">{index + 1}</span>
+                <span className="mt-0.5 w-5 shrink-0 text-[13px] tabular-nums text-[var(--neo-gray)]">{index + 1}</span>
               )}
               <div className="min-w-0 flex-1">
                 <p className="text-[15px] font-semibold leading-snug tracking-[-0.011em] text-[var(--neo-ink)]">

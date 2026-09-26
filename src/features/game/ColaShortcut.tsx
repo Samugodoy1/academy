@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ChevronRight, Flame, Gem, Target } from '../../icons';
-import { CharacterAvatar, GUIDE_ID } from './characters';
+import { Flame } from '../../icons';
 import { limitsFor, type GamePlan } from './plan';
-import { loadGameState } from './progress';
+import { loadLocalGameState } from './sync';
 import { streakAtRisk } from './streak';
 import type { GameState } from './types';
 
@@ -19,7 +18,7 @@ export const ColaShortcut: React.FC<ColaShortcutProps> = ({ plan, onOpen }) => {
   const [state, setState] = useState<GameState | null>(null);
 
   const refresh = useCallback(() => {
-    setState(loadGameState(new Date(), limitsFor(plan ?? 'free')));
+    setState(loadLocalGameState(new Date(), limitsFor(plan ?? 'free')));
   }, [plan]);
 
   useEffect(() => {
@@ -60,51 +59,35 @@ export const ColaShortcut: React.FC<ColaShortcutProps> = ({ plan, onOpen }) => {
     <button
       type="button"
       onClick={onOpen}
-      className={`w-full rounded-[24px] px-5 py-5 text-left ${
-        atRisk ? 'bg-[#fff3e0]' : 'bg-[#f5f5f7]'
-      }`}
+      className="ah-card w-full px-5 py-5 text-left ios-press-gentle"
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 gap-3">
-          <CharacterAvatar
-            id={GUIDE_ID}
-            mood={atRisk ? 'wow' : goalDone ? 'cheer' : 'happy'}
-            size={64}
-          />
-          <div className="min-w-0">
-            <p className="text-[22px] font-semibold leading-[1.08] tracking-[-0.025em] text-[var(--neo-ink)]">
-              {headline}
-            </p>
-            <p className="mt-2 text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
-              {subline}
-            </p>
-          </div>
+        <div className="min-w-0">
+          <p className="text-[17px] font-semibold leading-[1.15] tracking-[-0.016em] text-[var(--neo-ink)]">
+            {headline}
+          </p>
+          <p className="mt-1 text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
+            {subline}
+          </p>
         </div>
-        <span className="flex shrink-0 items-center gap-1 text-[17px] font-semibold tabular-nums text-[var(--neo-ink)]">
-          <Flame size={20} className={state.streak > 0 && !atRisk ? 'text-[#ff9500]' : 'text-[#c7c7cc]'} />
+        <span className="flex shrink-0 items-center gap-1 text-[15px] tabular-nums text-[var(--neo-gray)]">
+          <Flame size={16} className="text-[var(--neo-gray)]" />
           {state.streak}
         </span>
       </div>
 
-      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white">
+      <div className="mt-4 h-1 overflow-hidden rounded-full bg-black/[0.06]">
         <span
-          className="block h-full rounded-full bg-[var(--neo)]"
+          className="block h-full rounded-full bg-[#1d1d1f]"
           style={{ width: `${Math.round(goalProgress * 100)}%` }}
         />
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-3 text-[13px] text-[var(--neo-gray)]">
-        <span className="flex items-center gap-3">
-          <span className="flex items-center gap-1 tabular-nums">
-            <Target size={13} /> {state.dayXp}/{state.dailyGoal} XP
-          </span>
-          <span className="flex items-center gap-1 tabular-nums">
-            <Gem size={13} className="text-[#0a84ff]" /> {state.gems}
-          </span>
+        <span className="tabular-nums">
+          {state.dayXp}/{state.dailyGoal} XP · {state.gems} gemas
         </span>
-        <span className="flex items-center gap-0.5 font-medium text-[var(--neo)]">
-          Treinar <ChevronRight size={14} />
-        </span>
+        <span className="text-[var(--neo-ink)]">Treinar ›</span>
       </div>
     </button>
   );

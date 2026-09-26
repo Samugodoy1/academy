@@ -7,7 +7,6 @@ import {
   moveAcademyWidget,
   patchAcademyWidget,
   removeAcademyWidget,
-  studentGreeting,
   type AcademyWidget,
   WASH_WORDS,
   WIDGET_CATALOG,
@@ -16,7 +15,6 @@ import { useAcademyWidgets } from '../../theme/AcademyWidgetsProvider';
 
 interface AcademyWidgetBoardProps {
   editing: boolean;
-  firstName?: string;
   clock: Date;
   nextBox?: { time: string; patientName: string; procedure?: string } | null;
   patientCount: number;
@@ -56,7 +54,6 @@ function compressWidgetImage(file: File): Promise<string> {
 
 export function AcademyWidgetBoard({
   editing,
-  firstName,
   clock,
   nextBox,
   patientCount,
@@ -171,7 +168,6 @@ export function AcademyWidgetBoard({
               widget={widget}
               editing={editing}
               editingNote={editingNoteId === widget.id}
-              firstName={firstName}
               clock={clock}
               nextBox={nextBox}
               patientCount={patientCount}
@@ -226,7 +222,6 @@ function WidgetFace({
   widget,
   editing,
   editingNote,
-  firstName,
   clock,
   nextBox,
   patientCount,
@@ -238,7 +233,6 @@ function WidgetFace({
   widget: AcademyWidget;
   editing: boolean;
   editingNote: boolean;
-  firstName?: string;
   clock: Date;
   nextBox?: { time: string; patientName: string; procedure?: string } | null;
   patientCount: number;
@@ -250,8 +244,7 @@ function WidgetFace({
   const timeLabel = clock.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   const weekday = clock
     .toLocaleDateString('pt-BR', { weekday: 'short' })
-    .replace('.', '')
-    .toUpperCase();
+    .replace('.', '');
   const day = clock.getDate();
   const month = clock.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
   const sizeClass =
@@ -260,14 +253,11 @@ function WidgetFace({
   if (widget.kind === 'clock') {
     return (
       <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-neo`}>
-        <span className="text-[12px] font-medium uppercase tracking-[0.06em] text-white/80">
+        <span className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">
           {weekday} {day}
         </span>
-        <span className="mt-auto block text-[40px] font-semibold leading-none tracking-[-0.05em] tabular-nums">
+        <span className="mt-auto block text-[28px] font-semibold leading-none tracking-[-0.04em] tabular-nums text-[var(--neo-ink)]">
           {timeLabel}
-        </span>
-        <span className="mt-1.5 block text-[13px] text-white/80">
-          {studentGreeting(clock)}{firstName ? `, ${firstName}` : ''}
         </span>
       </button>
     );
@@ -276,13 +266,13 @@ function WidgetFace({
   if (widget.kind === 'next') {
     return (
       <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-soft`}>
-        <span className="text-[12px] font-medium text-[var(--neo)]">
+        <span className="text-[13px] text-white/75">
           {nextBox ? 'Box' : 'Livre'}
         </span>
-        <span className="mt-auto block truncate text-[32px] font-semibold leading-none tracking-[-0.05em] tabular-nums text-[var(--neo-ink)]">
+        <span className="mt-auto block truncate text-[22px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-white">
           {nextBox ? nextBox.time : '—'}
         </span>
-        <span className="mt-1.5 block truncate text-[13px] text-[var(--neo-ink)]/70">
+        <span className="mt-1.5 block truncate text-[13px] text-white/85">
           {nextBox ? nextBox.patientName.split(' ')[0] : 'Cadeira'}
         </span>
       </button>
@@ -296,7 +286,7 @@ function WidgetFace({
         {src ? (
           <img src={src} alt="" referrerPolicy="no-referrer" />
         ) : (
-          <span className="absolute inset-0 bg-[linear-gradient(160deg,var(--neo-soft),var(--neo))]" />
+          <span className="absolute inset-0 bg-[#f5f5f7]" />
         )}
       </button>
     );
@@ -329,8 +319,8 @@ function WidgetFace({
 
   if (widget.kind === 'wash') {
     return (
-      <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-neo justify-end`}>
-        <span className="text-[28px] font-semibold leading-[0.95] tracking-[-0.04em]">
+      <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-white justify-end`}>
+        <span className="text-[22px] font-semibold leading-[1.05] tracking-[-0.03em] text-[var(--neo-ink)]">
           {widget.wash || 'Box'}
         </span>
       </button>
@@ -341,7 +331,7 @@ function WidgetFace({
     return (
       <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-wash`}>
         <span className="text-[12px] text-[var(--neo-gray)]">Casos</span>
-        <span className="mt-auto block text-[40px] font-semibold leading-none tracking-[-0.05em] tabular-nums text-[var(--neo-ink)]">
+        <span className="mt-auto block text-[28px] font-semibold leading-none tracking-[-0.04em] tabular-nums text-[var(--neo-ink)]">
           {patientCount}
         </span>
       </button>
@@ -351,8 +341,8 @@ function WidgetFace({
   if (widget.kind === 'agenda') {
     return (
       <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-white`}>
-        <span className="text-[12px] font-medium uppercase tracking-[0.06em] text-[var(--neo)]">{weekday}</span>
-        <span className="mt-auto block text-[40px] font-semibold leading-none tracking-[-0.05em] tabular-nums text-[var(--neo-ink)]">
+        <span className="text-[13px] text-[var(--neo-gray)]">{weekday}</span>
+        <span className="mt-auto block text-[28px] font-semibold leading-none tracking-[-0.04em] tabular-nums text-[var(--neo-ink)]">
           {day}
         </span>
         <span className="mt-1 block text-[13px] capitalize text-[var(--neo-gray)]">{month}</span>
@@ -363,8 +353,8 @@ function WidgetFace({
   if (widget.kind === 'estudos') {
     return (
       <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-soft`}>
-        <span className="text-[12px] text-[var(--neo)]">Antes</span>
-        <span className="mt-auto block text-[26px] font-semibold leading-[0.95] tracking-[-0.04em] text-[var(--neo-ink)]">
+        <span className="text-[13px] text-white/75">Antes</span>
+        <span className="mt-auto block text-[26px] font-semibold leading-[0.95] tracking-[-0.04em] text-white">
           Cola
         </span>
       </button>
@@ -373,9 +363,9 @@ function WidgetFace({
 
   if (widget.kind === 'base') {
     return (
-      <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-neo`}>
-        <span className="text-[12px] text-white/80">Ciclo básico</span>
-        <span className="mt-auto block text-[26px] font-semibold leading-[0.95] tracking-[-0.04em] text-white">
+      <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-white`}>
+        <span className="text-[13px] text-[var(--neo-gray)]">Ciclo básico</span>
+        <span className="mt-auto block text-[22px] font-semibold leading-[1.05] tracking-[-0.03em] text-[var(--neo-ink)]">
           Estudos
         </span>
       </button>
@@ -386,7 +376,7 @@ function WidgetFace({
     return (
       <button type="button" onClick={onActivate} className={`${sizeClass} neo-widget-white`}>
         <span className="text-[12px] text-[var(--neo-gray)]">Agenda</span>
-        <span className="mt-auto block text-[26px] font-semibold leading-[0.95] tracking-[-0.04em] text-[var(--neo)]">
+        <span className="mt-auto block text-[22px] font-semibold leading-[1.05] tracking-[-0.03em] text-[var(--neo-ink)]">
           +
         </span>
       </button>

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import type { StudyKey } from '../../../utils/studyTopics';
-import { BookOpen, Check, Crown, Lock, Play, Star, Trophy } from '../../../icons';
+import { Check, Crown, Lock, Play, Star, Trophy } from '../../../icons';
 import { CharacterAvatar, hostFor } from '../characters';
 import { GAME_UNITS } from '../content';
 import { CROWNS_PER_UNIT, getUnitState } from '../progress';
@@ -70,11 +70,16 @@ export const GameTrail: React.FC<GameTrailProps> = ({
   const dueCount = (Object.values(state.exerciseMemory) as ExerciseMemory[]).filter(
     memory => memory.attempts > 0 && memory.dueAt <= Date.now()
   ).length;
+  const focalTopic =
+    (spotlightTopic && units.some(item => item.unit.topic === spotlightTopic) && spotlightTopic) ||
+    units.find(item => item.unlocked && item.progress.lessons < item.unit.lessons)?.unit.topic ||
+    units[0]?.unit.topic;
 
   return (
     <div className="space-y-10">
       {units.map(({ unit, unlocked, progress }) => {
         const isSpotlight = spotlightTopic === unit.topic;
+        const isFocal = unit.topic === focalTopic;
         const host = hostFor(unit.topic);
         const done = Math.min(progress.lessons, unit.lessons);
         const nodes = [
@@ -87,44 +92,37 @@ export const GameTrail: React.FC<GameTrailProps> = ({
 
         return (
           <section key={unit.topic} className="space-y-4" style={accentStyle}>
-            <div
-              className={`rounded-[24px] px-5 py-4 text-white ${unlocked ? '' : 'opacity-80'}`}
-              style={{
-                background: accent,
-                boxShadow: `0 4px 0 color-mix(in srgb, ${accent} 70%, #1d1d1f)`,
-              }}
-            >
+            <div className={isFocal ? 'rounded-[24px] px-5 py-4 text-white' : 'ah-card px-5 py-4'} style={isFocal ? { background: accent } : undefined}>
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-white/80">
+                  <p className={`text-[13px] tracking-[-0.011em] ${isFocal ? 'text-white/80' : 'text-[var(--neo-gray)]'}`}>
                     {isSpotlight && spotlightLabel
                       ? spotlightLabel
                       : `Unidade ${GAME_UNITS.indexOf(unit) + 1}`}
                   </p>
-                  <h3 className="mt-0.5 text-[22px] font-bold leading-[1.1] tracking-[-0.02em]">
+                  <h3 className={`mt-1 font-semibold leading-[1.15] tracking-[-0.02em] ${isFocal ? 'text-[22px]' : 'text-[17px] text-[var(--neo-ink)]'}`}>
                     {unit.title}
                   </h3>
-                  <p className="mt-1 text-[14px] leading-snug text-white/90">{unit.tagline}</p>
+                  <p className={`mt-1 text-[15px] leading-snug ${isFocal ? 'text-white/80' : 'text-[var(--neo-gray)]'}`}>{unit.tagline}</p>
                 </div>
                 {unlocked ? (
                   <CrownRow crowns={progress.crowns} />
                 ) : (
-                  <Lock size={18} className="mt-1 shrink-0 text-white/80" />
+                  <Lock size={16} className={`mt-1 shrink-0 ${isFocal ? 'text-white/80' : 'text-[#c7c7cc]'}`} />
                 )}
               </div>
               <div className="mt-3 flex items-center justify-between gap-3">
-                <p className="text-[13px] font-semibold tabular-nums text-white/90">
+                <p className={`text-[13px] tabular-nums ${isFocal ? 'text-white/80' : 'text-[var(--neo-gray)]'}`}>
                   {unlocked
-                    ? `${done}/${unit.lessons} lições · ${unit.exercises.length} questões`
-                    : 'Termine a unidade anterior para abrir'}
+                    ? `${done} de ${unit.lessons} lições`
+                    : 'Termine a unidade anterior'}
                 </p>
                 {onOpenStudy && unlocked && (
                   <button
                     type="button"
                     onClick={() => onOpenStudy(unit.topic)}
-                    className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-[13px] font-bold text-white"
+                    className={`text-[13px] ${isFocal ? 'text-white' : 'text-[var(--neo-ink)]'}`}
                   >
-                    <BookOpen size={14} />
                     Ler a cola
                   </button>
                 )}
@@ -260,7 +258,7 @@ export const GameTrail: React.FC<GameTrailProps> = ({
         );
       })}
 
-      <section className="rounded-[28px] bg-[var(--neo-wash)] px-5 py-6 text-center">
+      <section className="ah-feature px-5 py-6 text-center">
         <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--neo)] text-white">
           <Trophy size={26} />
         </span>

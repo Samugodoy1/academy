@@ -174,3 +174,39 @@ export function studentGreeting(date: Date) {
   if (hour < 18) return 'E aí';
   return 'Fechou?';
 }
+
+export function homeGreeting(
+  date: Date,
+  situation: {
+    focusKind: string;
+    pendingCount: number;
+    patientFirstName?: string | null;
+    userName?: string;
+    patientCount: number;
+  },
+) {
+  const you = situation.userName ? `, ${situation.userName}` : '';
+  const who = situation.patientFirstName;
+
+  if (situation.focusKind === 'evolution' || situation.pendingCount > 0) {
+    const count = Math.max(situation.pendingCount, situation.focusKind === 'evolution' ? 1 : 0);
+    return count > 1 ? `${count} atendimentos pra fechar${you}` : `Tem atendimento pra fechar${you}`;
+  }
+  if (situation.focusKind === 'today' && who) return `${who} te espera agora${you}`;
+  if (situation.focusKind === 'next' && who) return `Próximo box com ${who}${you}`;
+  if (situation.focusKind === 'paused') return `Um caso parado pede retorno${you}`;
+  if (situation.focusKind === 'pending') return `Falta um dado no prontuário${you}`;
+  if (situation.focusKind === 'study') {
+    const hour = date.getHours();
+    if (hour < 12) return `Bom dia pra um resumo${you}`;
+    if (hour < 18) return `Boa hora de estudar${you}`;
+    return `Um resumo antes de encerrar${you}`;
+  }
+  if (situation.focusKind === 'start' || situation.patientCount === 0) {
+    return `O primeiro caso ainda não chegou${you}`;
+  }
+  const hour = date.getHours();
+  if (hour < 12) return `Bom dia${you}. Cadeira livre`;
+  if (hour < 18) return `Boa tarde${you}. Cadeira livre`;
+  return `Boa noite${you}. Nada pendente`;
+}

@@ -69,6 +69,7 @@ import {
   hasRecordedMedication,
   type AnamnesisFormState,
 } from '../utils/anamnesisUtils';
+import { buildBoxGlance } from '../data/boxGlance';
 import { boxGuideProcedures, boxGuides, type BoxGuideProcedure } from '../data/boxGuides';
 import {
   generateBoxContext,
@@ -326,6 +327,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   const [selectedBoxProcedure, setSelectedBoxProcedure] = useState<BoxGuideProcedure>('Consulta');
   const [selectedBoxDoubt, setSelectedBoxDoubt] = useState<string | null>(null);
   const [boxStep, setBoxStep] = useState(0);
+  const [pinnedCueId, setPinnedCueId] = useState<string | null>(null);
   const [boxTrayOpen, setBoxTrayOpen] = useState(false);
   const [boxTrayChecked, setBoxTrayChecked] = useState<Set<number>>(new Set());
   const [isReorderMode, setIsReorderMode] = useState(false);
@@ -1797,6 +1799,26 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
   }, [boxIntelContext, selectedBoxProcedure]);
 
   const activeBoxStep = boxSteps[boxStep] || boxSteps[0];
+  const glance = useMemo(() => buildBoxGlance({
+    procedure: selectedBoxProcedure,
+    clinicalStage: boxIntelContext.clinicalStage,
+    boxProcedureDetail: boxIntelContext.boxProcedureDetail,
+    targetTooth: boxIntelContext.targetTooth,
+    allergies: boxIntelContext.patient?.anamnesis?.allergies,
+    anamnesisAlert: boxIntelContext.anamnesisAlert,
+    anamnesisIncomplete,
+    chiefComplaint: boxIntelContext.chiefComplaint,
+    odontogramNote: boxIntelContext.odontogramNote,
+    workingLength: boxIntelContext.clinicalFacts?.workingLength,
+    finalFile: boxIntelContext.clinicalFacts?.finalFile,
+    materialUsed: boxIntelContext.clinicalFacts?.materialUsed,
+    isFirstConsultation: boxIntelContext.isFirstConsultation,
+  }), [boxIntelContext, selectedBoxProcedure, anamnesisIncomplete]);
+  const glanceCues = useMemo(() => {
+    const pinned = glance.cues.find((cue) => cue.id === pinnedCueId);
+    if (!pinned) return glance.cues;
+    return [pinned, ...glance.cues.filter((cue) => cue.id !== pinned.id)];
+  }, [glance, pinnedCueId]);
 
   useEffect(() => {
     if (!isBoxModeOpen) return;
@@ -1811,6 +1833,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
     }
     setSelectedBoxDoubt(null);
     setBoxStep(0);
+    setPinnedCueId(null);
     setBoxTrayOpen(false);
     setBoxTrayChecked(new Set());
   }, [isBoxModeOpen, boxContextProcedure]);
@@ -3259,143 +3282,57 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       </main>
 
       {isBoxModeOpen && (
-        <div className="fixed inset-0 z-[197] overflow-y-auto bg-[var(--neo)] font-sans text-white">
-          <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-5 pb-8 pt-6">
-            <header className="mb-5 flex items-center justify-between gap-3">
-              <div>
-                <p className="text-[15px] text-white/80">Modo Box</p>
-                <p className="text-[17px] font-semibold tracking-[-0.016em]">{activeBoxStep.label}</p>
-              </div>
+        <div className="fixed inset-0 z-[197] overflow-y-auto bg-[#f5f5f7] font-sans text-[#1d1d1f]">
+          <div className="mx-auto flex min-h-[100dvh] w-full max-w-[640px] flex-col px-7 pb-[max(2rem,env(safe-area-inset-bottom))] pt-[max(0.5rem,env(safe-area-inset-top))] md:max-w-[820px] md:px-12">
+            <div className="flex justify-end">
               <button
                 type="button"
                 onClick={() => setIsBoxModeOpen(false)}
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white"
+                className="flex h-11 w-11 items-center justify-center text-[#86868b] active:opacity-60"
                 aria-label="Fechar Modo Box"
               >
-                <X size={20} />
+                <X size={22} />
               </button>
-            </header>
+            </div>
 
-            <div className="flex flex-1 flex-col rounded-[28px] bg-white px-6 py-7 text-[var(--neo-ink)]">
-              {boxStep === 0 && boxMaterialItems.length > 0 && (
-                <div className="mb-6">
-                  <button
-                    type="button"
-                    onClick={() => setBoxTrayOpen((v) => !v)}
-                    className="flex w-full items-center justify-between gap-2 rounded-[18px] bg-[var(--neo-wash)] px-4 py-4 text-left"
-                  >
-                    <span className="text-[17px] text-[var(--neo-ink)]">Preparar mesa</span>
-                    <ChevronDown
-                      size={18}
-                      className={`text-[var(--neo-gray)] transition-transform duration-200 ${boxTrayOpen ? 'rotate-180' : ''}`}
-                    />
-                  </button>
-                  {boxTrayOpen && (
-                    <ul className="mt-3 space-y-1">
-                      {boxMaterialItems.slice(0, 6).map((item, idx) => {
-                        const isChecked = boxTrayChecked.has(idx);
-                        return (
-                          <li key={idx}>
-                            <button
-                              type="button"
-                              onClick={() => setBoxTrayChecked((prev) => {
-                                const next = new Set(prev);
-                                if (next.has(idx)) next.delete(idx); else next.add(idx);
-                                return next;
-                              })}
-                              className="flex w-full items-center gap-3 rounded-[16px] px-3 py-3 text-left"
-                            >
-                              <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
-                                isChecked
-                                  ? 'bg-[var(--neo)] text-white'
-                                  : 'bg-[var(--neo-soft)] text-[var(--neo)]'
-                              }`}>
-                                {isChecked && <Check size={14} strokeWidth={3} />}
-                              </span>
-                              <span className={`text-[17px] leading-snug ${
-                                isChecked ? 'text-[var(--neo-gray)] line-through' : 'text-[var(--neo-ink)]'
-                              }`}>
-                                {item}
-                              </span>
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </div>
-              )}
-
-              <p className="text-[15px] text-[var(--neo-gray)]">
-                Passo {boxStep + 1} de {boxSteps.length}
+            <p className="text-[17px] leading-none text-[#8e8e93] md:text-[22px]">{glance.kicker}</p>
+            <h1 className="mt-2 text-[clamp(92px,18vw,168px)] font-semibold leading-none tracking-[-0.055em] text-[#1d1d1f]">
+              {glance.hero}
+            </h1>
+            {glance.place && (
+              <p className="mt-2 text-[20px] leading-snug tracking-[-0.02em] text-[#8e8e93] md:text-[28px]">
+                {glance.place}
               </p>
-              <h2 className="mt-2 text-[34px] font-semibold leading-[1.05] tracking-[-0.025em] sm:text-[40px]">
-                {activeBoxStep.title}
-              </h2>
-              <p className="mt-3 text-[17px] leading-relaxed text-[var(--neo-gray)]">
-                {activeBoxStep.text}
-              </p>
+            )}
 
-              <ol className="mt-8 flex-1 space-y-4">
-                {(activeBoxStep.steps || []).slice(0, 5).map((step: string, index: number) => (
-                  <li key={`${index}-${step}`} className="text-[22px] leading-snug tracking-[-0.02em] text-[var(--neo-ink)]">
-                    {step}
-                  </li>
-                ))}
-              </ol>
-
-              {selectedBoxDoubt && (
-                <section className="mt-6 rounded-[22px] bg-[var(--neo-wash)] px-4 py-4">
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <p className="text-[15px] text-[var(--neo)]">Ajuda</p>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedBoxDoubt(null)}
-                      className="text-[15px] text-[var(--neo-gray)]"
-                    >
-                      Fechar
-                    </button>
-                  </div>
-                  <div className="-mx-1 overflow-x-auto pb-2">
-                    <div className="flex min-w-max gap-2">
-                      {selectedBoxGuide.doubtChips.map((chip) => (
-                        <button
-                          key={chip}
-                          type="button"
-                          onClick={() => setSelectedBoxDoubt(chip)}
-                          className={`rounded-[980px] px-4 py-2 text-[15px] ${
-                            selectedBoxDoubt === chip
-                              ? 'bg-[var(--neo)] text-white'
-                              : 'bg-white text-[var(--neo-ink)]'
-                          }`}
-                        >
-                          {chip}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="space-y-2.5 pt-2">
-                    {selectedDoubtItems.map((item) => (
-                      <p key={item} className="text-[16px] leading-relaxed text-[var(--neo-ink)]">{item}</p>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              <div className="mt-8 grid gap-3">
-                {activeBoxStep.actions.map((action) => (
+            <div className="mt-10 space-y-6 md:mt-14 md:space-y-8">
+              {glanceCues.map((cue, index) => {
+                const current = index === 0;
+                return (
                   <button
-                    key={action.label}
+                    key={cue.id}
                     type="button"
-                    onClick={action.onClick}
-                    className={action.primary
-                      ? 'neo-pill w-full py-4 text-[18px]'
-                      : 'neo-pill-secondary w-full py-4 text-[18px] bg-[var(--neo-wash)]'}
+                    onClick={() => setPinnedCueId(cue.id)}
+                    className="block w-full text-left"
+                    aria-current={current ? 'step' : undefined}
                   >
-                    {action.primary ? (action.label || 'O seu passo') : action.label}
+                    <span className={`block leading-none tracking-[-0.035em] ${
+                      current
+                        ? 'text-[clamp(32px,5vw,52px)] font-semibold text-[#1d1d1f]'
+                        : 'text-[clamp(26px,3.6vw,40px)] font-normal text-[#8e8e93]'
+                    }`}>
+                      {cue.lead}
+                    </span>
+                    <span className={`mt-1.5 block leading-snug tracking-[-0.02em] ${
+                      current
+                        ? 'text-[clamp(18px,2.4vw,26px)] text-[#3a3a3c]'
+                        : 'text-[clamp(16px,2vw,22px)] text-[#8e8e93]'
+                    }`}>
+                      {cue.note}
+                    </span>
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
           </div>
         </div>

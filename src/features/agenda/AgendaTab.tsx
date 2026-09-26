@@ -303,13 +303,13 @@ function AgendaTabComponent({
                   <div key={app.id} className={`p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:gap-5 group relative`}>
                     {/* Time column */}
                     <div className={`${agendaViewMode === 'day' ? '' : 'hidden sm:flex'} w-12 sm:w-16 pt-1 flex flex-col items-center shrink-0`}>
-                      <p className={`text-[13px] sm:text-[15px] font-semibold ${isNext && !isFocusMode ? 'text-[var(--neo)]' : 'text-[var(--neo-ink)]'}`}>
+                      <p className="text-[13px] sm:text-[15px] font-semibold text-[var(--neo-ink)]">
                         {formatAppointmentTime(app.start_time)}
                       </p>
                       <div className={`w-[1px] ${agendaViewMode === 'day' ? 'flex-1' : 'h-8'} bg-academy-border/60 my-2`} />
                     </div>
 
-                    <div className={`flex-1 rounded-[24px] p-4 sm:p-5 flex flex-col gap-4 ${isNext && !isFocusMode ? 'bg-[var(--neo)] text-white' : 'bg-white'}`}>
+                    <div className="flex-1 rounded-[22px] bg-[#f5f5f7] p-4 sm:p-5 flex flex-col gap-4">
                       {/* Head: Patient info and status */}
                       <div className="flex items-start gap-3 justify-between">
                         <div className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer" onClick={() => openPatientRecord(app.patient_id)}>
@@ -324,8 +324,8 @@ function AgendaTabComponent({
                             })()}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className={`text-base sm:text-lg font-semibold tracking-[-0.02em] truncate ${isNext && !isFocusMode ? 'text-white' : 'text-[var(--neo-ink)]'}`}>{app.patient_name}</p>
-                            <p className={`text-xs sm:text-sm truncate ${isNext && !isFocusMode ? 'text-white/80' : 'text-[var(--neo-gray)]'}`}>{app.notes || 'Consulta'}</p>
+                            <p className={`truncate tracking-[-0.02em] text-[var(--neo-ink)] ${isNext && !isFocusMode ? 'text-[17px] font-semibold' : 'text-[15px] font-medium'}`}>{app.patient_name}</p>
+                            <p className="truncate text-[13px] text-[var(--neo-gray)]">{app.notes || 'Consulta'}</p>
                           </div>
                         </div>
 
@@ -333,11 +333,7 @@ function AgendaTabComponent({
                           value={app.status}
                           onChange={(e) => updateAppointmentStatus(app.id, e.target.value as Appointment['status'])}
                           aria-label={`Status de ${app.patient_name}`}
-                          className={`px-3 py-2 rounded-[980px] text-sm font-normal outline-none whitespace-nowrap shrink-0 appearance-none cursor-pointer ${
-                            isNext && !isFocusMode
-                              ? 'bg-white/15 text-white'
-                              : 'bg-[var(--neo-soft)] text-[var(--neo-ink)]'
-                          }`}
+                          className="px-3 py-2 rounded-[980px] bg-[#f5f5f7] text-sm font-normal text-[var(--neo-ink)] outline-none whitespace-nowrap shrink-0 appearance-none cursor-pointer"
                         >
                           <option value="SCHEDULED">Agendado</option>
                           <option value="CONFIRMED">Confirmado</option>
@@ -357,7 +353,7 @@ function AgendaTabComponent({
                             navigate(`/prontuario/${app.patient_id}`);
                           }}
                           className={`flex-1 sm:flex-none px-4 py-2.5 rounded-[980px] font-normal text-sm flex items-center justify-center gap-2 active:scale-95 ${
-                            isNext && !isFocusMode ? 'bg-white text-[var(--neo-ink)]' : 'bg-[var(--neo)] text-white'
+                            isNext && !isFocusMode ? 'bg-[var(--neo)] text-white' : 'bg-[#f5f5f7] text-[var(--neo-ink)]'
                           }`}
                         >
                           <Activity size={16} />
@@ -367,7 +363,7 @@ function AgendaTabComponent({
 
                         <button
                           onClick={() => sendReminder(app)}
-                          className={`p-2.5 rounded-full shrink-0 ${isNext && !isFocusMode ? 'bg-white/15 text-white' : 'text-[var(--neo)] bg-[var(--neo-soft)]'}`}
+                          className="p-2.5 rounded-full shrink-0 text-[var(--neo-gray)]"
                           title="WhatsApp"
                         >
                           <MessageCircle size={18} />

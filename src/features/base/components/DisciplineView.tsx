@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, Lock, TreeStructure } from '../../../icons';
+import { ChevronRight, Lock } from '../../../icons';
 import { STUDY_TOPIC_LABELS } from '../../../utils/studyTopics';
 import type { BaseDiscipline } from '../types';
 import { PERIOD_LABEL, totalMinutes } from '../content';
@@ -48,7 +48,7 @@ export function DisciplineView({
             {discipline.tagline}
           </p>
         </div>
-        <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-4">
+        <div className="ah-card px-5 py-4">
           <div className="flex items-baseline justify-between gap-3">
             <p className="text-[15px] font-semibold tracking-[-0.011em] text-[var(--neo-ink)]">
               {read} de {total} resumos lidos
@@ -69,9 +69,14 @@ export function DisciplineView({
                   <ListRow
                     key={lesson.id}
                     title={lesson.title}
-                    meta={`${lesson.minutes} min · ${lesson.summary}`}
+                    meta={lesson.summary}
                     locked={!unlocked}
                     done={isLessonDone(progress, lesson.id)}
+                    trailing={
+                      <span className="shrink-0 text-[13px] tabular-nums text-[var(--neo-gray)]">
+                        {lesson.minutes} min
+                      </span>
+                    }
                     onClick={() => onOpenLesson(index)}
                   />
                 );
@@ -80,42 +85,38 @@ export function DisciplineView({
           </BaseSection>
 
           <BaseSection kicker="Mapa mental">
-            <button
-              type="button"
-              onClick={onOpenMindMap}
-              className={`flex w-full items-center gap-4 rounded-[24px] px-5 py-5 text-left ios-press-gentle ${
-                mapUnlocked ? 'bg-[var(--neo)] text-white' : 'bg-[#f5f5f7] text-[var(--neo-ink)]'
-              }`}
-            >
-              <span
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${
-                  mapUnlocked ? 'bg-white/15 text-white' : 'bg-white text-[var(--neo)]'
-                }`}
+            <GroupedList>
+              <button
+                type="button"
+                onClick={onOpenMindMap}
+                className="flex w-full items-center gap-4 px-5 py-4 text-left"
               >
-                <TreeStructure size={22} />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-[17px] font-semibold tracking-[-0.016em]">{discipline.mindMap.label}</span>
-                <span className={`mt-0.5 block text-[14px] ${mapUnlocked ? 'text-white/85' : 'text-[var(--neo-gray)]'}`}>
-                  {branches} ramos · {ideas} ideias · modo reconstruir
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[15px] font-semibold tracking-[-0.011em] text-[var(--neo-ink)]">
+                    {discipline.mindMap.label}
+                  </span>
+                  <span className="mt-0.5 block text-[13px] text-[var(--neo-gray)]">
+                    {branches} ramos · {ideas} ideias
+                    {mapUnlocked ? '' : ' · bloqueado'}
+                  </span>
                 </span>
-              </span>
-              {mapUnlocked ? (
-                <ChevronRight size={16} className="shrink-0 text-white/80" />
-              ) : (
-                <Lock size={15} className="shrink-0 text-[#C6C6C8]" />
-              )}
-            </button>
+                {mapUnlocked ? (
+                  <ChevronRight size={16} className="shrink-0 text-[#C6C6C8]" />
+                ) : (
+                  <Lock size={15} className="shrink-0 text-[#C6C6C8]" />
+                )}
+              </button>
+            </GroupedList>
           </BaseSection>
 
           {discipline.colaTopic && (
             <button
               type="button"
               onClick={() => onOpenCola(discipline.colaTopic!)}
-              className="w-full rounded-[24px] bg-[#f5f5f7] px-5 py-5 text-left ios-press-gentle"
+              className="ah-card w-full px-5 py-5 text-left ios-press-gentle"
             >
               <p className="text-[13px] text-[var(--neo-gray)]">Na clínica isto vira</p>
-              <p className="mt-1 text-[17px] font-semibold tracking-[-0.016em] text-[var(--neo-ink)]">
+              <p className="mt-1 text-[15px] font-semibold tracking-[-0.011em] text-[var(--neo-ink)]">
                 Cola · {STUDY_TOPIC_LABELS[discipline.colaTopic]}
               </p>
               <p className="neo-link mt-2 text-[15px]">Abrir na Cola ›</p>

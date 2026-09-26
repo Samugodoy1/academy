@@ -10,6 +10,7 @@ import {
 import type { CouponPreview } from '../features/coupons/types';
 import { trackProductEvent, trackStudentCta } from '../features/analytics/track';
 import { FREE_TENSION, STUDENT_PRIDE } from '../features/subscription/conversionCopy';
+import { AcademyPlanChooser } from '../features/subscription/AcademyPlanChooser';
 
 interface SubscriptionPlan {
   id: number;
@@ -21,6 +22,7 @@ interface SubscriptionPlan {
   currency: string;
   frequency: number;
   frequency_type: string;
+  billing_cycle?: string;
   active: boolean;
 }
 
@@ -394,20 +396,11 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
           {showFreeUpgrade && (
             neo ? (
               <div className="space-y-4">
-                <p className="text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-ink)]">
-                  {FREE_TENSION.priceLead}
-                </p>
-                <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
-                  {chargedAmount != null ? formatCurrency(chargedAmount) : formatCurrency(paidPlan.amount)} por mês
-                </p>
-                {couponPreview?.valid && planAmount != null && chargedAmount != null && chargedAmount < planAmount && (
-                  <p className="text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">
-                    De {formatCurrency(planAmount)} com o cupom {couponPreview.code}.
-                  </p>
-                )}
-                {paidPlan.description && (
-                  <p className="text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">{paidPlan.description}</p>
-                )}
+                <AcademyPlanChooser
+                  plans={plans}
+                  loading={createLoading}
+                  onSubscribe={handleCreateSubscription}
+                />
                 {showCouponField && (
                   <CouponApplyField
                     apiFetch={apiFetch}
@@ -419,16 +412,6 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
                     onChange={setCouponPreview}
                   />
                 )}
-                <button
-                  onClick={() => handleCreateSubscription(paidPlan.id)}
-                  disabled={createLoading}
-                  className="neo-pill w-full disabled:opacity-50"
-                >
-                  {createLoading ? 'Processando' : subscribeCtaLabel}
-                </button>
-                <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">
-                  Mercado Pago. Cancela quando quiser.
-                </p>
               </div>
             ) : (
             <div className="space-y-3">

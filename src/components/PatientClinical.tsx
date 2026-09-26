@@ -1516,7 +1516,7 @@ export const PatientClinical: React.FC<PatientClinicalProps> = ({
       setUploadFeedback('Foto atualizada.');
     } catch (error) {
       console.error('Error uploading patient profile image:', error);
-      setUploadFeedback('Não foi possível enviar a foto.');
+      setUploadFeedback(error instanceof Error ? error.message : 'Não foi possível enviar a foto.');
     } finally {
       setIsUploadingProfilePhoto(false);
       event.target.value = '';

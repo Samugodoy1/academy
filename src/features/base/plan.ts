@@ -14,12 +14,12 @@ export const FREE_LESSONS_PER_DISCIPLINE = 1;
 export const FREE_MIND_MAP_INDEX = 0;
 
 export function isLessonUnlocked(plan: BasePlan, lessonIndex: number): boolean {
-  if (plan === 'student') return true;
+  if (plan === 'student' || plan === 'clinico') return true;
   return lessonIndex < FREE_LESSONS_PER_DISCIPLINE;
 }
 
 export function isMindMapUnlocked(plan: BasePlan, disciplineIndex: number): boolean {
-  if (plan === 'student') return true;
+  if (plan === 'student' || plan === 'clinico') return true;
   return disciplineIndex === FREE_MIND_MAP_INDEX;
 }
 

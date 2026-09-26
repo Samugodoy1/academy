@@ -9,6 +9,7 @@ export function adminPlanSelectOptions(product: Product): Array<{ value: Product
   if (product === 'academy') {
     return [
       { value: 'free', label: 'Free' },
+      { value: 'clinico', label: 'Clínico' },
       { value: 'student', label: 'Student (embaixador / pago)' },
     ];
   }

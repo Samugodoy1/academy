@@ -134,7 +134,7 @@ export interface Patient {
 }
 
 export type Product = ProductCode;
-export type ProductPlan = 'free' | 'pro' | 'student';
+export type ProductPlan = 'free' | 'pro' | 'clinico' | 'student';
 export type ProductApprovalStatus = 'pending' | 'approved' | 'rejected' | 'blocked';
 
 export interface ProductAccess {

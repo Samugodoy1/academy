@@ -316,7 +316,7 @@ export const ColaGame: React.FC<ColaGameProps> = ({
 
   return (
     <div className="mx-auto w-full max-w-[560px] space-y-6">
-      <div className="flex items-center justify-between gap-2 rounded-[24px] bg-[#f5f5f7] px-4 py-4 sm:px-5">
+      <div className="flex items-center justify-between gap-2 ah-card px-4 py-4 sm:px-5">
         <button
           type="button"
           onClick={() => setStreakOpen(open => !open)}
@@ -479,7 +479,7 @@ export const ColaGame: React.FC<ColaGameProps> = ({
         <button
           type="button"
           onClick={() => setPlanBlock('dailyLessons')}
-          className="flex w-full items-center gap-3 rounded-[20px] bg-[#f5f5f7] px-4 py-3 text-left"
+          className="flex w-full items-center gap-3 ah-card px-4 py-3 text-left"
         >
           <Shield size={16} className="shrink-0 text-[var(--neo-gray)]" />
           <span className="min-w-0 flex-1 text-[13px] leading-snug text-[var(--neo-gray)]">

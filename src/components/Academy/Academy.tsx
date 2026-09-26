@@ -34,7 +34,7 @@ export const Academy: React.FC<AcademyProps> = ({ user, onNavigate }) => {
               </p>
             )}
           </div>
-          <span className="neo-pill !px-3.5 !py-1.5 !text-[13px] shrink-0">0 pacientes</span>
+          <span className="shrink-0 text-[13px] text-[var(--neo-gray)]">0 pacientes</span>
         </header>
 
         <h1 className="text-[28px] sm:text-[34px] font-semibold leading-[1.05] tracking-[-0.025em]">

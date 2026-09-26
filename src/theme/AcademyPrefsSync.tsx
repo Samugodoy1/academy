@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { DEFAULT_ACADEMY_NEO_ID, persistAcademyNeoId, readStoredAcademyNeoId } from './academyNeo';
+import { DEFAULT_ACADEMY_NEO_ID, persistAcademyNeoId, readExplicitAcademyNeoId, readStoredAcademyNeoId } from './academyNeo';
 import { useAcademyNeo } from './AcademyNeoProvider';
 import { useAcademyWidgets } from './AcademyWidgetsProvider';
 import {
@@ -50,6 +50,10 @@ export function AcademyPrefsSync({ userId, profile }: AcademyPrefsSyncProps) {
       academy_widgets: readAcademyWidgets(),
     });
 
+    const chooseNeo = (remoteNeo: AcademyAccountPrefs['academy_neo'] | null | undefined) => (
+      readExplicitAcademyNeoId() ?? remoteNeo ?? readStoredAcademyNeoId()
+    );
+
     if (hydratedUser.current !== userId) {
       hydratedUser.current = userId;
       fromApi.current = false;
@@ -60,13 +64,13 @@ export function AcademyPrefsSync({ userId, profile }: AcademyPrefsSyncProps) {
         if (remote) {
           fromApi.current = true;
           apply({
-            academy_neo: remote.academy_neo || fromProfile.neo || fromLocal().academy_neo,
+            academy_neo: chooseNeo(remote.academy_neo || fromProfile.neo),
             academy_widgets: remote.academy_widgets || fromProfile.widgets || fromLocal().academy_widgets,
           }, false);
           return;
         }
         apply({
-          academy_neo: fromProfile.neo || fromLocal().academy_neo,
+          academy_neo: chooseNeo(fromProfile.neo),
           academy_widgets: fromProfile.widgets || fromLocal().academy_widgets,
         }, !fromProfile.neo || !fromProfile.widgets);
       });
@@ -79,7 +83,7 @@ export function AcademyPrefsSync({ userId, profile }: AcademyPrefsSyncProps) {
       const fromProfile = resolveAcademyPrefs(profile);
       if (fromProfile.neo || fromProfile.widgets) {
         apply({
-          academy_neo: fromProfile.neo || fromLocal().academy_neo,
+          academy_neo: chooseNeo(fromProfile.neo),
           academy_widgets: fromProfile.widgets || fromLocal().academy_widgets,
         }, !fromProfile.neo || !fromProfile.widgets);
       }

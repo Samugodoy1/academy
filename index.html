@@ -25,17 +25,29 @@
           var isAcademyHost = host.indexOf('academy.odontohub') !== -1;
           var applyNeo = !isSistema && (isAcademyHost || !isSistema);
           var colorways = {
-            laranja: ['#FF6B2C', '#FFD8C4', '#FFF4ED'],
-            lima: ['#34C759', '#C8F5D4', '#F0FBF3'],
-            azul: ['#32ADE6', '#C5EBFA', '#F0F9FD'],
-            rosa: ['#FF6482', '#FFD0D9', '#FFF0F3'],
-            violeta: ['#BF5AF2', '#E8C8FA', '#F8F0FD']
+            red: ['#FF383C', '#FFDFE0', '#FFF3F3'],
+            orange: ['#FF8D28', '#FFEDDD', '#FFF8F2'],
+            yellow: ['#FFCC00', '#FFF7D6', '#FFFCF0'],
+            green: ['#34C759', '#DFF6E4', '#F3FCF5'],
+            mint: ['#00C8B3', '#D6F6F3', '#F0FCFA'],
+            teal: ['#00C3D0', '#D6F5F7', '#F0FBFC'],
+            cyan: ['#00C0E8', '#D6F5FB', '#F0FBFE'],
+            blue: ['#0088FF', '#D6ECFF', '#F0F8FF'],
+            indigo: ['#6155F5', '#E6E4FD', '#F6F5FE'],
+            purple: ['#CB30E0', '#F7DEFA', '#FCF3FD'],
+            pink: ['#F4B6C8', '#FDE8EE', '#FFF6F8'],
+            brown: ['#AC7F5E', '#F2EBE5', '#FAF7F5']
           };
           if (applyNeo) {
-            var neoId = localStorage.getItem('odontohub-academy-neo') || 'laranja';
-            var neo = colorways[neoId] || colorways.laranja;
+            var legacy = { laranja: 'orange', lima: 'green', azul: 'blue', rosa: 'pink', violeta: 'purple' };
+            var storedNeo = localStorage.getItem('odontohub-academy-neo') || 'blue';
+            var neoId = legacy[storedNeo] || storedNeo;
+            if (legacy[storedNeo]) localStorage.setItem('odontohub-academy-neo', neoId);
+            var neo = colorways[neoId] || colorways.blue;
+            var resolvedId = colorways[neoId] ? neoId : 'blue';
             document.documentElement.setAttribute('data-product', 'academy');
-            document.documentElement.setAttribute('data-neo', colorways[neoId] ? neoId : 'laranja');
+            document.documentElement.setAttribute('data-neo', resolvedId);
+            document.documentElement.setAttribute('data-neo-on', 'white');
             document.documentElement.setAttribute('data-theme', 'light');
             document.documentElement.style.colorScheme = 'light';
             document.documentElement.style.setProperty('--neo', neo[0]);

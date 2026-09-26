@@ -490,6 +490,25 @@ export default function App() {
   }, [getProductAccess]);
 
   const academyAccessPlan = getProductAccess(getCurrentProduct())?.plan || 'free';
+  const studentActive = academyAccessPlan !== 'free';
+
+  const openStudentPlan = useCallback(() => {
+    setActiveTab('configuracoes');
+    navigate('/');
+    let tries = 0;
+    const reveal = () => {
+      const target = document.getElementById('assinatura');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      if (tries < 24) {
+        tries += 1;
+        window.setTimeout(reveal, 80);
+      }
+    };
+    window.setTimeout(reveal, 60);
+  }, [navigate]);
 
   const openAcademyUpgradeLimit = useCallback((
     feature: 'pdf' | 'cases' | 'appointments' | 'box',
@@ -2336,7 +2355,7 @@ export default function App() {
       <Route path="/pre-atendimento/:token" element={<PreAtendimento />} />
       <Route path="/prontuario/:id" element={
         user ? (
-          <div className="min-h-screen bg-white flex font-sans text-sys-text relative overflow-x-hidden">
+          <div className="min-h-screen bg-[#f5f5f7] flex font-sans text-sys-text relative overflow-x-hidden">
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
               {isSidebarOpen && (
@@ -2363,6 +2382,8 @@ export default function App() {
               nextBox={nextBox}
               patientCount={patients.length}
               openAppointmentModal={openAppointmentModal}
+              studentActive={studentActive}
+              onSubscribe={openStudentPlan}
             />
             <main className="flex-1 min-w-0 overflow-x-hidden flex flex-col pt-4 md:pt-6 lg:pt-8">
               <ClinicalPageRoute
@@ -2420,7 +2441,7 @@ export default function App() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full max-w-[420px] oh-device p-7 sm:p-10"
+              className="w-full max-w-[420px] p-7 sm:p-10"
             >
               <motion.div
                 className="mb-10"
@@ -2602,7 +2623,7 @@ export default function App() {
           </div>
         ) : (
           <AppProvider value={appContextValue}>
-          <div className="min-h-screen bg-white flex font-sans text-sys-text relative overflow-x-hidden">
+          <div className="min-h-screen bg-[#f5f5f7] flex font-sans text-sys-text relative overflow-x-hidden">
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
               {isSidebarOpen && (
@@ -2631,11 +2652,13 @@ export default function App() {
               nextBox={nextBox}
               patientCount={patients.length}
               openAppointmentModal={openAppointmentModal}
+              studentActive={studentActive}
+              onSubscribe={openStudentPlan}
             />
 
             {/* Main Content */}
             <main className="flex-1 min-w-0 w-full print:p-0">
-              <div className="tablet-l:hidden sticky top-0 z-30 bg-white/90 px-5 py-3 backdrop-blur-xl no-print">
+              <div className="tablet-l:hidden sticky top-0 z-30 bg-[#f5f5f7]/90 px-5 py-3 backdrop-blur-xl no-print">
                 <AcademyWordmark size="sm" />
               </div>
               {/* ── Floating Guide Banner ── */}
@@ -2767,13 +2790,7 @@ export default function App() {
                       academicPeriod={profile?.academic_period}
                       institution={profile?.institution}
                       gamePlan={(getProductAccess(getCurrentProduct())?.plan || 'free') === 'free' ? 'free' : 'student'}
-                      onOpenStudentPlan={() => {
-                        setActiveTab('configuracoes');
-                        navigate('/');
-                        window.setTimeout(() => {
-                          document.getElementById('assinatura')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }, 120);
-                      }}
+                      onOpenStudentPlan={openStudentPlan}
                     />
                   )}
 
@@ -4173,6 +4190,14 @@ export default function App() {
               activeTab={activeTab}
               setActiveTab={setActiveTab}
               navigate={navigate}
+              studentActive={studentActive}
+              onSubscribe={openStudentPlan}
+              gamePlan={academyAccessPlan === 'free' ? 'free' : 'student'}
+              onOpenCola={() => {
+                try { localStorage.setItem('academy_study_mode', 'treinar'); } catch { /* modo padrão */ }
+                setActiveTab('estudos');
+                navigate('/');
+              }}
             />
 
             <AnimatePresence>

@@ -483,13 +483,7 @@ function PacientesTabComponent({
                 {chip.label}
                 {chip.count !== null && chip.count > 0 && (
                   <span
-                    className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold ${
-                      chip.key === 'pending'
-                        ? 'bg-[var(--neo-soft)] text-[var(--neo-ink)]'
-                        : chip.key === 'scheduled'
-                          ? 'bg-[var(--neo)] text-white'
-                          : 'bg-white text-[var(--neo-gray)]'
-                    }`}
+                    className="text-[13px] font-normal tabular-nums text-[var(--neo-gray)]"
                   >
                     {chip.count}
                   </span>
@@ -515,51 +509,15 @@ function PacientesTabComponent({
                 const intelPriority = intel?.priority || null;
                 const intelStatus = intel?.status || null;
                 const appointmentLabel = formatCaseAppointment(nextAppointment);
-                const statusConfig: Record<
-                  string,
-                  { label: string; bg: string; text: string; dot: string }
-                > = {
-                  ABANDONO: {
-                    label: 'Abandono',
-                    bg: 'bg-[var(--neo-wash)]',
-                    text: 'text-[var(--neo-ink)]',
-                    dot: 'bg-[var(--neo)]',
-                  },
-                  ATENCAO: {
-                    label: 'Atenção',
-                    bg: 'bg-[var(--neo-soft)]',
-                    text: 'text-[var(--neo-ink)]',
-                    dot: 'bg-[var(--neo)]',
-                  },
-                  EM_TRATAMENTO: {
-                    label: 'Em tratamento',
-                    bg: 'bg-[var(--neo-soft)]',
-                    text: 'text-[var(--neo-ink)]',
-                    dot: 'bg-[var(--neo)]',
-                  },
-                  FINALIZADO: {
-                    label: 'Concluído',
-                    bg: 'bg-[var(--neo-wash)]',
-                    text: 'text-[var(--neo-gray)]',
-                    dot: 'bg-[var(--neo-gray)]',
-                  },
+                const statusConfig: Record<string, { label: string }> = {
+                  ABANDONO: { label: 'Abandono' },
+                  ATENCAO: { label: 'Atenção' },
+                  EM_TRATAMENTO: { label: 'Em tratamento' },
+                  FINALIZADO: { label: 'Concluído' },
                 };
-                const priorityConfig: Record<
-                  string,
-                  { label: string; bg: string; text: string; ring: string }
-                > = {
-                  HIGH: {
-                    label: 'Urgente',
-                    bg: 'bg-rose-500',
-                    text: 'text-white',
-                    ring: 'ring-rose-200',
-                  },
-                  MEDIUM: {
-                    label: 'Atenção',
-                    bg: 'bg-amber-400',
-                    text: 'text-white',
-                    ring: 'ring-amber-200',
-                  },
+                const priorityConfig: Record<string, { label: string; urgent: boolean }> = {
+                  HIGH: { label: 'Urgente', urgent: true },
+                  MEDIUM: { label: 'Atenção', urgent: false },
                 };
                 const stCfg = intelStatus ? statusConfig[intelStatus] : null;
                 const priCfg = intelPriority ? priorityConfig[intelPriority] : null;
@@ -573,7 +531,7 @@ function PacientesTabComponent({
                       <button
                         type="button"
                         onClick={() => openPatientRecord(patient.id)}
-                        className="w-11 h-11 bg-[var(--neo-soft)] text-[var(--neo)] rounded-full flex items-center justify-center font-semibold text-sm overflow-hidden shrink-0"
+                        className="w-11 h-11 bg-[#f5f5f7] text-[var(--neo-ink)] rounded-full flex items-center justify-center font-semibold text-sm overflow-hidden shrink-0"
                       >
                         {patient.photo_url ? (
                           <img
@@ -602,7 +560,7 @@ function PacientesTabComponent({
                           )}
                           {!meta.isLead && priCfg && hasText(priCfg.label) && (
                             <span
-                              className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide ${priCfg.bg} ${priCfg.text} ring-1 ${priCfg.ring} shrink-0`}
+                              className={`shrink-0 text-[13px] ${priCfg.urgent ? 'text-[#ff3b30]' : 'text-[var(--neo-gray)]'}`}
                             >
                               {priCfg.label}
                             </span>
@@ -610,10 +568,7 @@ function PacientesTabComponent({
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
                           {stCfg && hasText(stCfg.label) && (
-                            <span
-                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${stCfg.bg} ${stCfg.text}`}
-                            >
-                              <span className={`w-1.5 h-1.5 rounded-full ${stCfg.dot}`} />
+                            <span className="text-[13px] text-[var(--neo-gray)]">
                               {stCfg.label}
                             </span>
                           )}
@@ -627,7 +582,7 @@ function PacientesTabComponent({
                           <p className="text-[13px] text-academy-text/80 mt-1 truncate">{conductLabel}</p>
                         )}
                         {hasText(pendingLabel) && (
-                          <p className="text-[12px] text-primary font-semibold mt-0.5 truncate">
+                          <p className="text-[13px] text-[var(--neo-gray)] mt-0.5 truncate">
                             {pendingLabel}
                           </p>
                         )}
@@ -639,7 +594,7 @@ function PacientesTabComponent({
                           type="button"
                           title="Agendar 1º atendimento"
                           onClick={() => handleScheduleFromCard(patient)}
-                          className="flex items-center gap-1.5 px-3 py-2 rounded-[980px] bg-[var(--neo)] text-white text-[12px] font-normal active:scale-95"
+                          className="flex items-center gap-1.5 px-2 py-2 text-[13px] text-[var(--neo-ink)]"
                         >
                           <CalendarPlus size={14} />
                           <span className="hidden sm:inline">1º atendimento</span>

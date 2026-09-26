@@ -11,24 +11,24 @@ import { parseAcademyWidgets } from './academyWidgets';
 describe('Academy account prefs', () => {
   it('reads color and widgets from the profile', () => {
     const resolved = resolveAcademyPrefs({
-      academy_neo: 'lima',
+      academy_neo: 'green',
       academy_widgets: [
         { id: 'clock', kind: 'clock', size: 'md' },
         { id: 'next', kind: 'next', size: 'sm' },
       ],
     });
-    expect(resolved.neo).toBe('lima');
+    expect(resolved.neo).toBe('green');
     expect(resolved.widgets?.map(widget => widget.kind)).toEqual(['clock', 'next']);
   });
 
   it('reads nested settings when the API stores a blob', () => {
     const resolved = resolveAcademyPrefs({
       settings: {
-        academy_neo: 'rosa',
+        academy_neo: 'pink',
         academy_widgets: [{ id: 'agenda', kind: 'agenda', size: 'sm' }],
       },
     });
-    expect(resolved.neo).toBe('rosa');
+    expect(resolved.neo).toBe('pink');
     expect(resolved.widgets?.[0].kind).toBe('agenda');
   });
 
@@ -38,16 +38,16 @@ describe('Academy account prefs', () => {
       { id: 'photo', kind: 'photo' as const, size: 'sm' as const, photo: 'https://res.cloudinary.com/odontohub/image/upload/widget.jpg' },
     ];
     const bio = embedAcademyPrefsInBio('texto visivel', {
-      academy_neo: 'violeta',
+      academy_neo: 'purple',
       academy_widgets: widgets,
     });
     expect(stripAcademyPrefsEnvelope(bio)).toBe('texto visivel');
-    expect(parseAcademyPrefsEnvelope(bio).neo).toBe('violeta');
+    expect(parseAcademyPrefsEnvelope(bio).neo).toBe('purple');
     expect(parseAcademyPrefsEnvelope(bio).widgets?.map(widget => widget.kind)).toEqual(['clock', 'photo']);
     expect(parseAcademyPrefsEnvelope(bio).widgets?.find(widget => widget.kind === 'photo')?.photo).toContain('cloudinary');
 
     const resolved = resolveAcademyPrefs({ bio });
-    expect(resolved.neo).toBe('violeta');
+    expect(resolved.neo).toBe('purple');
     expect(resolved.widgets?.find(widget => widget.kind === 'photo')?.photo).toBe(
       'https://res.cloudinary.com/odontohub/image/upload/widget.jpg',
     );
@@ -63,7 +63,7 @@ describe('Academy account prefs', () => {
   it('keeps the widget photo inside the profile envelope', () => {
     const photo = 'data:image/jpeg;base64,/9j/4AAQ';
     const bio = embedAcademyPrefsInBio('', {
-      academy_neo: 'lima',
+      academy_neo: 'green',
       academy_widgets: [{ id: 'photo', kind: 'photo', size: 'sm', photo }],
     });
     expect(parseAcademyPrefsEnvelope(bio).widgets?.[0].photo).toBe(photo);
@@ -79,10 +79,10 @@ describe('Academy account prefs', () => {
 
   it('reads the dedicated /api/academy/prefs payload', () => {
     const prefs = prefsFromUnknown({
-      academy_neo: 'azul',
+      academy_neo: 'blue',
       academy_widgets: [{ id: 'clock', kind: 'clock', size: 'md' }],
     });
-    expect(prefs?.academy_neo).toBe('azul');
+    expect(prefs?.academy_neo).toBe('blue');
     expect(prefs?.academy_widgets).toHaveLength(1);
     expect(prefsFromUnknown({})).toBeNull();
   });

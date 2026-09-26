@@ -1,7 +1,7 @@
 import React, { lazy, Suspense, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, ChevronRight, Clock } from '../icons';
-import { AcademyActivationCard, AcademyOnboarding } from './AcademyOnboarding';
+import { AcademyActivationCard, AcademyOnboarding } from './AcademyOnboarding.tsx';
 import { formatAppointmentTime, getAppointmentTime, parseAppointmentDateTime } from '../utils/dateUtils';
 import { buildParaFecharRows } from '../utils/deriveAcademyPatientState';
 import {
@@ -14,10 +14,11 @@ import {
 import { countClinicalSkills, suggestNextClinicalStep } from '../utils/clinicalProgression';
 import { STUDY_TOPIC_LABELS, StudyKey } from '../utils/studyTopics';
 import { DataLoadingSkeleton } from './DataLoadingSkeleton';
-import { studentGreeting } from '../theme/academyWidgets';
+import { homeGreeting } from '../theme/academyWidgets';
 import { ColaShortcut } from '../features/game/ColaShortcut';
+import { CalmPracticeCard } from '../features/game/CalmPracticeCard';
 import type { GamePlan } from '../features/game/plan';
-import { FREE_TENSION, STUDENT_PRIDE } from '../features/subscription/conversionCopy';
+import { FREE_TENSION } from '../features/subscription/conversionCopy';
 import { useResolvedAcademyStage } from '../theme/AcademyStageProvider';
 import { STAGE_LABEL } from '../theme/academyStage';
 import { AcademyStageControl } from './AcademyStageControl';
@@ -739,29 +740,31 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         openCola={openGame}
       />
 
-      <header className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[15px] font-normal text-[var(--neo-gray)] tracking-[-0.011em]">
-            {studentGreeting(now)}{greetingName ? `, ${greetingName}` : ''}
-          </p>
-          {academicLine && (
-            <p className="mt-1 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
-              {academicLine}
-            </p>
-          )}
-        </div>
-        <span className="neo-pill !px-3.5 !py-1.5 !text-[13px] shrink-0">
-          {isPreClinical && patients.length === 0
-            ? STAGE_LABEL['pre-clinico']
-            : gamePlan === 'student'
-              ? `Student · ${patients.length}`
-              : `${patients.length} ${patients.length === 1 ? 'paciente' : 'pacientes'}`}
-        </span>
+      <header className="min-w-0">
+        <p className="text-[15px] font-normal text-[var(--neo-gray)] tracking-[-0.011em]">
+          {homeGreeting(now, {
+            focusKind: focus.kind,
+            pendingCount: pendingRows.length,
+            patientFirstName: focusPatientName ? firstName(focusPatientName) : null,
+            userName: greetingName,
+            patientCount: patients.length,
+          })}
+        </p>
+        <p className="mt-1 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
+          {[
+            academicLine,
+            isPreClinical && patients.length === 0
+              ? STAGE_LABEL['pre-clinico']
+              : `${patients.length} ${patients.length === 1 ? 'paciente' : 'pacientes'}`,
+          ].filter(Boolean).join(' · ')}
+        </p>
       </header>
 
-      <h1 className="text-[28px] sm:text-[34px] font-semibold text-[var(--neo-ink)] leading-[1.05] tracking-[-0.025em] max-w-[20ch]">
-        {homeHeadline}
-      </h1>
+      {!focusPatientName && (
+        <h1 className="text-[28px] sm:text-[34px] font-semibold text-[var(--neo-ink)] leading-[1.05] tracking-[-0.025em] max-w-[20ch]">
+          {homeHeadline}
+        </h1>
+      )}
 
       <div className="flex flex-col gap-10 desktop:grid desktop:grid-cols-12 desktop:items-start desktop:gap-x-12">
         <div className="space-y-8 desktop:col-span-7">
@@ -769,22 +772,24 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
             <button
               type="button"
               onClick={focus.action}
-              className="w-full rounded-[28px] bg-[var(--neo)] px-6 py-6 text-left text-white"
+              className="patient-hero w-full px-6 py-6 text-left sm:px-7 sm:py-7"
             >
               {appointmentMetaLabel && (
-                <p className="text-[12px] font-normal uppercase tracking-[0.04em] text-white/80">
+                <p className="text-[13px] tracking-[-0.011em] text-white/75">
                   {appointmentMetaLabel}
                 </p>
               )}
-              <p className="mt-2 text-[26px] sm:text-[32px] font-semibold leading-[1.05] tracking-[-0.025em]">
+              <p className="mt-3 text-[32px] font-semibold leading-[1.05] tracking-[-0.03em] text-white sm:text-[36px]">
                 {focusPatientName}
               </p>
-              <p className="mt-2 text-[15px] text-white/85 tracking-[-0.011em]">
-                {procedureHint || focus.subtitle}
-              </p>
-              <p className="mt-4 text-[15px] text-white/90">
-                {focus.actionLabel} ›
-              </p>
+              {(procedureHint || focus.subtitle) && (
+                <p className="mt-2 max-w-[34ch] text-[17px] leading-snug tracking-[-0.011em] text-white/80">
+                  {procedureHint || focus.subtitle}
+                </p>
+              )}
+              <span className="mt-6 inline-flex rounded-full bg-white px-[22px] py-3 text-[17px] tracking-[-0.022em] text-[#1d1d1f]">
+                {focus.actionLabel}
+              </span>
             </button>
           ) : focus.kind === 'study' ? (
             <div className="space-y-3">
@@ -794,7 +799,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
               <button
                 type="button"
                 onClick={() => setIsPatientModalOpen(true)}
-                className="flex w-full items-center justify-between gap-4 rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left"
+                className="flex w-full items-center justify-between gap-4 ah-card px-5 py-4 text-left"
               >
                 <span className="min-w-0">
                   <span className="block text-[15px] tracking-[-0.011em] text-[var(--neo-ink)]">Já tem paciente?</span>
@@ -803,39 +808,37 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
                 <span className="neo-link shrink-0 text-[15px]">Cadastrar ›</span>
               </button>
             </div>
-          ) : (
-            <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
-              <p className="text-[13px] text-[var(--neo-gray)]">Agenda</p>
-              <p className="mt-1 text-[22px] font-semibold tracking-[-0.025em] text-[var(--neo-ink)]">
-                Cadeira livre
-              </p>
-              <p className="mt-1 text-[15px] text-[var(--neo-gray)] tracking-[-0.011em]">
-                {focus.subtitle || 'Nenhum box por agora'}
-              </p>
+          ) : focus.kind === 'start' ? (
+            <div className="ah-feature space-y-5 px-6 py-6 sm:px-7">
+              {focus.subtitle && (
+                <p className="max-w-[36ch] text-[17px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
+                  {focus.subtitle}
+                </p>
+              )}
               <button
                 type="button"
-                className="neo-link mt-3 text-[15px]"
-                onClick={focus.kind === 'start' ? () => setIsPatientModalOpen(true) : openAppointmentModal}
+                className="neo-pill"
+                onClick={() => setIsPatientModalOpen(true)}
               >
-                {focus.kind === 'start' ? 'Cadastrar paciente ›' : 'Agendar consulta ›'}
+                Cadastrar paciente
               </button>
             </div>
-          )}
-
-          {gamePlan === 'student' && patients.length > 0 && (
-            <p className="text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">
-              {STUDENT_PRIDE.homeLine}
-            </p>
+          ) : (
+            <CalmPracticeCard
+              plan={gamePlan ?? 'free'}
+              onStudy={openStudyTopic}
+              onPlay={openGame}
+            />
           )}
 
           {gamePlan !== 'student' && patients.length > 0 && onOpenStudentPlan && (
             <button
               type="button"
               onClick={onOpenStudentPlan}
-              className="w-full rounded-[24px] bg-[#f5f5f7] px-5 py-5 text-left"
+              className="w-full ah-card px-5 py-5 text-left"
             >
               <p className="text-[13px] text-[var(--neo-gray)]">Free · 1 de 1</p>
-              <p className="mt-1 text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
+              <p className="mt-1 text-[17px] font-semibold leading-[1.15] tracking-[-0.016em] text-[var(--neo-ink)]">
                 {FREE_TENSION.homeHeadline}
               </p>
               <p className="mt-2 text-[15px] leading-snug text-[var(--neo-gray)]">
@@ -846,8 +849,8 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           )}
 
           {showBoxMode && boxPrepItems.length > 0 && (
-            <HomeSection kicker="Antes de sentar">
-              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+            <HomeSection kicker="Antes de sentar" mark="study">
+              <div className="overflow-hidden ah-card">
                 {boxPrepItems.map((item, index) => (
                   <button
                     key={`${item.label}-${index}`}
@@ -855,7 +858,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
                     onClick={() => item.studyTopic && openStudyTopic(item.studyTopic)}
                     className="flex w-full items-center gap-3 border-b border-black/[0.04] px-5 py-4 text-left last:border-b-0"
                   >
-                    <CheckCircle2 size={18} className="shrink-0 text-[var(--neo)]" />
+                    <CheckCircle2 size={18} className="shrink-0 text-[var(--neo-gray)]" />
                     <span className="min-w-0 flex-1 text-[17px] tracking-[-0.011em] text-[var(--neo-ink)]">
                       {item.label}
                     </span>
@@ -878,7 +881,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
         <div className="space-y-8 desktop:col-span-5">
           {stage === null && patients.length === 0 && (
             <HomeSection kicker="Onde você está no curso?">
-              <div className="rounded-[24px] bg-[#f5f5f7] px-4 py-4">
+              <div className="ah-card px-4 py-4">
                 <AcademyStageControl value={null} onChange={setStage} />
                 <p className="mt-3 px-1 text-[13px] leading-snug text-[var(--neo-gray)]">
                   No ciclo básico a home começa pelos Estudos. Na clínica, pelo caso.
@@ -888,8 +891,8 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           )}
 
           {pendingRows.length > 0 && (
-            <HomeSection kicker="Pra fechar">
-              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+            <HomeSection kicker="Pra fechar" mark="alert">
+              <div className="overflow-hidden ah-card shadow-[inset_3px_0_0_#ff3b30]">
                 {pendingRows.map(row => (
                   <React.Fragment key={row.id}>
                     <ListRow
@@ -914,6 +917,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 
           {otherAppointments.length > 0 && (
             <HomeSection
+              mark="next"
               kicker="A seguir"
               action={
                 <button type="button" onClick={() => setActiveTab('agenda')} className="neo-link text-[13px]">
@@ -921,7 +925,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
                 </button>
               }
             >
-              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+              <div className="overflow-hidden ah-card">
                 {otherAppointments.map(app => {
                   const dateTime = formatAgendaListDateTime(app.start_time);
                   return (
@@ -932,7 +936,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
                       className="flex w-full items-center gap-4 border-b border-black/[0.04] px-5 py-4 text-left last:border-b-0"
                     >
                       <div className="w-14 shrink-0">
-                        <p className="text-[12px] font-semibold text-[var(--neo)]">{dateTime.date}</p>
+                        <p className="text-[12px] text-[var(--neo-gray)]">{dateTime.date}</p>
                         <p className="mt-0.5 text-[17px] font-semibold tabular-nums tracking-[-0.022em] text-[var(--neo-ink)]">
                           {dateTime.time}
                         </p>
@@ -950,11 +954,11 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           )}
 
           {focus.kind === 'study' && (
-            <HomeSection kicker="Estudos">
+            <HomeSection kicker="Estudos" mark="study">
               <button
                 type="button"
                 onClick={() => setActiveTab('base')}
-                className="flex w-full items-center gap-4 rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left"
+                className="flex w-full items-center gap-4 ah-card px-5 py-4 text-left"
               >
                 <span className="min-w-0 flex-1">
                   <span className="block text-[15px] font-semibold tracking-[-0.011em] text-[var(--neo-ink)]">Ciclo básico</span>
@@ -967,18 +971,18 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
             </HomeSection>
           )}
 
-          <HomeSection kicker="Treino">
+          <HomeSection kicker="Treino" mark="study">
             <ColaShortcut plan={gamePlan ?? 'free'} onOpen={openGame} />
           </HomeSection>
 
           {studySuggestion && (
-            <HomeSection kicker="Cola">
+            <HomeSection kicker="Cola" mark="next">
               <button
                 type="button"
                 onClick={() => openStudyTopic(studySuggestion.topicKey)}
-                className="w-full rounded-[24px] bg-[#f5f5f7] px-5 py-5 text-left"
+                className="w-full ah-card px-5 py-5 text-left"
               >
-                <p className="text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
+                <p className="text-[17px] font-semibold leading-[1.15] tracking-[-0.016em] text-[var(--neo-ink)]">
                   {studySuggestion.topic}
                 </p>
                 <p className="mt-2 text-[15px] leading-snug text-[var(--neo-gray)] tracking-[-0.011em]">
@@ -993,11 +997,11 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
           )}
 
           {pausedCase && focus.patient?.id !== pausedCase.id && (
-            <HomeSection kicker="Retorno">
+            <HomeSection kicker="Retorno" mark="return">
               <button
                 type="button"
                 onClick={() => openPatientRecord(pausedCase.id)}
-                className="flex w-full items-center gap-4 rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left"
+                className="flex w-full items-center gap-4 ah-card px-5 py-4 text-left"
               >
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[15px] font-semibold text-[var(--neo-ink)]">{pausedCase.name}</p>
@@ -1013,7 +1017,7 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveTab('pacientes')}
-                className="flex w-full items-center justify-between rounded-[24px] bg-[#f5f5f7] px-5 py-4 text-left"
+                className="flex w-full items-center justify-between ah-card px-5 py-4 text-left"
               >
                 <span className="text-[15px] text-[var(--neo-ink)]">Ver os seus casos</span>
                 <span className="neo-link text-[15px]">Abrir ›</span>
@@ -1030,16 +1034,30 @@ export const AcademyDashboard: React.FC<AcademyDashboardProps> = ({
 function HomeSection({
   kicker,
   action,
+  mark,
   children,
 }: {
   kicker: string;
   action?: React.ReactNode;
+  mark?: 'alert' | 'next' | 'study' | 'return';
   children: React.ReactNode;
 }) {
+  const dot = mark === 'alert'
+    ? 'bg-[#ff3b30]'
+    : mark === 'next'
+      ? 'bg-[var(--neo)]'
+      : mark === 'study'
+        ? 'bg-[#8e8e93]'
+        : mark === 'return'
+          ? 'bg-[#ff9f0a]'
+          : '';
   return (
     <section className="space-y-3">
       <div className="flex items-baseline justify-between gap-3 px-1">
-        <h2 className="text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">{kicker}</h2>
+        <h2 className="flex items-center gap-2 text-[13px] font-normal tracking-[-0.011em] text-[var(--neo-gray)]">
+          {dot && <span className={`h-2 w-2 shrink-0 rounded-full ${dot}`} />}
+          {kicker}
+        </h2>
         {action}
       </div>
       {children}
@@ -1064,9 +1082,7 @@ const ListRow = ({
       className="flex cursor-pointer items-center gap-4 border-b border-black/[0.04] px-5 py-4 last:border-b-0"
       onClick={onClick}
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--neo-soft)] text-[13px] font-semibold text-[var(--neo)]">
-        {(title || '?').charAt(0).toUpperCase()}
-      </div>
+      <span className="h-2 w-2 shrink-0 rounded-full bg-[#ff3b30]" />
       <div className="min-w-0 flex-1">
         <p className="truncate text-[15px] font-semibold text-[var(--neo-ink)]">{title}</p>
         {metaLines.map((line, i) => (

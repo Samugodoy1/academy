@@ -1,11 +1,10 @@
 import React from 'react';
-import { ArrowUpRight, Check, Lock } from '../../../icons';
+import { ChevronRight, Lock } from '../../../icons';
 import type { BaseDiscipline } from '../types';
-import { BASE_DISCIPLINES, disciplinesByPeriod, STUDY_METHOD_TIPS, totalMinutes } from '../content';
+import { BASE_DISCIPLINES, disciplinesByPeriod, totalMinutes } from '../content';
 import { BASE_STUDENT_PERKS, countLessons, countUnlockedLessons, type BasePlan } from '../plan';
 import { countAllDone, countDone, type BaseContinueSuggestion, type BaseProgress } from '../progress';
-import { referenceHref, referenceShortCitation } from '../references';
-import { BaseSection, GroupedList, ListRow, ProgressBar } from './ui';
+import { BaseSection, ProgressBar } from './ui';
 
 interface BaseHomeProps {
   plan: BasePlan;
@@ -58,25 +57,22 @@ export function BaseHome({
             <button
               type="button"
               onClick={() => onOpenLesson(suggestion.discipline, suggestion.lessonIndex)}
-              className="w-full rounded-[28px] bg-[var(--neo)] px-6 py-6 text-left text-white ios-press-gentle"
+              className="patient-hero w-full px-6 py-6 text-left sm:px-7 sm:py-7"
             >
-              <p className="text-[12px] font-normal uppercase tracking-[0.04em] text-white/80">
+              <p className="text-[13px] tracking-[-0.011em] text-white/75">
                 {SUGGESTION_KICKER[suggestion.reason]}
               </p>
-              <p className="mt-2 text-[15px] tracking-[-0.011em] text-white/85">{suggestion.discipline.title}</p>
-              <p className="mt-1 text-[26px] font-semibold leading-[1.05] tracking-[-0.025em] sm:text-[32px]">
+              <p className="mt-3 text-[15px] tracking-[-0.011em] text-white/80">{suggestion.discipline.title}</p>
+              <p className="mt-1 text-[32px] font-semibold leading-[1.05] tracking-[-0.03em] text-white sm:text-[36px]">
                 {suggestion.lesson.title}
               </p>
-              <p className="mt-3 text-[15px] leading-snug text-white/90">{suggestion.lesson.summary}</p>
-              <p className="mt-4 flex items-center justify-between text-[15px] text-white/90">
-                <span>{suggestion.lesson.minutes} min de leitura</span>
-                <span>Ler ›</span>
-              </p>
+              <p className="mt-2 max-w-[36ch] text-[17px] leading-snug text-white/80">{suggestion.lesson.summary}</p>
+              <span className="hero-action">Ler · {suggestion.lesson.minutes} min</span>
             </button>
           ) : (
-            <div className="rounded-[28px] bg-[#f5f5f7] px-6 py-6">
+            <div className="ah-feature px-6 py-6">
               <p className="text-[13px] text-[var(--neo-gray)]">Estante</p>
-              <p className="mt-1 text-[22px] font-semibold tracking-[-0.025em] text-[var(--neo-ink)]">
+              <p className="mt-1 text-[17px] font-semibold tracking-[-0.016em] text-[var(--neo-ink)]">
                 Você leu tudo o que estava aberto.
               </p>
               <p className="mt-2 text-[15px] leading-snug text-[var(--neo-gray)]">
@@ -92,7 +88,7 @@ export function BaseHome({
             </div>
           )}
 
-          <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-4">
+          <div className="ah-card px-5 py-4">
             <div className="flex items-baseline justify-between gap-3">
               <p className="text-[15px] font-semibold tracking-[-0.011em] text-[var(--neo-ink)]">
                 {done} de {total} resumos
@@ -110,93 +106,80 @@ export function BaseHome({
               kicker={group.label}
               action={
                 currentSemester === group.period ? (
-                  <span className="rounded-full bg-[var(--neo-wash)] px-2.5 py-0.5 text-[12px] font-medium text-[var(--neo)]">
-                    O seu período
-                  </span>
+                  <span className="text-[13px] text-[var(--neo-gray)]">Seu período</span>
                 ) : undefined
               }
             >
-              <GroupedList>
+              <div className="space-y-3">
                 {group.disciplines.map(discipline => {
                   const read = countDone(progress, discipline);
                   const minutes = totalMinutes(discipline);
                   const lessons = discipline.lessons.length;
+                  const progressLabel = read === lessons
+                    ? 'Lido'
+                    : read > 0
+                      ? `${read} de ${lessons}`
+                      : `${lessons} resumos`;
                   return (
-                    <ListRow
+                    <button
                       key={discipline.id}
-                      title={discipline.title}
-                      meta={`${lessons} resumos · mapa mental · ${minutes} min · ${discipline.tagline}`}
-                      done={read === lessons}
-                      trailing={
-                        read > 0 && read < lessons ? (
-                          <span className="shrink-0 text-[13px] tabular-nums text-[var(--neo-gray)]">
-                            {read}/{lessons}
-                          </span>
-                        ) : undefined
-                      }
+                      type="button"
                       onClick={() => onOpenDiscipline(discipline)}
-                    />
+                      className="ah-card flex w-full items-center gap-4 px-5 py-4 text-left ios-press-gentle"
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[17px] font-semibold leading-[1.2] tracking-[-0.016em] text-[var(--neo-ink)]">
+                          {discipline.title}
+                        </span>
+                        <span className="mt-1 block text-[14px] leading-snug text-[var(--neo-gray)]">
+                          {discipline.tagline}
+                        </span>
+                        <span className="mt-3 block text-[13px] tabular-nums text-[var(--neo-gray)]">
+                          {progressLabel} · {minutes} min
+                        </span>
+                      </span>
+                      <ChevronRight size={16} className="shrink-0 text-[#C6C6C8]" />
+                    </button>
                   );
                 })}
-              </GroupedList>
+              </div>
             </BaseSection>
           ))}
         </div>
 
         <aside className="space-y-10 desktop:col-span-5 desktop:sticky desktop:top-8">
           {plan === 'free' && (
-            <div className="rounded-[28px] bg-[var(--neo-wash)] px-6 py-6">
-              <p className="text-[12px] font-medium uppercase tracking-[0.06em] text-[var(--neo)]">Student</p>
-              <p className="mt-2 text-[22px] font-semibold leading-[1.1] tracking-[-0.025em] text-[var(--neo-ink)]">
+            <div className="ah-card px-5 py-5">
+              <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">Student</p>
+              <p className="mt-2 text-[17px] font-semibold leading-[1.2] tracking-[-0.016em] text-[var(--neo-ink)]">
                 A estante inteira, do 1º período à clínica.
               </p>
-              <div className="mt-4 space-y-2">
+              <div className="mt-3 space-y-1.5">
                 {BASE_STUDENT_PERKS.map(perk => (
-                  <p key={perk} className="flex items-center gap-2.5 text-[14px] text-[var(--neo-ink)]">
-                    <Check size={14} className="shrink-0 text-[var(--neo)]" />
+                  <p key={perk} className="text-[15px] leading-snug text-[var(--neo-gray)]">
                     {perk}
                   </p>
                 ))}
               </div>
               {onUpgrade && (
-                <button type="button" onClick={onUpgrade} className="neo-pill mt-5 w-full">
-                  Conhecer o Student
+                <button type="button" onClick={onUpgrade} className="neo-link mt-4 text-[15px]">
+                  Conhecer o Student ›
                 </button>
               )}
-              <p className="mt-3 flex items-center gap-1.5 text-[12px] text-[var(--neo-gray)]">
+              <p className="mt-3 flex items-center gap-1.5 text-[13px] text-[var(--neo-gray)]">
                 <Lock size={11} /> No Free: o 1º resumo de cada disciplina e um mapa completo.
               </p>
             </div>
           )}
 
-          <BaseSection kicker="Como estudar, com evidência">
-            <GroupedList>
-              {STUDY_METHOD_TIPS.map(tip => {
-                const href = referenceHref(tip.reference);
-                return (
-                  <div key={tip.id} className="border-b border-black/[0.04] px-5 py-4 last:border-b-0">
-                    <p className="text-[15px] font-semibold tracking-[-0.011em] text-[var(--neo-ink)]">{tip.title}</p>
-                    <p className="mt-1 text-[14px] leading-snug text-[var(--neo-gray)]">{tip.body}</p>
-                    {href && (
-                      <a
-                        href={href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="neo-link mt-2 inline-flex items-center gap-1 text-[13px]"
-                      >
-                        {referenceShortCitation(tip.reference)} <ArrowUpRight size={12} />
-                      </a>
-                    )}
-                  </div>
-                );
-              })}
-            </GroupedList>
-          </BaseSection>
+          <p className="px-1 text-[13px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
+            Teste-se e volte depois de alguns dias. Grifar rende menos.
+          </p>
 
           <button
             type="button"
             onClick={onOpenCola}
-            className="w-full rounded-[24px] bg-[#f5f5f7] px-5 py-5 text-left ios-press-gentle"
+            className="ah-card w-full px-5 py-5 text-left ios-press-gentle"
           >
             <p className="text-[13px] text-[var(--neo-gray)]">Já está na clínica?</p>
             <p className="mt-1 text-[17px] font-semibold tracking-[-0.016em] text-[var(--neo-ink)]">

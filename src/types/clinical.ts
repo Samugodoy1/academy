@@ -164,6 +164,7 @@ export interface Dentist {
   academy_neo?: string;
   academy_widgets?: unknown;
   academy_game?: unknown;
+  account_kind?: 'standard' | 'ambassador' | 'test';
   settings?: Record<string, unknown>;
   current_product?: Product;
   product_accesses?: ProductAccess[];
@@ -189,6 +190,7 @@ export interface CurrentUser {
   id: number;
   name: string;
   role: string;
+  account_kind?: 'standard' | 'ambassador' | 'test';
   status?: string;
   current_product?: Product;
   product_accesses?: ProductAccess[];

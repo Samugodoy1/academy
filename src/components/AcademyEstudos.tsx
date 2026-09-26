@@ -7,7 +7,6 @@ import {
   FileText,
   Heart,
   Pill,
-  Play,
   Search,
   Shield,
   Stethoscope,
@@ -1221,36 +1220,27 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         </button>
 
         {selectedCase && caseBox && (
-          <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+          <div className="ah-feature max-w-[42rem] space-y-2 px-6 py-6">
             <p className="text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">
               Para o atendimento
             </p>
-            <p className="mt-1 text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
+            <p className="text-[17px] font-semibold leading-snug tracking-[-0.016em] text-[var(--neo-ink)]">
               {caseName} · {getWhenLabel(selectedCase.date)}
             </p>
             {caseBox.boxProcedureDetail && (
-              <p className="mt-2 text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
+              <p className="text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
                 {caseBox.boxProcedureDetail}
               </p>
             )}
             {cleanCheckpoint(caseBox.criticalCheckpoint) && (
-              <p className="mt-3 text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-ink)]">
+              <p className="text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-ink)]">
                 {cleanCheckpoint(caseBox.criticalCheckpoint)}
               </p>
             )}
             {caseBox.anamnesisAlert && (
-              <p className="mt-3 rounded-[16px] bg-[var(--neo-soft)] px-4 py-3 text-[14px] leading-snug text-[var(--neo-ink)]">
+              <p className="text-[15px] leading-snug text-[var(--neo-ink)]">
                 {caseBox.anamnesisAlert}
               </p>
-            )}
-            {openPatientRecord && (
-              <button
-                type="button"
-                onClick={() => openPatientRecord(selectedCase.patient.id)}
-                className="neo-link mt-4 text-[15px]"
-              >
-                Abrir caso ›
-              </button>
             )}
           </div>
         )}
@@ -1269,7 +1259,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
 
         {activeMaterial.quickFacts.length > 0 && (
           <StudySection kicker="Na ponta da língua">
-            <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+            <div className="overflow-hidden ah-card">
               {activeMaterial.quickFacts.map(fact => (
                 <div
                   key={fact.label}
@@ -1288,8 +1278,8 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         <StudySection kicker="Roteiro">
           <div className="space-y-3">
             {activeMaterial.modules.map((module, moduleIndex) => (
-              <article key={module.title} className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
-                <p className="text-[13px] tabular-nums text-[var(--neo)]">
+              <article key={module.title} className="ah-card px-5 py-5">
+                <p className="text-[13px] tabular-nums text-[var(--neo-gray)]">
                   {String(moduleIndex + 1).padStart(2, '0')}
                 </p>
                 <h3 className="mt-2 text-[17px] font-semibold tracking-[-0.016em] text-[var(--neo-ink)]">
@@ -1301,7 +1291,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
                 <ul className="mt-4 space-y-2.5">
                   {module.steps.map(step => (
                     <li key={step} className="flex gap-2.5 text-[15px] leading-relaxed text-[var(--neo-ink)]">
-                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--neo)]" />
+                      <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#c7c7cc]" />
                       <span>{step}</span>
                     </li>
                   ))}
@@ -1319,7 +1309,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
             </span>
           }
         >
-          <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+          <div className="overflow-hidden ah-card">
             {activeMaterial.checklist.map(item => {
               const isChecked = checkedItems.has(item);
               return (
@@ -1331,7 +1321,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
                 >
                   <span
                     className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
-                      isChecked ? 'bg-[var(--neo)] text-white' : 'bg-white text-transparent'
+                      isChecked ? 'bg-[var(--neo)] text-white' : 'bg-[#f5f5f7] text-transparent shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]'
                     }`}
                   >
                     <Check size={12} />
@@ -1351,7 +1341,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
 
         {activeMaterial.selfTest.length > 0 && (
           <StudySection kicker="Teste-se">
-            <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+            <div className="overflow-hidden ah-card">
               {activeMaterial.selfTest.map((qa, index) => {
                 const revealed = revealedAnswers.has(index);
                 return (
@@ -1380,7 +1370,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         )}
 
         <StudySection kicker="Cuidado">
-          <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+          <div className="overflow-hidden ah-card">
             {activeMaterial.pitfalls.map(item => (
               <p
                 key={item}
@@ -1393,7 +1383,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         </StudySection>
 
         <StudySection kicker="Explicar">
-          <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+          <div className="ah-card px-5 py-5">
             <p className="text-[15px] leading-relaxed tracking-[-0.011em] text-[var(--neo-ink)]">
               {activeMaterial.patientTalk}
             </p>
@@ -1401,7 +1391,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         </StudySection>
 
         <StudySection kicker="Confiança">
-          <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+          <div className="overflow-hidden ah-card">
             {CONFIDENCE_OPTIONS.map(option => {
               const isSelected = selectedStudy ? confidenceMap[selectedStudy]?.level === option.level : false;
               return (
@@ -1413,7 +1403,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
                 >
                   <span
                     className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
-                      isSelected ? 'bg-[var(--neo)] text-white' : 'bg-white text-transparent'
+                      isSelected ? 'bg-[var(--neo)] text-white' : 'bg-[#f5f5f7] text-transparent shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]'
                     }`}
                   >
                     <Check size={12} />
@@ -1441,18 +1431,13 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
               closeStudy();
               changeMode('treinar', activeMaterial.id);
             }}
-            className="game-tile items-center gap-3 py-4"
+            className="w-full ah-card px-5 py-4 text-left"
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--neo-wash)] text-[var(--neo)]">
-              <Play size={18} />
+            <span className="block text-[15px] font-semibold tracking-[-0.011em] text-[var(--neo-ink)]">
+              Jogar a lição de {activeMaterial.title.toLowerCase()}
             </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[16px] font-semibold text-[var(--neo-ink)]">
-                Jogar a lição de {activeMaterial.title.toLowerCase()}
-              </span>
-              <span className="block text-[13px] text-[var(--neo-gray)]">
-                Perguntas rápidas para ver se ficou mesmo.
-              </span>
+            <span className="mt-0.5 block text-[13px] text-[var(--neo-gray)]">
+              Perguntas rápidas para ver se ficou.
             </span>
           </button>
         </StudySection>
@@ -1477,7 +1462,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
     ? `${getDayPhrase(nextCase.date)} ${nextPatientName}.`
     : 'Antes do box';
   const headlineMeta = nextCase && nextCaseTopic
-    ? `${nextCaseTopic.title} · ${nextCaseTopic.duration}`
+    ? nextCaseTopic.title
     : studyNudges.length > 0
       ? 'Uma revisão que ainda falta no seu histórico.'
       : 'Quando um caso entrar na agenda, a revisão certa aparece aqui.';
@@ -1500,7 +1485,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
         </p>
       </header>
 
-      <div className="grid grid-cols-2 gap-1 rounded-full bg-[#f5f5f7] p-1 desktop:max-w-[320px]">
+      <div className="grid grid-cols-2 gap-1 rounded-full bg-[#e8e8ed] p-1 desktop:max-w-[320px]">
         {(['estudar', 'treinar'] as StudyMode[]).map(option => (
           <button
             key={option}
@@ -1520,7 +1505,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
       {mode === 'treinar' ? (
         <Suspense
           fallback={
-            <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-8 text-center text-[15px] text-[var(--neo-gray)]">
+            <div className="ah-card px-5 py-8 text-center text-[15px] text-[var(--neo-gray)]">
               Carregando o treino…
             </div>
           }
@@ -1544,68 +1529,61 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
             <button
               type="button"
               onClick={() => openStudy(nextCase.topicKey, nextCase)}
-              className="w-full rounded-[28px] bg-[var(--neo)] px-6 py-6 text-left text-white"
+              className="patient-hero w-full px-6 py-6 text-left sm:px-7 sm:py-7"
             >
-              <p className="text-[12px] font-normal uppercase tracking-[0.04em] text-white/80">
+              <p className="text-[13px] tracking-[-0.011em] text-white/75">
                 {getWhenLabel(nextCase.date)}
                 {nextCase.box.targetTooth ? ` · Dente ${nextCase.box.targetTooth}` : ''}
               </p>
-              <p className="mt-2 text-[26px] font-semibold leading-[1.05] tracking-[-0.025em] sm:text-[32px]">
+              <p className="mt-3 text-[32px] font-semibold leading-[1.05] tracking-[-0.03em] text-white sm:text-[36px]">
+                {nextPatientName || nextCaseTopic.title}
+              </p>
+              <p className="mt-2 text-[17px] leading-snug tracking-[-0.011em] text-white/80">
                 {nextCaseTopic.title}
               </p>
-              <p className="mt-2 text-[15px] tracking-[-0.011em] text-white/85">
-                {nextCaseTopic.duration} · {nextCaseTopic.subtitle}
-              </p>
               {cleanCheckpoint(nextCase.box.criticalCheckpoint) && (
-                <p className="mt-4 text-[15px] leading-snug text-white/90">
+                <p className="mt-3 max-w-[40ch] text-[15px] leading-snug text-white/85">
                   {cleanCheckpoint(nextCase.box.criticalCheckpoint)}
                 </p>
               )}
               {nextCase.box.anamnesisAlert && (
-                <p className="mt-3 rounded-[16px] bg-white/15 px-4 py-3 text-[14px] leading-snug">
+                <p className="mt-3 max-w-[40ch] text-[15px] leading-snug text-white/85">
                   {nextCase.box.anamnesisAlert}
                 </p>
               )}
               {(confidenceMap[nextCase.topicKey]?.level === 'review' ||
                 confidenceMap[nextCase.topicKey]?.level === 'ask') && (
-                <p className="mt-3 text-[13px] text-white/80">
+                <p className="mt-3 text-[13px] text-white/70">
                   {confidenceMap[nextCase.topicKey]?.level === 'review'
                     ? 'Você marcou este tema para rever.'
                     : 'Você ficou de levar uma dúvida ao professor.'}
                 </p>
               )}
-              <p className="mt-4 text-[15px] text-white/90">Revisar ›</p>
+              <span className="hero-action">Revisar</span>
             </button>
           ) : studyNudges[0] ? (
             <button
               type="button"
               onClick={() => openStudy(studyNudges[0].topic)}
-              className="w-full rounded-[24px] bg-[#f5f5f7] px-5 py-5 text-left"
+              className="patient-hero w-full px-6 py-6 text-left sm:px-7 sm:py-7"
             >
-              <p className="text-[13px] text-[var(--neo-gray)]">Estudar agora</p>
-              <p className="mt-1 text-[22px] font-semibold leading-[1.05] tracking-[-0.025em] text-[var(--neo-ink)]">
+              <p className="text-[13px] text-white/75">Estudar agora</p>
+              <p className="mt-3 text-[32px] font-semibold leading-[1.05] tracking-[-0.03em] text-white sm:text-[36px]">
                 {studyNudges[0].title}
               </p>
-              <p className="mt-2 text-[15px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
+              <p className="mt-2 max-w-[36ch] text-[17px] leading-snug text-white/80">
                 {studyNudges[0].reason}
               </p>
-              <p className="mt-4 flex items-center justify-between text-[15px]">
-                <span className="text-[var(--neo-gray)]">{STUDY_LIBRARY[studyNudges[0].topic].duration}</span>
-                <span className="neo-link">Revisar ›</span>
-              </p>
+              <span className="hero-action">Revisar</span>
             </button>
           ) : (
-            <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
-              <p className="text-[13px] text-[var(--neo-gray)]">Agenda</p>
-              <p className="mt-1 text-[22px] font-semibold tracking-[-0.025em] text-[var(--neo-ink)]">
-                Livre agora
-              </p>
-              <p className="mt-1 text-[15px] tracking-[-0.011em] text-[var(--neo-gray)]">
+            <div className="space-y-3">
+              <p className="max-w-[36ch] text-[17px] leading-snug tracking-[-0.011em] text-[var(--neo-gray)]">
                 Nenhum atendimento nos próximos 15 dias.
               </p>
               <button
                 type="button"
-                className="neo-link mt-3 text-[15px]"
+                className="neo-link text-[15px]"
                 onClick={() => setActiveTab?.('agenda')}
               >
                 Ver agenda ›
@@ -1625,7 +1603,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
 
           {laterCases.length > 0 && (
             <StudySection kicker="A seguir">
-              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+              <div className="overflow-hidden ah-card">
                 {laterCases.map(caseInfo => {
                   const material = STUDY_LIBRARY[caseInfo.topicKey];
                   return (
@@ -1653,7 +1631,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
 
           {studyNudges.length > (nextCase ? 0 : 1) && (
             <StudySection kicker="Para você">
-              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+              <div className="overflow-hidden ah-card">
                 {studyNudges.slice(nextCase ? 0 : 1).map(nudge => (
                   <button
                     type="button"
@@ -1689,12 +1667,12 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
                 value={librarySearch}
                 onChange={event => setLibrarySearch(event.target.value)}
                 placeholder="siso, canal, grampo"
-                className="w-full rounded-[18px] bg-[#f5f5f7] py-3 pl-11 pr-4 text-[15px] tracking-[-0.011em] text-[var(--neo-ink)] outline-none placeholder:text-[var(--neo-gray)]"
+                className="w-full rounded-[18px] bg-white py-3 pl-11 pr-4 text-[15px] tracking-[-0.011em] text-[var(--neo-ink)] shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)] outline-none placeholder:text-[var(--neo-gray)]"
               />
             </div>
 
             {filteredLibraryItems.length > 0 ? (
-              <div className="overflow-hidden rounded-[24px] bg-[#f5f5f7]">
+              <div className="overflow-hidden ah-card">
                 {filteredLibraryItems.map(cat => {
                   const conf = confidenceMap[cat.id]?.level;
                   const caption =
@@ -1726,7 +1704,7 @@ export const AcademyEstudos: React.FC<AcademyEstudosProps> = ({
                 })}
               </div>
             ) : (
-              <div className="rounded-[24px] bg-[#f5f5f7] px-5 py-5">
+              <div className="ah-card px-5 py-5">
                 <p className="text-[15px] font-semibold text-[var(--neo-ink)]">Nada com esse nome.</p>
                 <p className="mt-1 text-[13px] text-[var(--neo-gray)]">
                   Tente o procedimento — extração, canal, raspagem.

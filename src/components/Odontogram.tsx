@@ -816,15 +816,10 @@ export const Odontogram: React.FC<OdontogramProps> = ({
         ? [...block.permanent].reverse()
         : block.permanent
       : [];
-    const deciduous = block.deciduous
-      ? reversePermanent
-        ? [...block.deciduous].reverse()
-        : block.deciduous
-      : [];
+    const deciduous = block.deciduous ? [...block.deciduous] : [];
 
     if (dentitionMode === 'mixed' && permanent.length > 0 && deciduous.length > 0) {
-      const slots = MIXED_DECIDUOUS_GRID_SLOTS[halfKey];
-      const slotTeeth = reversePermanent ? [...slots].reverse() : slots;
+      const slotTeeth = MIXED_DECIDUOUS_GRID_SLOTS[halfKey];
       return (
         <div className={`flex min-w-0 flex-1 flex-col gap-0.5 rounded-xl px-0.5 py-0.5 ${highlight}`}>
           <div className="grid grid-cols-8 gap-1">
@@ -860,16 +855,15 @@ export const Odontogram: React.FC<OdontogramProps> = ({
 
   const renderArch = (arch: 'upper' | 'lower') => {
     const layout = dentitionLayout[arch];
-    const reverseLower = arch === 'lower';
     const rightKey: ArchHalfKey = arch === 'upper' ? 'upperRight' : 'lowerRight';
     const leftKey: ArchHalfKey = arch === 'upper' ? 'upperLeft' : 'lowerLeft';
 
     return (
       <div className="rounded-[20px] border border-slate-200/70 bg-white px-2 py-2 sm:rounded-[22px] sm:px-3 sm:py-2.5">
         <div className="flex items-stretch justify-center gap-2 sm:gap-3">
-          {renderArchHalf(rightKey, layout.right, reverseLower)}
+          {renderArchHalf(rightKey, layout.right, false)}
           <div className="w-px shrink-0 self-stretch bg-slate-200/80" aria-hidden />
-          {renderArchHalf(leftKey, layout.left, reverseLower)}
+          {renderArchHalf(leftKey, layout.left, arch === 'lower')}
         </div>
       </div>
     );

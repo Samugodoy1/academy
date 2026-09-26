@@ -90,7 +90,7 @@ function Field({
 }
 
 const fieldClass =
-  'w-full bg-transparent py-4 text-[15px] tracking-[-0.011em] text-[var(--neo-ink)] outline-none placeholder:text-[var(--neo-gray)]';
+  'w-full bg-transparent py-4 text-[16px] tracking-[-0.011em] text-[var(--neo-ink)] outline-none placeholder:text-[var(--neo-gray)]';
 
 export function AcademyAccount({
   user,

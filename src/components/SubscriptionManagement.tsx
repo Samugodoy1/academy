@@ -256,11 +256,12 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
     ? STATUS_MAP[subscription.status] || STATUS_MAP.pending
     : null;
   const subscribeCtaLabel = product === 'academy' ? FREE_TENSION.subscribeCta : 'Assinar OdontoHub Pro';
-  const showFreeUpgrade = isFree && !isPending && !isProActive && paidPlan;
+  const showFreeUpgrade = isFree && !isProActive && Boolean(paidPlan) && (neo || !isPending);
+  const showAcademyPendingChoice = neo && isPending && Boolean(subscription) && isFree && !isProActive;
   const showCancelledExpired = subscription && ['cancelled', 'expired'].includes(subscription.status) && paidPlan;
   const hasCardBody = Boolean(
     (isProActive && subscription)
-    || (isPending && subscription)
+    || (isPending && subscription && !showAcademyPendingChoice)
     || showFreeUpgrade
     || showCancelledExpired
     || payments.length > 0
@@ -354,8 +355,8 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
             </>
           )}
 
-          {/* Pending — resume checkout CTA */}
-          {isPending && subscription && (
+          {/* Pending — resume checkout CTA. No Academy os outros planos continuam disponíveis. */}
+          {isPending && subscription && !showAcademyPendingChoice && (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-slate-50 rounded-xl p-3">
@@ -396,6 +397,19 @@ export function SubscriptionManagement({ apiFetch, product, currentPlan }: Subsc
           {showFreeUpgrade && (
             neo ? (
               <div className="space-y-4">
+                {showAcademyPendingChoice && subscription && (
+                  <div className="flex items-center justify-between gap-3 text-[13px] tracking-[-0.011em] text-[var(--neo-gray)]">
+                    <p>Pagamento de {subscription.plan_name} ainda não concluído.</p>
+                    <button
+                      type="button"
+                      onClick={handleResumeSubscription}
+                      disabled={createLoading}
+                      className="shrink-0 text-[var(--neo-ink)] disabled:opacity-50"
+                    >
+                      Continuar
+                    </button>
+                  </div>
+                )}
                 <AcademyPlanChooser
                   plans={plans}
                   loading={createLoading}
